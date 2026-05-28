@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@shu/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@shu/utils": ["../../packages/utils/src/index.ts"],
+      "@shu/ui-components": ["../../packages/ui-components/src/index.ts"]
+    }
+  },
+  "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"]
+}

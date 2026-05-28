@@ -1,0 +1,197 @@
+// شو عبالك؟ — Prisma Schema
+// راجع PROJECT_HANDOFF.md §نموذج قاعدة البيانات
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  BUSINESS
+  DRIVER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  PICKED_UP
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  ELECTRONIC
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum DriverStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+enum BusinessCategory {
+  RESTAURANT
+  STORE
+  CAFE
+}
+
+enum DeliveryType {
+  PLATFORM
+  SELF
+}
+
+model Area {
+  id          String     @id @default(uuid())
+  city        String
+  name        String
+  deliveryFee Decimal    @db.Decimal(10, 2)
+  users       User[]
+  businesses  Business[]
+  drivers     Driver[]
+
+  @@map("areas")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  role      UserRole
+  name      String
+  phone     String    @unique
+  email     String?   @unique
+  password  String
+  areaId    String?
+  area      Area?     @relation(fields: [areaId], references: [id])
+  business  Business?
+  driver    Driver?
+  orders    Order[]   @relation("CustomerOrders")
+  createdAt DateTime  @default(now())
+
+  @@map("users")
+}
+
+model Business {
+  id           String           @id @default(uuid())
+  ownerId      String           @unique
+  owner        User             @relation(fields: [ownerId], references: [id])
+  name         String
+  category     BusinessCategory
+  areaId       String
+  area         Area             @relation(fields: [areaId], references: [id])
+  deliveryType DeliveryType     @default(PLATFORM)
+  imageUrl     String?
+  rating       Float            @default(0)
+  isOpen       Boolean          @default(true)
+  products     Product[]
+  orders       Order[]
+
+  @@map("businesses")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  businessId  String
+  business    Business    @relation(fields: [businessId], references: [id])
+  name        String
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  imageUrl    String?
+  isAvailable Boolean     @default(true)
+  category    String?
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+model Driver {
+  id     String       @id @default(uuid())
+  userId String       @unique
+  user   User         @relation(fields: [userId], references: [id])
+  status DriverStatus @default(OFFLINE)
+  areaId String
+  area   Area         @relation(fields: [areaId], references: [id])
+  rating Float        @default(0)
+  orders Order[]
+
+  @@map("drivers")
+}
+
+model Order {
+  id            String               @id @default(uuid())
+  customerId    String
+  customer      User                 @relation("CustomerOrders", fields: [customerId], references: [id])
+  businessId    String
+  business      Business             @relation(fields: [businessId], references: [id])
+  driverId      String?
+  driver        Driver?              @relation(fields: [driverId], references: [id])
+  status        OrderStatus          @default(PENDING)
+  paymentMethod PaymentMethod
+  total         Decimal              @db.Decimal(10, 2)
+  note          String?
+  items         OrderItem[]
+  statusHistory OrderStatusHistory[]
+  review        Review?
+  payment       Payment?
+  createdAt     DateTime             @default(now())
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id])
+  status    OrderStatus
+  changedBy String
+  createdAt DateTime    @default(now())
+
+  @@map("order_status_history")
+}
+
+model Review {
+  id             String @id @default(uuid())
+  orderId        String @unique
+  order          Order  @relation(fields: [orderId], references: [id])
+  businessRating Int
+  driverRating   Int?
+
+  @@map("reviews")
+}
+
+model Payment {
+  id      String        @id @default(uuid())
+  orderId String        @unique
+  order   Order         @relation(fields: [orderId], references: [id])
+  method  PaymentMethod
+  status  PaymentStatus @default(PENDING)
+  amount  Decimal       @db.Decimal(10, 2)
+
+  @@map("payments")
+}

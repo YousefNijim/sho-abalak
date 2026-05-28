@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "شو عبالك؟ — المنشأة",
+    "slug": "shu-business",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "shu-business",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#FCF3DC",
+    "splash": {
+      "backgroundColor": "#FCF3DC",
+      "resizeMode": "contain"
+    },
+    "ios": { "supportsTablet": false },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#FCF3DC" }
+    },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}
