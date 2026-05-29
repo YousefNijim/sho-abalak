@@ -1,4 +1,4 @@
-export { http, setAuthToken } from './http';
+export { http, setAuthToken, BASE_URL } from './http';
 export { authApi } from './auth.api';
 export { areasApi } from './areas.api';
 export { businessesApi } from './businesses.api';

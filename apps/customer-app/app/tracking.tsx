@@ -1,11 +1,11 @@
-'use client';
-
+import { useEffect } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, radius, spacing } from '../src/theme';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
+import { useSocket } from '../src/hooks/useSocket';
 
 const STEPS = [
   { status: 'PENDING', label: 'تم استلام الطلب' },
@@ -18,14 +18,33 @@ const STEPS = [
 export default function Tracking() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const socket = useSocket();
 
-  // Poll order status every 5 seconds for real-time tracking
+  // Poll order status every 30 seconds as a heartbeat fallback; sockets handle instant updates
   const { data: order, isLoading, error } = useQuery({
     queryKey: ['order', id],
     queryFn: () => ordersApi.getById(id!),
     enabled: !!id,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    if (!socket || !id) return;
+
+    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+      if (payload.orderId === id) {
+        console.log(`WS instant order status update received: ${payload.status}`);
+        queryClient.invalidateQueries({ queryKey: ['order', id] });
+      }
+    };
+
+    socket.on('order:status_update', handleStatusUpdate);
+
+    return () => {
+      socket.off('order:status_update', handleStatusUpdate);
+    };
+  }, [socket, id, queryClient]);
 
   if (!id) {
     return (

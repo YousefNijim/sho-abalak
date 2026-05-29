@@ -1,11 +1,12 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
-import { OrderStatus, UserRole } from '@shu/shared-types';
+import { OrderStatus, UserRole, DriverStatus } from '@shu/shared-types';
 import { canTransition } from '@shu/utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from '../auth/jwt.strategy';
 import { PaymentsService } from '../payments/payments.service';
+import { SocketGateway } from '../gateway/socket.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 
@@ -23,6 +24,7 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly payments: PaymentsService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
@@ -73,6 +75,11 @@ export class OrdersService {
       include: ORDER_INCLUDE,
     });
 
+    // Emit new order socket event to the business owner
+    if (order.business?.ownerId) {
+      this.socketGateway.emitOrderNew(order.business.ownerId, order);
+    }
+
     // For electronic orders the client needs the gateway checkout URL; cash returns null.
     return { ...order, checkout };
   }
@@ -99,7 +106,7 @@ export class OrdersService {
     }
     await this.assertCanTransition(order, user, dto.status, dto.driverId);
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
       await tx.order.update({
         where: { id },
         data: {
@@ -109,6 +116,22 @@ export class OrdersService {
         },
       });
 
+      // If transitioning to PICKED_UP, toggle the assigned driver to BUSY
+      if (dto.status === OrderStatus.PICKED_UP && dto.driverId) {
+        await tx.driver.update({
+          where: { id: dto.driverId },
+          data: { status: DriverStatus.BUSY },
+        });
+      }
+
+      // If transitioning to DELIVERED, toggle the driver status back to AVAILABLE
+      if (dto.status === OrderStatus.DELIVERED && order.driverId) {
+        await tx.driver.update({
+          where: { id: order.driverId },
+          data: { status: DriverStatus.AVAILABLE },
+        });
+      }
+
       // Cash is collected on delivery → settle the payment to PAID in the same transaction.
       if (dto.status === OrderStatus.DELIVERED) {
         await this.payments.settleCashOnDelivery(id, tx);
@@ -117,6 +140,21 @@ export class OrdersService {
       // Re-read with includes AFTER settlement so the response carries the fresh payment status.
       return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
     });
+
+    // Emit order status update to customer tracking room
+    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+
+    // If order was assigned to a driver, emit request alert directly to the driver's user account
+    if (dto.status === OrderStatus.PICKED_UP && updatedOrder.driver?.user?.id) {
+      this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
+        orderId: updatedOrder.id,
+        businessName: updatedOrder.business?.name || 'منشأة تجارية',
+        areaName: updatedOrder.customer?.area?.name || 'العنوان المسجل',
+        total: Number(updatedOrder.total),
+      });
+    }
+
+    return updatedOrder;
   }
 
   // --- authorization helpers ---

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 /** Base URL — override with NEXT_PUBLIC_API_URL or EXPO_PUBLIC_API_URL at build time */
-const BASE_URL =
+export const BASE_URL =
   (typeof process !== 'undefined' &&
     (process.env['NEXT_PUBLIC_API_URL'] ?? process.env['EXPO_PUBLIC_API_URL'])) ||
   'http://127.0.0.1:3001';

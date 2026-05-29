@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, radius, spacing } from '../src/theme';
 
 export default function RequestAlert() {
   const router = useRouter();
+  const { orderId, businessName, areaName, total } = useLocalSearchParams<{
+    orderId: string;
+    businessName: string;
+    areaName: string;
+    total: string;
+  }>();
+
   const [seconds, setSeconds] = useState(165);
 
   useEffect(() => {
@@ -26,10 +33,10 @@ export default function RequestAlert() {
       <Text style={styles.title}>طلب جديد!</Text>
 
       <View style={styles.card}>
-        <Row label="المنشأة" value="مطعم القدس" />
-        <Row label="المنطقة" value="رام الله - المصيون" />
+        <Row label="المنشأة" value={businessName || 'مطعم القدس'} />
+        <Row label="المنطقة" value={areaName || 'رام الله - المصيون'} />
         <Row label="المسافة التقديرية" value="~2 كم" />
-        <Row label="مبلغ الطلب" value="45 ₪" />
+        <Row label="مبلغ الطلب" value={`${total || '45'} ₪`} />
         <Row label="طريقة الدفع" value="نقدي" />
       </View>
 
@@ -37,7 +44,16 @@ export default function RequestAlert() {
 
       <View style={styles.actions}>
         <Button title="❌ رفض" variant="danger" style={{ flex: 1 }} onPress={() => router.back()} />
-        <Button title="✅ قبول" style={{ flex: 1 }} onPress={() => router.replace('/active-delivery')} />
+        <Button
+          title="✅ قبول"
+          style={{ flex: 1 }}
+          onPress={() =>
+            router.replace({
+              pathname: '/active-delivery',
+              params: { orderId: orderId || 'D-501' },
+            })
+          }
+        />
       </View>
     </View>
   );

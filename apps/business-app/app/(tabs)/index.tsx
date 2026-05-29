@@ -1,12 +1,11 @@
-'use client';
-
-import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
 import { businessesApi, ordersApi } from '@shu/api-client';
+import { useSocket } from '../../src/hooks/useSocket';
 
 const TABS = [
   { key: 'new', label: 'جديد' },
@@ -18,6 +17,7 @@ export default function Dashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const socket = useSocket();
   const [tab, setTab] = useState<'new' | 'active' | 'done'>('new');
 
   // Fetch business profile owned by the logged-in user
@@ -26,12 +26,35 @@ export default function Dashboard() {
     queryFn: () => businessesApi.mine(),
   });
 
-  // Fetch all orders for this business
+  // Fetch all orders for this business - poll every 30 seconds as fallback heartbeat
   const { data: orders = [], isLoading: loadingOrders } = useQuery({
     queryKey: ['business-orders'],
     queryFn: () => ordersApi.list(),
-    refetchInterval: 5000, // Poll every 5 seconds for new orders
+    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewOrder = (payload: { order: any }) => {
+      console.log('WS instant order:new received:', payload.order.id);
+      Alert.alert('طلب جديد! 🔔', `تلقيت طلباً جديداً بقيمة ${payload.order.total} ₪`);
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+    };
+
+    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+      console.log('WS order status update received:', payload.orderId, payload.status);
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+    };
+
+    socket.on('order:new', handleNewOrder);
+    socket.on('order:status_update', handleStatusUpdate);
+
+    return () => {
+      socket.off('order:new', handleNewOrder);
+      socket.off('order:status_update', handleStatusUpdate);
+    };
+  }, [socket, queryClient]);
 
   // Mutation to toggle open/close status
   const toggleOpen = useMutation({

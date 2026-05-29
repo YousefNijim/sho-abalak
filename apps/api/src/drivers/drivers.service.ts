@@ -6,6 +6,8 @@ import { RegisterDriverDto } from './dto/register-driver.dto';
 import { UpdateDriverStatusDto } from './dto/update-driver-status.dto';
 import { QueryDriversDto } from './dto/query-drivers.dto';
 
+import { SocketGateway } from '../gateway/socket.gateway';
+
 // Include the driver's user (name/phone) and area on every read — the apps need them.
 const DRIVER_INCLUDE = {
   user: { select: { id: true, name: true, phone: true } },
@@ -14,7 +16,10 @@ const DRIVER_INCLUDE = {
 
 @Injectable()
 export class DriversService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly socketGateway: SocketGateway,
+  ) {}
 
   /** السائق ينشئ ملفه (مرة واحدة فقط لكل مستخدم). */
   async register(userId: string, dto: RegisterDriverDto) {
@@ -43,11 +48,16 @@ export class DriversService {
     const driver = await this.findByUser(userId);
     if (dto.areaId) await this.assertAreaExists(dto.areaId);
 
-    return this.prisma.driver.update({
+    const updated = await this.prisma.driver.update({
       where: { id: driver.id },
       data: { status: dto.status, ...(dto.areaId ? { areaId: dto.areaId } : {}) },
       include: DRIVER_INCLUDE,
     });
+
+    // Emit driver status change socket event
+    this.socketGateway.emitDriverStatusChange(updated.id, updated.status as DriverStatus);
+
+    return updated;
   }
 
   /** السائقون المتاحون — لشاشة اختيار السائق لدى المنشأة. */

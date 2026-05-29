@@ -10,6 +10,8 @@ import { DriversModule } from './drivers/drivers.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { UsersModule } from './users/users.module';
+import { GatewayModule } from './gateway/gateway.module';
+import { UploadsModule } from './uploads/uploads.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -25,6 +27,8 @@ import { HealthController } from './health.controller';
     PaymentsModule,
     ReviewsModule,
     UsersModule,
+    GatewayModule,
+    UploadsModule,
   ],
   controllers: [HealthController],
 })

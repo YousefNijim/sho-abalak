@@ -1,16 +1,17 @@
-'use client';
-
+import { useEffect } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
 import { driversApi, ordersApi } from '@shu/api-client';
+import { useSocket } from '../../src/hooks/useSocket';
 
 export default function DriverHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const socket = useSocket();
 
   // Fetch driver profile
   const { data: driver, isLoading: loadingMe } = useQuery({
@@ -18,12 +19,42 @@ export default function DriverHome() {
     queryFn: () => driversApi.me(),
   });
 
-  // Fetch all orders scoped to this driver
+  // Fetch all orders scoped to this driver - poll every 30 seconds as fallback heartbeat
   const { data: orders = [], isLoading: loadingOrders } = useQuery({
     queryKey: ['driver-orders'],
     queryFn: () => ordersApi.list(),
-    refetchInterval: 5000, // Poll every 5s
+    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; total: number }) => {
+      console.log('WS instant driver request received:', payload.orderId);
+      router.push({
+        pathname: '/request-alert',
+        params: {
+          orderId: payload.orderId,
+          businessName: payload.businessName,
+          areaName: payload.areaName,
+          total: String(payload.total),
+        },
+      });
+    };
+
+    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+      console.log('WS order status update received:', payload.orderId, payload.status);
+      queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
+    };
+
+    socket.on('driver:request', handleDriverRequest);
+    socket.on('order:status_update', handleStatusUpdate);
+
+    return () => {
+      socket.off('driver:request', handleDriverRequest);
+      socket.off('order:status_update', handleStatusUpdate);
+    };
+  }, [socket, router, queryClient]);
 
   // Mutation to toggle availability
   const toggleAvailable = useMutation({
