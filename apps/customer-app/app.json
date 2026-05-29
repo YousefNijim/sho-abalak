@@ -13,6 +13,7 @@
     },
     "ios": { "supportsTablet": false },
     "android": {
+      "package": "com.shu.customer",
       "adaptiveIcon": { "backgroundColor": "#FCF3DC" }
     },
     "plugins": ["expo-router"],
