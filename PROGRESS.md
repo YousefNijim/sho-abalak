@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-29
-**Current phase:** Phase 11 (UI polish complete — Cairo fonts, Lucide icons, reanimated button animations, bottom-sheet area picker, polished components across all 3 mobile apps; all 3 apps typecheck clean)
+**Current phase:** Phase 12 (Home screen redesign — real icons/images, gradient banner, depth, contrast, fixed bottom nav; all 3 apps typecheck clean)
 
 ---
 
@@ -164,6 +164,7 @@
 8. ~~**DevOps & Infra (Phase 7)**~~ ✅ **100% DONE** — GitHub Actions CI pipeline, multi-stage Dockerfiles for NestJS and Next.js, Sentry incident capturer filters, and Nginx reverse proxy gateway configurations mapped and validated.
 9. ~~**Feature Leftovers & Polish (Phase 8)**~~ ✅ **100% DONE** — Local/S3 Uploads REST module registered, SMS & Push alert interfaces injected, supertest E2E integration specs running, and atomic driver availability automation toggles configured.
 10. ~~**UI Polish (Phase 11 — branch `feat/ui-polish`)**~~ ✅ **100% DONE** — Cairo font loaded in all 3 app layouts (blocks splash until ready); `fontFamily` tokens added to `tokens.ts`; Button upgraded with Reanimated scale press animation; Input/Card polished; Lucide icons replace emoji tabs in all 3 apps; Register screen upgraded with `@gorhom/bottom-sheet` area picker; all screens use `fontFamily.*` tokens instead of raw `fontWeight` strings; `tsc --noEmit` clean on customer-app, business-app, driver-app.
+11. ~~**Home Screen Redesign (Phase 12 — branch `feat/ui-polish`)**~~ ✅ **DONE** — Full redesign of customer-app Home: Lucide icons (UtensilsCrossed/Store/Coffee) in colored circles replace emoji categories; expo-image for business card images with branded placeholder; expo-linear-gradient banner (#E6781E→#C96016) with decorative icon and CTA; real rating pill (star + score), Clock+Bike meta icons, open/closed badge on image with gradient overlay; search bar with filter button and shadow; bottom nav safe-area-aware (height = 64 + insets.bottom); FAB anchored above nav, clears card content. Button.tsx fixed for reanimated v4 (Animated.View wrapper instead of createAnimatedComponent(Pressable)). `components`/`shadows` added to customer-app `src/theme.ts` re-exports. Gotcha: `Animated.createAnimatedComponent(Pressable)` type-errors in reanimated v4 — wrap Pressable in `Animated.View` instead.
 
 ---
 
