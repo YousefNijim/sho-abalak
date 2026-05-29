@@ -75,7 +75,7 @@ export default function History() {
 
 function DriverOrderCard({ o, formatDate }: any) {
   const [expanded, setExpanded] = useState(false);
-  const itemsCount = o.items?.reduce((acc: number, it: any) => acc + it.quantity, 0) ?? 0;
+  const itemsCount = o.items?.reduce((acc: number, it: any) => acc + Number(it.quantity), 0) ?? 0;
 
   return (
     <Pressable style={styles.card} onPress={() => setExpanded(!expanded)}>

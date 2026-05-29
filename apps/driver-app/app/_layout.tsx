@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { I18nManager } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -17,6 +17,36 @@ import {
 import { colors } from '../src/theme';
 import { getQueryClient } from '../src/lib/query-client';
 import { useAuthStore } from '../src/stores/auth.store';
+import { useSocket } from '../src/hooks/useSocket';
+
+function GlobalSocketListener() {
+  const router = useRouter();
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; total: number }) => {
+      console.log('WS instant driver request received globally:', payload.orderId);
+      router.push({
+        pathname: '/request-alert',
+        params: {
+          orderId: payload.orderId,
+          businessName: payload.businessName,
+          areaName: payload.areaName,
+          total: String(payload.total),
+        },
+      });
+    };
+
+    socket.on('driver:request', handleDriverRequest);
+    return () => {
+      socket.off('driver:request', handleDriverRequest);
+    };
+  }, [socket, router]);
+
+  return null;
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -50,6 +80,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
+          <GlobalSocketListener />
           <StatusBar style="dark" />
           <Stack
             screenOptions={{

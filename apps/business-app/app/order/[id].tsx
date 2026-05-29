@@ -1,9 +1,11 @@
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { ordersApi } from '@shu/api-client';
+import { useSocket } from '../../src/hooks/useSocket';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
@@ -39,6 +41,39 @@ export default function OrderDetail() {
       Alert.alert('خطأ', msg);
     },
   });
+
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket || !id) return;
+
+    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+      if (payload.orderId === id) {
+        queryClient.invalidateQueries({ queryKey: ['order', id] });
+        queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+      }
+    };
+
+    const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
+      if (payload.orderId === id) {
+        if (Platform.OS === 'web') {
+           window.alert(`اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
+        } else {
+           Alert.alert('سائق غير متاح', `اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
+        }
+        queryClient.invalidateQueries({ queryKey: ['order', id] });
+        queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+      }
+    };
+
+    socket.on('order:status_update', handleStatusUpdate);
+    socket.on('order:driver_rejected', handleDriverRejected);
+
+    return () => {
+      socket.off('order:status_update', handleStatusUpdate);
+      socket.off('order:driver_rejected', handleDriverRejected);
+    };
+  }, [socket, id, queryClient]);
 
   if (isLoading) {
     return (

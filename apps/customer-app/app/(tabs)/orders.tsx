@@ -86,7 +86,7 @@ export default function Orders() {
         <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
           {list.map((o: any) => {
             const s = STATUS[o.status] || { label: o.status, bg: colors.border, fg: colors.textPrimary };
-            const itemsCount = o.items?.reduce((acc: number, it: any) => acc + it.quantity, 0) ?? 0;
+            const itemsCount = o.items?.reduce((acc: number, it: any) => acc + Number(it.quantity), 0) ?? 0;
             return (
               <OrderCard key={o.id} o={o} s={s} itemsCount={itemsCount} handleReorder={handleReorder} router={router} formatDate={formatDate} />
             );

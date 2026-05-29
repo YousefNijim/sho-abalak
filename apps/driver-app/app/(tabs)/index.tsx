@@ -104,7 +104,7 @@ export default function DriverHome() {
 
   const earnings = completedToday.reduce((acc: number, o: any) => {
     // Driver gets the delivery fee portion
-    return acc + (o.business?.area?.deliveryFee ?? 5);
+    return acc + Number(o.business?.area?.deliveryFee ?? 5);
   }, 0);
 
   return (

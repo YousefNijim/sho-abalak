@@ -29,8 +29,8 @@ export default function Cart() {
     enabled: !!businessId,
   });
 
-  const fee = business?.area?.deliveryFee ?? 0;
-  const total = subtotal + fee;
+  const fee = Number(business?.area?.deliveryFee ?? 0);
+  const total = Number(subtotal) + fee;
 
   // Mutation to create order
   const createOrder = useMutation({

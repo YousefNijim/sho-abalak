@@ -144,6 +144,11 @@ export class OrdersService {
     // Emit order status update to customer tracking room
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
 
+    // Also emit order status update to the business owner so their app reflects changes (e.g. DELIVERED)
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+    }
+
     // If order was assigned to a driver, emit request alert directly to the driver's user account
     if (dto.status === OrderStatus.PICKED_UP && updatedOrder.driver?.user?.id) {
       this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {

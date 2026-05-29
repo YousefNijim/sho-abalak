@@ -53,7 +53,7 @@ export default function Analytics() {
   const periodOrders = filterOrdersByPeriod(orders, period);
   const completedOrders = periodOrders.filter((o: any) => o.status === 'DELIVERED');
 
-  const totalSales = completedOrders.reduce((acc: number, o: any) => acc + o.total, 0);
+  const totalSales = completedOrders.reduce((acc: number, o: any) => acc + Number(o.total || 0), 0);
   const avgOrder = completedOrders.length > 0 ? Math.round(totalSales / completedOrders.length) : 0;
 
   // Compile top selling products
@@ -63,7 +63,7 @@ export default function Analytics() {
       if (o.status === 'DELIVERED') {
         o.items?.forEach((it: any) => {
           const name = it.product?.name || 'منتج';
-          counts[name] = (counts[name] || 0) + it.quantity;
+          counts[name] = (counts[name] || 0) + Number(it.quantity || 0);
         });
       }
     });

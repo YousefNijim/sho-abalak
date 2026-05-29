@@ -75,6 +75,15 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
+  /** Pushes real-time order status updates to business owner screen */
+  emitOrderStatusUpdateToBusiness(businessOwnerId: string, orderId: string, status: OrderStatus) {
+    this.logger.log(`Emit status update [${status}] to business owner business:owner:${businessOwnerId} for order:${orderId}`);
+    this.server.to(`business:owner:${businessOwnerId}`).emit(SocketEvents.ORDER_STATUS_UPDATE, {
+      orderId,
+      status,
+    });
+  }
+
   /** Pushes new incoming order details to the business owner */
   emitOrderNew(businessOwnerId: string, order: any) {
     this.logger.log(`Emit order:new to business owner business:owner:${businessOwnerId}`);

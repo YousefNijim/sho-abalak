@@ -106,7 +106,7 @@ export default function Dashboard() {
 
   const revenue = todayOrders
     .filter((o: any) => o.status === 'DELIVERED')
-    .reduce((acc: number, o: any) => acc + o.total, 0);
+    .reduce((acc: number, o: any) => acc + Number(o.total || 0), 0);
 
   const preparingCount = orders.filter((o: any) =>
     ['CONFIRMED', 'PREPARING', 'READY', 'PICKED_UP'].includes(o.status),
@@ -176,7 +176,7 @@ export default function Dashboard() {
         {/* Orders */}
         <View style={{ gap: spacing[3] }}>
           {list.map((o: any) => {
-            const itemsCount = o.items?.reduce((acc: number, it: any) => acc + it.quantity, 0) ?? 0;
+            const itemsCount = o.items?.reduce((acc: number, it: any) => acc + Number(it.quantity || 0), 0) ?? 0;
             return (
               <Pressable key={o.id} style={styles.orderCard} onPress={() => router.push(`/order/${o.id}`)}>
                 <View style={styles.orderRow}>
