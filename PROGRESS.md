@@ -25,7 +25,8 @@
 - **Stitch screen HTMLs** are archived in `.design-refs/{admin,customer,business,driver}/` — the blueprints used for the port. Re-fetch fresh signed URLs via the `list_screens`/`get_screen` MCP tools (download URLs expire).
 - **Password hashing uses `bcryptjs`, not `bcrypt`.** The native `bcrypt` failed to load its `.node` binding on this Windows setup (`Cannot find module bcrypt_lib.node`). Swapped to pure-JS `bcryptjs` (same API). Don't reintroduce native `bcrypt`.
 - **The API runtime needs `@shu/shared-types` and `@shu/utils` COMPILED.** Node can't `require()` their `.ts` source, so both packages now have `main: dist/index.js` + a `build` script (`tsc -p tsconfig.build.json`, CommonJS). **Run `pnpm --filter @shu/shared-types build && pnpm --filter @shu/utils build` before `start:prod`/`start:dev`** (or whenever those packages change), else the API dies with `ERR_MODULE_NOT_FOUND .../enums`. The web/RN apps are unaffected — they import these via tsconfig `paths` to source, not `main`. TODO: wire these builds as an Nx `dependsOn` so they run automatically.
-- **Orphaned node on :3001/:3000** — stopping a dev/prod API leaves a node holding the port; next start hits `EADDRINUSE`. Kill it: PowerShell `Get-NetTCPConnection -LocalPort 3001 -State Listen | %{ Stop-Process -Id $_.OwningProcess -Force }`.
+- **Orphaned node on :3001/:3000** — stopping a dev/prod API leaves a node holding the port; next start hits `EADDRINUSE`. Kill it: PowerShell `Get-NetTCPConnection -LocalPort 3001 -State Listen | %{ Stop-Process -Id $_.OwningProcess -Force }`. (A running API also locks the Prisma query-engine DLL → `prisma generate` fails with `EPERM`; stop node first.)
+- **Prisma migrations must be non-interactive here.** `prisma migrate dev` prompts on warnings and the shell is non-interactive (it errors out). Instead: edit schema → `prisma migrate diff --from-url <DATABASE_URL> --to-schema-datamodel prisma/schema.prisma --script > migration.sql` into a new `prisma/migrations/<timestamp>_<name>/` dir → `prisma migrate deploy` → `prisma generate` (with node stopped). Don't leave stray dirs under `prisma/migrations/` (Prisma treats every subdir as a migration → P3015).
 
 ---
 
@@ -108,8 +109,13 @@
 - ✅ **Orders** (`src/orders/`): `POST /orders` (CUSTOMER — server computes total from real product prices + area delivery fee, writes items + initial history in one create), `GET /orders` (role-scoped: customer=own, business=its orders, driver=assigned, admin=all), `GET /orders/:id` (view-authz), `PATCH /orders/:id/status` (validates via `@shu/utils` `canTransition`, enforces who-can-do-which-transition, appends `OrderStatusHistory`).
   - **Transition authority (matches the app flows):** CONFIRMED/PREPARING/READY → business owner; **PICKED_UP → business owner assigns the driver (must pass `driverId`)** — the "اختيار سائق" screen is in the *business* app; **DELIVERED → assigned driver only** (driver app "تم التسليم"); CANCELLED → customer (only while PENDING) or business.
 - ✅ **Drivers** (`src/drivers/`): `POST /drivers/register` (DRIVER creates profile, one per user), `GET /drivers/me`, `PATCH /drivers/me/status` (toggle AVAILABLE/BUSY/OFFLINE + change area — the driver-app availability toggle), `GET /drivers/available?areaId=` (BUSINESS/ADMIN — the driver-selection screen), `GET /drivers` (ADMIN). Reads include the driver's user (name/phone) + area.
+- ✅ **Payments** (`src/payments/`): a `Payment` row is created with every order (nested in the order's create, atomic).
+  - **Cash:** created `PENDING`; auto-settles to `PAID` inside the same transaction when the order hits `DELIVERED` (driver collected the cash). This is the live default.
+  - **Online (ELECTRONIC):** built to be swappable. A `PaymentProvider` interface (`providers/payment-provider.interface.ts`, DI token `PAYMENT_PROVIDER`) is implemented today by `MockPaymentProvider` (returns a fake checkout URL + reference; confirm flips PENDING→PAID, or →FAILED if `{paid:false}`). **To go live, implement the interface for a real gateway and change the one binding in `PaymentsModule`** — no service/controller changes. `POST /payments/confirm` is the gateway webhook home (public; provider verifies signature). `GET /payments/:orderId` reuses order view-authz.
+  - **Schema:** added `provider`, `reference` (unique), `createdAt`, `updatedAt` to `Payment` (migration `20260529120447_payment_gateway_fields`). Orders now `include` their payment.
+  - **Verified end-to-end:** cash → PENDING then PAID on delivery (response + DB); electronic → PENDING + checkout URL → confirm → PAID; failed confirm → FAILED.
 - **Verified end-to-end against live DB — FULL lifecycle:** business→product→order; total = items + delivery fee; customer-confirm 403; illegal PENDING→READY 400; business CONFIRMED→PREPARING→READY; driver registers (OFFLINE) → not in `available` → goes AVAILABLE → appears in `available`; assign without `driverId` 400; **business assigns READY→PICKED_UP**; **driver completes PICKED_UP→DELIVERED** (6 history rows); driver sees only assigned orders; customer blocked from `/drivers/register` 403; duplicate driver 409. All confirmed in Postgres.
-- Remaining modules: **users** (admin mgmt), **reviews**, **payments**.
+- Remaining modules: **reviews** (rate business + driver after DELIVERED), **users** (admin list/suspend).
 - No **Socket.io gateway** (events are typed in shared-types but not implemented).
 - No **Redis** integration (ioredis is installed, not wired).
 - DTOs + class-validator + role guards are in place for the built modules; **no automated tests yet** (verified manually via curl/REST).
@@ -132,10 +138,11 @@
 1. ~~**API auth module**~~ ✅ DONE.
 2. ~~**API orders + businesses + products modules**~~ ✅ DONE (+ areas).
 3. ~~**Drivers module**~~ ✅ DONE — full order lifecycle (PENDING→DELIVERED) now works end-to-end.
-4. **Remaining modules:** **reviews** (rate business + driver after DELIVERED), **payments** (record per order), **users** (admin list/suspend). Consider: set driver→BUSY on assignment / →AVAILABLE on delivery (minor enhancement, not done).
-5. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state. (`order:new` on create, `order:status_update` on each transition.)
-6. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
-7. **Infra** — CI (GitHub Actions), Sentry, deploy config.
+4. ~~**Payments module**~~ ✅ DONE — cash settles on delivery; online infra ready behind `PaymentProvider` (mock today). To enable real online payments: implement `PaymentProvider` for a gateway + rebind `PAYMENT_PROVIDER` in `PaymentsModule`.
+5. **Remaining modules:** **reviews** (rate business + driver after DELIVERED), **users** (admin list/suspend). Consider: set driver→BUSY on assignment / →AVAILABLE on delivery (minor enhancement, not done).
+6. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state. (`order:new` on create, `order:status_update` on each transition.)
+7. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
+8. **Infra** — CI (GitHub Actions), Sentry, deploy config.
 
 ---
 

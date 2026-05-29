@@ -1,9 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { OrderStatus, UserRole } from '@shu/shared-types';
 import { canTransition } from '@shu/utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from '../auth/jwt.strategy';
+import { PaymentsService } from '../payments/payments.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 
@@ -11,11 +13,15 @@ const ORDER_INCLUDE = {
   items: { include: { product: true } },
   business: true,
   statusHistory: { orderBy: { createdAt: 'asc' as const } },
+  payment: true,
 } satisfies Prisma.OrderInclude;
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payments: PaymentsService,
+  ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
     const business = await this.prisma.business.findUnique({
@@ -41,8 +47,17 @@ export class OrdersService {
     });
     const total = subtotal.add(business.area.deliveryFee);
 
-    return this.prisma.order.create({
+    // Pre-generate the order id so the payment provider can reference it before we persist.
+    const orderId = randomUUID();
+    const { create: paymentCreate, checkout } = await this.payments.buildPaymentForOrder({
+      orderId,
+      method: dto.paymentMethod,
+      amount: total,
+    });
+
+    const order = await this.prisma.order.create({
       data: {
+        id: orderId,
         customerId,
         businessId: dto.businessId,
         status: OrderStatus.PENDING,
@@ -51,9 +66,13 @@ export class OrdersService {
         note: dto.note ?? null,
         items: { create: itemData },
         statusHistory: { create: { status: OrderStatus.PENDING, changedBy: customerId } },
+        payment: { create: paymentCreate },
       },
       include: ORDER_INCLUDE,
     });
+
+    // For electronic orders the client needs the gateway checkout URL; cash returns null.
+    return { ...order, checkout };
   }
 
   async findForUser(user: AuthUser) {
@@ -78,14 +97,23 @@ export class OrdersService {
     }
     await this.assertCanTransition(order, user, dto.status, dto.driverId);
 
-    return this.prisma.order.update({
-      where: { id },
-      data: {
-        status: dto.status,
-        ...(dto.driverId ? { driverId: dto.driverId } : {}),
-        statusHistory: { create: { status: dto.status, changedBy: user.id } },
-      },
-      include: ORDER_INCLUDE,
+    return this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          ...(dto.driverId ? { driverId: dto.driverId } : {}),
+          statusHistory: { create: { status: dto.status, changedBy: user.id } },
+        },
+      });
+
+      // Cash is collected on delivery → settle the payment to PAID in the same transaction.
+      if (dto.status === OrderStatus.DELIVERED) {
+        await this.payments.settleCashOnDelivery(id, tx);
+      }
+
+      // Re-read with includes AFTER settlement so the response carries the fresh payment status.
+      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
     });
   }
 

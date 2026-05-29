@@ -186,12 +186,18 @@ model Review {
 }
 
 model Payment {
-  id      String        @id @default(uuid())
-  orderId String        @unique
-  order   Order         @relation(fields: [orderId], references: [id])
-  method  PaymentMethod
-  status  PaymentStatus @default(PENDING)
-  amount  Decimal       @db.Decimal(10, 2)
+  id        String        @id @default(uuid())
+  orderId   String        @unique
+  order     Order         @relation(fields: [orderId], references: [id])
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDING)
+  amount    Decimal       @db.Decimal(10, 2)
+  // Online gateway fields (null for cash). `reference` is the provider-side id used to
+  // match a webhook/confirmation back to this payment; `provider` records which gateway.
+  provider  String?
+  reference String?       @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   @@map("payments")
 }
