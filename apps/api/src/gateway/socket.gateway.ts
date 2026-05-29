@@ -38,7 +38,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Verify and decode JWT
       const decoded = this.jwtService.verify(token);
       client.user = {
-        id: decoded.id,
+        id: decoded.sub,
         role: decoded.role,
         areaId: decoded.areaId || null,
       };
