@@ -12,14 +12,9 @@
     "@shu/shared-types": "workspace:*"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "react-native-reanimated": "*"
-  },
-  "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-native": { "optional": true },
-    "react-native-reanimated": { "optional": true }
+    "react": "^19.0.0",
+    "react-native": "^0.81.0",
+    "react-native-reanimated": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "~19.1.0"

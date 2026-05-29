@@ -29,10 +29,10 @@ config.resolver.extraNodeModules = new Proxy(
   }
 );
 
-// Force singleton packages to always resolve from the app root, preventing
-// duplicate instances when nested node_modules inside workspace packages
-// (e.g. @shu/ui-components) contain stale versions from the old SDK.
-const singletons = [
+// Force singleton packages to always resolve from the app root.
+// Without this, Metro follows symlinks into workspace packages and finds
+// their nested node_modules copies (stale or duplicate versions).
+const singletons = new Set([
   'react',
   'react-dom',
   'react-native',
@@ -40,13 +40,14 @@ const singletons = [
   'react-native-gesture-handler',
   'react-native-safe-area-context',
   'react-native-screens',
-];
-const singletonMap = Object.fromEntries(
-  singletons.map((name) => [name, path.resolve(projectRoot, 'node_modules', name)])
-);
+]);
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (singletonMap[moduleName]) {
-    return { filePath: require.resolve(singletonMap[moduleName]), type: 'sourceFile' };
+  if (singletons.has(moduleName)) {
+    return context.resolveRequest(
+      { ...context, originModulePath: path.resolve(projectRoot, 'package.json') },
+      moduleName,
+      platform
+    );
   }
   return context.resolveRequest(context, moduleName, platform);
 };
