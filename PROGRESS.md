@@ -23,6 +23,9 @@
 - **RN components live behind a subpath:** RN primitives (`Button`/`Input`/`Card`) are at `@shu/ui-components/native`, NOT the root export. The root (`@shu/ui-components`) is tokens only, so the web admin never pulls react-native in. Apps map both in their tsconfig `paths`.
 - **Tokens are plain TS** in `@shu/ui-components` and shared by web (Tailwind config mirrors them) and RN (StyleSheet reads them directly). Update tokens in one place.
 - **Stitch screen HTMLs** are archived in `.design-refs/{admin,customer,business,driver}/` — the blueprints used for the port. Re-fetch fresh signed URLs via the `list_screens`/`get_screen` MCP tools (download URLs expire).
+- **Password hashing uses `bcryptjs`, not `bcrypt`.** The native `bcrypt` failed to load its `.node` binding on this Windows setup (`Cannot find module bcrypt_lib.node`). Swapped to pure-JS `bcryptjs` (same API). Don't reintroduce native `bcrypt`.
+- **The API runtime needs `@shu/shared-types` and `@shu/utils` COMPILED.** Node can't `require()` their `.ts` source, so both packages now have `main: dist/index.js` + a `build` script (`tsc -p tsconfig.build.json`, CommonJS). **Run `pnpm --filter @shu/shared-types build && pnpm --filter @shu/utils build` before `start:prod`/`start:dev`** (or whenever those packages change), else the API dies with `ERR_MODULE_NOT_FOUND .../enums`. The web/RN apps are unaffected — they import these via tsconfig `paths` to source, not `main`. TODO: wire these builds as an Nx `dependsOn` so they run automatically.
+- **Orphaned node on :3001/:3000** — stopping a dev/prod API leaves a node holding the port; next start hits `EADDRINUSE`. Kill it: PowerShell `Get-NetTCPConnection -LocalPort 3001 -State Listen | %{ Stop-Process -Id $_.OwningProcess -Force }`.
 
 ---
 
@@ -97,8 +100,9 @@
 
 ## ⚠️ What's missing / not done
 
-### API (apps/api) — only scaffold exists
-- No feature modules: **auth** (JWT + bcrypt, OTP), **users**, **businesses**, **products**, **orders**, **drivers**, **areas**, **reviews**, **payments**.
+### API (apps/api) — auth done; rest is scaffold
+- ✅ **Auth module DONE** (`src/auth/`): `POST /auth/register` (bcryptjs hash), `POST /auth/login` (JWT), `GET /auth/me` (JWT guard), `POST /auth/otp/request|verify` (stub, devCode `0000`). Plus `JwtStrategy`, `JwtAuthGuard`, `RolesGuard` + `@Roles()`, `@CurrentUser()`. **Verified end-to-end against live DB:** register→login→me works, 401 on no/bad token, 409 dup phone, 400 bad-phone validation, password stored as bcrypt hash. (Test loop in chat history.)
+- Still no feature modules: **users**, **businesses**, **products**, **orders**, **drivers**, **areas**, **reviews**, **payments**.
 - No **Socket.io gateway** (events are typed in shared-types but not implemented).
 - No **Redis** integration (ioredis is installed, not wired).
 - No DTOs/validation, no guards/role decorators, no tests.
@@ -118,8 +122,8 @@
 
 ## 👉 Next steps (suggested order)
 
-1. **API auth module** — register/login (phone + password), JWT, bcrypt, role guard, OTP stub. Unblocks wiring every app to real data.
-2. **API orders + businesses + products modules** — CRUD + the order-status state machine (reuse `@shu/utils` `canTransition`).
+1. ~~**API auth module**~~ ✅ DONE — see above.
+2. **API orders + businesses + products modules** — CRUD + the order-status state machine (reuse `@shu/utils` `canTransition`). Protect routes with `JwtAuthGuard` + `@Roles()` (already built).
 3. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state.
 4. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
 5. **Infra** — CI (GitHub Actions), Sentry, deploy config.
