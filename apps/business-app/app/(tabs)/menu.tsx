@@ -1,5 +1,3 @@
-'use client';
-
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';

@@ -37,7 +37,7 @@ export default function RootLayout() {
       I18nManager.forceRTL(true);
     }
     hydrate();
-  }, []);
+  }, [hydrate]);
 
   useEffect(() => {
     if (fontsLoaded) {

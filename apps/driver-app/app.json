@@ -15,6 +15,7 @@
       "supportsTablet": false
     },
     "android": {
+      "package": "com.shu.driver",
       "adaptiveIcon": {
         "backgroundColor": "#FCF3DC"
       }

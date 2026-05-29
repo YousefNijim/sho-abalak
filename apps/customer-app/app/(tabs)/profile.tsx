@@ -1,5 +1,3 @@
-'use client';
-
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';

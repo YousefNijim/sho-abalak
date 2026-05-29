@@ -29,4 +29,34 @@ config.resolver.extraNodeModules = new Proxy(
   }
 );
 
+const singletons = [
+  'react',
+  'react-dom',
+  'react-native',
+  'react-native-reanimated',
+  'react-native-gesture-handler',
+  'react-native-safe-area-context',
+  'react-native-screens',
+];
+const singletonMap = Object.fromEntries(
+  singletons.map((name) => [name, path.resolve(projectRoot, 'node_modules', name)])
+);
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (singletonMap[moduleName]) {
+    return { filePath: require.resolve(singletonMap[moduleName]), type: 'sourceFile' };
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+// Exclude RN debugger frontend (pure ESM with import.meta) from the web bundle.
+const existingBlockList = config.resolver.blockList
+  ? Array.isArray(config.resolver.blockList)
+    ? config.resolver.blockList
+    : [config.resolver.blockList]
+  : [];
+config.resolver.blockList = [
+  ...existingBlockList,
+  /node_modules[/\\]@react-native[/\\]debugger-frontend[/\\].*/,
+];
+
 module.exports = config;

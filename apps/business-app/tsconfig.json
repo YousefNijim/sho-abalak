@@ -17,5 +17,5 @@
       "react-native-reanimated": ["node_modules/react-native-reanimated"]
     }
   },
-  "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"]
+  "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

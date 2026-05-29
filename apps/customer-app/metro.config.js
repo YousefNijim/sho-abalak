@@ -13,35 +13,53 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-// Force singleton packages to always resolve from the app, preventing duplicates
-const singletons = [
-  'react',
-  'react-native',
-  'react-native/Libraries/Renderer/shims/ReactNative',
-  '@react-navigation/native',
-  '@react-navigation/bottom-tabs',
-  'react-native-safe-area-context',
-  'react-native-screens',
-];
-
 config.resolver.extraNodeModules = new Proxy(
   {},
   {
     get: (_, name) => {
-      return path.resolve(projectRoot, 'node_modules', name);
+      const appPath = path.resolve(projectRoot, 'node_modules', name);
+      const rootPath = path.resolve(monorepoRoot, 'node_modules', name);
+      try {
+        require.resolve(appPath);
+        return appPath;
+      } catch {
+        return rootPath;
+      }
     },
   }
 );
 
+// Force singleton packages to always resolve from the app root, preventing
+// duplicate instances when nested node_modules inside workspace packages
+// (e.g. @shu/ui-components) contain stale versions from the old SDK.
+const singletons = [
+  'react',
+  'react-dom',
+  'react-native',
+  'react-native-reanimated',
+  'react-native-gesture-handler',
+  'react-native-safe-area-context',
+  'react-native-screens',
+];
+const singletonMap = Object.fromEntries(
+  singletons.map((name) => [name, path.resolve(projectRoot, 'node_modules', name)])
+);
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (singletons.some((s) => moduleName === s || moduleName.startsWith(s + '/'))) {
-    return context.resolveRequest(
-      { ...context, originModulePath: path.resolve(projectRoot, 'index.js') },
-      moduleName,
-      platform
-    );
+  if (singletonMap[moduleName]) {
+    return { filePath: require.resolve(singletonMap[moduleName]), type: 'sourceFile' };
   }
   return context.resolveRequest(context, moduleName, platform);
 };
+
+// Exclude RN debugger frontend (pure ESM with import.meta) from the web bundle.
+const existingBlockList = config.resolver.blockList
+  ? Array.isArray(config.resolver.blockList)
+    ? config.resolver.blockList
+    : [config.resolver.blockList]
+  : [];
+config.resolver.blockList = [
+  ...existingBlockList,
+  /node_modules[/\\]@react-native[/\\]debugger-frontend[/\\].*/,
+];
 
 module.exports = config;

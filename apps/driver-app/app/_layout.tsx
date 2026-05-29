@@ -60,6 +60,8 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: colors.background },
             }}
           >
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="request-alert" options={{ presentation: 'modal', title: 'طلب جديد' }} />
             <Stack.Screen name="active-delivery" options={{ title: 'التوصيل النشط' }} />

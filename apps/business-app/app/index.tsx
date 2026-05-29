@@ -13,7 +13,7 @@ export default function Splash() {
       if (token) {
         router.replace('/(tabs)');
       } else {
-        router.replace('/onboarding');
+        router.replace('/(auth)/login');
       }
     }, 1400);
     return () => clearTimeout(t);
@@ -25,7 +25,7 @@ export default function Splash() {
         <Text style={{ color: colors.primary }}>شو </Text>
         <Text style={{ color: colors.secondary }}>عبالك؟</Text>
       </Text>
-      <Text style={styles.tagline}>منصة طلباتك</Text>
+      <Text style={styles.tagline}>لوحة تحكم المنشأة</Text>
     </View>
   );
 }
