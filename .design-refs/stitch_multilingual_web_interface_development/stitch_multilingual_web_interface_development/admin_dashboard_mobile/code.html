@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@100..900&amp;family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface": "#fbf8ff",
+                    "muted-gray": "#6B7280",
+                    "secondary": "#296a43",
+                    "on-secondary-container": "#2e6f47",
+                    "primary-container": "#e6781e",
+                    "background": "#fbf8ff",
+                    "inverse-surface": "#303037",
+                    "surface-bright": "#fbf8ff",
+                    "surface-container-low": "#f5f2fc",
+                    "success-green": "#22C55E",
+                    "error": "#ba1a1a",
+                    "outline-variant": "#ddc1b1",
+                    "on-primary-fixed": "#311300",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#974800",
+                    "surface-container": "#efecf6",
+                    "surface-variant": "#e4e1eb",
+                    "primary": "#974800",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#4e2200",
+                    "surface-dim": "#dbd9e2",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "on-surface-variant": "#564337",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "on-secondary-fixed": "#00210e",
+                    "secondary-container": "#abefbd",
+                    "background-cream": "#FCF3DC",
+                    "on-surface": "#1b1b22",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "on-tertiary-fixed": "#001e30",
+                    "primary-fixed": "#ffdbc7",
+                    "secondary-fixed": "#aef2bf",
+                    "outline": "#8a7265",
+                    "surface-white": "#FFFFFF",
+                    "tertiary-fixed": "#cbe6ff",
+                    "warning-amber": "#F59E0B",
+                    "tertiary-container": "#009ee8",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "error-red": "#EF4444",
+                    "tertiary": "#006495",
+                    "surface-container-highest": "#e4e1eb",
+                    "surface-container-lowest": "#ffffff",
+                    "border-beige": "#E5E0D5",
+                    "inverse-on-surface": "#f2eff9",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#eae7f1",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-background": "#1b1b22",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb688"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "nav-height": "64px",
+                    "gap-lg": "20px",
+                    "margin-standard": "16px",
+                    "section-lg": "32px",
+                    "gap-xs": "4px",
+                    "gap-md": "12px",
+                    "section-md": "24px",
+                    "gap-sm": "8px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "headline-sm": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "label-md": ["Montserrat"],
+                    "headline-lg": ["Cairo"],
+                    "body-base": ["Montserrat"]
+            },
+            "fontSize": {
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .active-nav-item {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-background-cream font-body-base text-on-surface overflow-x-hidden">
+<!-- Sidebar / Navigation Drawer (Initial state hidden) -->
+<div class="fixed inset-0 z-[70] translate-x-full transition-transform duration-300 ease-in-out" id="side-drawer">
+<div class="absolute inset-0 bg-black/40" onclick="toggleDrawer()"></div>
+<aside class="h-full w-80 fixed right-0 top-0 z-[60] bg-background-cream dark:bg-background shadow-2xl flex flex-col rtl px-4 py-8">
+<div class="flex items-center gap-md mb-section-lg border-b border-border-beige pb-4">
+<img alt="Brand Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKXNmkD_13rQjKLnZv4c_xyVwSZ2nM3maotxyPlXnEmPCgqCaCrQWqzz9fBi-Qk4Wkq5epumeWgWHUHkGt2sxG84OqMj39uhi9qH_pd-5JQ-Bg83Yu5Weyy9lkpV_zkvK_RUyMpff4Ls4obSdbzACl-Fll1GgqzOEdZb_Hrzc5qxoqfIWzP45VNx11GcV0qUQfDhmDee3ZggYfrUZ7jLVQyiouR9-hiiKIUqawWIs0PkHNobAc-ZkwU-uZzxxjDHH2GvJugiiODOfu"/>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary">مطعم الزيتون الأصيل</h3>
+<p class="font-label-md text-label-md text-muted-gray">فرع رام الله</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<button class="w-full flex items-center gap-md p-4 bg-primary-container text-on-primary-container font-bold rounded-l-full">
+<span class="material-symbols-outlined">person</span>
+<span>الملف الشخصي</span>
+</button>
+<button class="w-full flex items-center gap-md p-4 text-on-surface hover:bg-surface-container transition-all duration-300 rounded-l-full">
+<span class="material-symbols-outlined">settings</span>
+<span>الإعدادات</span>
+</button>
+<button class="w-full flex items-center gap-md p-4 text-on-surface hover:bg-surface-container transition-all duration-300 rounded-l-full">
+<span class="material-symbols-outlined">history</span>
+<span>سجل العمليات</span>
+</button>
+<button class="w-full flex items-center gap-md p-4 text-on-surface hover:bg-surface-container transition-all duration-300 rounded-l-full">
+<span class="material-symbols-outlined">logout</span>
+<span>تسجيل الخروج</span>
+</button>
+</nav>
+<div class="mt-auto pt-4 text-center">
+<span class="inline-block px-3 py-1 rounded-full bg-success-green/10 text-success-green text-label-sm font-bold">نشط الآن</span>
+</div>
+</aside>
+</div>
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 right-0 h-nav-height bg-background-cream dark:bg-background shadow-sm flex flex-row-reverse justify-between items-center w-full px-margin-standard z-50">
+<div class="flex items-center gap-md">
+<button class="p-2 active:scale-95 transition-transform duration-150 hover:bg-surface-container-low rounded-full" onclick="toggleDrawer()">
+<span class="material-symbols-outlined text-primary text-headline-md">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary">مدير المتجر</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-2 relative hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-primary-container rounded-full border-2 border-background-cream"></span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden shadow-sm">
+<img alt="صورة الملف الشخصي" class="w-full h-full object-cover" data-alt="A professional headshot of a Middle Eastern male restaurant manager smiling warmly, wearing a clean white chef's shirt. The background is a soft-focus Palestinian traditional kitchen with warm ceramic tones and natural lighting, creating an atmosphere of authentic hospitality and expertise. High-end portrait photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEk35S7miLNDoK6WyIpqd7kl2CN2clrRrvvJrbKFx7U1jxEw7Qmnfk9jE6udjp41zTQvTdt9Z5JLqNltjeR6XdcPfVckIqCJzwu8kiEGAMRZb0VtuBduof9qG55kejRCfw9IwNz6sXCWR12sFj1kAok27OR4IPJpIsJLrghTId2jPMWPZBDYtNW_irg82tAWu0ytVNnRkgdzxNcWS-fZJzprfGbWhHQYLdQCh70voNQ5vudVdH01w7-dGmBa_D9lWt9_JTmkLgQD1L"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-20 pb-24 px-margin-standard max-w-lg mx-auto">
+<!-- Welcome Section -->
+<section class="mb-section-md">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">أهلاً بك، شو عبالك اليوم؟</h2>
+<p class="font-body-base text-body-base text-on-surface-variant mt-1">نظرة عامة على نشاط متجرك حالياً.</p>
+</section>
+<!-- Stats Grid (2x2) -->
+<section class="grid grid-cols-2 gap-md mb-section-md">
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex flex-col gap-xs">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary-container">shopping_bag</span>
+<span class="text-success-green font-bold text-label-sm">+12%</span>
+</div>
+<span class="font-label-md text-label-md text-muted-gray">إجمالي الطلبات</span>
+<span class="font-headline-md text-headline-md text-on-surface">142</span>
+</div>
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex flex-col gap-xs">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary">payments</span>
+<span class="text-success-green font-bold text-label-sm">+5%</span>
+</div>
+<span class="font-label-md text-label-md text-muted-gray">المبيعات اليومية</span>
+<span class="font-headline-md text-headline-md text-on-surface">₪1,840</span>
+</div>
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex flex-col gap-xs">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-secondary">star</span>
+</div>
+<span class="font-label-md text-label-md text-muted-gray">تقييم العملاء</span>
+<span class="font-headline-md text-headline-md text-on-surface">4.8</span>
+</div>
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex flex-col gap-xs">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-warning-amber">timer</span>
+</div>
+<span class="font-label-md text-label-md text-muted-gray">وقت التجهيز</span>
+<span class="font-headline-md text-headline-md text-on-surface">18 د</span>
+</div>
+</section>
+<!-- Quick Actions -->
+<section class="mb-section-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-gap-md">إجراءات سريعة</h3>
+<div class="flex gap-md overflow-x-auto hide-scrollbar pb-2">
+<button class="flex-shrink-0 flex items-center gap-sm bg-primary text-white px-5 py-3 rounded-full font-bold shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined">list_alt</span>
+<span>الطلبات النشطة</span>
+</button>
+<button class="flex-shrink-0 flex items-center gap-sm bg-secondary text-white px-5 py-3 rounded-full font-bold shadow-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined">map</span>
+<span>خريطة السائقين</span>
+</button>
+<button class="flex-shrink-0 flex items-center gap-sm border-2 border-primary-container text-primary-container px-5 py-3 rounded-full font-bold active:scale-95 transition-transform">
+<span class="material-symbols-outlined">support_agent</span>
+<span>الدعم الفني</span>
+</button>
+</div>
+</section>
+<!-- Recent Orders -->
+<section>
+<div class="flex items-center justify-between mb-gap-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">آخر الطلبات</h3>
+<button class="text-primary font-bold text-label-md">عرض الكل</button>
+</div>
+<div class="space-y-md">
+<!-- Order Card 1 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between hover:shadow-md transition-shadow">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div>
+<p class="font-bold text-body-base">طلب #9234</p>
+<p class="text-label-md text-muted-gray">منذ 5 دقائق</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-xs">
+<span class="px-3 py-1 bg-amber-100 text-amber-700 text-label-sm font-bold rounded-full">قيد التحضير</span>
+<p class="font-bold text-primary">₪85.00</p>
+</div>
+</div>
+<!-- Order Card 2 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<div>
+<p class="font-bold text-body-base">طلب #9231</p>
+<p class="text-label-md text-muted-gray">منذ 15 دقيقة</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-xs">
+<span class="px-3 py-1 bg-green-100 text-green-700 text-label-sm font-bold rounded-full">مع السائق</span>
+<p class="font-bold text-primary">₪120.50</p>
+</div>
+</div>
+<!-- Order Card 3 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-bold text-body-base">طلب #9228</p>
+<p class="text-label-md text-muted-gray">منذ 32 دقيقة</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-xs">
+<span class="px-3 py-1 bg-blue-100 text-blue-700 text-label-sm font-bold rounded-full">تم التوصيل</span>
+<p class="font-bold text-primary">₪45.00</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe bg-surface-white dark:bg-surface-container-lowest shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary dark:text-primary-container rounded-xl px-3 py-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm-mobile">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm-mobile">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all duration-200" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-label-sm text-label-sm-mobile">القائمة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all duration-200" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-sm text-label-sm-mobile">التقارير</span>
+</a>
+</nav>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('side-drawer');
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+                drawer.classList.add('translate-x-0');
+            } else {
+                drawer.classList.add('translate-x-full');
+                drawer.classList.remove('translate-x-0');
+            }
+        }
+
+        // Simple button active state visual feedback
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => el.classList.add('active-nav-item'));
+            el.addEventListener('mouseup', () => el.classList.remove('active-nav-item'));
+            el.addEventListener('mouseleave', () => el.classList.remove('active-nav-item'));
+        });
+    </script>
+</body></html>

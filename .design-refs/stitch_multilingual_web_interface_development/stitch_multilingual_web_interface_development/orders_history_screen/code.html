@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#f2eff9",
+                    "background-cream": "#FCF3DC",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "muted-gray": "#6B7280",
+                    "on-tertiary-fixed": "#001e30",
+                    "surface-container-high": "#eae7f1",
+                    "tertiary": "#006495",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-background": "#1b1b22",
+                    "inverse-primary": "#ffb688",
+                    "background": "#fbf8ff",
+                    "surface-variant": "#e4e1eb",
+                    "on-surface": "#1b1b22",
+                    "primary": "#974800",
+                    "primary-fixed-dim": "#ffb688",
+                    "tertiary-container": "#009ee8",
+                    "on-secondary-container": "#2e6f47",
+                    "on-primary-fixed-variant": "#733600",
+                    "on-primary-container": "#4e2200",
+                    "on-secondary-fixed": "#00210e",
+                    "on-tertiary-container": "#00314c",
+                    "on-surface-variant": "#564337",
+                    "surface-container-highest": "#e4e1eb",
+                    "primary-container": "#e6781e",
+                    "surface-dim": "#dbd9e2",
+                    "outline-variant": "#ddc1b1",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#aef2bf",
+                    "surface-container-low": "#f5f2fc",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#efecf6",
+                    "surface-white": "#FFFFFF",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "warning-amber": "#F59E0B",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#8a7265",
+                    "secondary": "#296a43",
+                    "secondary-container": "#abefbd",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#974800",
+                    "error-red": "#EF4444",
+                    "success-green": "#22C55E",
+                    "primary-fixed": "#ffdbc7",
+                    "border-beige": "#E5E0D5",
+                    "surface": "#fbf8ff",
+                    "surface-bright": "#fbf8ff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#311300",
+                    "inverse-surface": "#303037",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "nav-height": "64px",
+                    "gap-md": "12px",
+                    "gap-lg": "20px",
+                    "margin-standard": "16px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Montserrat"],
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        .tab-active {
+            border-bottom: 3px solid #974800;
+            color: #974800;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-nav-height font-body-base text-on-background">
+<!-- Top App Bar -->
+<header class="bg-background-cream dark:bg-background shadow-sm docked full-width top-0 sticky z-40">
+<div class="flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed transition-transform active:scale-95 cursor-pointer">notifications</span>
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a friendly Middle Eastern man with a warm smile, set against a soft, sun-drenched architectural background in Palestine. The lighting is golden and natural, emphasizing a welcoming and communal atmosphere. The image uses high-key tones and a warm cream palette to match the application's heritage-modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh93PwDaqVIlUIoTlscPh4woOwQpD7y_Mrs8EiM2sWRt2NN3H18sugX2vvmYNigGR_lw1EA-NDuSPgKx4xKLSBPZ0W9vbN4v9fWK2DSK3wOENLWyRTnm3urIBlTMXd9wdrHZMlglmqzonhHg-Qq_1imfh-5AzD9NS5tl53qdh7zrKVocjAW0tZTLLKQaL8wbu5Tx-H3jCvRJkFd7IjCpWhnR2FCfrEWqHBiTDCcOfFa9hmbq3R_1w79sWTXkOwmQ5l2qWrmqTJYG3e"/>
+</div>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed">شو عبالك؟</h1>
+<div class="w-10"></div> <!-- Spacer for symmetry -->
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="px-margin-standard pt-section-md flex flex-col gap-section-md">
+<!-- Tabs -->
+<div class="flex border-b border-border-beige bg-surface-white rounded-xl shadow-sm overflow-hidden">
+<button class="flex-1 py-4 font-headline-sm text-headline-sm text-center tab-active transition-all duration-200" id="tab-current" onclick="switchTab('current')">
+                الحالية
+            </button>
+<button class="flex-1 py-4 font-headline-sm text-headline-sm text-center text-muted-gray hover:bg-surface-container-low transition-all duration-200" id="tab-previous" onclick="switchTab('previous')">
+                السابقة
+            </button>
+</div>
+<!-- Orders List -->
+<div class="flex flex-col gap-md" id="orders-container">
+<!-- Order Card 1 (Current) -->
+<div class="order-card current-order bg-surface-white rounded-xl p-4 shadow-sm border border-transparent hover:border-outline-variant transition-all duration-300">
+<div class="flex items-start gap-md mb-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A gourmet Palestinian pizza topped with fresh local ingredients like za'atar, olives, and melted cheese, presented on a rustic wooden board. The lighting is warm and appetizing, highlighting textures of the crust and vibrant colors of the toppings. The background is a clean, minimalist kitchen setting with warm cream tones consistent with the brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">بيتزا الريف</h3>
+<span class="px-3 py-1 rounded-full bg-orange-100 text-warning-amber font-label-md text-label-md">قيد التحضير</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">اليوم، 02:30 م</p>
+</div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-border-beige">
+<div class="flex flex-col">
+<span class="text-muted-gray font-label-sm text-label-sm">3 أصناف</span>
+<span class="text-primary font-bold font-body-lg text-body-lg">75.00 ₪</span>
+</div>
+<button class="px-6 h-[44px] rounded-lg border-1.5 border-primary text-primary font-button-text text-button-text hover:bg-primary-fixed-dim transition-colors active:scale-95 flex items-center gap-sm">
+                        تتبع الطلب
+                    </button>
+</div>
+</div>
+<!-- Order Card 2 (History/Previous) -->
+<div class="order-card previous-order bg-surface-white rounded-xl p-4 shadow-sm border border-transparent hover:border-outline-variant transition-all duration-300">
+<div class="flex items-start gap-md mb-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A delicious, steaming plate of traditional Palestinian Shawarma wrap cut into pieces, served with garlic sauce and pickles on a clean white ceramic plate. High-contrast lighting captures the juice of the meat and the crispness of the bread. The scene is warm and inviting, evoke a sense of heritage and high-quality local cuisine." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-bOD-1EBqPUPsAKhzINi8K_xvDPLx7Kw9rTNBVrQQJdeRvssljTC-EdQznBxnq_cZiy6YbNWdL_Fp9Ccwqx-f2sNM994Qsi4oA-EwVqUTUYLswHeKWZ6NLUS6wyi2ju8L_hvQobNCvOhQslt2hVGaTvFYB9lnP3W6wzXJEhsGeGgPb9nwqv_MipmvMcUWl5exqCGVUrcYvniY0ot1EhaWyVs8Ya6SCVuRlmQxdd2Qrg2lg2Dnasqj5ppFJEUPhABEbtiTQL9PB4gk"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">شاورما السنابل</h3>
+<span class="px-3 py-1 rounded-full bg-green-100 text-success-green font-label-md text-label-md">تم التوصيل</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">أمس، 08:15 م</p>
+</div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-border-beige">
+<div class="flex flex-col">
+<span class="text-muted-gray font-label-sm text-label-sm">1 صنف</span>
+<span class="text-primary font-bold font-body-lg text-body-lg">25.00 ₪</span>
+</div>
+<button class="px-6 h-[44px] rounded-lg border-[1.5px] border-primary text-primary font-button-text text-button-text hover:bg-primary-fixed-dim transition-colors active:scale-95 flex items-center gap-sm">
+                        إعادة الطلب
+                    </button>
+</div>
+</div>
+<!-- Order Card 3 (History/Previous) -->
+<div class="order-card previous-order bg-surface-white rounded-xl p-4 shadow-sm border border-transparent hover:border-outline-variant transition-all duration-300">
+<div class="flex items-start gap-md mb-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Freshly fried golden-brown Falafel pieces served in a traditional Palestinian breakfast spread with creamy hummus and olive oil. The lighting is bright and cheerful, suggesting a morning meal. The visual style is tactile and minimalist, using a warm cream background to emphasize the freshness and quality of the local food." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBedxVySBKQkY7th57_fPBFrxWS1rv8j39wqBAJrZA712jkJ7TpxL1hV_SKJkIhtHBb-Gw9JNDFrj94fMdhuW88iJVTDa7DpQl6tMbSYMUrDPSIDKw3r8uLJRitdX9vlj7C2OCaxeomCXIzPvmV2o6ByELxhe8B7tIXixTFDQwFcY6RU12NgEC8AkS61HQoO3ZVIhf1yy_y3utb9PZf2tXgcpTMbBxxQdHZXUPdGrO0M3pxK_uYWKz4XcCljjcJCw_VWaL46z7UTFHk"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface truncate">فلافل القدس</h3>
+<span class="px-3 py-1 rounded-full bg-green-100 text-success-green font-label-md text-label-md">تم التوصيل</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">20 أكتوبر، 09:00 ص</p>
+</div>
+</div>
+<div class="flex justify-between items-center pt-4 border-t border-border-beige">
+<div class="flex flex-col">
+<span class="text-muted-gray font-label-sm text-label-sm">5 أصناف</span>
+<span class="text-primary font-bold font-body-lg text-body-lg">42.00 ₪</span>
+</div>
+<button class="px-6 h-[44px] rounded-lg border-[1.5px] border-primary text-primary font-button-text text-button-text hover:bg-primary-fixed-dim transition-colors active:scale-95 flex items-center gap-sm">
+                        إعادة الطلب
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base bg-surface-white dark:bg-inverse-surface shadow-lg rounded-t-xl border-t border-border-beige dark:border-outline">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant font-label-sm text-label-sm transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-4 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span>الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant font-label-sm text-label-sm transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-4 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span>الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold font-label-sm text-label-sm transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-4 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span>الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant font-label-sm text-label-sm transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-4 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>حسابي</span>
+</a>
+</nav>
+<script>
+        function switchTab(type) {
+            const currentBtn = document.getElementById('tab-current');
+            const previousBtn = document.getElementById('tab-previous');
+            const currentOrders = document.querySelectorAll('.current-order');
+            const previousOrders = document.querySelectorAll('.previous-order');
+
+            if (type === 'current') {
+                currentBtn.classList.add('tab-active');
+                currentBtn.classList.remove('text-muted-gray');
+                previousBtn.classList.remove('tab-active');
+                previousBtn.classList.add('text-muted-gray');
+                
+                currentOrders.forEach(el => el.classList.remove('hidden'));
+                previousOrders.forEach(el => el.classList.add('hidden'));
+            } else {
+                previousBtn.classList.add('tab-active');
+                previousBtn.classList.remove('text-muted-gray');
+                currentBtn.classList.remove('tab-active');
+                currentBtn.classList.add('text-muted-gray');
+                
+                currentOrders.forEach(el => el.classList.add('hidden'));
+                previousOrders.forEach(el => el.classList.remove('hidden'));
+            }
+        }
+
+        // Initialize view with 'current' orders hidden or shown appropriately? 
+        // Let's show all by default or default to current.
+        switchTab('current');
+    </script>
+</body></html>

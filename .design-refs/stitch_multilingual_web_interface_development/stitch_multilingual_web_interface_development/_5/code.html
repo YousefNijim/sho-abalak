@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>إدارة المنشآت - لوحة التحكم</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@100..900&amp;family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#009ee8",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-background": "#1b1b22",
+                    "tertiary": "#006495",
+                    "surface-container-high": "#eae7f1",
+                    "surface-container-low": "#f5f2fc",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-secondary-fixed": "#00210e",
+                    "inverse-surface": "#303037",
+                    "primary": "#974800",
+                    "border-beige": "#E5E0D5",
+                    "secondary-container": "#abefbd",
+                    "on-tertiary": "#ffffff",
+                    "outline-variant": "#ddc1b1",
+                    "on-surface-variant": "#564337",
+                    "on-secondary-container": "#2e6f47",
+                    "on-primary-fixed": "#311300",
+                    "surface-bright": "#fbf8ff",
+                    "warning-amber": "#F59E0B",
+                    "error-red": "#EF4444",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#974800",
+                    "inverse-on-surface": "#f2eff9",
+                    "tertiary-fixed": "#cbe6ff",
+                    "surface": "#fbf8ff",
+                    "background": "#fbf8ff",
+                    "surface-container": "#efecf6",
+                    "primary-container": "#e6781e",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "primary-fixed": "#ffdbc7",
+                    "surface-variant": "#e4e1eb",
+                    "secondary-fixed": "#aef2bf",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "inverse-primary": "#ffb688",
+                    "success-green": "#22C55E",
+                    "surface-dim": "#dbd9e2",
+                    "outline": "#8a7265",
+                    "surface-container-highest": "#e4e1eb",
+                    "muted-gray": "#6B7280",
+                    "surface-white": "#FFFFFF",
+                    "on-surface": "#1b1b22",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "secondary": "#296a43",
+                    "background-cream": "#FCF3DC",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#4e2200",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "primary-fixed-dim": "#ffb688"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "nav-height": "64px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "section-md": "24px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "section-lg": "32px",
+                    "gap-md": "12px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg": ["Cairo"],
+                    "label-md": ["Montserrat"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #FCF3DC;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 12px rgba(151, 72, 0, 0.08);
+        }
+        .active-glow {
+            box-shadow: 0 0 15px rgba(151, 72, 0, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background shadow-sm flex flex-row justify-between items-center px-margin-standard h-nav-height w-full fixed top-0 z-50">
+<div class="flex items-center gap-md">
+<button class="transition-transform active:scale-95 hover:opacity-80 p-base">
+<span class="material-symbols-outlined text-primary text-[28px]">menu</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">المنشآت</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="transition-transform active:scale-95 hover:opacity-80 relative p-base">
+<span class="material-symbols-outlined text-primary">notifications</span>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error-red rounded-full border-2 border-background-cream"></span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a Middle Eastern man in a corporate setting, with warm studio lighting and a clean, minimalist background. The style is contemporary business photography, using a warm color palette that aligns with the brand heritage aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAitVPfCtQt55yKAOh85hBlObsioXsLVyOJWuZp9xqtD02r8QfJpGhAuDb69douatMMFDuUCHOwITuYTdpirtuawiQjHahsBWvaqmkOyb8-okgC5q-Z4u2rwXl7H0rPrTrKjQ8rz4-Kv_c0eD_vzpCkAgrsZP9mL_zwWzCDgf-F4VugvS1JczzH3HuqAfs-6hG7W_UGL_3GrKjLwtqQu-rlCyc724-r1U5Q-U194SpAh1zgWhHt_5Rw5Y3D1m8g03Rp4cI1jR182ib9"/>
+</div>
+</div>
+</header>
+<main class="pt-20 px-margin-standard pb-section-lg">
+<!-- Search Section -->
+<div class="mt-gap-lg mb-section-md">
+<div class="relative group">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full h-[52px] bg-surface-white border-1.5 border-border-beige rounded-xl pr-12 pl-4 focus:ring-0 focus:border-primary transition-all font-label-md text-on-surface custom-shadow" placeholder="ابحث عن منشأة..." type="text"/>
+</div>
+</div>
+<!-- Quick Stats Bento (Mobile style) -->
+<div class="grid grid-cols-2 gap-md mb-section-md">
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex flex-col gap-xs">
+<span class="text-label-sm font-label-sm text-muted-gray">إجمالي المنشآت</span>
+<span class="text-headline-sm font-headline-sm text-primary">١٤٢</span>
+</div>
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex flex-col gap-xs">
+<span class="text-label-sm font-label-sm text-muted-gray">نشط حالياً</span>
+<span class="text-headline-sm font-headline-sm text-success-green">١٢٨</span>
+</div>
+</div>
+<!-- Business List Title -->
+<div class="flex justify-between items-center mb-gap-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface-variant">جميع الأعمال</h2>
+<button class="text-primary font-label-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                تصفية
+            </button>
+</div>
+<!-- Business Cards Container -->
+<div class="space-y-gap-md">
+<!-- Business Card 1 -->
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex items-center gap-md border border-transparent active:scale-[0.98] transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img alt="Bakery" class="w-full h-full object-cover" data-alt="A high-quality close-up photo of fresh artisan bread and pastries in a traditional Palestinian bakery setting. The lighting is warm and natural, highlighting the textures of the crust. The color grading uses rich ambers and soft creams to evoke a heritage feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3DTm4psv_XBnrFnaB0lyozXSdTKFmjJvFRWuIqdwURczwvxnomTRdmD8XjE2KStTECFRm7j5yxHSzOzOYvbc7v1zXMwsE5BHI8jRFhEogOyuRF5ccLlr487KDJLzHOg2GxwxX2jfqi9H0U4BoyzHmEeuOdMzMhL0mwmmlOJ2vBfaas3DQmL78sfJWo0Av0ooUApHMG4DuECIi5u910fNSq2xydAI2NaIJ7_7CX4e0RtiSqbOpvHFlIvlSQZBqWlQGtrK0jolcscFk"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-sm text-body-lg text-on-surface mb-base">مخبز الهدى الحديث</h3>
+<div class="flex items-center text-muted-gray gap-xs">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-label-md font-label-md">نابلس، المركز التجاري</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-sm">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+<span class="text-success-green text-label-sm font-label-sm px-base py-px bg-success-green/10 rounded">نشط</span>
+</div>
+</div>
+<!-- Business Card 2 -->
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex items-center gap-md border border-transparent active:scale-[0.98] transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img alt="Pharmacy" class="w-full h-full object-cover" data-alt="A clean, modern pharmacy interior in Palestine with organized shelving and warm wooden accents. The lighting is bright and professional yet welcoming. The aesthetic is tactile minimalism with high contrast between medicinal products and the cream-colored interior." src="https://lh3.googleusercontent.com/aida-public/AB6AXuChJgSBnIdmSuOKZIH_8e0V0WFKg3wJU6woBvTplrrATOplGJ5BqBGZj5iObAxCsYuzXtBuMeqFRalMdztP9te_EuCEAFhHnN5wf7zmLWbRv6BgWo8-jC2Q_3tUEvia8QpG46e5vy0fHQIm-NQQ-pMsEMp4YMNXyCLdrFkowdQ6ICJXTkbCXCspPOdorQFfd_X7F-XSfDbmfNU788zQZ9C6N3ErrIrr9OTr3S-aR0vpT3q8WBreZ1lOe0GrcJjQ_wOoQ6DjrrWsZP2i"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-sm text-body-lg text-on-surface mb-base">صيدلية الياسمين</h3>
+<div class="flex items-center text-muted-gray gap-xs">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-label-md font-label-md">رام الله، الماصيون</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-sm">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+<span class="text-success-green text-label-sm font-label-sm px-base py-px bg-success-green/10 rounded">نشط</span>
+</div>
+</div>
+<!-- Business Card 3 (Inactive) -->
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex items-center gap-md border border-transparent opacity-90 active:scale-[0.98] transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden shrink-0 grayscale">
+<img alt="Restaurant" class="w-full h-full object-cover" data-alt="An elegant restaurant space featuring stone arches and modern Palestinian decor. The atmosphere is calm and peaceful, with soft hanging lamps casting a warm glow. The color palette focuses on earthy tones, limestone whites, and subtle orange accents to align with the heritage brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWycepGX3NzlnMibhzqJX4_e_lHdF2GhZvoIq3feNO9EPBED3taSrqmWtbZ2_ylvOYp2HYZJh7_YJ43GmSMrvRLH6_IqiCrnH1Dl7wySWam9seMOyOw5JyOFXkhBjjK6lYV5X-GZ1yoREuQ5VsDy0XgkBFoUeREWDOSGJCV9uIsOGiGK6yuihjzdD84mlqZhpmaTupcD7CMUhLrbJOAyEKx5moUtFFsmULuXLzA9Ua3zJn1SI7BeCggAIxNbhgqGfzw5Z9viqXd04R"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-sm text-body-lg text-on-surface mb-base">مطعم قرية التراث</h3>
+<div class="flex items-center text-muted-gray gap-xs">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-label-md font-label-md">بيت لحم، المهد</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-sm">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+<span class="text-warning-amber text-label-sm font-label-sm px-base py-px bg-warning-amber/10 rounded">مغلق مؤقتاً</span>
+</div>
+</div>
+<!-- Business Card 4 -->
+<div class="bg-surface-white p-gap-md rounded-xl custom-shadow flex items-center gap-md border border-transparent active:scale-[0.98] transition-all">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden shrink-0">
+<img alt="Supermarket" class="w-full h-full object-cover" data-alt="A vibrant Palestinian market scene showing fresh local produce and spices. The colors are incredibly saturated and warm, creating an inviting and appetizing atmosphere. The visual style is a blend of corporate modern clarity and authentic local textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7ekJMQhZeQCZUEmj8wWCmxO1QdwHeH9XnabHJKhQf10PzgcZSOihtp18F5kGo8edlgOlC2NOqTMLQ9zyiFLo_v580KPPlqckx_TRJ8nNSb-hfJZMHSW0-zh4MmhQapujSJ9q9_hUal_BgjB_uA1bS6paiO_ZiZKGe2itJvE4b-vkDWJKrYIVKWWU_E49DD5dIEaHJBNnYUh4LdWO6dWt-bRjjHLxuRarOACOIvbPO_slBg8Nx-3ZEVnmOA45xrRZGDCFSpQAOjwFK"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline-sm text-body-lg text-on-surface mb-base">سوبر ماركت السلام</h3>
+<div class="flex items-center text-muted-gray gap-xs">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span class="text-label-md font-label-md">الخليل، شارع عين سارة</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-sm">
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+<span class="text-success-green text-label-sm font-label-sm px-base py-px bg-success-green/10 rounded">نشط</span>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-24 left-margin-standard w-14 h-14 bg-primary text-on-primary rounded-full custom-shadow flex items-center justify-center z-40 transition-transform active:scale-90 active-glow">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base bg-surface-white dark:bg-inverse-surface shadow-lg border-t border-border-beige dark:border-outline rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-base rounded-lg" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-base rounded-lg" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-base rounded-lg" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold transition-all duration-200 active:scale-90 hover:bg-surface-container-low px-base rounded-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions for toggles
+        document.querySelectorAll('input[type="checkbox"]').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const statusBadge = this.closest('.flex-col').querySelector('span');
+                if(this.checked) {
+                    statusBadge.innerText = 'نشط';
+                    statusBadge.className = 'text-success-green text-label-sm font-label-sm px-base py-px bg-success-green/10 rounded';
+                    this.closest('.bg-surface-white').classList.remove('opacity-90');
+                } else {
+                    statusBadge.innerText = 'غير نشط';
+                    statusBadge.className = 'text-muted-gray text-label-sm font-label-sm px-base py-px bg-muted-gray/10 rounded';
+                    this.closest('.bg-surface-white').classList.add('opacity-90');
+                }
+            });
+        });
+
+        // FAB active state
+        const fab = document.querySelector('.fixed.bottom-24');
+        fab.addEventListener('click', () => {
+            console.log('Open Add Business Modal');
+            // Mock modal trigger logic
+        });
+    </script>
+</body></html>

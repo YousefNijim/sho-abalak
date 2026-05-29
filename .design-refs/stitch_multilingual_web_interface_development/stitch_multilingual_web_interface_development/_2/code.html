@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#92d5a5",
+                    "surface": "#fbf8ff",
+                    "on-surface-variant": "#564337",
+                    "error-red": "#EF4444",
+                    "primary": "#974800",
+                    "on-secondary-fixed": "#00210e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "surface-tint": "#974800",
+                    "error-container": "#ffdad6",
+                    "secondary": "#296a43",
+                    "on-secondary-container": "#2e6f47",
+                    "tertiary-container": "#009ee8",
+                    "secondary-fixed": "#aef2bf",
+                    "outline-variant": "#ddc1b1",
+                    "primary-fixed": "#ffdbc7",
+                    "inverse-surface": "#303037",
+                    "surface-white": "#FFFFFF",
+                    "on-primary-fixed-variant": "#733600",
+                    "background-cream": "#FCF3DC",
+                    "surface-container": "#efecf6",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface-container-low": "#f5f2fc",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#dbd9e2",
+                    "inverse-primary": "#ffb688",
+                    "secondary-container": "#abefbd",
+                    "primary-container": "#e6781e",
+                    "on-tertiary-container": "#00314c",
+                    "inverse-on-surface": "#f2eff9",
+                    "error": "#ba1a1a",
+                    "border-beige": "#E5E0D5",
+                    "surface-variant": "#e4e1eb",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-error-container": "#93000a",
+                    "muted-gray": "#6B7280",
+                    "surface-container-high": "#eae7f1",
+                    "surface-bright": "#fbf8ff",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-primary-fixed": "#311300",
+                    "on-error": "#ffffff",
+                    "tertiary": "#006495",
+                    "success-green": "#22C55E",
+                    "primary-fixed-dim": "#ffb688",
+                    "warning-amber": "#F59E0B",
+                    "background": "#fbf8ff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#8a7265",
+                    "on-surface": "#1b1b22",
+                    "on-background": "#1b1b22",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-primary-container": "#4e2200",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "gap-md": "12px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "gap-lg": "20px",
+                    "section-md": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "button-text": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .notification-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream min-h-screen pb-nav-height">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 bg-background-cream shadow-sm flex flex-row justify-between items-center px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<button class="transition-transform active:scale-95 text-primary">
+<span class="material-symbols-outlined text-headline-sm">arrow_forward</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary">الإشعارات</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="transition-transform active:scale-95 text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<main class="mt-nav-height px-margin-standard py-section-md">
+<!-- Filter Pills -->
+<div class="flex gap-sm mb-section-md overflow-x-auto no-scrollbar pb-base">
+<button class="bg-primary-container text-on-primary-container px-gap-lg py-gap-sm rounded-full font-label-md text-label-md shadow-sm">الكل</button>
+<button class="bg-surface-white text-on-surface-variant px-gap-lg py-gap-sm rounded-full font-label-md text-label-md border border-border-beige">الطلبات</button>
+<button class="bg-surface-white text-on-surface-variant px-gap-lg py-gap-sm rounded-full font-label-md text-label-md border border-border-beige">العروض</button>
+<button class="bg-surface-white text-on-surface-variant px-gap-lg py-gap-sm rounded-full font-label-md text-label-md border border-border-beige">النظام</button>
+</div>
+<!-- Notification List -->
+<div class="space-y-gap-md">
+<!-- Section: Today -->
+<h2 class="font-headline-sm text-[16px] text-on-surface-variant mb-gap-sm">اليوم</h2>
+<!-- Order Update (Unread) -->
+<div class="notification-card bg-surface-white p-margin-standard rounded-xl shadow-sm border-r-4 border-primary transition-all flex gap-md relative">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-headline-sm text-[15px] text-on-surface">تم تحديث حالة طلبك</h3>
+<span class="font-label-sm text-label-sm text-muted-gray">منذ دقيقتين</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant mb-gap-sm">طلبك رقم #123456 غادر المطعم وهو في طريقه إليك الآن.</p>
+<div class="flex gap-sm">
+<button class="text-primary font-label-md text-label-md underline">تتبع الطلب</button>
+</div>
+</div>
+<div class="absolute top-margin-standard left-margin-standard w-2 h-2 bg-primary rounded-full"></div>
+</div>
+<!-- Promotion -->
+<div class="notification-card bg-surface-white p-margin-standard rounded-xl shadow-sm transition-all flex gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0 text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_offer</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-headline-sm text-[15px] text-on-surface">خصم خاص بمناسبة العيد!</h3>
+<span class="font-label-sm text-label-sm text-muted-gray">١ ساعة</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant">استخدم الكود EID20 واحصل على خصم 20% على طلبك القادم من حلوياتنا التقليدية.</p>
+</div>
+</div>
+<!-- Section: Yesterday -->
+<h2 class="font-headline-sm text-[16px] text-on-surface-variant mt-section-md mb-gap-sm">أمس</h2>
+<!-- System Alert -->
+<div class="notification-card bg-surface-white p-margin-standard rounded-xl shadow-sm transition-all flex gap-md">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center flex-shrink-0 text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-headline-sm text-[15px] text-on-surface">تم تسجيل دخول جديد</h3>
+<span class="font-label-sm text-label-sm text-muted-gray">أمس، ٩:٠٠ م</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant">تم رصد عملية تسجيل دخول لحسابك من متصفح جديد في مدينة رام الله.</p>
+</div>
+</div>
+<!-- Delivery Success -->
+<div class="notification-card bg-surface-white p-margin-standard rounded-xl shadow-sm transition-all flex gap-md">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0 text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-headline-sm text-[15px] text-on-surface">تم التوصيل بنجاح</h3>
+<span class="font-label-sm text-label-sm text-muted-gray">أمس، ٨:٣٠ م</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant">نأمل أنك استمتعت بوجبتك! شاركنا تقييمك لمساعدتنا على التحسن.</p>
+<div class="flex gap-sm mt-gap-sm">
+<button class="bg-primary text-on-primary px-margin-standard py-base rounded-lg font-label-md text-label-md">تقييم الطلب</button>
+</div>
+</div>
+</div>
+<!-- Promotion Image Notification -->
+<div class="notification-card bg-surface-white p-0 overflow-hidden rounded-xl shadow-sm transition-all flex flex-col">
+<div class="h-32 w-full relative">
+<img alt="Traditional Palestinian Food" class="w-full h-full object-cover" data-alt="A mouth-watering high-angle close-up of traditional Palestinian Musakhan served on a large wooden platter, with golden-brown bread, caramelized onions, and sumac-coated roasted chicken. The scene is illuminated by warm, natural sunlight in a rustic kitchen setting, evoking a sense of heritage and home-cooked warmth. The color palette is rich with earthy tones, deep reds, and vibrant greens from fresh parsley garnish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9TEJU96A19oaf389I4sMbO5n0fBdrsTbsTvV2_F_4ulANfyJUoFvkTi_RwfA8rkxibv2JclYpaXVhHWdZH70Dy7Dd6msdqwwZNHYcxaCZDALWNxbvwvmmNrdd-AFc5VC47vrG8cTlE2zwDIu7SHGRSBlqPtQY6_cozuTwGH-mqiW4Ez0CNhVDtBktrqTRAKFj-0TxdKDOBkO6PO72dkveHYfTVgxov0HMOnD_f-_8u1-IOKBevctBlqcIbEGkQptcuj_Xp_B05WY_"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-margin-standard">
+<span class="bg-warning-amber text-on-primary-container px-gap-sm py-1 rounded text-[10px] font-bold">عرض حصري</span>
+</div>
+</div>
+<div class="p-margin-standard flex gap-md">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-base">
+<h3 class="font-headline-sm text-[15px] text-on-surface">جديد في منطقتك!</h3>
+<span class="font-label-sm text-label-sm text-muted-gray">أمس، ٦:١٥ م</span>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant">مطعم "النكهة الأصيلة" انضم إلينا مؤخراً. جرب أطباقهم المميزة الآن.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-white border-t border-border-beige shadow-lg flex flex-row-reverse justify-around items-center h-nav-height px-base rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray font-label-sm text-label-sm transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+<span>حسابي</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold font-label-sm text-label-sm transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span>الإشعارات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray font-label-sm text-label-sm transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray font-label-sm text-label-sm transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">category</span>
+<span>الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray font-label-sm text-label-sm transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+<span>الرئيسية</span>
+</a>
+</nav>
+<script>
+        // Simple click interaction for filter chips
+        document.querySelectorAll('button.rounded-full').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('button.rounded-full').forEach(b => {
+                    b.classList.remove('bg-primary-container', 'text-on-primary-container');
+                    b.classList.add('bg-surface-white', 'text-on-surface-variant', 'border', 'border-border-beige');
+                });
+                button.classList.remove('bg-surface-white', 'text-on-surface-variant', 'border', 'border-border-beige');
+                button.classList.add('bg-primary-container', 'text-on-primary-container');
+            });
+        });
+
+        // Mark as read animation
+        document.querySelectorAll('.notification-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const indicator = card.querySelector('.absolute.bg-primary');
+                if (indicator) {
+                    indicator.style.opacity = '0';
+                    card.style.borderRightColor = 'transparent';
+                    setTimeout(() => indicator.remove(), 300);
+                }
+            });
+        });
+    </script>
+</body></html>

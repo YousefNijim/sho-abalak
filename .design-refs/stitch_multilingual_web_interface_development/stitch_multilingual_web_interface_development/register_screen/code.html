@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-on-surface": "#f2eff9",
+                "background-cream": "#FCF3DC",
+                "secondary-fixed-dim": "#92d5a5",
+                "muted-gray": "#6B7280",
+                "on-tertiary-fixed": "#001e30",
+                "surface-container-high": "#eae7f1",
+                "tertiary": "#006495",
+                "on-tertiary-fixed-variant": "#004b71",
+                "on-background": "#1b1b22",
+                "inverse-primary": "#ffb688",
+                "background": "#fbf8ff",
+                "surface-variant": "#e4e1eb",
+                "on-surface": "#1b1b22",
+                "primary": "#974800",
+                "primary-fixed-dim": "#ffb688",
+                "tertiary-container": "#009ee8",
+                "on-secondary-container": "#2e6f47",
+                "on-primary-fixed-variant": "#733600",
+                "on-primary-container": "#4e2200",
+                "on-secondary-fixed": "#00210e",
+                "on-tertiary-container": "#00314c",
+                "on-surface-variant": "#564337",
+                "surface-container-highest": "#e4e1eb",
+                "primary-container": "#e6781e",
+                "surface-dim": "#dbd9e2",
+                "outline-variant": "#ddc1b1",
+                "error-container": "#ffdad6",
+                "secondary-fixed": "#aef2bf",
+                "surface-container-low": "#f5f2fc",
+                "on-error-container": "#93000a",
+                "surface-container": "#efecf6",
+                "surface-white": "#FFFFFF",
+                "on-error": "#ffffff",
+                "tertiary-fixed": "#cbe6ff",
+                "warning-amber": "#F59E0B",
+                "surface-container-lowest": "#ffffff",
+                "outline": "#8a7265",
+                "secondary": "#296a43",
+                "secondary-container": "#abefbd",
+                "tertiary-fixed-dim": "#8fcdff",
+                "on-tertiary": "#ffffff",
+                "error": "#ba1a1a",
+                "surface-tint": "#974800",
+                "error-red": "#EF4444",
+                "success-green": "#22C55E",
+                "primary-fixed": "#ffdbc7",
+                "border-beige": "#E5E0D5",
+                "surface": "#fbf8ff",
+                "surface-bright": "#fbf8ff",
+                "on-secondary": "#ffffff",
+                "on-primary-fixed": "#311300",
+                "inverse-surface": "#303037",
+                "on-secondary-fixed-variant": "#09522d",
+                "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "gap-xs": "4px",
+                "gap-sm": "8px",
+                "base": "4px",
+                "section-md": "24px",
+                "section-lg": "32px",
+                "nav-height": "64px",
+                "gap-md": "12px",
+                "gap-lg": "20px",
+                "margin-standard": "16px"
+            },
+            "fontFamily": {
+                "label-sm": ["Montserrat"],
+                "label-md": ["Montserrat"],
+                "body-lg": ["Montserrat"],
+                "headline-md": ["Cairo"],
+                "button-text": ["Montserrat"],
+                "headline-sm": ["Cairo"],
+                "headline-lg-mobile": ["Cairo"],
+                "headline-lg": ["Cairo"],
+                "body-base": ["Montserrat"],
+                "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .input-focus-effect:focus-within {
+            border-color: #974800;
+            box-shadow: 0 0 0 1px #974800;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- Top AppBar (Identity Anchor) -->
+<header class="bg-background-cream text-primary font-headline-lg-mobile text-headline-lg-mobile docked full-width top-0 shadow-sm flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full z-50">
+<div class="flex items-center gap-sm transition-transform active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile">شو عبالك؟</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="person_add">person_add</span>
+</div>
+</header>
+<main class="flex-grow flex flex-col px-margin-standard py-section-lg max-w-md mx-auto w-full">
+<!-- Hero Section -->
+<div class="mb-section-md text-center">
+<h1 class="font-headline-md text-headline-md text-primary mb-2">إنشاء حساب جديد</h1>
+<p class="font-body-base text-on-surface-variant">انضم إلينا واستمتع بأشهى المأكولات والخدمات في فلسطين</p>
+</div>
+<!-- Registration Form -->
+<form class="space-y-gap-lg">
+<!-- Full Name -->
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">الاسم الكامل</label>
+<div class="h-[52px] bg-surface-white border-[1.5px] border-border-beige rounded-xl flex items-center px-margin-standard transition-all input-focus-effect">
+<span class="material-symbols-outlined text-muted-gray ml-3" data-icon="person">person</span>
+<input class="bg-transparent border-none focus:ring-0 flex-grow text-body-base font-body-base outline-none text-right" placeholder="أدخل اسمك الكامل" type="text"/>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">رقم الهاتف</label>
+<div class="h-[52px] bg-surface-white border-[1.5px] border-border-beige rounded-xl flex items-center px-margin-standard transition-all input-focus-effect" dir="ltr">
+<span class="font-body-base font-bold text-primary border-r border-border-beige pr-3 mr-3">+970</span>
+<input class="bg-transparent border-none focus:ring-0 flex-grow text-body-base font-body-base outline-none" placeholder="59XXXXXXX" type="tel"/>
+<span class="material-symbols-outlined text-muted-gray ml-2" data-icon="phone_iphone">phone_iphone</span>
+</div>
+</div>
+<!-- Area Dropdown -->
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">المنطقة</label>
+<div class="relative h-[52px] bg-surface-white border-[1.5px] border-border-beige rounded-xl flex items-center px-margin-standard transition-all input-focus-effect">
+<span class="material-symbols-outlined text-muted-gray ml-3" data-icon="location_on">location_on</span>
+<select class="bg-transparent border-none focus:ring-0 flex-grow text-body-base font-body-base outline-none appearance-none cursor-pointer text-right">
+<option disabled="" selected="" value="">اختر مدينتك</option>
+<option>رام الله</option>
+<option>نابلس</option>
+<option>الخليل</option>
+<option>بيت لحم</option>
+<option>جنين</option>
+<option>طولكرم</option>
+</select>
+<span class="material-symbols-outlined text-muted-gray mr-auto pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">كلمة المرور</label>
+<div class="h-[52px] bg-surface-white border-[1.5px] border-border-beige rounded-xl flex items-center px-margin-standard transition-all input-focus-effect">
+<span class="material-symbols-outlined text-muted-gray ml-3" data-icon="lock">lock</span>
+<input class="bg-transparent border-none focus:ring-0 flex-grow text-body-base font-body-base outline-none text-right" placeholder="كلمة المرور" type="password"/>
+<span class="material-symbols-outlined text-muted-gray cursor-pointer" data-icon="visibility">visibility</span>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">تأكيد كلمة المرور</label>
+<div class="h-[52px] bg-surface-white border-[1.5px] border-border-beige rounded-xl flex items-center px-margin-standard transition-all input-focus-effect">
+<span class="material-symbols-outlined text-muted-gray ml-3" data-icon="lock_reset">lock_reset</span>
+<input class="bg-transparent border-none focus:ring-0 flex-grow text-body-base font-body-base outline-none text-right" placeholder="أعد إدخال كلمة المرور" type="password"/>
+</div>
+</div>
+<!-- Terms Checkbox -->
+<div class="flex items-start gap-sm pt-2">
+<input class="mt-1 w-5 h-5 rounded border-border-beige text-primary focus:ring-primary-container" id="terms" type="checkbox"/>
+<label class="font-label-md text-label-md text-on-surface-variant leading-relaxed" for="terms">
+                    أوافق على <span class="text-primary font-bold cursor-pointer">الشروط والأحكام</span> و <span class="text-primary font-bold cursor-pointer">سياسة الخصوصية</span> الخاصة بشو عبالك.
+                </label>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-[52px] bg-primary-container text-on-primary-container font-button-text text-button-text rounded-xl shadow-lg transition-all active:scale-[0.98] hover:opacity-90 mt-4" type="submit">
+                إنشاء حساب
+            </button>
+</form>
+<!-- Login Link -->
+<div class="mt-section-md text-center">
+<p class="font-body-base text-on-surface-variant">
+                عندك حساب؟ 
+                <a class="text-primary font-bold mr-1 underline decoration-primary-fixed decoration-2 underline-offset-4" href="#">سجّل دخول</a>
+</p>
+</div>
+<!-- Visual Decoration / Heritage Touch -->
+<div class="mt-auto pt-section-lg flex justify-center opacity-20 grayscale pointer-events-none">
+<div class="w-full h-24 relative overflow-hidden flex justify-center items-center">
+<img class="h-full object-contain opacity-40" data-alt="An intricate Palestinian tatreez embroidery pattern border design with traditional geometric motifs. The visual style is minimalist and refined using a monochromatic sepia and warm cream palette. The lighting is even and flat creating a subtle background texture that evokes cultural heritage and authentic hospitality in a modern UI context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlsqdL2okG3UAb0LNFcpDvuhV8FuenzbYSkaaHCQYbZtuKvPUXnJ5_fg16BZXFA26McnF9m2ZGvxJmPTX8w949vaFl_vjqlEAwXcSb2JdznUQqEETy2KpzDKzakaOzrdt0-czTBRsKRoa6b4MCdaXXEXORs-_XvkNgcIfITY6X1-rMnbfkw7fOMGUHmD0vcJlQlWB02OdqL-3O7tgFTv15DRyRAshRvFNtxRH3m6wFTlADUCxieOhLhg8mcNsfjr-YLep7XyGssdTj"/>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interaction for password visibility
+        const passwordFields = document.querySelectorAll('input[type="password"]');
+        document.querySelectorAll('[data-icon="visibility"]').forEach((icon, index) => {
+            icon.addEventListener('click', () => {
+                const input = passwordFields[index];
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.textContent = 'visibility_off';
+                } else {
+                    input.type = 'password';
+                    icon.textContent = 'visibility';
+                }
+            });
+        });
+
+        // Simple form validation visual feedback
+        const form = document.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 20px;">sync</span>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+                alert('شكراً لتسجيلك! سيتم توجيهك قريباً.');
+            }, 1500);
+        });
+    </script>
+</body></html>

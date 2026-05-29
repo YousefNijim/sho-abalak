@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#92d5a5",
+                    "surface": "#fbf8ff",
+                    "on-surface-variant": "#564337",
+                    "error-red": "#EF4444",
+                    "primary": "#974800",
+                    "on-secondary-fixed": "#00210e",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "surface-tint": "#974800",
+                    "error-container": "#ffdad6",
+                    "secondary": "#296a43",
+                    "on-secondary-container": "#2e6f47",
+                    "tertiary-container": "#009ee8",
+                    "secondary-fixed": "#aef2bf",
+                    "outline-variant": "#ddc1b1",
+                    "primary-fixed": "#ffdbc7",
+                    "inverse-surface": "#303037",
+                    "surface-white": "#FFFFFF",
+                    "on-primary-fixed-variant": "#733600",
+                    "background-cream": "#FCF3DC",
+                    "surface-container": "#efecf6",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface-container-low": "#f5f2fc",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#dbd9e2",
+                    "inverse-primary": "#ffb688",
+                    "secondary-container": "#abefbd",
+                    "primary-container": "#e6781e",
+                    "on-tertiary-container": "#00314c",
+                    "inverse-on-surface": "#f2eff9",
+                    "error": "#ba1a1a",
+                    "border-beige": "#E5E0D5",
+                    "surface-variant": "#e4e1eb",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-error-container": "#93000a",
+                    "muted-gray": "#6B7280",
+                    "surface-container-high": "#eae7f1",
+                    "surface-bright": "#fbf8ff",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-primary-fixed": "#311300",
+                    "on-error": "#ffffff",
+                    "tertiary": "#006495",
+                    "success-green": "#22C55E",
+                    "primary-fixed-dim": "#ffb688",
+                    "warning-amber": "#F59E0B",
+                    "background": "#fbf8ff",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#8a7265",
+                    "on-surface": "#1b1b22",
+                    "on-background": "#1b1b22",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-primary-container": "#4e2200",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "gap-md": "12px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "gap-lg": "20px",
+                    "section-md": "24px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "button-text": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC; /* background-cream */
+            font-family: 'Cairo', 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 224, 213, 0.5);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background fixed top-0 left-0 w-full z-50 flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height shadow-sm">
+<div class="flex items-center gap-sm">
+<span class="font-headline-sm text-headline-sm text-primary">من نحن</span>
+<button class="transition-transform active:scale-95 hover:opacity-80">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-primary">شو عبالك؟</div>
+</header>
+<main class="pt-nav-height pb-nav-height px-margin-standard overflow-x-hidden">
+<!-- Hero Branding Section -->
+<section class="mt-section-md flex flex-col items-center text-center">
+<div class="w-24 h-24 bg-primary-container rounded-full flex items-center justify-center shadow-lg mb-gap-lg overflow-hidden border-4 border-surface-white">
+<img alt="Logo" class="w-full h-full object-cover" data-alt="A stylized digital logo icon representing Palestinian heritage and modern food delivery. It features warm saffron and deep terracotta colors with a subtle geometric pattern inspired by traditional embroidery. The aesthetic is clean, professional, and welcoming, set against a soft cream studio background with natural warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJWruajV8i6Scr54hDiW8OFW71EP8uEtlqsyT1O3oVwWwlFZjTm-fGcvk3Z91ZeUOXyG671FZc5sCUqDoCAYNoSENOrjmrFNe0jlgYpUR-twYPEVYZlBnaotMA9rI0-AkcKjQ7f7vFprDh799ylYJAUWY21lxk5WyIbV5axf3vRae_SB59v21cELhcJLYZJz0H9iSavRvpSHMfJVGOkMVr4ZdsfjgjCvOphvg4NJj_66s01YE4xuU8rT0zuCGRGhnPZsZSRGpp03FT"/>
+</div>
+<h1 class="font-hero-lg text-hero-lg text-primary mb-gap-sm">شو عبالك؟</h1>
+<p class="font-headline-sm text-headline-sm text-secondary-container bg-secondary px-4 py-1 rounded-full mb-section-md inline-block">تراثنا، بضغطة زر</p>
+</section>
+<!-- Mission Content: Bento Grid Inspired -->
+<section class="grid grid-cols-1 gap-gap-md mt-section-md">
+<!-- Main Mission Card -->
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-border-beige col-span-1">
+<div class="flex items-center gap-sm mb-gap-md">
+<span class="material-symbols-outlined text-warning-amber text-[32px]" data-icon="handshake" style="font-variation-settings: 'FILL' 1;">handshake</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">رسالتنا</h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                    من قلب فلسطين، انطلقت منصة "شو عبالك؟" لتكون الجسر الذي يربط بين أصالة الإنتاج المحلي وسرعة العصر الرقمي. نسعى لتمكين المشاريع الصغيرة والمتوسطة في الضفة الغربية، وتوفير منصة عرض تليق بجودة منتجاتنا الوطنية.
+                </p>
+</div>
+<div class="grid grid-cols-2 gap-gap-md">
+<!-- Stat 1 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center">
+<span class="font-headline-lg text-headline-lg text-primary">+١٠٠</span>
+<span class="font-label-md text-label-md text-muted-gray">شريك محلي</span>
+</div>
+<!-- Stat 2 -->
+<div class="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center">
+<span class="font-headline-lg text-headline-lg text-secondary">١٠٠٪</span>
+<span class="font-label-md text-label-md text-muted-gray">دعم وطني</span>
+</div>
+</div>
+<!-- Visual Support Card -->
+<div class="relative h-48 rounded-xl overflow-hidden shadow-md">
+<img class="w-full h-full object-cover" data-alt="A cinematic, warm-toned photograph of a traditional Palestinian market scene in Ramallah. Soft morning sunlight filters through narrow streets, illuminating vibrant stalls of local produce, artisanal crafts, and steaming food. The atmosphere is bustling and communal, using a rich palette of earthy tones, oranges, and greens to evoke a sense of heritage and local pride." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiRyav4mROW0D88qj4UR5W4GZQc4Uyql1msVpj_WOK88pcgTD1rSc8WdkiFmeG3k9_w1oHuj1SrvY16-kPf3gHdmnFLR_0lByBavH_qJqAmzB5CXCc3Q4VH3jPWiE2OdyAY_KZcbw8cUIb6gAkohUery4qyr50chfVeMyoA3dsShbhAXjTK3sSVQyHkBwU3CYxlMLcd0uChRKPWUo_8wn8T56_AmniHfti90t0P6MYk9hYIpyaqWKpAAD5Hh8tGlhCttfg9WT3Kfat"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
+<p class="text-white font-headline-sm text-headline-sm">ندعم مجتمعنا، ننمو معاً</p>
+</div>
+</div>
+<!-- Vision Card -->
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-border-beige">
+<div class="flex items-center gap-sm mb-gap-md">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="visibility" style="font-variation-settings: 'FILL' 1;">visibility</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">رؤيتنا</h2>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant">
+                    أن نصبح الخيار الأول للمستهلك الفلسطيني، حيث يجد كل ما يتمناه من منتجات وخدمات بكل سهولة، مع الحفاظ على روح الهوية الفلسطينية في كل تفصيل من تفاصيل تجربته الرقمية.
+                </p>
+</div>
+</section>
+<!-- Social Media Links -->
+<section class="mt-section-lg mb-section-lg text-center">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-gap-lg">تابعنا على</h3>
+<div class="flex justify-center gap-lg">
+<a class="w-12 h-12 rounded-full bg-surface-white flex items-center justify-center text-primary border border-border-beige shadow-sm transition-all hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="facebook">social_leaderboard</span>
+</a>
+<a class="w-12 h-12 rounded-full bg-surface-white flex items-center justify-center text-primary border border-border-beige shadow-sm transition-all hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="camera">camera</span>
+</a>
+<a class="w-12 h-12 rounded-full bg-surface-white flex items-center justify-center text-primary border border-border-beige shadow-sm transition-all hover:scale-110 active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</a>
+</div>
+</section>
+<!-- Contact CTA -->
+<section class="mb-section-lg">
+<button class="w-full h-[52px] bg-primary text-on-primary font-button-text text-button-text rounded-xl shadow-lg flex items-center justify-center gap-sm transition-all active:scale-95">
+                تواصل معنا
+                <span class="material-symbols-outlined" data-icon="mail">mail</span>
+</button>
+</section>
+<!-- App Version Info -->
+<div class="text-center pb-8">
+<p class="font-label-sm text-label-sm text-muted-gray">إصدار التطبيق ٢.٤.٠</p>
+<p class="font-label-sm text-label-sm text-muted-gray mt-1">جميع الحقوق محفوظة © ٢٠٢٤ شو عبالك؟</p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base bg-surface-white dark:bg-inverse-surface shadow-lg border-t border-border-beige rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</button>
+<button class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</button>
+<button class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-all duration-200 active:scale-90">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for scrolling
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('bg-white/90', 'backdrop-blur-md');
+            } else {
+                header.classList.remove('bg-white/90', 'backdrop-blur-md');
+            }
+        });
+
+        // Add haptic-like feedback to social buttons
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('click', () => {
+                if (window.navigator.vibrate) {
+                    window.navigator.vibrate(10);
+                }
+            });
+        });
+    </script>
+</body></html>

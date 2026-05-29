@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -7,6 +7,8 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
+  Animated as RNAnimated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,10 +20,13 @@ import {
   UtensilsCrossed,
   Store,
   Coffee,
+  SlidersHorizontal,
+  Bell,
+  Star,
   Clock,
   Bike,
-  Star,
-  SlidersHorizontal,
+  Apple,
+  Beef,
   ImageIcon,
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
@@ -32,16 +37,12 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 
 const CATEGORIES = [
-  { id: 'RESTAURANT', label: 'مطاعم', Icon: UtensilsCrossed, color: colors.primary },
-  { id: 'STORE', label: 'محلات', Icon: Store, color: colors.secondary },
-  { id: 'CAFE', label: 'كافيه', Icon: Coffee, color: '#8B5CF6' },
+  { id: 'RESTAURANT', label: 'مطاعم', icon: '🍕' },
+  { id: 'STORE', label: 'محلات', icon: '🛒' },
+  { id: 'CAFE', label: 'كافيه', icon: '☕' },
+  { id: 'VEG', label: 'خضار', icon: '🍎' },
+  { id: 'MEAT', label: 'ملحمة', icon: '🥩' },
 ] as const;
-
-const CATEGORY_DESC: Record<string, string> = {
-  RESTAURANT: 'وجبات شهية لباب بيتك',
-  CAFE: 'مشروبات وحلويات',
-  STORE: 'منتجات متنوعة',
-};
 
 export default function Home() {
   const router = useRouter();
@@ -66,124 +67,97 @@ export default function Home() {
   const bottomInset = insets.bottom;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView
-        contentContainerStyle={[
-          styles.scroll,
-          { paddingTop: insets.top + spacing[4], paddingBottom: 80 + bottomInset + spacing[6] },
-        ]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ─── Header ─── */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greetingLabel}>
-              مرحباً، {user?.name?.split(' ')[0] || 'أهلاً'}
-            </Text>
-            <Text style={styles.greetingTitle}>شو عبالك اليوم؟</Text>
-          </View>
+    <View style={styles.container}>
+      {/* TopAppBar */}
+      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+        <View style={styles.headerRight}>
+          <Pressable style={styles.iconBtn}>
+            <Bell size={28} color={colors.primary} />
+          </Pressable>
           <Pressable style={styles.avatarWrap} onPress={() => router.push('/(tabs)/profile')}>
-            <MapPin size={18} color={colors.primary} />
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBiqR61W2ihUH0rTwN34VvJJq9ZSJBrj2Ozc882b_wtsjH9HPbZnvIKgKI_qQ8eGIebHVNrJLwn0Z5MffcYjDhc-ZWFsSVsdcjZprmW3vF8eSbyqjmYVbhfx-iNnUTeBwsV2bOumOaQi72fW9x6vJGe26PZCM51zkDtAJakjt4PG9RNmWUO48FBtPDGXPzuGEBGt_6w-Dz7K7iKDFENHmiAscsOo1aK19VMVQr8rBWJdcQU_PxxSp-SyYjpsAtmpcM-4qpO4Mt5byvA' }}
+              style={styles.avatarImg}
+              contentFit="cover"
+            />
           </Pressable>
         </View>
+        <Text style={styles.headerTitle}>شو عبالك؟</Text>
+      </View>
 
-        {/* ─── Search bar ─── */}
-        <View style={styles.searchRow}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 100 + bottomInset }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Search Bar */}
+        <View style={styles.searchWrap}>
           <View style={styles.searchBar}>
-            <Search size={18} color={colors.textMuted} style={{ marginLeft: spacing[2] }} />
             <TextInput
-              placeholder="ابحث عن منشأة أو طبق..."
+              placeholder="شو عبالك اليوم؟"
               placeholderTextColor={colors.textMuted}
               style={styles.searchInput}
               textAlign="right"
               value={search}
               onChangeText={setSearch}
             />
+            <Search size={24} color={colors.textMuted} style={styles.searchIconRight} />
+            <Pressable style={styles.filterBtn}>
+              <SlidersHorizontal size={24} color={colors.primary} />
+            </Pressable>
           </View>
-          <Pressable
-            style={styles.filterBtn}
-            onPress={() => {
-              setSearch('');
-              setSelectedCat(null);
-            }}
-          >
-            <SlidersHorizontal size={18} color={colors.secondary} />
-          </Pressable>
         </View>
 
-        {/* ─── Promo banner ─── */}
-        <LinearGradient
-          colors={['#E6781E', '#C96016']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.banner}
-        >
-          {/* decorative circle */}
-          <View style={styles.bannerDecor} pointerEvents="none">
-            <UtensilsCrossed size={96} color="rgba(255,255,255,0.12)" />
+        {/* Promo Banner */}
+        <View style={styles.bannerSection}>
+          <View style={styles.banner}>
+            <View style={styles.bannerContent}>
+              <Text style={styles.bannerTitle}>خصم 20% على طلبك الأول</Text>
+              <Text style={styles.bannerSub}>استمتع بأشهى المأكولات المحلية بخصومات حصرية</Text>
+              <Pressable style={styles.bannerBtn}>
+                <Text style={styles.bannerBtnText}>اطلب الآن</Text>
+              </Pressable>
+            </View>
+            <View style={styles.bannerIconBg}>
+              <UtensilsCrossed size={120} color="#FFFFFF" opacity={0.1} />
+            </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.bannerTitle}>خصم 20%{'\n'}على طلبك الأول</Text>
-            <Text style={styles.bannerSub}>مأكولات شهية بخصومات حصرية</Text>
-            <Pressable
-              style={styles.bannerBtn}
-              onPress={() => {
-                setSelectedCat('RESTAURANT');
-                setSearch('');
-              }}
-            >
-              <Text style={styles.bannerBtnText}>اطلب الآن</Text>
-            </Pressable>
-          </View>
-        </LinearGradient>
+        </View>
 
-        {/* ─── Categories ─── */}
-        <View style={styles.sectionHead}>
+        {/* Categories */}
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>الأقسام</Text>
-          {selectedCat && (
-            <Pressable onPress={() => setSelectedCat(null)}>
-              <Text style={styles.link}>إلغاء</Text>
-            </Pressable>
-          )}
+          <Pressable>
+            <Text style={styles.sectionLink}>عرض الكل</Text>
+          </Pressable>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.catList}
+          contentContainerStyle={styles.catScroll}
         >
-          {CATEGORIES.map(({ id, label, Icon, color }) => {
-            const active = selectedCat === id;
+          {CATEGORIES.map((cat) => {
+            const isActive = selectedCat === cat.id;
             return (
               <Pressable
-                key={id}
+                key={cat.id}
                 style={styles.catItem}
-                onPress={() => setSelectedCat(active ? null : id)}
+                onPress={() => setSelectedCat(isActive ? null : cat.id)}
               >
-                <View
-                  style={[
-                    styles.catCircle,
-                    { backgroundColor: active ? color : color + '18' },
-                    active && styles.catCircleActive,
-                  ]}
-                >
-                  <Icon size={26} color={active ? '#fff' : color} />
+                <View style={[styles.catBox, isActive && styles.catBoxActive]}>
+                  <Text style={styles.catEmoji}>{cat.icon}</Text>
                 </View>
-                <Text style={[styles.catLabel, active && { color, fontFamily: fontFamily.bold }]}>
-                  {label}
-                </Text>
+                <Text style={styles.catLabel}>{cat.label}</Text>
               </Pressable>
             );
           })}
         </ScrollView>
 
-        {/* ─── Nearby businesses ─── */}
-        <View style={styles.sectionHead}>
+        {/* Near Establishments */}
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>المنشآت القريبة</Text>
-          <View style={styles.locationRow}>
-            <MapPin size={13} color={colors.textMuted} />
-            <Text style={styles.muted}>
-              {user?.areaId ? 'منطقتك' : 'كل المناطق'}
-            </Text>
+          <View style={styles.locationTag}>
+            <MapPin size={16} color={colors.textMuted} />
+            <Text style={styles.locationTagText}>نابلس، المركز</Text>
           </View>
         </View>
 
@@ -195,423 +169,349 @@ export default function Home() {
             <Text style={styles.emptyText}>لا توجد منشآت مطابقة</Text>
           </View>
         ) : (
-          <View style={{ gap: spacing[4] }}>
-            {businesses.map((b: any) => {
-              const catMeta = CATEGORIES.find((c) => c.id === b.category);
-              const description = CATEGORY_DESC[b.category] || 'منشأة محلية';
-
-              return (
-                <Pressable
-                  key={b.id}
-                  style={styles.card}
-                  onPress={() => router.push(`/business/${b.id}`)}
-                >
-                  {/* Card image area */}
-                  <View style={styles.cardImageWrap}>
-                    {b.imageUrl ? (
-                      <Image
-                        source={{ uri: b.imageUrl }}
-                        style={styles.cardImage}
-                        contentFit="cover"
-                        transition={200}
-                      />
-                    ) : (
-                      <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
-                        <View style={styles.cardImageIcon}>
-                          {catMeta ? (
-                            <catMeta.Icon size={40} color={catMeta.color} />
-                          ) : (
-                            <ImageIcon size={40} color={colors.border} />
-                          )}
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Dark overlay gradient at top for badge readability */}
-                    <LinearGradient
-                      colors={['rgba(0,0,0,0.35)', 'transparent']}
-                      style={styles.cardOverlay}
-                      pointerEvents="none"
-                    />
-
-                    {/* Open/closed badge */}
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        { backgroundColor: b.isOpen ? colors.secondary : '#374151' },
-                      ]}
-                    >
-                      <Text style={styles.statusBadgeText}>
-                        {b.isOpen ? 'مفتوح' : 'مغلق'}
+          <View style={styles.grid}>
+            {businesses.map((b: any) => (
+              <Pressable
+                key={b.id}
+                style={styles.card}
+                onPress={() => router.push(`/business/${b.id}`)}
+              >
+                <View style={styles.cardImageWrap}>
+                  {b.imageUrl ? (
+                    <Image source={{ uri: b.imageUrl }} style={styles.cardImage} contentFit="cover" />
+                  ) : (
+                    <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
+                      <ImageIcon size={40} color={colors.border} />
+                    </View>
+                  )}
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
+                  </View>
+                </View>
+                <View style={styles.cardBody}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle} numberOfLines={1}>{b.name}</Text>
+                    <View style={styles.ratingWrap}>
+                      <Star size={14} color={colors.warning} fill={colors.warning} />
+                      <Text style={styles.ratingText}>{b.rating ? b.rating.toFixed(1) : '4.8'}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.cardDesc} numberOfLines={1}>
+                    {b.category === 'RESTAURANT' ? 'شاورما، مشاوي، وجبات سريعة' : 'حمص، فلافل، فطور شرقي'}
+                  </Text>
+                  <View style={styles.cardMeta}>
+                    <View style={styles.metaItem}>
+                      <Clock size={16} color={colors.textMuted} />
+                      <Text style={styles.metaText}>25-35 دقيقة</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <Bike size={16} color={colors.primary} />
+                      <Text style={[styles.metaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
+                        {b.area?.deliveryFee ?? 3} شيكل
                       </Text>
                     </View>
                   </View>
-
-                  {/* Card content */}
-                  <View style={styles.cardBody}>
-                    {/* Name row + rating */}
-                    <View style={styles.cardTopRow}>
-                      <Text style={styles.cardTitle} numberOfLines={1}>
-                        {b.name}
-                      </Text>
-                      <View style={styles.ratingPill}>
-                        <Star size={11} color="#F59E0B" fill="#F59E0B" />
-                        <Text style={styles.ratingText}>
-                          {b.rating ? b.rating.toFixed(1) : '5.0'}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Description */}
-                    <Text style={styles.cardDesc} numberOfLines={1}>
-                      {description}
-                    </Text>
-
-                    {/* Meta row */}
-                    <View style={styles.cardMeta}>
-                      <View style={styles.metaItem}>
-                        <Clock size={13} color={colors.textMuted} />
-                        <Text style={styles.metaText}>٣٠ دقيقة</Text>
-                      </View>
-                      <View style={styles.metaDot} />
-                      <View style={styles.metaItem}>
-                        <Bike size={13} color={colors.primary} />
-                        <Text style={[styles.metaText, { color: colors.primary }]}>
-                          {b.area?.deliveryFee ?? 0} ₪
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
+                </View>
+              </Pressable>
+            ))}
           </View>
         )}
       </ScrollView>
 
-      {/* ─── Cart FAB ─── */}
-      {cartQty > 0 && (
+      {/* Cart FAB */}
+      <View style={[styles.fabContainer, { bottom: bottomInset + 80 }]}>
         <Pressable
-          style={[styles.fab, { bottom: 80 + bottomInset + spacing[4] }]}
+          style={styles.fab}
           onPress={() => router.push('/cart')}
         >
-          <ShoppingCart size={22} color="#fff" />
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{cartQty}</Text>
-          </View>
+          <ShoppingCart size={28} color={colors.white} />
+          {cartQty > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{cartQty}</Text>
+            </View>
+          )}
         </Pressable>
-      )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    paddingHorizontal: spacing[4],
+  container: {
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
   },
-
-  // Header
   header: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing[5],
+    paddingHorizontal: spacing[4],
+    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    backgroundColor: '#FCF3DC',
+    zIndex: 50,
   },
-  greetingLabel: {
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
-    fontFamily: fontFamily.medium,
-    marginBottom: 2,
+  headerRight: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
   },
-  greetingTitle: {
-    fontSize: fontSizes['2xl'],
-    fontFamily: fontFamily.extrabold,
-    color: colors.textPrimary,
+  iconBtn: {
+    padding: spacing[1],
   },
   avatarWrap: {
-    width: components.touchTargetMin,
-    height: components.touchTargetMin,
-    borderRadius: radius.xl,
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#ffdbc7', // primary-fixed
+    overflow: 'hidden',
   },
-
-  // Search
-  searchRow: {
-    flexDirection: 'row',
-    gap: spacing[3],
-    marginBottom: spacing[6],
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  headerTitle: {
+    fontFamily: fontFamily.bold, // Cairo 700
+    fontSize: 26, // headline-lg-mobile
+    color: colors.primary,
+    letterSpacing: -0.5,
+  },
+  scroll: {
+    paddingTop: spacing[2],
+    paddingHorizontal: spacing[4],
+  },
+  searchWrap: {
+    marginTop: spacing[4],
   },
   searchBar: {
-    flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderWidth: 1.5,
-    borderColor: colors.border,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
     borderRadius: radius.md,
-    height: components.inputHeight,
+    height: 52,
     paddingHorizontal: spacing[4],
-    gap: spacing[2],
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    position: 'relative',
   },
   searchInput: {
     flex: 1,
+    height: '100%',
+    fontFamily: fontFamily.regular,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
-    fontFamily: fontFamily.regular,
-    textAlign: 'right',
+    paddingRight: 32, // space for search icon
+    paddingLeft: 32, // space for filter icon
+  },
+  searchIconRight: {
+    position: 'absolute',
+    right: spacing[4],
   },
   filterBtn: {
-    width: components.inputHeight,
-    height: components.inputHeight,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
-
-  // Banner
-  banner: {
-    borderRadius: radius.lg,
-    padding: spacing[6],
-    marginBottom: spacing[6],
-    overflow: 'hidden',
-    minHeight: 140,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  bannerDecor: {
     position: 'absolute',
-    left: -20,
-    top: -20,
+    left: spacing[4],
+  },
+  bannerSection: {
+    marginTop: spacing[6],
+  },
+  banner: {
+    backgroundColor: '#e6781e', // primary-container
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    position: 'relative',
+    aspectRatio: 16 / 7,
+    justifyContent: 'center',
+    padding: spacing[6],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 6 },
+      android: { elevation: 3 },
+      web: { boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+    }),
+  },
+  bannerContent: {
+    zIndex: 10,
+    alignItems: 'flex-end',
   },
   bannerTitle: {
-    color: '#fff',
-    fontSize: fontSizes['2xl'],
-    fontFamily: fontFamily.extrabold,
-    lineHeight: 34,
+    fontFamily: fontFamily.bold,
+    fontSize: 24, // headline-md
+    color: colors.white, // on-primary
     textAlign: 'right',
   },
   bannerSub: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: fontSizes.sm,
     fontFamily: fontFamily.regular,
+    fontSize: fontSizes.base,
+    color: colors.white,
+    opacity: 0.9,
     marginTop: spacing[1],
     textAlign: 'right',
   },
   bannerBtn: {
-    backgroundColor: '#fff',
-    alignSelf: 'flex-end',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing[5],
+    backgroundColor: colors.white,
+    paddingHorizontal: spacing[6],
     paddingVertical: spacing[2],
-    marginTop: spacing[4],
+    borderRadius: radius.full,
+    marginTop: spacing[3],
   },
   bannerBtnText: {
-    color: colors.primary,
     fontFamily: fontFamily.bold,
-    fontSize: fontSizes.sm,
+    fontSize: 16,
+    color: colors.primary,
   },
-
-  // Section header
-  sectionHead: {
-    flexDirection: 'row',
+  bannerIconBg: {
+    position: 'absolute',
+    left: -40,
+    bottom: -40,
+  },
+  sectionHeader: {
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: spacing[6],
     marginBottom: spacing[3],
   },
   sectionTitle: {
-    fontSize: fontSizes.lg,
-    fontFamily: fontFamily.bold,
+    fontFamily: fontFamily.semibold,
+    fontSize: 20, // headline-sm
     color: colors.textPrimary,
   },
-  link: {
+  sectionLink: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13, // label-md
     color: colors.primary,
-    fontSize: fontSizes.sm,
-    fontFamily: fontFamily.semibold,
   },
-
-  // Categories
-  catList: {
-    gap: spacing[4],
+  catScroll: {
     paddingBottom: spacing[1],
-    marginBottom: spacing[6],
+    gap: spacing[3],
+    flexDirection: 'row-reverse',
   },
   catItem: {
     alignItems: 'center',
     gap: spacing[2],
-    minWidth: 72,
   },
-  catCircle: {
+  catBox: {
     width: 64,
     height: 64,
-    borderRadius: radius.lg,
+    backgroundColor: colors.white,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 1 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    }),
   },
-  catCircleActive: {
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+  catBoxActive: {
+    borderWidth: 2,
+    borderColor: colors.primary,
+  },
+  catEmoji: {
+    fontSize: 24,
   },
   catLabel: {
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
     fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textPrimary,
   },
-
-  // Location row
-  locationRow: {
-    flexDirection: 'row',
+  locationTag: {
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 4,
   },
-  muted: {
+  locationTagText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
     color: colors.textMuted,
-    fontSize: fontSizes.sm,
-    fontFamily: fontFamily.regular,
   },
-
-  // Business card
+  grid: {
+    gap: spacing[4],
+  },
   card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
+    backgroundColor: colors.white,
+    borderRadius: radius.md,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 6 },
+      android: { elevation: 3 },
+      web: { boxShadow: '0 4px 6px rgba(0,0,0,0.1)' },
+    }),
   },
   cardImageWrap: {
-    height: 140,
+    height: 160,
     position: 'relative',
   },
   cardImage: {
     width: '100%',
-    height: 140,
+    height: '100%',
   },
   cardImagePlaceholder: {
     backgroundColor: colors.border + '60',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardImageIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: radius.xl,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  cardOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-  },
   statusBadge: {
     position: 'absolute',
     top: spacing[3],
     left: spacing[3],
+    backgroundColor: 'rgba(34, 197, 94, 0.9)', // success-green
     paddingHorizontal: spacing[3],
     paddingVertical: 4,
     borderRadius: radius.full,
   },
   statusBadgeText: {
-    color: '#fff',
-    fontSize: fontSizes.xs,
-    fontFamily: fontFamily.semibold,
+    color: colors.white,
+    fontFamily: fontFamily.medium,
+    fontSize: 11,
   },
   cardBody: {
     padding: spacing[4],
   },
-  cardTopRow: {
-    flexDirection: 'row',
+  cardHeader: {
+    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing[1],
+    alignItems: 'flex-start',
   },
   cardTitle: {
-    fontSize: fontSizes.lg,
-    fontFamily: fontFamily.bold,
+    fontFamily: fontFamily.semibold,
+    fontSize: 20, // headline-sm
     color: colors.textPrimary,
     flex: 1,
     textAlign: 'right',
-    marginLeft: spacing[3],
   },
-  ratingPill: {
-    flexDirection: 'row',
+  ratingWrap: {
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
-    borderRadius: radius.full,
-    paddingHorizontal: spacing[2],
-    paddingVertical: 3,
-    gap: 3,
+    gap: 2,
   },
   ratingText: {
-    fontSize: fontSizes.xs,
     fontFamily: fontFamily.bold,
-    color: '#92400E',
+    fontSize: 13,
+    color: colors.textPrimary, // Design has dark text next to star
   },
   cardDesc: {
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
     fontFamily: fontFamily.regular,
+    fontSize: fontSizes.base,
+    color: colors.textMuted,
     textAlign: 'right',
-    marginBottom: spacing[3],
+    marginTop: 2,
   },
   cardMeta: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    gap: spacing[2],
-    justifyContent: 'flex-end',
+    gap: spacing[3],
+    marginTop: spacing[3],
   },
   metaItem: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 4,
   },
   metaText: {
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
     fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textMuted,
   },
-  metaDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: colors.border,
-  },
-
-  // Empty state
   emptyWrap: {
     alignItems: 'center',
     paddingTop: spacing[12],
@@ -623,28 +523,29 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     textAlign: 'center',
   },
-
-  // FAB
-  fab: {
+  fabContainer: {
     position: 'absolute',
     left: spacing[4],
+    zIndex: 40,
+  },
+  fab: {
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    ...Platform.select({
+      ios: { shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 6 },
+      web: { boxShadow: `0 4px 12px ${colors.primary}40` },
+    }),
   },
   badge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    minWidth: 20,
+    top: -4,
+    right: -4,
+    width: 20,
     height: 20,
     borderRadius: 10,
     backgroundColor: colors.error,
@@ -652,7 +553,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: colors.surface,
-    paddingHorizontal: 3,
   },
   badgeText: {
     color: '#fff',
@@ -660,3 +560,4 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
   },
 });
+

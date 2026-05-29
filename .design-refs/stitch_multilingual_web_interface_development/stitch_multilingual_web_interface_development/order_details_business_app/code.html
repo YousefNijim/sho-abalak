@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>تفاصيل الطلب - مدير المتجر</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#e6781e",
+                    "secondary-fixed": "#aef2bf",
+                    "surface": "#fbf8ff",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary-container": "#00314c",
+                    "surface-container-low": "#f5f2fc",
+                    "warning-amber": "#F59E0B",
+                    "tertiary-container": "#009ee8",
+                    "on-primary-container": "#4e2200",
+                    "on-background": "#1b1b22",
+                    "background": "#fbf8ff",
+                    "background-cream": "#FCF3DC",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#cbe6ff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#296a43",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "success-green": "#22C55E",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "inverse-primary": "#ffb688",
+                    "inverse-surface": "#303037",
+                    "surface-container": "#efecf6",
+                    "surface-white": "#FFFFFF",
+                    "on-surface": "#1b1b22",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#733600",
+                    "outline-variant": "#ddc1b1",
+                    "on-primary": "#ffffff",
+                    "muted-gray": "#6B7280",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#564337",
+                    "tertiary": "#006495",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#8a7265",
+                    "primary-fixed": "#ffdbc7",
+                    "border-beige": "#E5E0D5",
+                    "surface-bright": "#fbf8ff",
+                    "secondary-container": "#abefbd",
+                    "surface-variant": "#e4e1eb",
+                    "surface-dim": "#dbd9e2",
+                    "surface-tint": "#974800",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#e4e1eb",
+                    "error-red": "#EF4444",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-tertiary-fixed": "#001e30",
+                    "surface-container-high": "#eae7f1",
+                    "on-primary-fixed": "#311300",
+                    "primary": "#974800",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "on-secondary-container": "#2e6f47",
+                    "on-secondary-fixed": "#00210e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-md": "12px",
+                    "gap-lg": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Cairo"],
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg": ["Cairo"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "body-base": ["Montserrat"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        .order-card {
+            transition: transform 0.2s ease;
+        }
+        .order-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface bg-background-cream min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background docked full-width top-0 shadow-sm z-50 fixed flex flex-row-reverse justify-between items-center w-full px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="صورة الملف الشخصي للمتجر" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBleAw71eIsIugRvHyN8z-F3lH-HFw4SERB92uubocGJMLFmIIZSMmLnNj-zjLFXopZCCPv1iQ6QAe4gRQajl4C57eC_LVq-b8tIUjU8sGxDHsdqM-kirhlHCfNBMVom9pjQsC-A85O1hKAp1jZy6joN5y40SPoWx5rMAZN4b56ZjukH7urlZZGD5kR68oV_jBsUPRu8uEdFBRmk82wWSiSa5zRiH6J8x692o9MzLqUWw6YigWUw_jDNnlGho01NycQXnrsHVJeCXEZ"/>
+</div>
+<button class="hover:bg-surface-container-low dark:hover:bg-surface-dim transition-colors p-2 rounded-full Active: scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+</div>
+<h1 class="text-primary font-headline-sm text-headline-sm-mobile font-bold tracking-tight">طلب #1234 - أحمد محمود</h1>
+<button class="p-2 rounded-full hover:bg-surface-container-low" onclick="window.history.back()">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</header>
+<main class="pt-20 px-margin-standard max-w-2xl mx-auto space-y-6">
+<!-- Status Badge -->
+<div class="flex justify-center">
+<span class="bg-warning-amber/20 text-warning-amber px-6 py-2 rounded-full font-headline-sm text-label-md border border-warning-amber/30">
+                في انتظار التأكيد
+            </span>
+</div>
+<!-- Section: Customer Info & Notes -->
+<section class="bg-surface-white rounded-xl shadow-lg p-6 space-y-4">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary">person</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm">أحمد محمود</h2>
+<p class="text-muted-gray font-label-sm">+970 599 000 000</p>
+</div>
+</div>
+<!-- Customer Note Box -->
+<div class="bg-[#FFF9E6] border border-warning-amber/20 p-4 rounded-lg flex gap-md">
+<span class="material-symbols-outlined text-warning-amber">info</span>
+<p class="text-on-surface-variant font-body-base">
+                    "يرجى التأكد من أن الشاورما ساخنة جداً وبدون مخلل في الساندويش الثاني."
+                </p>
+</div>
+</section>
+<!-- Section: Order Items -->
+<section class="bg-surface-white rounded-xl shadow-lg overflow-hidden">
+<div class="bg-surface-container-low p-4 border-b border-border-beige">
+<h3 class="font-headline-sm text-headline-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+                    تفاصيل السلة
+                </h3>
+</div>
+<div class="p-4 space-y-4">
+<!-- Item 1 -->
+<div class="flex justify-between items-start border-b border-border-beige pb-4">
+<div class="flex gap-md">
+<div class="bg-primary-container/10 text-primary-container w-8 h-8 rounded flex items-center justify-center font-bold">2x</div>
+<div>
+<p class="font-headline-sm text-body-lg">ساندويش شاورما دجاج</p>
+<p class="text-muted-gray text-label-sm">حجم كبير - خبز صاج</p>
+</div>
+</div>
+<p class="font-bold text-primary">40.00 ILS</p>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-start border-b border-border-beige pb-4">
+<div class="flex gap-md">
+<div class="bg-primary-container/10 text-primary-container w-8 h-8 rounded flex items-center justify-center font-bold">1x</div>
+<div>
+<p class="font-headline-sm text-body-lg">بطاطا مقلية</p>
+<p class="text-muted-gray text-label-sm">بالتتبيلة الحارة</p>
+</div>
+</div>
+<p class="font-bold text-primary">12.00 ILS</p>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-start">
+<div class="flex gap-md">
+<div class="bg-primary-container/10 text-primary-container w-8 h-8 rounded flex items-center justify-center font-bold">1x</div>
+<div>
+<p class="font-headline-sm text-body-lg">كولا</p>
+<p class="text-muted-gray text-label-sm">330 مل</p>
+</div>
+</div>
+<p class="font-bold text-primary">5.00 ILS</p>
+</div>
+</div>
+</section>
+<!-- Section: Delivery & Payment -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-white rounded-xl shadow-lg p-4 space-y-3">
+<p class="text-muted-gray font-label-sm">عنوان التوصيل</p>
+<div class="flex gap-sm items-start">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<p class="font-body-base">رام الله، حي الطيرة، عمارة النخيل، ط 3</p>
+</div>
+</div>
+<div class="bg-surface-white rounded-xl shadow-lg p-4 space-y-3">
+<p class="text-muted-gray font-label-sm">طريقة الدفع</p>
+<div class="flex gap-sm items-center">
+<span class="material-symbols-outlined text-primary">payments</span>
+<p class="font-body-base">نقداً عند الاستلام (Cash)</p>
+</div>
+</div>
+</section>
+<!-- Section: Summary -->
+<section class="bg-surface-white rounded-xl shadow-lg p-6 space-y-3">
+<div class="flex justify-between text-body-base">
+<span class="text-muted-gray">المجموع الفرعي</span>
+<span>57.00 ILS</span>
+</div>
+<div class="flex justify-between text-body-base">
+<span class="text-muted-gray">رسوم التوصيل</span>
+<span>8.00 ILS</span>
+</div>
+<div class="pt-3 border-t-2 border-dashed border-border-beige flex justify-between items-center">
+<span class="font-headline-sm text-headline-sm">الإجمالي</span>
+<span class="font-headline-md text-headline-md text-primary">65.00 ILS</span>
+</div>
+</section>
+</main>
+<!-- Floating Action Container (Responsive) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-white shadow-[0_-4px_10px_rgba(0,0,0,0.1)] p-4 flex flex-col gap-3 z-50">
+<!-- Actions: Accept / Reject -->
+<div class="flex gap-4" id="initial-actions">
+<button class="flex-1 h-[52px] bg-success-green text-on-primary font-bold rounded-xl flex items-center justify-center gap-sm active:scale-95 transition-all shadow-lg shadow-success-green/20" id="btn-accept">
+<span class="material-symbols-outlined">check_circle</span>
+                قبول الطلب
+            </button>
+<button class="flex-1 h-[52px] border-2 border-error-red text-error-red font-bold rounded-xl flex items-center justify-center gap-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined">cancel</span>
+                رفض
+            </button>
+</div>
+<!-- Hidden Actions: Confirmed States -->
+<div class="hidden flex-col gap-3 animate-fade-in" id="confirmed-actions">
+<button class="w-full h-[52px] bg-primary-container text-on-primary font-bold rounded-xl flex items-center justify-center gap-sm active:scale-95 transition-all shadow-lg shadow-primary-container/20">
+<span class="material-symbols-outlined">restaurant</span>
+                بدء التحضير
+            </button>
+</div>
+</div>
+<script>
+        document.getElementById('btn-accept').addEventListener('click', function() {
+            // Simple visual feedback for the demo
+            document.getElementById('initial-actions').classList.add('hidden');
+            document.getElementById('confirmed-actions').classList.remove('hidden');
+            document.querySelector('.bg-warning-amber\\/20').className = "bg-success-green/20 text-success-green px-6 py-2 rounded-full font-headline-sm text-label-md border border-success-green/30";
+            document.querySelector('.bg-warning-amber\\/20').textContent = "تم التأكيد";
+        });
+    </script>
+</body></html>

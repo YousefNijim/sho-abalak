@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#974800",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-secondary": "#ffffff",
+                    "warning-amber": "#F59E0B",
+                    "error-red": "#EF4444",
+                    "on-primary-fixed": "#311300",
+                    "surface-bright": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#abefbd",
+                    "on-secondary-container": "#2e6f47",
+                    "outline-variant": "#ddc1b1",
+                    "on-surface-variant": "#564337",
+                    "tertiary": "#006495",
+                    "surface-container-high": "#eae7f1",
+                    "primary": "#974800",
+                    "border-beige": "#E5E0D5",
+                    "on-secondary-fixed": "#00210e",
+                    "inverse-surface": "#303037",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "surface-container-low": "#f5f2fc",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "tertiary-container": "#009ee8",
+                    "on-background": "#1b1b22",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-primary-container": "#4e2200",
+                    "error-container": "#ffdad6",
+                    "background-cream": "#FCF3DC",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "primary-fixed-dim": "#ffb688",
+                    "muted-gray": "#6B7280",
+                    "secondary": "#296a43",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-surface": "#1b1b22",
+                    "surface-white": "#FFFFFF",
+                    "surface-variant": "#e4e1eb",
+                    "secondary-fixed": "#aef2bf",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "primary-fixed": "#ffdbc7",
+                    "outline": "#8a7265",
+                    "surface-container-highest": "#e4e1eb",
+                    "surface-dim": "#dbd9e2",
+                    "success-green": "#22C55E",
+                    "inverse-primary": "#ffb688",
+                    "surface-container": "#efecf6",
+                    "background": "#fbf8ff",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "primary-container": "#e6781e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "nav-height": "64px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "section-md": "24px",
+                    "margin-standard": "16px",
+                    "gap-md": "12px",
+                    "section-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 20px -2px rgba(151, 72, 0, 0.08);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-standard h-nav-height bg-surface shadow-sm transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+<img alt="Driver Profile Image" class="w-full h-full object-cover" data-alt="A professional headshot of a friendly Middle Eastern man in his early 30s, smiling warmly at the camera. He is outdoors in a sun-drenched street in Palestine, with soft golden-hour lighting. The image has a clean, premium feel with a shallow depth of field, highlighting his approachable and reliable character for a driver profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkifOK-3Fk-9ZlpNFvcUJcjewKc-PxG37C2KgEemGicvnWgEcJD-Gw_PPYB8ca9VAdXZBuUIA0OdWOJq1ForGWmiSJRXRPQJXq3uNgslk5UjviE03A2BkjLvLhZ1JKyj5vR6gUaWQlf9yt-FUroMf2J74JRbjd3ONbiGjol4hYu4Ib4oc297zjNSkfObWMVAZrES0Djax_yz1Tl5ELsLUjBXKVjDpdA45Rn7017TtNJT9wVPx-kdvX1uQ2bcTn8cXJ33800Mf9lxpg"/>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary">Heritage Pulse</h1>
+</div>
+<button class="material-symbols-outlined text-primary scale-95 active:opacity-80 transition-transform p-2 hover:bg-surface-container-low rounded-full">
+            notifications
+        </button>
+</header>
+<main class="pt-20 pb-32 px-margin-standard flex flex-col gap-section-md">
+<!-- Availability Toggle Section -->
+<section class="glass-card p-6 rounded-xl border border-border-beige custom-shadow flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-secondary" id="status-label">متصل الآن</span>
+<span class="font-label-md text-label-md text-muted-gray">أنت جاهز لاستلام الطلبات</span>
+</div>
+<div class="relative inline-flex items-center cursor-pointer" onclick="toggleAvailability()">
+<div class="w-14 h-8 bg-success-green rounded-full transition-colors duration-300" id="toggle-bg"></div>
+<div class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300 translate-x-6" id="toggle-dot"></div>
+</div>
+</section>
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-2 gap-md">
+<!-- Daily Earnings -->
+<div class="col-span-2 bg-primary-container p-6 rounded-xl flex flex-col gap-sm shadow-sm">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-primary-container">أرباح اليوم</span>
+<span class="material-symbols-outlined text-on-primary-container">payments</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-lg text-headline-lg text-on-primary-container">₪ 245.50</span>
+<span class="font-label-sm text-label-sm text-on-primary-container opacity-80">+12% عن الأمس</span>
+</div>
+</div>
+<!-- Total Deliveries -->
+<div class="bg-surface-white p-5 rounded-xl border border-border-beige flex flex-col gap-sm custom-shadow">
+<span class="material-symbols-outlined text-primary">local_shipping</span>
+<span class="font-label-md text-label-md text-muted-gray">إجمالي الطلبات</span>
+<span class="font-headline-md text-headline-md text-primary">14</span>
+</div>
+<!-- Average Rating -->
+<div class="bg-surface-white p-5 rounded-xl border border-border-beige flex flex-col gap-sm custom-shadow">
+<span class="material-symbols-outlined text-warning-amber" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md text-muted-gray">التقييم العام</span>
+<span class="font-headline-md text-headline-md text-primary">4.9</span>
+</div>
+</section>
+<!-- Last Deliveries List -->
+<section class="flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">آخر التوصيلات</h2>
+<button class="text-primary font-label-md text-label-md">عرض الكل</button>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Delivery Item 1 -->
+<div class="bg-surface-white p-4 rounded-xl border border-border-beige flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-background-cream flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">restaurant</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">مطعم الزاد</span>
+<span class="font-label-sm text-label-sm text-muted-gray">رام الله، حي الطيرة</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-primary font-bold">₪ 35.00</span>
+<span class="font-label-sm text-label-sm text-success-green">تم التوصيل</span>
+</div>
+</div>
+<!-- Delivery Item 2 -->
+<div class="bg-surface-white p-4 rounded-xl border border-border-beige flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-background-cream flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">bakery_dining</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">مخبز العائلة</span>
+<span class="font-label-sm text-label-sm text-muted-gray">البيرة، شارع القدس</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-primary font-bold">₪ 18.50</span>
+<span class="font-label-sm text-label-sm text-success-green">تم التوصيل</span>
+</div>
+</div>
+<!-- Delivery Item 3 -->
+<div class="bg-surface-white p-4 rounded-xl border border-border-beige flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-background-cream flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">icecream</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">بوظة الركب</span>
+<span class="font-label-sm text-label-sm text-muted-gray">رام الله، الدوار</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-primary font-bold">₪ 22.00</span>
+<span class="font-label-sm text-label-sm text-success-green">تم التوصيل</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-nav-height bg-surface-white border-t border-border-beige pb-safe shadow-lg">
+<!-- Home Tab -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-xl px-4 py-1 scale-95 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<!-- Orders Tab -->
+<a class="flex flex-col items-center justify-center text-muted-gray px-4 py-1 hover:bg-surface-container-highest transition-all scale-95 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-md text-label-md">Orders</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center justify-center text-muted-gray px-4 py-1 hover:bg-surface-container-highest transition-all scale-95 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+        function toggleAvailability() {
+            const toggleBg = document.getElementById('toggle-bg');
+            const toggleDot = document.getElementById('toggle-dot');
+            const label = document.getElementById('status-label');
+            const isOnline = toggleBg.classList.contains('bg-success-green');
+
+            if (isOnline) {
+                // Set Offline
+                toggleBg.classList.remove('bg-success-green');
+                toggleBg.classList.add('bg-muted-gray');
+                toggleDot.classList.remove('translate-x-6');
+                label.innerText = 'غير متصل';
+                label.classList.remove('text-secondary');
+                label.classList.add('text-muted-gray');
+            } else {
+                // Set Online
+                toggleBg.classList.remove('bg-muted-gray');
+                toggleBg.classList.add('bg-success-green');
+                toggleDot.classList.add('translate-x-6');
+                label.innerText = 'متصل الآن';
+                label.classList.remove('text-muted-gray');
+                label.classList.add('text-secondary');
+            }
+        }
+    </script>
+</body></html>

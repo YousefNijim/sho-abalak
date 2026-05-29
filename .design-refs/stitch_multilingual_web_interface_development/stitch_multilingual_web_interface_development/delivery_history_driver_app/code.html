@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#974800",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-secondary": "#ffffff",
+                    "warning-amber": "#F59E0B",
+                    "error-red": "#EF4444",
+                    "on-primary-fixed": "#311300",
+                    "surface-bright": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#abefbd",
+                    "on-secondary-container": "#2e6f47",
+                    "outline-variant": "#ddc1b1",
+                    "on-surface-variant": "#564337",
+                    "tertiary": "#006495",
+                    "surface-container-high": "#eae7f1",
+                    "primary": "#974800",
+                    "border-beige": "#E5E0D5",
+                    "on-secondary-fixed": "#00210e",
+                    "inverse-surface": "#303037",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "surface-container-low": "#f5f2fc",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "tertiary-container": "#009ee8",
+                    "on-background": "#1b1b22",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-primary-container": "#4e2200",
+                    "error-container": "#ffdad6",
+                    "background-cream": "#FCF3DC",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "primary-fixed-dim": "#ffb688",
+                    "muted-gray": "#6B7280",
+                    "secondary": "#296a43",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "on-surface": "#1b1b22",
+                    "surface-white": "#FFFFFF",
+                    "surface-variant": "#e4e1eb",
+                    "secondary-fixed": "#aef2bf",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "primary-fixed": "#ffdbc7",
+                    "outline": "#8a7265",
+                    "surface-container-highest": "#e4e1eb",
+                    "surface-dim": "#dbd9e2",
+                    "success-green": "#22C55E",
+                    "inverse-primary": "#ffb688",
+                    "surface-container": "#efecf6",
+                    "background": "#fbf8ff",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "primary-container": "#e6781e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "nav-height": "64px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "section-md": "24px",
+                    "margin-standard": "16px",
+                    "gap-md": "12px",
+                    "section-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC;
+            font-family: 'Cairo', 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 20px -2px rgba(151, 72, 0, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-standard h-nav-height bg-surface dark:bg-surface-dim shadow-sm transition-all duration-300">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Driver Profile Image" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a friendly Palestinian male delivery driver in his late 20s wearing a clean, modern uniform. The lighting is warm and natural, reflecting a bright morning in a historic West Bank city. The background shows a soft-focus urban street with traditional stone architecture. The overall mood is reliable and welcoming, aligning with a warm heritage brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB82ofX21Z8D0V_BBNMWWbVx5znHJHqqkyRiupE3XjMJfQWojD8NuuN5TqDS8X16rndgYT56rHWOle1PZPD3a9Bw0KkudAzFdQoYSpHF6yaRas6JZyqRudLXKWlKrr506-ivIS7GOH7bbb7S0XCJ3qXExEx2S_6IwrBBOgRS4Fy1koY1V_cFbjxseURBc-3Kc6NkwoQ7h2khJo4wARUQQ8G8hnUHswwjFWAPp13RoHNLcPyP1buTxrmOW8jtMk6tinjBdG1umXLXl1G"/>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">History</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-primary active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</header>
+<main class="pt-20 px-margin-standard max-w-2xl mx-auto">
+<!-- Summary Card Section -->
+<section class="mt-gap-lg">
+<div class="bg-surface-white rounded-xl p-section-md custom-shadow border border-border-beige relative overflow-hidden">
+<!-- Abstract Heritage Pattern Overlay -->
+<div class="absolute top-0 right-0 w-32 h-32 opacity-5 pointer-events-none transform translate-x-8 -translate-y-8">
+<svg class="text-primary" fill="currentColor" height="120" viewbox="0 0 100 100" width="120">
+<path d="M50 0L60 40L100 50L60 60L50 100L40 60L0 50L40 40Z"></path>
+</svg>
+</div>
+<div class="grid grid-cols-2 gap-section-md relative z-10">
+<div class="flex flex-col gap-xs">
+<span class="font-label-md text-label-md text-muted-gray">Total Monthly Earnings</span>
+<div class="flex items-baseline gap-xs">
+<span class="font-headline-lg text-headline-lg text-primary">₪2,840</span>
+</div>
+</div>
+<div class="flex flex-col gap-xs border-r border-border-beige pr-gap-lg">
+<span class="font-label-md text-label-md text-muted-gray">Total Deliveries</span>
+<div class="flex items-baseline gap-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface">142</span>
+</div>
+</div>
+</div>
+<div class="mt-section-md pt-section-md border-t border-border-beige flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+                        +12% from last month
+                    </span>
+<button class="text-primary font-button-text text-label-md flex items-center gap-xs hover:underline">
+                        View Analytics
+                        <span class="material-symbols-outlined text-[18px]" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+</div>
+</section>
+<!-- List of Past Deliveries -->
+<section class="mt-section-lg">
+<div class="flex items-center justify-between mb-gap-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Recent Deliveries</h2>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-surface-white border border-border-beige text-muted-gray active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+<div class="space-y-gap-md">
+<!-- Card 1 -->
+<div class="bg-surface-white p-margin-standard rounded-xl custom-shadow border border-border-beige flex justify-between items-start transition-transform active:scale-[0.98]">
+<div class="flex gap-margin-standard">
+<div class="w-14 h-14 rounded-lg bg-background-cream flex items-center justify-center text-primary border border-primary-container/20">
+<span class="material-symbols-outlined text-[32px]" data-icon="restaurant">restaurant</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-[16px] text-on-surface">Zajal Restaurant</h3>
+<span class="font-label-md text-label-md text-muted-gray mt-1">Today, 2:30 PM</span>
+<div class="mt-gap-sm">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-1 w-fit">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Delivered
+                                </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-sm text-headline-sm text-primary">₪24.00</span>
+<span class="font-label-sm text-label-sm text-muted-gray">Earnings</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-white p-margin-standard rounded-xl custom-shadow border border-border-beige flex justify-between items-start transition-transform active:scale-[0.98]">
+<div class="flex gap-margin-standard">
+<div class="w-14 h-14 rounded-lg bg-background-cream flex items-center justify-center text-primary border border-primary-container/20">
+<span class="material-symbols-outlined text-[32px]" data-icon="bakery_dining">bakery_dining</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-[16px] text-on-surface">Arafat Sweets</h3>
+<span class="font-label-md text-label-md text-muted-gray mt-1">Today, 11:15 AM</span>
+<div class="mt-gap-sm">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-1 w-fit">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Delivered
+                                </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-sm text-headline-sm text-primary">₪18.50</span>
+<span class="font-label-sm text-label-sm text-muted-gray">Earnings</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-white p-margin-standard rounded-xl custom-shadow border border-border-beige flex justify-between items-start transition-transform active:scale-[0.98]">
+<div class="flex gap-margin-standard">
+<div class="w-14 h-14 rounded-lg bg-background-cream flex items-center justify-center text-primary border border-primary-container/20">
+<span class="material-symbols-outlined text-[32px]" data-icon="lunch_dining">lunch_dining</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-[16px] text-on-surface">Abu Salha Burgers</h3>
+<span class="font-label-md text-label-md text-muted-gray mt-1">Yesterday, 9:45 PM</span>
+<div class="mt-gap-sm">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-1 w-fit">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Delivered
+                                </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-sm text-headline-sm text-primary">₪32.00</span>
+<span class="font-label-sm text-label-sm text-muted-gray">Earnings</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-white p-margin-standard rounded-xl custom-shadow border border-border-beige flex justify-between items-start transition-transform active:scale-[0.98]">
+<div class="flex gap-margin-standard">
+<div class="w-14 h-14 rounded-lg bg-background-cream flex items-center justify-center text-primary border border-primary-container/20">
+<span class="material-symbols-outlined text-[32px]" data-icon="local_cafe">local_cafe</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-[16px] text-on-surface">Caffe Nero</h3>
+<span class="font-label-md text-label-md text-muted-gray mt-1">Yesterday, 4:20 PM</span>
+<div class="mt-gap-sm">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-1 w-fit">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Delivered
+                                </span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-sm text-headline-sm text-primary">₪12.00</span>
+<span class="font-label-sm text-label-sm text-muted-gray">Earnings</span>
+</div>
+</div>
+</div>
+<button class="w-full mt-section-lg py-4 flex items-center justify-center gap-sm text-primary font-bold font-button-text border-2 border-primary/20 rounded-xl hover:bg-primary-container/10 transition-colors">
+                Load More History
+                <span class="material-symbols-outlined" data-icon="expand_more">expand_more</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-nav-height bg-surface-white dark:bg-surface-container-lowest px-2 pb-safe shadow-lg border-t border-border-beige dark:border-outline-variant">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest transition-all scale-95 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed text-on-primary-container dark:text-on-primary-fixed-variant rounded-xl px-6 py-1 scale-95 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span class="font-label-md text-label-md font-bold">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-highest transition-all scale-95 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for the history cards
+        document.querySelectorAll('.bg-surface-white').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple scroll effect for TopAppBar shadow enhancement
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-md');
+                header.classList.remove('shadow-sm');
+            } else {
+                header.classList.add('shadow-sm');
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body></html>

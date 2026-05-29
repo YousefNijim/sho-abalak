@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#f2eff9",
+                        "background-cream": "#FCF3DC",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "muted-gray": "#6B7280",
+                        "on-tertiary-fixed": "#001e30",
+                        "surface-container-high": "#eae7f1",
+                        "tertiary": "#006495",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "on-background": "#1b1b22",
+                        "inverse-primary": "#ffb688",
+                        "background": "#fbf8ff",
+                        "surface-variant": "#e4e1eb",
+                        "on-surface": "#1b1b22",
+                        "primary": "#974800",
+                        "primary-fixed-dim": "#ffb688",
+                        "tertiary-container": "#009ee8",
+                        "on-secondary-container": "#2e6f47",
+                        "on-primary-fixed-variant": "#733600",
+                        "on-primary-container": "#4e2200",
+                        "on-secondary-fixed": "#00210e",
+                        "on-tertiary-container": "#00314c",
+                        "on-surface-variant": "#564337",
+                        "surface-container-highest": "#e4e1eb",
+                        "primary-container": "#e6781e",
+                        "surface-dim": "#dbd9e2",
+                        "outline-variant": "#ddc1b1",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#aef2bf",
+                        "surface-container-low": "#f5f2fc",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#efecf6",
+                        "surface-white": "#FFFFFF",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#cbe6ff",
+                        "warning-amber": "#F59E0B",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#8a7265",
+                        "secondary": "#296a43",
+                        "secondary-container": "#abefbd",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#974800",
+                        "error-red": "#EF4444",
+                        "success-green": "#22C55E",
+                        "primary-fixed": "#ffdbc7",
+                        "border-beige": "#E5E0D5",
+                        "surface": "#fbf8ff",
+                        "surface-bright": "#fbf8ff",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#311300",
+                        "inverse-surface": "#303037",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gap-xs": "4px",
+                        "gap-sm": "8px",
+                        "base": "4px",
+                        "section-md": "24px",
+                        "section-lg": "32px",
+                        "nav-height": "64px",
+                        "gap-md": "12px",
+                        "gap-lg": "20px",
+                        "margin-standard": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Montserrat"],
+                        "label-md": ["Montserrat"],
+                        "body-lg": ["Montserrat"],
+                        "headline-md": ["Cairo"],
+                        "button-text": ["Montserrat"],
+                        "headline-sm": ["Cairo"],
+                        "headline-lg-mobile": ["Cairo"],
+                        "headline-lg": ["Cairo"],
+                        "body-base": ["Montserrat"],
+                        "hero-lg": ["Cairo"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream text-on-surface font-body-base">
+<!-- Hero Section -->
+<div class="relative w-full h-64 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-angle professional food photography shot of a traditional Palestinian feast spread on a rustic wooden table. The scene is bathed in warm, natural sunlight that highlights golden-brown freshly baked breads and vibrant green garnishes. The aesthetic is modern yet heritage-focused, with a warm cream and saffron color palette reflecting authentic hospitality and culinary excellence in a clean, high-contrast light-mode style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2afQRc9pYUwEgCzqPCW8LMwAxttDxh4AMlUpDGMjENjZJZ_TxRcgJ4iAMd8UE6A7bFoKKIMF75EHUXC8QCXq11YBBP2RSptUxYbwzuBTEJ-ploE61JrKm2FDCNtjR9jcJ5s9sIOrRKwC1QjSRp7Ar3LZQMZP-bHujhrpxPdfr7P84geFZZRE7uMZSdbJ2S-rl0jWyPc5hbnyww49Om8IonCK7zEh035VDVvLkujchuORQFDv3isEAhcVnAah4wP7FHiJwfk1Vv9lL"/>
+<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent"></div>
+<!-- Back Button & Actions -->
+<div class="absolute top-margin-standard left-margin-standard right-margin-standard flex justify-between items-center">
+<button class="w-10 h-10 flex items-center justify-center bg-surface-white/90 backdrop-blur-sm rounded-full shadow-lg transition-transform active:scale-95">
+<span class="material-symbols-outlined text-on-surface">arrow_forward</span>
+</button>
+<div class="flex gap-sm">
+<button class="w-10 h-10 flex items-center justify-center bg-surface-white/90 backdrop-blur-sm rounded-full shadow-lg">
+<span class="material-symbols-outlined text-on-surface">share</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center bg-surface-white/90 backdrop-blur-sm rounded-full shadow-lg">
+<span class="material-symbols-outlined text-on-surface">favorite</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Business Info Card -->
+<div class="mx-margin-standard -mt-10 relative z-10 bg-surface-white rounded-xl shadow-lg p-margin-standard">
+<div class="flex justify-between items-start mb-gap-sm">
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">مطعم القدس</h1>
+<p class="text-muted-gray font-body-base">رام الله - المصيون</p>
+</div>
+<div class="bg-primary-fixed text-on-primary-container px-3 py-1 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.8</span>
+</div>
+</div>
+<div class="flex items-center gap-lg pt-gap-md border-t border-border-beige">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">schedule</span>
+<span class="text-label-md font-label-md">25-35 دقيقة</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">delivery_dining</span>
+<span class="text-label-md font-label-md">توصيل 3 NIS</span>
+</div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-primary">payments</span>
+<span class="text-label-md font-label-md">دفع نقدي</span>
+</div>
+</div>
+</div>
+<!-- Category Tabs -->
+<div class="sticky top-0 bg-background-cream z-20 py-margin-standard mt-gap-md">
+<div class="flex overflow-x-auto hide-scrollbar px-margin-standard gap-sm">
+<button class="px-6 py-2 bg-primary text-on-primary rounded-full font-bold whitespace-nowrap transition-all">الكل</button>
+<button class="px-6 py-2 bg-surface-white text-on-surface rounded-full border border-border-beige font-medium whitespace-nowrap hover:bg-surface-container-low transition-all">الوجبات</button>
+<button class="px-6 py-2 bg-surface-white text-on-surface rounded-full border border-border-beige font-medium whitespace-nowrap hover:bg-surface-container-low transition-all">المشروبات</button>
+<button class="px-6 py-2 bg-surface-white text-on-surface rounded-full border border-border-beige font-medium whitespace-nowrap hover:bg-surface-container-low transition-all">سلطات</button>
+<button class="px-6 py-2 bg-surface-white text-on-surface rounded-full border border-border-beige font-medium whitespace-nowrap hover:bg-surface-container-low transition-all">حلويات</button>
+</div>
+</div>
+<!-- Product List -->
+<div class="px-margin-standard pb-32 flex flex-col gap-gap-md">
+<!-- Product Item 1 -->
+<div class="bg-surface-white p-gap-md rounded-xl shadow-sm flex gap-gap-md border border-transparent hover:border-primary-container transition-all active:scale-[0.98]">
+<div class="w-20 h-20 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A juicy, premium grilled beef burger on a soft brioche bun, featuring fresh lettuce, vine-ripened tomatoes, and melted golden cheese. The burger is presented in a bright, modern studio setting with warm directional lighting that enhances the textures and colors of the ingredients, maintaining a warm heritage feel with clean, minimal surroundings." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYWLnKlcaImvcUf8AuAuWBKGm0C9DcN1cIMgND0CjvQa5hqXze9zjuX0_I0Y_JPDP5h2PZ8de38UEUj2N9Bp9rR_hnRjYsHbxp8A6hZXlqEbnuB6VzpkDzfQURpo_igxaieo1g8QjDnKyIjqM0lPTHQKV3UafcLXYbnX6lQvnkDdLgX90ZOinfz7kcFOP1w6MkjQSjSMeHDYIBqtohZDJwPRPDV1W6CHZy8t3wsIIPh5ivABraLidBrfXBN-uGDV-I9akmxVuMb7si"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-on-surface">منسف فلسطيني ملكي</h3>
+<p class="text-muted-gray text-label-md line-clamp-2">لحم بلدي مطهو بالجميد الكركي الأصلي يقدم مع الأرز والصنوبر واللوز.</p>
+</div>
+<div class="flex justify-between items-center mt-gap-sm">
+<span class="text-primary font-bold text-body-lg">65 NIS</span>
+<button class="w-8 h-8 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="bg-surface-white p-gap-md rounded-xl shadow-sm flex gap-gap-md border border-transparent hover:border-primary-container transition-all active:scale-[0.98]">
+<div class="w-20 h-20 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Traditional Palestinian Musakhan featuring tender roasted chicken pieces seasoned heavily with purple sumac, served over fresh flatbread soaked in olive oil and topped with caramelized onions and toasted pine nuts. The photography is crisp and vibrant, showcasing a rich, heritage-inspired meal in a warm, appetizing atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDraekBMQ4rY_djTCuD7knt4-fs3Zb8Xor5xjeocH-EhUU9_xshoQFpKC5rXFenjkNMs3jG65-fWb8B5ai-T8eoY2NXjZXVt2avnhe0Nh-i81JtGaJtmm28rDKRwKgdUEGxow75VXrMaNnxo1946nn_eK8hCYWAHeX44zSxcZt86Z9--_Qv5zVyO8OoB8FNYt7cmr9XAobfSheCIIPJULMAslc1EvOzwvquBdw-cKxDos2xjNvTKPnnN6SXcUlWF7IYXPesV3SGgY03"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-on-surface">مسخن دجاج فاخر</h3>
+<p class="text-muted-gray text-label-md line-clamp-2">دجاج مشوي مع السماق البلدي وزيت الزيتون الأصلي على خبز الطابون.</p>
+</div>
+<div class="flex justify-between items-center mt-gap-sm">
+<span class="text-primary font-bold text-body-lg">45 NIS</span>
+<button class="w-8 h-8 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="bg-surface-white p-gap-md rounded-xl shadow-sm flex gap-gap-md border border-transparent hover:border-primary-container transition-all active:scale-[0.98]">
+<div class="w-20 h-20 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A plate of crispy, golden-brown fried appetizers including falafel and kibbeh, garnished with fresh mint and lemon slices. The setting is clean and high-contrast, utilizing a warm cream background that emphasizes the appetizing crunch and authentic local flavors of Palestinian starters." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP0r5pblGx8-v_piLiBmoWgKMwcfnIxKO-KCmBH80G_K_VXXx3XmVp-eq9g4344-wW2yeyk0-6DZ4H_9D_akz_9jKx3sinTQhX-7paApViZVnzLNhAvxKCkDjbMqDjV27T3bTMPZcx_BBApc1GeCLet-stmY5CVXcqn-5kJ-Ltb4u3ic96a_2hKCQIWUbPgVRu2L_cOJnT9G8c3OxLPu2Il0LbGdi5nnC8g7DIAtI51xyh49JA79oG9sNwowkLsEeNq4AREnj_GoH8"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-on-surface">صحن كبة مقلية (4 قطع)</h3>
+<p class="text-muted-gray text-label-md line-clamp-2">كبة محشوة باللحم المفروم واللوز والبهارات المقدسية الخاصة.</p>
+</div>
+<div class="flex justify-between items-center mt-gap-sm">
+<span class="text-primary font-bold text-body-lg">22 NIS</span>
+<button class="w-8 h-8 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="bg-surface-white p-gap-md rounded-xl shadow-sm flex gap-gap-md border border-transparent hover:border-primary-container transition-all active:scale-[0.98]">
+<div class="w-20 h-20 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A refreshing, vibrant green lemonade with fresh mint leaves and ice cubes in a tall glass. The lighting is bright and summery, creating a thirst-quenching visual. The background is a soft warm cream, aligning with the brand's aesthetic of fresh, natural hospitality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDd8-gCo00reizL3dIkA0cPWSZJxk9SUUFkkgL9sYKHPVwaJDtq14K5osyhgkacCyI0GbQL3qh3aTqDseqaYVfSyQMLnG3Ppek1sEfWs607djoMy9Q81z03OxO84F3AVdWeiec2izp5ss0Ktam_0ZqeXAKsNE2HBWfS1CUGYD-LuacqEr7hpj-BX-TGNe3130Wph3S7nKw5HJ12OdZfSsZlihmxN_oWyKuqKXdg4H4ZCyux3G_C0tKjGhu6qPU0CGpF1E6QuPtAYgSH"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h3 class="font-bold text-on-surface">ليمون نعناع طازج</h3>
+<p class="text-muted-gray text-label-md line-clamp-2">عصير ليمون طبيعي مع أوراق النعناع الطازجة والثلج.</p>
+</div>
+<div class="flex justify-between items-center mt-gap-sm">
+<span class="text-primary font-bold text-body-lg">12 NIS</span>
+<button class="w-8 h-8 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center shadow-md active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Cart Bar -->
+<div class="fixed bottom-margin-standard left-margin-standard right-margin-standard z-50">
+<button class="w-full h-14 bg-primary-container text-on-primary-container rounded-xl shadow-lg flex items-center justify-between px-6 transition-transform active:scale-[0.97]">
+<div class="flex items-center gap-sm">
+<div class="bg-on-primary-container/20 px-2 py-1 rounded text-label-md font-bold">2</div>
+<span class="font-button-text text-button-text">عرض السلة</span>
+</div>
+<span class="font-bold text-button-text">87 NIS</span>
+</button>
+</div>
+<!-- Script for Micro-interactions -->
+<script>
+        // Simple ripple-like effect on button press
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                let ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Tab selection logic
+        const tabs = document.querySelectorAll('.hide-scrollbar button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-primary', 'text-on-primary');
+                    t.classList.add('bg-surface-white', 'text-on-surface', 'border-border-beige');
+                });
+                tab.classList.remove('bg-surface-white', 'text-on-surface', 'border-border-beige');
+                tab.classList.add('bg-primary', 'text-on-primary');
+            });
+        });
+    </script>
+</body></html>

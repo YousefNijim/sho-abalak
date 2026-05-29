@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>شو عبالك؟ - مدير المتجر</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@100..900&amp;family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#009ee8",
+                    "on-primary-fixed": "#311300",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-surface-variant": "#564337",
+                    "error": "#ba1a1a",
+                    "inverse-on-surface": "#f2eff9",
+                    "surface-container-low": "#f5f2fc",
+                    "on-secondary-container": "#2e6f47",
+                    "secondary": "#296a43",
+                    "on-tertiary-fixed": "#001e30",
+                    "background-cream": "#FCF3DC",
+                    "error-container": "#ffdad6",
+                    "error-red": "#EF4444",
+                    "secondary-container": "#abefbd",
+                    "warning-amber": "#F59E0B",
+                    "inverse-primary": "#ffb688",
+                    "primary": "#974800",
+                    "on-surface": "#1b1b22",
+                    "muted-gray": "#6B7280",
+                    "success-green": "#22C55E",
+                    "on-secondary-fixed": "#00210e",
+                    "on-background": "#1b1b22",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#eae7f1",
+                    "surface-white": "#FFFFFF",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "border-beige": "#E5E0D5",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#aef2bf",
+                    "primary-container": "#e6781e",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface": "#fbf8ff",
+                    "background": "#fbf8ff",
+                    "surface-tint": "#974800",
+                    "on-tertiary-container": "#00314c",
+                    "primary-fixed": "#ffdbc7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-highest": "#e4e1eb",
+                    "outline": "#8a7265",
+                    "on-primary-fixed-variant": "#733600",
+                    "on-primary-container": "#4e2200",
+                    "surface-variant": "#e4e1eb",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "inverse-surface": "#303037",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#efecf6",
+                    "outline-variant": "#ddc1b1",
+                    "on-primary": "#ffffff",
+                    "surface-dim": "#dbd9e2",
+                    "tertiary": "#006495",
+                    "surface-bright": "#fbf8ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "base": "4px",
+                    "margin-standard": "16px",
+                    "gap-md": "12px",
+                    "nav-height": "64px",
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "section-md": "24px",
+                    "gap-lg": "20px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-lg": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "headline-sm": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        @keyframes pulse-warm {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        .animate-heritage-pulse {
+            animation: pulse-warm 3s ease-in-out infinite;
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stagger-1 { animation-delay: 0.2s; }
+        .stagger-2 { animation-delay: 0.4s; }
+        .stagger-3 { animation-delay: 0.6s; }
+        
+        .bg-pattern {
+            background-image: radial-gradient(circle at 2px 2px, rgba(151, 72, 0, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background-cream min-h-screen flex flex-col items-center justify-between overflow-hidden">
+<!-- Background Texture -->
+<div class="fixed inset-0 bg-pattern pointer-events-none opacity-50"></div>
+<!-- Main Content Container -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-standard w-full max-w-md relative z-10">
+<!-- App Icon Section -->
+<div class="mb-section-md animate-heritage-pulse">
+<div class="w-40 h-40 md:w-48 md:h-48 relative">
+<!-- Outer Glow Effect -->
+<div class="absolute inset-0 bg-primary/10 rounded-3xl blur-2xl transform scale-110"></div>
+<!-- App Icon -->
+<img alt="Sho Abalak Business App Icon" class="w-full h-full object-cover rounded-[32px] shadow-lg relative z-20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDorCEh8Gd_NN-_1qvEJDu2mtI3_DmOTLKPe4aQK3-lZ4Udr-sHBmpveuRn-V_q55CW2YVR1ao9OwmsjGUZmgRr6GS1W1BoLbOynB-W7HJBVBDz3ylG18tX9PBrrFc_RLKztx7oqFU2VEBWCGZUgR65NhHqCxmH0a96cZuXrMzUv2WeXXgqch0P1FvvLh3FfCci56WNvutgcQ8gHNldli3Z6jTvib2OBVtJY_uz6H8izOvDlvaDbY6qREPNSepA7qsH-b8du5Zaki2U"/>
+</div>
+</div>
+<!-- Identity Section -->
+<div class="text-center space-y-2">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface-variant fade-in-up stagger-1">
+                شو عبالك؟
+            </h1>
+<div class="inline-flex items-center gap-sm bg-primary/5 px-4 py-1.5 rounded-full border border-primary/10 fade-in-up stagger-2">
+<span class="material-symbols-outlined text-primary text-[18px]">storefront</span>
+<span class="font-headline-sm text-headline-sm text-primary">
+                    مدير المتجر
+                </span>
+</div>
+</div>
+</main>
+<!-- Footer Tagline Section -->
+<footer class="w-full py-section-lg px-margin-standard flex flex-col items-center gap-md relative z-10">
+<p class="font-body-base text-body-base text-on-surface-variant/70 fade-in-up stagger-3 text-center">
+            أدر تجارتك بكل سهولة
+        </p>
+<!-- Decorative Arabic Pattern Element -->
+<div class="w-12 h-1 bg-primary/20 rounded-full mb-base"></div>
+<!-- Loading Indicator -->
+<div class="w-48 h-1 bg-surface-white/50 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/3 rounded-full animate-[loading_2s_ease-in-out_infinite]"></div>
+</div>
+</footer>
+<style>
+        @keyframes loading {
+            0% { transform: translateX(200%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+<!-- Atmospheric Micro-interactions -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Subtle parallax effect on mouse move for desktop
+            if (window.innerWidth > 768) {
+                document.addEventListener('mousemove', (e) => {
+                    const icon = document.querySelector('.animate-heritage-pulse');
+                    const x = (window.innerWidth / 2 - e.pageX) / 50;
+                    const y = (window.innerHeight / 2 - e.pageY) / 50;
+                    icon.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            }
+
+            // Splash timeout simulation
+            setTimeout(() => {
+                const main = document.querySelector('main');
+                const footer = document.querySelector('footer');
+                // Potential transition logic would go here
+                console.log('App ready to transition');
+            }, 3500);
+        });
+    </script>
+</body></html>
