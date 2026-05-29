@@ -13,22 +13,35 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-// Help Metro find packages that pnpm hoists into .pnpm deep paths
+// Force singleton packages to always resolve from the app, preventing duplicates
+const singletons = [
+  'react',
+  'react-native',
+  'react-native/Libraries/Renderer/shims/ReactNative',
+  '@react-navigation/native',
+  '@react-navigation/bottom-tabs',
+  'react-native-safe-area-context',
+  'react-native-screens',
+];
+
 config.resolver.extraNodeModules = new Proxy(
   {},
   {
     get: (_, name) => {
-      // First try the app's own node_modules, then the monorepo root
-      const appPath = path.resolve(projectRoot, 'node_modules', name);
-      const rootPath = path.resolve(monorepoRoot, 'node_modules', name);
-      try {
-        require.resolve(appPath);
-        return appPath;
-      } catch {
-        return rootPath;
-      }
+      return path.resolve(projectRoot, 'node_modules', name);
     },
   }
 );
+
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (singletons.some((s) => moduleName === s || moduleName.startsWith(s + '/'))) {
+    return context.resolveRequest(
+      { ...context, originModulePath: path.resolve(projectRoot, 'index.js') },
+      moduleName,
+      platform
+    );
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
 
 module.exports = config;
