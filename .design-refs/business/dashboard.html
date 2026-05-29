@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Cairo', 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .order-card-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .active-tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: #974800;
+            transition: all 0.3s ease;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#e6781e",
+                    "secondary-fixed": "#aef2bf",
+                    "surface": "#fbf8ff",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary-container": "#00314c",
+                    "surface-container-low": "#f5f2fc",
+                    "warning-amber": "#F59E0B",
+                    "tertiary-container": "#009ee8",
+                    "on-primary-container": "#4e2200",
+                    "on-background": "#1b1b22",
+                    "background": "#fbf8ff",
+                    "background-cream": "#FCF3DC",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#cbe6ff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary": "#296a43",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "success-green": "#22C55E",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "inverse-primary": "#ffb688",
+                    "inverse-surface": "#303037",
+                    "surface-container": "#efecf6",
+                    "surface-white": "#FFFFFF",
+                    "on-surface": "#1b1b22",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#733600",
+                    "outline-variant": "#ddc1b1",
+                    "on-primary": "#ffffff",
+                    "muted-gray": "#6B7280",
+                    "error-container": "#ffdad6",
+                    "on-surface-variant": "#564337",
+                    "tertiary": "#006495",
+                    "on-tertiary": "#ffffff",
+                    "outline": "#8a7265",
+                    "primary-fixed": "#ffdbc7",
+                    "border-beige": "#E5E0D5",
+                    "surface-bright": "#fbf8ff",
+                    "secondary-container": "#abefbd",
+                    "surface-variant": "#e4e1eb",
+                    "surface-dim": "#dbd9e2",
+                    "surface-tint": "#974800",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#e4e1eb",
+                    "error-red": "#EF4444",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-tertiary-fixed": "#001e30",
+                    "surface-container-high": "#eae7f1",
+                    "on-primary-fixed": "#311300",
+                    "primary": "#974800",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "on-secondary-container": "#2e6f47",
+                    "on-secondary-fixed": "#00210e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-md": "12px",
+                    "gap-lg": "20px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Cairo"],
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg": ["Cairo"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "body-base": ["Montserrat"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-background-cream sticky top-0 z-50 flex flex-row-reverse justify-between items-center w-full px-margin-standard h-nav-height shadow-sm">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border-2 border-primary-fixed">
+<img alt="صورة الملف الشخصي للمتجر" class="w-full h-full object-cover" data-alt="A professional close-up of a high-end restaurant chef's profile, wearing a clean white uniform against a warm, softly lit kitchen background. The aesthetic is clean and corporate, featuring warm cream tones and soft natural light that emphasizes Palestinian hospitality and modern culinary excellence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT1NDylc_w6xTY2ijT2mh9wkyLrYZE_G5OJlzuy60tDOOzwg5gO-MBPMdvmc6sqp8dEyc0gBdVnoJGpU1NnOBDgohz5h_kaDEK8kkUwn7gXBeho796Mjgdyw9uDmkLZJ3TVwiR5Wjq7XiTCa-GNzjSF2-AjqiOPq9HlOTPX440bnNFj-4ePZnY_WD8OP7HbkU_SxcozUqHb9lNJjnccy5aOKCvef9vWyPQvUuj67fNt1y6LLD7ntaLpNvJtuI6bt41CyKwUGT3zApv"/>
+</div>
+<div class="flex flex-col items-end">
+<h1 class="text-primary font-headline-sm text-headline-sm leading-tight">مدير المتجر</h1>
+<p class="text-on-surface-variant font-label-sm text-label-sm">مطعم الزيتون الأصيل</p>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<!-- Open/Closed Toggle -->
+<div class="flex items-center bg-surface-white rounded-full p-1 border border-outline-variant shadow-sm" id="store-status-container">
+<button class="relative flex items-center gap-sm px-4 py-1.5 rounded-full transition-all duration-300 bg-success-green text-white shadow-sm" id="status-toggle">
+<span class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+<span class="font-headline-sm text-label-md font-bold">مفتوح</span>
+</button>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</div>
+</header>
+<main class="px-margin-standard py-6 max-w-5xl mx-auto">
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-md mb-section-lg">
+<!-- Today's Orders -->
+<div class="bg-primary-container p-4 rounded-xl shadow-md flex flex-col justify-between min-h-[120px] transform transition-transform hover:scale-[1.02]">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-white opacity-80" data-icon="shopping_bag">shopping_bag</span>
+<span class="text-white/80 font-label-md">طلبات اليوم</span>
+</div>
+<div class="mt-2">
+<span class="text-white font-headline-md text-headline-md">24</span>
+<div class="text-white/70 text-[10px] mt-1">+12% من الأمس</div>
+</div>
+</div>
+<!-- Revenue -->
+<div class="bg-secondary p-4 rounded-xl shadow-md flex flex-col justify-between min-h-[120px] transform transition-transform hover:scale-[1.02]">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-white opacity-80" data-icon="payments">payments</span>
+<span class="text-white/80 font-label-md">الإيرادات</span>
+</div>
+<div class="mt-2">
+<div class="flex items-baseline gap-xs">
+<span class="text-white font-headline-md text-headline-md">1,450</span>
+<span class="text-white/80 font-label-sm">₪</span>
+</div>
+<div class="text-white/70 text-[10px] mt-1">المبلغ المحصل</div>
+</div>
+</div>
+<!-- Preparing -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col justify-between min-h-[120px] transform transition-transform hover:scale-[1.02]">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-warning-amber" data-icon="skillet">skillet</span>
+<span class="text-on-surface-variant font-label-md">قيد التحضير</span>
+</div>
+<div class="mt-2">
+<span class="text-primary font-headline-md text-headline-md">5</span>
+<div class="w-full bg-surface-variant h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-warning-amber h-full w-[60%]"></div>
+</div>
+</div>
+</div>
+<!-- Completed -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col justify-between min-h-[120px] transform transition-transform hover:scale-[1.02]">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-success-green" data-icon="check_circle">check_circle</span>
+<span class="text-on-surface-variant font-label-md">المكتملة</span>
+</div>
+<div class="mt-2">
+<span class="text-primary font-headline-md text-headline-md">19</span>
+<div class="w-full bg-surface-variant h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-success-green h-full w-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Tabs Section -->
+<section class="mb-section-md">
+<div class="flex border-b border-outline-variant relative">
+<button class="tab-btn flex-1 py-4 text-center font-headline-sm text-primary relative active" onclick="switchTab(this, 'new')">
+                    الجديدة
+                    <span class="absolute top-3 right-1/4 w-2 h-2 bg-error-red rounded-full ring-4 ring-background-cream"></span>
+</button>
+<button class="tab-btn flex-1 py-4 text-center font-headline-sm text-on-surface-variant" onclick="switchTab(this, 'ongoing')">الحالية</button>
+<button class="tab-btn flex-1 py-4 text-center font-headline-sm text-on-surface-variant" onclick="switchTab(this, 'finished')">المنتهية</button>
+<div class="active-tab-indicator w-1/3 right-0" id="tab-indicator"></div>
+</div>
+</section>
+<!-- Orders List -->
+<section class="space-y-4" id="orders-container">
+<!-- Order 1 -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 border-r-4 border-primary order-card-transition">
+<div class="flex justify-between items-start mb-3">
+<div class="flex flex-col">
+<span class="text-on-surface font-headline-sm text-headline-sm">#ORD-2481</span>
+<span class="text-on-surface-variant font-body-base">خالد منصور</span>
+</div>
+<div class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                        منذ 3 دقائق
+                    </div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 mb-4">
+<p class="text-on-surface-variant font-body-base leading-relaxed">
+                        2x حمص باللحمة، 1x منسف لحم بلدي، 3x مشروبات باردة
+                    </p>
+</div>
+<div class="flex justify-between items-center border-t border-dashed border-outline-variant pt-4">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px]">المجموع الكلي</span>
+<span class="text-primary font-headline-md">145.00 ₪</span>
+</div>
+<div class="flex gap-md">
+<button class="px-6 py-2.5 bg-primary text-white font-button-text rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all">
+                            قبول الطلب
+                        </button>
+<button class="p-2.5 border-1.5 border-error text-error rounded-xl hover:bg-error-container/20 transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Order 2 -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 border-r-4 border-warning-amber order-card-transition">
+<div class="flex justify-between items-start mb-3">
+<div class="flex flex-col">
+<span class="text-on-surface font-headline-sm text-headline-sm">#ORD-2479</span>
+<span class="text-on-surface-variant font-body-base">سارة القدومي</span>
+</div>
+<div class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="restaurant">restaurant</span>
+                        قيد التحضير
+                    </div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 mb-4">
+<p class="text-on-surface-variant font-body-base leading-relaxed">
+                        1x دجاج محشي، 2x سلطة عربية، 1x كنافة نابلسية
+                    </p>
+</div>
+<div class="flex justify-between items-center border-t border-dashed border-outline-variant pt-4">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px]">المجموع الكلي</span>
+<span class="text-primary font-headline-md">210.00 ₪</span>
+</div>
+<div class="flex gap-md">
+<button class="px-6 py-2.5 bg-secondary text-white font-button-text rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="done_all">done_all</span>
+                            جاهز للتوصيل
+                        </button>
+</div>
+</div>
+</div>
+<!-- Order 3 -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 border-r-4 border-primary order-card-transition">
+<div class="flex justify-between items-start mb-3">
+<div class="flex flex-col">
+<span class="text-on-surface font-headline-sm text-headline-sm">#ORD-2480</span>
+<span class="text-on-surface-variant font-body-base">أحمد سلامة</span>
+</div>
+<div class="bg-error-container text-on-error-container px-3 py-1 rounded-full text-label-sm font-bold flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+                        منذ 8 دقائق
+                    </div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-3 mb-4">
+<p class="text-on-surface-variant font-body-base leading-relaxed">
+                        4x ساندويش فلافل سوبر، 2x بطاطا مقلية
+                    </p>
+</div>
+<div class="flex justify-between items-center border-t border-dashed border-outline-variant pt-4">
+<div class="flex flex-col">
+<span class="text-on-surface-variant text-[12px]">المجموع الكلي</span>
+<span class="text-primary font-headline-md">68.00 ₪</span>
+</div>
+<div class="flex gap-md">
+<button class="px-6 py-2.5 bg-primary text-white font-button-text rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all">
+                            قبول الطلب
+                        </button>
+<button class="p-2.5 border-1.5 border-error text-error rounded-xl hover:bg-error-container/20 transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer Overlay (Hidden by default) -->
+<div class="fixed inset-0 bg-black/40 z-[55] hidden transition-opacity duration-300 opacity-0" id="drawer-overlay"></div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe bg-surface-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary rounded-xl px-3 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-label-sm text-label-sm">القائمة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-label-sm">التقارير</span>
+</a>
+</nav>
+<script>
+        // Store Status Toggle Logic
+        const statusBtn = document.getElementById('status-toggle');
+        let isOpen = true;
+
+        statusBtn.addEventListener('click', () => {
+            isOpen = !isOpen;
+            if (isOpen) {
+                statusBtn.classList.remove('bg-error-red');
+                statusBtn.classList.add('bg-success-green');
+                statusBtn.innerHTML = `
+                    <span class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></span>
+                    <span class="font-headline-sm text-label-md font-bold">مفتوح</span>
+                `;
+            } else {
+                statusBtn.classList.remove('bg-success-green');
+                statusBtn.classList.add('bg-error-red');
+                statusBtn.innerHTML = `
+                    <span class="w-2.5 h-2.5 bg-white rounded-full"></span>
+                    <span class="font-headline-sm text-label-md font-bold">مغلق</span>
+                `;
+            }
+        });
+
+        // Tabs Logic
+        function switchTab(btn, tabName) {
+            // Update Active State
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('text-primary', 'active');
+                el.classList.add('text-on-surface-variant');
+            });
+            btn.classList.add('text-primary', 'active');
+            btn.classList.remove('text-on-surface-variant');
+
+            // Move Indicator
+            const indicator = document.getElementById('tab-indicator');
+            const index = Array.from(btn.parentNode.children).indexOf(btn);
+            indicator.style.right = (index * 33.33) + '%';
+
+            // Simple Filter Mockup
+            const container = document.getElementById('orders-container');
+            container.style.opacity = '0';
+            setTimeout(() => {
+                container.style.opacity = '1';
+                // In a real app, logic to filter orders would go here
+            }, 200);
+        }
+
+        // Micro-interaction for order cards
+        document.querySelectorAll('.order-card-transition').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

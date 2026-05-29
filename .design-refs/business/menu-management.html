@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>إدارة القائمة - Heritage Pulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            border-bottom: 3px solid #974800;
+        }
+        .product-card-hover:active {
+            transform: scale(0.98);
+        }
+        .bottom-sheet-transition {
+            transition: transform 0.3s ease-out;
+        }
+        .overlay-blur {
+            backdrop-filter: blur(4px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#e6781e",
+                      "secondary-fixed": "#aef2bf",
+                      "surface": "#fbf8ff",
+                      "secondary-fixed-dim": "#92d5a5",
+                      "on-tertiary-container": "#00314c",
+                      "surface-container-low": "#f5f2fc",
+                      "warning-amber": "#F59E0B",
+                      "tertiary-container": "#009ee8",
+                      "on-primary-container": "#4e2200",
+                      "on-background": "#1b1b22",
+                      "background": "#fbf8ff",
+                      "background-cream": "#FCF3DC",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed": "#cbe6ff",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#296a43",
+                      "primary-fixed-dim": "#ffb688",
+                      "on-secondary-fixed-variant": "#09522d",
+                      "inverse-primary": "#ffb688",
+                      "inverse-surface": "#303037",
+                      "surface-container": "#efecf6",
+                      "surface-white": "#FFFFFF",
+                      "on-surface": "#1b1b22",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#733600",
+                      "outline-variant": "#ddc1b1",
+                      "on-primary": "#ffffff",
+                      "muted-gray": "#6B7280",
+                      "error-container": "#ffdad6",
+                      "on-surface-variant": "#564337",
+                      "tertiary": "#006495",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#8a7265",
+                      "primary-fixed": "#ffdbc7",
+                      "border-beige": "#E5E0D5",
+                      "surface-bright": "#fbf8ff",
+                      "secondary-container": "#abefbd",
+                      "surface-variant": "#e4e1eb",
+                      "surface-dim": "#dbd9e2",
+                      "surface-tint": "#974800",
+                      "on-error": "#ffffff",
+                      "surface-container-highest": "#e4e1eb",
+                      "error-red": "#EF4444",
+                      "inverse-on-surface": "#f2eff9",
+                      "on-tertiary-fixed": "#001e30",
+                      "surface-container-high": "#eae7f1",
+                      "on-primary-fixed": "#311300",
+                      "primary": "#974800",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#8fcdff",
+                      "on-secondary-container": "#2e6f47",
+                      "on-secondary-fixed": "#00210e"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-lg": "32px",
+                      "gap-sm": "8px",
+                      "base": "4px",
+                      "nav-height": "64px",
+                      "section-md": "24px",
+                      "margin-standard": "16px",
+                      "gap-xs": "4px",
+                      "gap-md": "12px",
+                      "gap-lg": "20px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Cairo"],
+                      "label-md": ["Montserrat"],
+                      "body-lg": ["Montserrat"],
+                      "label-sm": ["Montserrat"],
+                      "headline-lg": ["Cairo"],
+                      "headline-sm": ["Cairo"],
+                      "headline-lg-mobile": ["Cairo"],
+                      "button-text": ["Montserrat"],
+                      "body-base": ["Montserrat"],
+                      "hero-lg": ["Cairo"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                      "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                      "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background shadow-sm docked full-width top-0 flex flex-row-reverse justify-between items-center w-full px-margin-standard h-nav-height z-50 fixed">
+<div class="flex items-center gap-md">
+<button class="hover:bg-surface-container-low dark:hover:bg-surface-dim transition-colors Active: scale-95 transition-transform duration-150 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary dark:text-primary-container">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary-container">مدير المتجر</h1>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center overflow-hidden border-2 border-primary-container">
+<img alt="صورة الملف الشخصي للمتجر" class="w-full h-full object-cover" data-alt="A professional portrait of a smiling Palestinian restaurant owner in a modern, warm-lit commercial kitchen. The setting is clean and high-end, featuring warm wood accents and brushed copper kitchenware. The lighting is soft and golden, reflecting a premium, heritage-focused brand aesthetic with warm cream and saffron tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJIQtoEHFaqfrj3KAbnR7xs5nIfT7YQ2gLCddQi8EKu5K0-oM9oXHUSruYOZs5dSepUi1JJmTXHHrdeeIZwLxcKjbdgx_ko55ZyAkX2j043FhgbqJhXLaS3692aoiE3dub_0ngnSTavizpXdhNSi1wxpI-K06C_Sj3j4SaReccr20tf5nzGvO0QIFvcJ1NBycDPayIf1DYSj9yjRJ104KRNK41hv2gTzjmFM6V72EPsRv0QGr5wmWQ3pBmDOr1YIdWqzMDRQpQutY0"/>
+</div>
+</div>
+</header>
+<main class="mt-20 px-4 max-w-4xl mx-auto">
+<!-- Section Header -->
+<div class="flex justify-between items-center mb-section-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">قائمتي</h2>
+<button class="bg-primary-container text-on-primary text-button-text font-button-text px-6 py-2 rounded-xl flex items-center gap-2 shadow-md hover:opacity-90 active:scale-95 transition-all" onclick="toggleBottomSheet(true)">
+<span class="material-symbols-outlined">add</span>
+<span>إضافة منتج</span>
+</button>
+</div>
+<!-- Category Tabs -->
+<div class="flex border-b border-border-beige mb-6 overflow-x-auto no-scrollbar gap-8">
+<button class="pb-3 px-2 font-headline-sm text-headline-sm text-primary active-tab whitespace-nowrap">الوجبات الرئيسية</button>
+<button class="pb-3 px-2 font-headline-sm text-headline-sm text-on-surface-variant whitespace-nowrap">المشروبات</button>
+<button class="pb-3 px-2 font-headline-sm text-headline-sm text-on-surface-variant whitespace-nowrap">المقبلات</button>
+<button class="pb-3 px-2 font-headline-sm text-headline-sm text-on-surface-variant whitespace-nowrap">الحلويات</button>
+</div>
+<!-- Product List -->
+<div class="grid gap-4">
+<!-- Product Item 1 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between group product-card-hover transition-all">
+<div class="flex items-center gap-4">
+<img alt="منسف فلسطيني" class="w-[60px] h-[60px] rounded-lg object-cover" data-alt="A beautifully presented traditional Palestinian Mansaf dish on a large communal platter. The rice is topped with tender pieces of lamb and roasted nuts, garnished with fresh parsley. The photography style is warm and appetizing, with natural side-lighting in a rustic yet high-end restaurant setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt3CGco2VVBsb9iatMgUvYrfKcTJisYuQw4vX2eiz9hNCiBFKD98v9YENacV3onDf1nas2qguscTEIBQt0B7JV8xzlarVC0y70bdQ7SfAqW7d9GLOUG6O-B80wd1YrgYuiWnLwgv3obft3uil_6WeMfZ1jA1JSUudSIM5jepf4HkN7Tm4Nf6N5Syu_wjlmWfLkKI809YUzaeLC304ZrVk67JClwjLDJ7jlMYwes7yL3upC6xMjSe82ZuP8h368mnBWaE2AHKpRkkj0"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">منسف بلدي باللحم</h3>
+<p class="font-label-md text-primary font-bold">₪ 65.00</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<!-- Availability Toggle -->
+<div class="flex flex-col items-center gap-1">
+<span class="text-[10px] font-label-sm text-muted-gray">متوفر</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[-100%] rtl:peer-checked:after:translate-x-[-1.25rem] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<!-- Actions -->
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error-red transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between group product-card-hover transition-all">
+<div class="flex items-center gap-4">
+<img alt="مسخن فلسطيني" class="w-[60px] h-[60px] rounded-lg object-cover" data-alt="Close-up of traditional Palestinian Musakhan, featuring roasted chicken with sumac, caramelised onions, and pine nuts over taboon bread. Warm earthy tones, vibrant purples of sumac, and rich golden oils. Elegant plating in a warm, inviting dining atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuANWmTBr_LtBe03bP4IoMjC5mtsy7cH0rSIEy6xOCpqZDvoO3MoUrW_bjRVRdke8j7kgfxlqFPKGpuO0FdLy-J3ItEvS_DUQOBQ3ibTKJn5wqHs_oPviUmETKHTLkWcaDCPibmZP2oV5yt6qAhrdsBKNDpEgWXHljz4BH0s5kj8FQzEFchDVnqIhltgJT2FmVCe9pFXFfOMxv5_xTliZ2PmwnAIGnP_lBZqGACo8rN0gNW-vZ4V1FmI9j_-G9_SUaEj-auEuW0AhqL9"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">مسخن دجاج فاخر</h3>
+<p class="font-label-md text-primary font-bold">₪ 45.00</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center gap-1">
+<span class="text-[10px] font-label-sm text-muted-gray">متوفر</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[-100%] rtl:peer-checked:after:translate-x-[-1.25rem] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error-red transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="bg-surface-white p-4 rounded-xl shadow-sm border border-border-beige flex items-center justify-between group product-card-hover transition-all">
+<div class="flex items-center gap-4 opacity-70">
+<img alt="مقلوبة" class="w-[60px] h-[60px] rounded-lg object-cover grayscale" data-alt="Traditional Maqluba dish with eggplant, cauliflower and meat, served upside down. High-contrast photography showing steam and textures. The lighting is focused and warm, though the product is marked as unavailable, it retains a high-quality visual appeal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz6w3ZRomlxtIWSoNET9cqA-ASNW9y6GvySOl5Fuor3vvwvYxap0RjxBiO3zseIPKDpSdwlKoOarKL8KpUBcw1oLecBK5AwB9B29i9y1w9VHSXsTb2ESQibdJUy3v4ZT-AoVVXDuANY3mc6iKL5sXhRl7B61XdLBySxxuz4E2K6pzW_VBNUE_7V2-HfsDlyEApvXdWvkqWerfzUIMrnxTGgWkOP2l275rl7c-JMmSnSbIGCXVwdnbPMudDd4pEMxorBIu7ZCbUojnp"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">مقلوبة بالباذنجان</h3>
+<p class="font-label-md text-primary font-bold">₪ 38.00</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex flex-col items-center gap-1">
+<span class="text-[10px] font-label-sm text-muted-gray">غير متوفر</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-beige peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[-100%] rtl:peer-checked:after:translate-x-[-1.25rem] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 hover:bg-error-container/20 rounded-full text-error-red transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe bg-surface-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm-mobile">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm-mobile">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary rounded-xl px-3 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+<span class="font-label-sm text-label-sm-mobile">القائمة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-sm text-label-sm-mobile">التقارير</span>
+</a>
+</nav>
+<!-- Bottom Sheet for Add Product -->
+<div class="fixed inset-0 bg-black/40 z-[60] hidden overlay-blur transition-opacity duration-300 opacity-0" id="overlay" onclick="toggleBottomSheet(false)"></div>
+<div class="fixed bottom-0 left-0 right-0 bg-background-cream z-[70] rounded-t-[32px] transform translate-y-full bottom-sheet-transition max-h-[795px] overflow-y-auto px-6 pb-12 pt-4" id="bottom-sheet">
+<!-- Handle -->
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full mx-auto mb-6"></div>
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface">إضافة منتج جديد</h2>
+<button class="text-on-surface-variant" onclick="toggleBottomSheet(false)">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="space-y-6">
+<!-- Image Upload Placeholder -->
+<div class="w-full h-40 border-2 border-dashed border-outline-variant rounded-2xl flex flex-col items-center justify-center bg-white/50 gap-2 cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-primary">add_a_photo</span>
+<span class="font-label-md text-on-surface-variant">اضغط لإضافة صورة المنتج</span>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block font-label-md text-on-surface mb-2">اسم المنتج</label>
+<input class="w-full h-[52px] bg-white border-1.5 border-border-beige rounded-xl px-4 focus:border-primary-container focus:ring-0 outline-none transition-colors" placeholder="مثلاً: ورق عنب بالزيت" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block font-label-md text-on-surface mb-2">السعر (₪)</label>
+<input class="w-full h-[52px] bg-white border-1.5 border-border-beige rounded-xl px-4 focus:border-primary-container focus:ring-0 outline-none" placeholder="0.00" type="number"/>
+</div>
+<div>
+<label class="block font-label-md text-on-surface mb-2">الفئة</label>
+<select class="w-full h-[52px] bg-white border-1.5 border-border-beige rounded-xl px-4 focus:border-primary-container focus:ring-0 outline-none">
+<option>الوجبات الرئيسية</option>
+<option>المقبلات</option>
+<option>المشروبات</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-md text-on-surface mb-2">وصف المنتج</label>
+<textarea class="w-full bg-white border-1.5 border-border-beige rounded-xl p-4 focus:border-primary-container focus:ring-0 outline-none" placeholder="اكتب تفاصيل المكونات أو طريقة التحضير..." rows="3"></textarea>
+</div>
+</div>
+<button class="w-full h-[52px] bg-primary-container text-white font-button-text text-button-text rounded-xl shadow-lg active:scale-95 transition-transform mt-4" onclick="toggleBottomSheet(false)" type="button">
+                تأكيد الإضافة
+            </button>
+</form>
+</div>
+<script>
+        function toggleBottomSheet(show) {
+            const sheet = document.getElementById('bottom-sheet');
+            const overlay = document.getElementById('overlay');
+            
+            if (show) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.add('opacity-100');
+                    sheet.classList.remove('translate-y-full');
+                }, 10);
+                document.body.style.overflow = 'hidden';
+            } else {
+                sheet.classList.add('translate-y-full');
+                overlay.classList.remove('opacity-100');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                document.body.style.overflow = '';
+            }
+        }
+    </script>
+</body></html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#efecf6",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "on-error": "#ffffff",
+                        "tertiary": "#006495",
+                        "background-cream": "#FCF3DC",
+                        "outline-variant": "#ddc1b1",
+                        "surface-container-low": "#f5f2fc",
+                        "inverse-on-surface": "#f2eff9",
+                        "secondary": "#296a43",
+                        "surface-dim": "#dbd9e2",
+                        "surface-white": "#FFFFFF",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed": "#aef2bf",
+                        "primary-fixed": "#ffdbc7",
+                        "on-surface": "#1b1b22",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#00210e",
+                        "primary": "#974800",
+                        "on-primary-container": "#4e2200",
+                        "success-green": "#22C55E",
+                        "surface-container-high": "#eae7f1",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#00314c",
+                        "warning-amber": "#F59E0B",
+                        "surface-variant": "#e4e1eb",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#1b1b22",
+                        "muted-gray": "#6B7280",
+                        "on-secondary-container": "#2e6f47",
+                        "surface": "#fbf8ff",
+                        "tertiary-container": "#009ee8",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#ffb688",
+                        "primary-container": "#e6781e",
+                        "outline": "#8a7265",
+                        "border-beige": "#E5E0D5",
+                        "surface-bright": "#fbf8ff",
+                        "on-tertiary-fixed": "#001e30",
+                        "on-primary-fixed-variant": "#733600",
+                        "on-primary-fixed": "#311300",
+                        "on-primary": "#ffffff",
+                        "error-red": "#EF4444",
+                        "tertiary-fixed": "#cbe6ff",
+                        "inverse-primary": "#ffb688",
+                        "surface-container-highest": "#e4e1eb",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "background": "#fbf8ff",
+                        "surface-tint": "#974800",
+                        "secondary-container": "#abefbd",
+                        "inverse-surface": "#303037",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#564337"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gap-xs": "4px",
+                        "gap-md": "12px",
+                        "margin-standard": "16px",
+                        "nav-height": "64px",
+                        "gap-sm": "8px",
+                        "gap-lg": "20px",
+                        "section-md": "24px",
+                        "section-lg": "32px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "hero-lg": ["Cairo"],
+                        "label-sm": ["Montserrat"],
+                        "label-md": ["Montserrat"],
+                        "button-text": ["Montserrat"],
+                        "headline-md": ["Cairo"],
+                        "headline-lg": ["Cairo"],
+                        "body-base": ["Montserrat"],
+                        "body-lg": ["Montserrat"],
+                        "headline-sm": ["Cairo"],
+                        "headline-lg-mobile": ["Cairo"]
+                    },
+                    "fontSize": {
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream font-body-base text-on-background selection:bg-primary-fixed">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background shadow-sm docked full-width top-0 sticky z-50 transition-transform active:scale-95">
+<div class="flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed text-[28px] hover:opacity-80">notifications</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary-fixed overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiqR61W2ihUH0rTwN34VvJJq9ZSJBrj2Ozc882b_wtsjH9HPbZnvIKgKI_qQ8eGIebHVNrJLwn0Z5MffcYjDhc-ZWFsSVsdcjZprmW3vF8eSbyqjmYVbhfx-iNnUTeBwsV2bOumOaQi72fW9x6vJGe26PZCM51zkDtAJakjt4PG9RNmWUO48FBtPDGXPzuGEBGt_6w-Dz7K7iKDFENHmiAscsOo1aK19VMVQr8rBWJdcQU_PxxSp-SyYjpsAtmpcM-4qpO4Mt5byvA"/>
+</div>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed tracking-tight">شو عبالك؟</h1>
+</div>
+</header>
+<main class="pb-32 px-margin-standard max-w-2xl mx-auto">
+<!-- Search Bar -->
+<div class="mt-gap-lg">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-muted-gray">search</span>
+<input class="w-full h-[52px] bg-surface-white border-1.5 border-border-beige rounded-xl pr-12 pl-4 focus:ring-2 focus:ring-primary focus:border-primary font-body-base transition-all" placeholder="شو عبالك اليوم؟" type="text"/>
+<button class="absolute left-4 material-symbols-outlined text-primary">tune</button>
+</div>
+</div>
+<!-- Promo Banner -->
+<section class="mt-section-md">
+<div class="relative overflow-hidden rounded-xl bg-primary-container p-6 shadow-md aspect-[16/7] flex flex-col justify-center">
+<div class="z-10">
+<h2 class="font-headline-md text-headline-md text-on-primary">خصم 20% على طلبك الأول</h2>
+<p class="font-body-base text-on-primary mt-base opacity-90">استمتع بأشهى المأكولات المحلية بخصومات حصرية</p>
+<button class="mt-gap-md bg-surface-white text-primary px-6 py-2 rounded-full font-button-text text-button-text hover:bg-opacity-90 transition-all">اطلب الآن</button>
+</div>
+<!-- Abstract Heritage Pattern for Banner -->
+<div class="absolute -left-10 -bottom-10 opacity-10 w-40 h-40">
+<span class="material-symbols-outlined text-[120px] text-white">restaurant</span>
+</div>
+</div>
+</section>
+<!-- Categories -->
+<section class="mt-section-md">
+<div class="flex items-center justify-between mb-gap-md">
+<h3 class="font-headline-sm text-headline-sm">الأقسام</h3>
+<button class="text-primary font-label-md text-label-md">عرض الكل</button>
+</div>
+<div class="flex gap-md overflow-x-auto hide-scrollbar pb-base">
+<div class="flex flex-col items-center gap-sm flex-shrink-0">
+<div class="w-16 h-16 bg-surface-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="text-2xl">🍕</span>
+</div>
+<span class="font-label-md text-label-md">مطاعم</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-shrink-0">
+<div class="w-16 h-16 bg-surface-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="text-2xl">🛒</span>
+</div>
+<span class="font-label-md text-label-md">محلات</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-shrink-0">
+<div class="w-16 h-16 bg-surface-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="text-2xl">☕</span>
+</div>
+<span class="font-label-md text-label-md">كافيه</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-shrink-0">
+<div class="w-16 h-16 bg-surface-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="text-2xl">🍎</span>
+</div>
+<span class="font-label-md text-label-md">خضار</span>
+</div>
+<div class="flex flex-col items-center gap-sm flex-shrink-0">
+<div class="w-16 h-16 bg-surface-white rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+<span class="text-2xl">🥩</span>
+</div>
+<span class="font-label-md text-label-md">ملحمة</span>
+</div>
+</div>
+</section>
+<!-- Near Establishments Section -->
+<section class="mt-section-md">
+<div class="flex items-center justify-between mb-gap-md">
+<h3 class="font-headline-sm text-headline-sm">المنشآت القريبة</h3>
+<div class="flex items-center gap-xs text-muted-gray font-label-md">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+<span>نابلس، المركز</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-margin-standard">
+<!-- Business Card 1 -->
+<article class="bg-surface-white rounded-xl shadow-md overflow-hidden group hover:scale-[1.01] transition-transform">
+<div class="relative h-40">
+<img alt="Shawarma" class="w-full h-full object-cover" data-alt="A macro shot of a delicious, authentic Palestinian shawarma wrap with perfectly charred chicken, creamy tahini sauce, and fresh vegetables. The lighting is warm and natural, highlighting the textures of the pita bread and the juicy meat, presented on a rustic ceramic plate that fits the brand's heritage aesthetic. The background is a soft, out-of-focus cream-colored wall." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClMZcCvSETQ16Sw1ehKDCWjKUr4pxXq-ZLjuOtoDeI2X6qFH6VUaJcBt4vPm3WW0-cygPhXum4SQWClhBJsfUSe7vyqvKigp8ZOmIzybviGFQ5_qjnZA3oIXDWKrFnSniFxIiGywjaRZYPQY5I_SgKLBdutV3UXE6EkMH-R_zpgXEYcG84fYQdg56uCUwacxVYAo4gCMroiVJsvIcgHaR8DXjxFxcehxp1fo1SF5uMpePEBfRbJTZUWrYjKfLYTtdQ_W-vdnvIUgdJ"/>
+<div class="absolute top-3 left-3 bg-success-green/90 text-white px-3 py-1 rounded-full font-label-sm text-label-sm">مفتوح</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start">
+<h4 class="font-headline-sm text-headline-sm">مطعم القدس</h4>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.8</span>
+</div>
+</div>
+<p class="text-muted-gray font-body-base mt-xs">شاورما، مشاوي، وجبات سريعة</p>
+<div class="flex items-center gap-md mt-gap-md text-muted-gray text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>25-35 دقيقة</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">delivery_dining</span>
+<span class="text-primary font-bold">3 شيكل</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Business Card 2 -->
+<article class="bg-surface-white rounded-xl shadow-md overflow-hidden group hover:scale-[1.01] transition-transform">
+<div class="relative h-40">
+<img alt="Hummus" class="w-full h-full object-cover" data-alt="A top-down view of a traditional Palestinian breakfast table featuring a vibrant bowl of creamy hummus topped with olive oil and chickpeas, accompanied by fresh pita bread and olives. The scene is lit with bright, morning sunlight, creating a fresh and appetizing atmosphere. The colors are dominated by earthy tones and the brand's warm cream and saffron palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbXK7hF5QvygPkuPwp1tDYlKnQf0mfJwHl5PHNecb2yVvthRR_k-ZAf6r75mrI9se91WSR504DekbN_yT2SmmydrAql0lvfmTi9zyflzcB0NupfB7zpZhu9XFw7JrYP-pmEESyDkGZxzNFK04CEwak4EfA07kNNlBpZf9VC-uZgiShvmmdWwTYaVGGfi7Tq-zYQ2Zv1uynDlq_2bF3nho37PgwYwv3a5KDRQE3mbSpF8xMQDuA-n8F7DoF3EmPHgO7koPWkemJZjxI"/>
+<div class="absolute top-3 left-3 bg-success-green/90 text-white px-3 py-1 rounded-full font-label-sm text-label-sm">مفتوح</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start">
+<h4 class="font-headline-sm text-headline-sm">حمص البركة</h4>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.9</span>
+</div>
+</div>
+<p class="text-muted-gray font-body-base mt-xs">حمص، فلافل، فطور شرقي</p>
+<div class="flex items-center gap-md mt-gap-md text-muted-gray text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>15-20 دقيقة</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">delivery_dining</span>
+<span class="text-primary font-bold">2 شيكل</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Business Card 3 (Web/Desktop visibility) -->
+<article class="bg-surface-white rounded-xl shadow-md overflow-hidden group hover:scale-[1.01] transition-transform hidden md:block">
+<div class="relative h-40">
+<img alt="Sweets" class="w-full h-full object-cover" data-alt="A delicious, decadent dessert tray featuring traditional Middle Eastern pastries like knafeh and baklava, glistening with syrup and sprinkled with green pistachios. The lighting is moody and focused, capturing the rich textures of the filo pastry and melting cheese. The brand's warm, inviting hospitality is palpable through the luxurious presentation on a brass platter." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAui_Oi-wh5AuMSzqp8Wok0Cc50kbUTA5Jf1wInmOTAmhJJtbVUfnoM0r2lw2OWHOP4cpMP7buPKghCctwpMkhfhNn_cUqKeqfZFjSuLu1NmxcCdRVQWW1U63LEZ1AHbOGddBMm5A2Cog8M--02_bsHJQCVwIXMN0_nWyu2ir9cX9pMa_M57yuy-ORFuNhagSzGjrpH7vMItxPSd8kiGdHm4y2z9c0GplQ3il5iOAjYLpXeLnNM1ezVDd5eDXvNoga5bAwFRV794yGL"/>
+<div class="absolute top-3 left-3 bg-success-green/90 text-white px-3 py-1 rounded-full font-label-sm text-label-sm">مفتوح</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-start">
+<h4 class="font-headline-sm text-headline-sm">حلويات النصر</h4>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.7</span>
+</div>
+</div>
+<p class="text-muted-gray font-body-base mt-xs">حلويات عربية، كنافة، بوظة</p>
+<div class="flex items-center gap-md mt-gap-md text-muted-gray text-label-md">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span>30-40 دقيقة</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">delivery_dining</span>
+<span class="text-primary font-bold">4 شيكل</span>
+</div>
+</div>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (Primary Action) -->
+<div class="fixed bottom-24 left-margin-standard z-40">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-90 hover:opacity-90">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">shopping_basket</span>
+<div class="absolute -top-1 -right-1 w-5 h-5 bg-error-red text-white text-[10px] rounded-full flex items-center justify-center border-2 border-surface-white font-bold">2</div>
+</button>
+</div>
+<!-- BottomNavBar -->
+<nav class="bg-surface-white dark:bg-inverse-surface border-t border-border-beige dark:border-outline shadow-lg fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant transition-all duration-200 active:scale-90 hover:bg-surface-container-low p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction: Active state visual feedback for categories
+        const categoryItems = document.querySelectorAll('.category-item');
+        categoryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                categoryItems.forEach(i => i.classList.remove('ring-2', 'ring-primary'));
+                item.classList.add('ring-2', 'ring-primary');
+            });
+        });
+
+        // Simple scroll reveal for cards
+        const observerOptions = {
+            threshold: 0.1
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('article').forEach(card => {
+            card.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-500');
+            observer.observe(card);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>مدير المتجر - إدارة المنشآت</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-container": "#009ee8",
+                "tertiary-fixed-dim": "#8fcdff",
+                "surface-container-lowest": "#ffffff",
+                "on-tertiary-fixed": "#001e30",
+                "on-background": "#1b1b22",
+                "tertiary": "#006495",
+                "surface-container-high": "#eae7f1",
+                "surface-container-low": "#f5f2fc",
+                "secondary-fixed-dim": "#92d5a5",
+                "on-secondary-fixed": "#00210e",
+                "inverse-surface": "#303037",
+                "primary": "#974800",
+                "border-beige": "#E5E0D5",
+                "secondary-container": "#abefbd",
+                "on-tertiary": "#ffffff",
+                "outline-variant": "#ddc1b1",
+                "on-surface-variant": "#564337",
+                "on-secondary-container": "#2e6f47",
+                "on-primary-fixed": "#311300",
+                "surface-bright": "#fbf8ff",
+                "warning-amber": "#F59E0B",
+                "error-red": "#EF4444",
+                "on-secondary": "#ffffff",
+                "surface-tint": "#974800",
+                "inverse-on-surface": "#f2eff9",
+                "tertiary-fixed": "#cbe6ff",
+                "surface": "#fbf8ff",
+                "background": "#fbf8ff",
+                "surface-container": "#efecf6",
+                "primary-container": "#e6781e",
+                "on-tertiary-container": "#00314c",
+                "on-primary-fixed-variant": "#733600",
+                "primary-fixed": "#ffdbc7",
+                "surface-variant": "#e4e1eb",
+                "secondary-fixed": "#aef2bf",
+                "on-tertiary-fixed-variant": "#004b71",
+                "inverse-primary": "#ffb688",
+                "success-green": "#22C55E",
+                "surface-dim": "#dbd9e2",
+                "outline": "#8a7265",
+                "surface-container-highest": "#e4e1eb",
+                "muted-gray": "#6B7280",
+                "surface-white": "#FFFFFF",
+                "on-surface": "#1b1b22",
+                "on-error-container": "#93000a",
+                "error": "#ba1a1a",
+                "secondary": "#296a43",
+                "background-cream": "#FCF3DC",
+                "on-primary": "#ffffff",
+                "on-error": "#ffffff",
+                "on-primary-container": "#4e2200",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed-variant": "#09522d",
+                "primary-fixed-dim": "#ffb688"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "nav-height": "64px",
+                "gap-sm": "8px",
+                "base": "4px",
+                "section-md": "24px",
+                "margin-standard": "16px",
+                "gap-xs": "4px",
+                "gap-lg": "20px",
+                "section-lg": "32px",
+                "gap-md": "12px"
+            },
+            "fontFamily": {
+                "headline-sm": ["Cairo"],
+                "headline-md": ["Cairo"],
+                "body-base": ["Montserrat"],
+                "body-lg": ["Montserrat"],
+                "hero-lg": ["Cairo"],
+                "headline-lg-mobile": ["Cairo"],
+                "button-text": ["Montserrat"],
+                "label-sm": ["Montserrat"],
+                "headline-lg": ["Cairo"],
+                "label-md": ["Montserrat"]
+            },
+            "fontSize": {
+                "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC;
+            font-family: 'Cairo', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E5E0D5;
+            border-radius: 10px;
+        }
+        .sidebar-active {
+            background-color: rgba(230, 120, 30, 0.1);
+            border-left: 4px solid #974800;
+        }
+    </style>
+</head>
+<body class="bg-background-cream text-on-surface overflow-hidden h-screen flex">
+<!-- Navigation Drawer (Sidebar) -->
+<aside class="hidden md:flex flex-col h-full w-72 bg-surface-white shadow-xl z-50 transition-all duration-300">
+<div class="p-6 flex flex-col h-full">
+<div class="mb-section-lg flex items-center gap-md">
+<div class="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-headline-md" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm text-primary">مدير المتجر</h1>
+<p class="font-label-sm text-label-sm text-muted-gray">لوحة تحكم المنشآت</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>الرئيسية</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl bg-primary-container/10 text-primary border-r-4 border-primary font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">corporate_fare</span>
+<span>المنشآت</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span>الطلبات</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span>القائمة</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span>التقارير</span>
+</a>
+<div class="pt-section-md mt-section-md border-t border-border-beige">
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>الإعدادات</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl text-error hover:bg-error-container/20 transition-colors font-headline-sm text-[16px]" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>تسجيل الخروج</span>
+</a>
+</div>
+</nav>
+<div class="mt-auto p-4 bg-background-cream rounded-2xl flex items-center gap-md">
+<img alt="Admin Profile" class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A professional headshot of a Middle Eastern man in a business casual outfit, smiling warmly with a blurred office background. The lighting is bright and modern, maintaining the warm heritage cream aesthetic with soft focus. High-quality corporate portrait photography with professional depth of field and warm tonal values." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDThYF7DDh0tFXYQeLHRI0WLpYKJdWkO6gf8wxdCcuOeRV3EKb-6yYw4KRWeYBj4cWv-63gA4VnQfFlNQQmgG4weM_84ujBW7Ck3-DwU0Li6Qg3e2nDi3jRSPU_IBwugg0Pyh7yPtacKIUtL4_mVQiWTHTR1nTbvab4bTbJY8bXIVmI4BNttMr1dRH48xgmS_w2aj1s6612obC9tEXdoc-QfWzFI8jqwxwBP2EfUFG-z_Pna4whYutxfd3Y7gKI6WH6lOS54Jd63fHI"/>
+<div class="overflow-hidden">
+<p class="font-headline-sm text-[14px] truncate text-on-surface">أحمد الخليل</p>
+<p class="font-label-sm text-label-sm text-muted-gray truncate">مسؤول النظام</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<!-- Header / TopAppBar -->
+<header class="h-nav-height bg-surface-white shadow-sm flex items-center justify-between px-margin-standard z-40">
+<div class="flex items-center gap-md">
+<button class="md:hidden text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline-md text-headline-md text-on-surface">إدارة المنشآت</h2>
+</div>
+<button class="bg-primary-container hover:bg-primary transition-all active:scale-95 text-white h-12 px-6 rounded-xl flex items-center gap-sm shadow-md">
+<span class="material-symbols-outlined">add</span>
+<span class="font-button-text">إضافة منشأة جديدة</span>
+</button>
+</header>
+<!-- Page Content -->
+<section class="flex-1 overflow-y-auto p-margin-standard custom-scrollbar">
+<!-- Filters Bento Grid -->
+<div class="bg-surface-white p-6 rounded-2xl shadow-sm mb-section-md border border-border-beige">
+<div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-md items-end">
+<!-- Search -->
+<div class="lg:col-span-2 space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block mr-2">البحث عن منشأة</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray">search</span>
+<input class="w-full h-12 pr-12 pl-4 bg-background-cream/50 border-1.5 border-border-beige rounded-xl focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all outline-none font-body-base" placeholder="اسم المنشأة، رقم الهاتف..." type="text"/>
+</div>
+</div>
+<!-- Category Dropdown -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block mr-2">التصنيف</label>
+<select class="w-full h-12 px-4 bg-background-cream/50 border-1.5 border-border-beige rounded-xl focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all outline-none font-body-base appearance-none cursor-pointer">
+<option>الكل</option>
+<option>مطاعم</option>
+<option>محلات</option>
+<option>كافيه</option>
+</select>
+</div>
+<!-- Area Dropdown -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block mr-2">المنطقة</label>
+<select class="w-full h-12 px-4 bg-background-cream/50 border-1.5 border-border-beige rounded-xl focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all outline-none font-body-base appearance-none cursor-pointer">
+<option>كل المدن</option>
+<option>رام الله</option>
+<option>نابلس</option>
+<option>الخليل</option>
+</select>
+</div>
+<!-- Status Filter -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block mr-2">الحالة</label>
+<div class="flex bg-background-cream/50 p-1 rounded-xl border border-border-beige h-12">
+<button class="flex-1 rounded-lg bg-surface-white shadow-sm text-primary font-bold text-[14px]">نشط</button>
+<button class="flex-1 rounded-lg text-muted-gray hover:text-on-surface transition-colors text-[14px]">غير نشط</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Data Table Layout -->
+<div class="bg-surface-white rounded-2xl shadow-lg border border-border-beige overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full border-collapse text-right">
+<thead>
+<tr class="bg-surface-container-low border-b border-border-beige">
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant">المنشأة</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant">التصنيف</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant">المنطقة</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant text-center">إجمالي الطلبات</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant text-center">التقييم</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant">الحالة</th>
+<th class="px-6 py-4 font-headline-sm text-[14px] text-on-surface-variant text-left">الإجراءات</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-beige">
+<!-- Row 1 -->
+<tr class="hover:bg-background-cream/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-md">
+<img alt="Restaurant Logo" class="w-12 h-12 rounded-xl object-cover border border-border-beige shadow-sm" data-alt="A stylized logo of a traditional Palestinian restaurant on a rustic building wall. The image features clean, modern Mediterranean typography against a sun-drenched stone texture. The warm afternoon sun casts soft shadows, creating an inviting, professional brand presence with high-end culinary appeal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeN-X9NbFe_uX5nrTX3YtpTGF_qqGJYf0G-zToJoWEPrxGqhNrWYUoa7X-6W6afL-dkvh8niNv8c83zZq6MTib6RRAi0FzcQLaV2m4et12_nDKn8AtCuv-vwuvRkDno6naM0kJdg8I5kIWouMfORYOL5Z8Jtm_NF7mj6Wk6eGgww9cD5hKjAank1A-YVuIQ98AS8FVJhQr2kQLCKRke4Kb9S_TEVDZsAaP1MeC5s_ZW9cI0NIs154md3cg4zdP09Q97owiCIZbnefy"/>
+<div>
+<p class="font-headline-sm text-[15px] text-on-surface">مطعم الزيتون الأصيل</p>
+<p class="font-label-sm text-label-sm text-muted-gray">ID: #M-10293</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-primary-container/10 text-primary rounded-full font-label-md text-[12px]">مطاعم</span>
+</td>
+<td class="px-6 py-4 font-body-base text-on-surface">رام الله</td>
+<td class="px-6 py-4 text-center font-bold text-on-surface">1,240</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-1 text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-[14px]">4.8</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-success-green"></div>
+<span class="text-success-green font-bold text-[13px]">نشط</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-background-cream/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-md">
+<img alt="Shop Logo" class="w-12 h-12 rounded-xl object-cover border border-border-beige shadow-sm" data-alt="An elegant storefront of a modern retail boutique in Nablus, showcasing traditional textiles through large glass windows. The lighting is crisp and warm, highlighting the high-quality craftsmanship of the products within. The aesthetic is minimal yet rich in cultural heritage, photographed with high clarity and balanced contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATjgUxQfOmwfC8Hgzw1SXN4dC5IV5FoZSKCtWPVicfCGMeXV4Yxvo8QFvjrLokrdLOmU1BaW-l8uwXqHmV1uDXSsspF4JOGTBmgaQgRpcXhVteQXg5sYvZYDSTAYSRryQ88fGBF5ydGmL-cy8dpeH2w_nSEue9jxvhxTORUpYUGflucGQABdza0ZVD8CMR0F48fauTQ3CE-YTfRn4JXxOhxufc_eYYjWGzadFLODljHgsT31Pvr783GAQiF9EH7xRJMVVewadVaOnh"/>
+<div>
+<p class="font-headline-sm text-[15px] text-on-surface">سوبر ماركت النجمة</p>
+<p class="font-label-sm text-label-sm text-muted-gray">ID: #S-22481</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-tertiary-container/10 text-tertiary rounded-full font-label-md text-[12px]">محلات</span>
+</td>
+<td class="px-6 py-4 font-body-base text-on-surface">نابلس</td>
+<td class="px-6 py-4 text-center font-bold text-on-surface">856</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-1 text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-[14px]">4.5</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-success-green"></div>
+<span class="text-success-green font-bold text-[13px]">نشط</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-background-cream/30 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-md">
+<img alt="Cafe Logo" class="w-12 h-12 rounded-xl object-cover border border-border-beige shadow-sm" data-alt="A cozy, sunlit cafe interior in Hebron, featuring warm wooden furniture and a display of artisanal Palestinian pastries. The atmosphere is vibrant and communal, with a soft golden glow emanating from modern pendant lights. The photograph captures the bustling morning energy with a clean, light-mode aesthetic and rich textural detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn1iqrsSEAFKxOMGoRasWX_PMgXGTZGECreJTleYK9bn846S71wttB6bBnVd20-gAxQc13pXdwNaARXy_zqHeuxCGx04zquzEo6pELxeI5sJcKPXqcsABBANyxZF4AvSMMiaMvdlC8Gx0_9Gva0_gclh_EqTP8pfqpme4wOCVDt2HkScUGZZHdUz_C0fgoMF-n7B7vk-f6YgsifadyMpegmGTTh1Wgfmc43uy0wztnwUKbHaMihF8HINhDu8UqTVauvT8hJHn6iQBV"/>
+<div>
+<p class="font-headline-sm text-[15px] text-on-surface">كافيه الصباح</p>
+<p class="font-label-sm text-label-sm text-muted-gray">ID: #C-44912</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 bg-secondary-container/30 text-secondary rounded-full font-label-md text-[12px]">كافيه</span>
+</td>
+<td class="px-6 py-4 font-body-base text-on-surface">الخليل</td>
+<td class="px-6 py-4 text-center font-bold text-on-surface">512</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-1 text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-[14px]">4.2</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-error-red"></div>
+<span class="text-error-red font-bold text-[13px]">غير نشط</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 bg-surface-container-lowest border-t border-border-beige flex items-center justify-between">
+<p class="font-label-md text-label-md text-muted-gray">عرض 1-10 من أصل 45 منشأة</p>
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-beige hover:bg-surface-container-high transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary-container text-white font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">2</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">3</button>
+<span class="text-muted-gray px-2">...</span>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">5</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg border border-border-beige hover:bg-surface-container-high transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Stats (Quick View) -->
+<footer class="h-24 bg-surface-white border-t border-border-beige px-margin-standard flex items-center gap-section-lg overflow-x-auto custom-scrollbar">
+<div class="flex items-center gap-md min-w-fit">
+<div class="w-12 h-12 bg-primary-container/10 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">domain</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-muted-gray">إجمالي المنشآت</p>
+<p class="font-headline-sm text-[18px] text-on-surface">45 منشأة</p>
+</div>
+</div>
+<div class="w-px h-10 bg-border-beige"></div>
+<div class="flex items-center gap-md min-w-fit">
+<div class="w-12 h-12 bg-success-green/10 rounded-full flex items-center justify-center text-success-green">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-muted-gray">النشطة حالياً</p>
+<p class="font-headline-sm text-[18px] text-on-surface">38 منشأة</p>
+</div>
+</div>
+<div class="w-px h-10 bg-border-beige"></div>
+<div class="flex items-center gap-md min-w-fit">
+<div class="w-12 h-12 bg-warning-amber/10 rounded-full flex items-center justify-center text-warning-amber">
+<span class="material-symbols-outlined">star</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-muted-gray">متوسط التقييم</p>
+<p class="font-headline-sm text-[18px] text-on-surface">4.6 / 5</p>
+</div>
+</div>
+<div class="w-px h-10 bg-border-beige"></div>
+<div class="flex items-center gap-md min-w-fit">
+<div class="w-12 h-12 bg-tertiary-container/10 rounded-full flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">shopping_cart</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-muted-gray">إجمالي الطلبات اليوم</p>
+<p class="font-headline-sm text-[18px] text-on-surface">312 طلب</p>
+</div>
+</div>
+</footer>
+</main>
+<script>
+        // Simple micro-interaction for rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-[0.99]');
+                setTimeout(() => {
+                    row.classList.remove('scale-[0.99]');
+                }, 100);
+            });
+        });
+
+        // Toggle mobile sidebar (concept)
+        const mobileMenuBtn = document.querySelector('header button.md\\:hidden');
+        if(mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                alert('القائمة الجانبية قيد التطوير للعرض على الجوال');
+            });
+        }
+    </script>
+</body></html>

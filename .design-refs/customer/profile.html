@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Montserrat', 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-on-surface": "#f2eff9",
+                      "background-cream": "#FCF3DC",
+                      "secondary-fixed-dim": "#92d5a5",
+                      "muted-gray": "#6B7280",
+                      "on-tertiary-fixed": "#001e30",
+                      "surface-container-high": "#eae7f1",
+                      "tertiary": "#006495",
+                      "on-tertiary-fixed-variant": "#004b71",
+                      "on-background": "#1b1b22",
+                      "inverse-primary": "#ffb688",
+                      "background": "#fbf8ff",
+                      "surface-variant": "#e4e1eb",
+                      "on-surface": "#1b1b22",
+                      "primary": "#974800",
+                      "primary-fixed-dim": "#ffb688",
+                      "tertiary-container": "#009ee8",
+                      "on-secondary-container": "#2e6f47",
+                      "on-primary-fixed-variant": "#733600",
+                      "on-primary-container": "#4e2200",
+                      "on-secondary-fixed": "#00210e",
+                      "on-tertiary-container": "#00314c",
+                      "on-surface-variant": "#564337",
+                      "surface-container-highest": "#e4e1eb",
+                      "primary-container": "#e6781e",
+                      "surface-dim": "#dbd9e2",
+                      "outline-variant": "#ddc1b1",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#aef2bf",
+                      "surface-container-low": "#f5f2fc",
+                      "on-error-container": "#93000a",
+                      "surface-container": "#efecf6",
+                      "surface-white": "#FFFFFF",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed": "#cbe6ff",
+                      "warning-amber": "#F59E0B",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#8a7265",
+                      "secondary": "#296a43",
+                      "secondary-container": "#abefbd",
+                      "tertiary-fixed-dim": "#8fcdff",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#974800",
+                      "error-red": "#EF4444",
+                      "success-green": "#22C55E",
+                      "primary-fixed": "#ffdbc7",
+                      "border-beige": "#E5E0D5",
+                      "surface": "#fbf8ff",
+                      "surface-bright": "#fbf8ff",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#311300",
+                      "inverse-surface": "#303037",
+                      "on-secondary-fixed-variant": "#09522d",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gap-xs": "4px",
+                      "gap-sm": "8px",
+                      "base": "4px",
+                      "section-md": "24px",
+                      "section-lg": "32px",
+                      "nav-height": "64px",
+                      "gap-md": "12px",
+                      "gap-lg": "20px",
+                      "margin-standard": "16px"
+              },
+              "fontFamily": {
+                      "label-sm": ["Montserrat"],
+                      "label-md": ["Montserrat"],
+                      "body-lg": ["Montserrat"],
+                      "headline-md": ["Cairo"],
+                      "button-text": ["Montserrat"],
+                      "headline-sm": ["Cairo"],
+                      "headline-lg-mobile": ["Cairo"],
+                      "headline-lg": ["Cairo"],
+                      "body-base": ["Montserrat"],
+                      "hero-lg": ["Cairo"]
+              },
+              "fontSize": {
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="bg-background-cream sticky top-0 z-50 flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full shadow-sm">
+<div class="flex items-center gap-md">
+<h1 class="font-headline-sm text-headline-sm text-primary">شو عبالك؟</h1>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-primary hover:opacity-80 transition-transform active:scale-95" data-icon="notifications">notifications</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A close-up high-quality portrait of a friendly Palestinian man in his late 20s with a neat beard, smiling warmly. The photo has professional studio lighting with soft shadows, set against a warm, neutral background that complements the brand's cream palette. The visual style is modern, approachable, and high-definition, reflecting cultural pride and reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa1He8yho8BE00MM1pAWfA2YsyLWRy6k5mUf7ByERqjZuFWFMfwd_qx2l9d5jtT6iiZcZ6cYH_zCy_nIQcUdnRrkqUy7Oz2T2sLARn4STyOZcoFBKewag5w9k3cmRJkn7PXHw4Jyo1nlX_VTtuHoTUINjt4JAHkcwzNOCA_I7_Th8Y4i__ZJCebT1ki_O_etwlQE1rXbaViSVVOh-SZ3uDnYXHu-u5o_DC3V9SlLrImoF_rlxAO9V3ZH-2JxetDLSvBvDx3h1LPSOY"/>
+</div>
+</div>
+</header>
+<main class="px-margin-standard mt-section-md">
+<!-- Profile Header Card -->
+<section class="bg-surface-white rounded-xl shadow-sm p-6 mb-section-md">
+<div class="flex flex-col items-center">
+<div class="relative mb-4">
+<div class="w-24 h-24 rounded-full overflow-hidden border-4 border-primary-fixed shadow-md">
+<img alt="Avatar Large" class="w-full h-full object-cover" data-alt="A professional studio portrait of a young man with a friendly expression and authentic local features, captured in bright, natural light. The environment is minimalist and high-end, using warm earthy tones that align with the brand's heritage-modern aesthetic. The image conveys a sense of trust and personal connection for a digital service platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUSZfCM-tLbRtzPFjdltok_AvJFIYQYCOPLdPX3NXaaHNm0KCEco5A-ZZNR_Z_lWA2hlTnpqeUjmJUmz65hX4mYw5FBHXmVbs7zsCBEyzilWML6gn7DafAdoxKKzkToFelHt5_G23OFo5r9CC3SElLF_KoaB8U_7ReJsfkoSALty4a9cQSkEzEtIUcNtJFue5y-Vbye8IUG7uCkCBstYJZoHAipmEhePvayLQBPhgO7I6GIaPTIlv2aKhaPfLJBREvaDwccwXANlib"/>
+</div>
+<button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-lg border-2 border-surface-white transition-all active:scale-90">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+</button>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-1">أحمد محمود</h2>
+<p class="font-body-base text-body-base text-muted-gray mb-6" dir="ltr">+970 59-xxxx-xxx</p>
+<button class="w-full py-3 bg-primary text-on-primary font-button-text text-button-text rounded-lg flex items-center justify-center gap-sm transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="person_edit">person_edit</span>
+                    تعديل الملف الشخصي
+                </button>
+</div>
+</section>
+<!-- Profile Menu Grid -->
+<section class="space-y-4">
+<div class="bg-surface-white rounded-xl shadow-sm overflow-hidden">
+<!-- Group 1 -->
+<div class="divide-y divide-border-beige">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<span class="font-body-lg text-body-lg text-on-surface">عناويني المحفوظة</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="notifications_active">notifications_active</span>
+<span class="font-body-lg text-body-lg text-on-surface">التنبيهات</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="language">language</span>
+<span class="font-body-lg text-body-lg text-on-surface">اللغة</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="text-primary font-label-md text-label-md">العربية</span>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</div>
+</button>
+</div>
+</div>
+<div class="bg-surface-white rounded-xl shadow-sm overflow-hidden">
+<!-- Group 2 -->
+<div class="divide-y divide-border-beige">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="lock_reset">lock_reset</span>
+<span class="font-body-lg text-body-lg text-on-surface">تغيير كلمة المرور</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="star">star</span>
+<span class="font-body-lg text-body-lg text-on-surface">تقييم التطبيق</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-white rounded-xl shadow-sm overflow-hidden">
+<!-- Group 3 -->
+<div class="divide-y divide-border-beige">
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="support_agent">support_agent</span>
+<span class="font-body-lg text-body-lg text-on-surface">اتصل بنا</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-full flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors group">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<span class="font-body-lg text-body-lg text-on-surface">من نحن</span>
+</div>
+<span class="material-symbols-outlined text-muted-gray group-hover:translate-x-[-4px] transition-transform" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+</div>
+<!-- Logout -->
+<button class="w-full flex items-center gap-md p-4 bg-error-container/20 border border-error/10 rounded-xl hover:bg-error-container/30 transition-colors group">
+<span class="material-symbols-outlined text-error" data-icon="logout">logout</span>
+<span class="font-button-text text-button-text text-error">تسجيل الخروج</span>
+</button>
+</section>
+<!-- Version Info -->
+<div class="mt-section-md text-center">
+<p class="font-label-sm text-label-sm text-muted-gray">الإصدار 2.4.0 (2024)</p>
+<p class="font-label-sm text-label-sm text-muted-gray mt-1">صنع بكل حب في فلسطين 🇵🇸</p>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base bg-surface-white dark:bg-inverse-surface border-t border-border-beige dark:border-outline shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for list items
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.classList.add('scale-[0.98]');
+            });
+            btn.addEventListener('touchend', function() {
+                this.classList.remove('scale-[0.98]');
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#f2eff9",
+                    "background-cream": "#FCF3DC",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "muted-gray": "#6B7280",
+                    "on-tertiary-fixed": "#001e30",
+                    "surface-container-high": "#eae7f1",
+                    "tertiary": "#006495",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-background": "#1b1b22",
+                    "inverse-primary": "#ffb688",
+                    "background": "#fbf8ff",
+                    "surface-variant": "#e4e1eb",
+                    "on-surface": "#1b1b22",
+                    "primary": "#974800",
+                    "primary-fixed-dim": "#ffb688",
+                    "tertiary-container": "#009ee8",
+                    "on-secondary-container": "#2e6f47",
+                    "on-primary-fixed-variant": "#733600",
+                    "on-primary-container": "#4e2200",
+                    "on-secondary-fixed": "#00210e",
+                    "on-tertiary-container": "#00314c",
+                    "on-surface-variant": "#564337",
+                    "surface-container-highest": "#e4e1eb",
+                    "primary-container": "#e6781e",
+                    "surface-dim": "#dbd9e2",
+                    "outline-variant": "#ddc1b1",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#aef2bf",
+                    "surface-container-low": "#f5f2fc",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#efecf6",
+                    "surface-white": "#FFFFFF",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "warning-amber": "#F59E0B",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#8a7265",
+                    "secondary": "#296a43",
+                    "secondary-container": "#abefbd",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#974800",
+                    "error-red": "#EF4444",
+                    "success-green": "#22C55E",
+                    "primary-fixed": "#ffdbc7",
+                    "border-beige": "#E5E0D5",
+                    "surface": "#fbf8ff",
+                    "surface-bright": "#fbf8ff",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#311300",
+                    "inverse-surface": "#303037",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "nav-height": "64px",
+                    "gap-md": "12px",
+                    "gap-lg": "20px",
+                    "margin-standard": "16px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Montserrat"],
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .pulse-orange {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .stepper-line {
+            width: 2px;
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background shadow-sm docked full-width top-0 flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full sticky z-50">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-container/20 flex items-center justify-center border border-primary/10">
+<span class="material-symbols-outlined text-primary">person</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary-fixed">طلبك من مطعم القدس</h1>
+</div>
+<button class="transition-transform active:scale-95 hover:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant">close</span>
+</button>
+</header>
+<main class="px-margin-standard pt-section-md space-y-section-md">
+<!-- Live Status Card -->
+<div class="bg-surface-white rounded-xl shadow-sm p-margin-standard space-y-gap-lg">
+<div class="flex justify-between items-center">
+<span class="bg-primary-container/10 text-primary px-3 py-1 rounded-full font-label-md text-label-md">رقم الطلب: #88219</span>
+<span class="text-muted-gray font-label-sm text-label-sm">منذ 12 دقيقة</span>
+</div>
+<!-- Vertical Stepper -->
+<div class="flex flex-col space-y-0">
+<!-- Item: Received -->
+<div class="flex gap-lg min-h-[60px]">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-success-green flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="stepper-line bg-success-green"></div>
+</div>
+<div class="pb-gap-lg">
+<h3 class="font-headline-sm text-[16px] text-on-surface">تم استلام الطلب</h3>
+<p class="font-body-base text-label-sm text-muted-gray">12:45 مساءً</p>
+</div>
+</div>
+<!-- Item: Confirmed -->
+<div class="flex gap-lg min-h-[60px]">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-success-green flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="stepper-line bg-success-green"></div>
+</div>
+<div class="pb-gap-lg">
+<h3 class="font-headline-sm text-[16px] text-on-surface">تم تأكيد الطلب</h3>
+<p class="font-body-base text-label-sm text-muted-gray">12:48 مساءً</p>
+</div>
+</div>
+<!-- Item: Preparing (Active) -->
+<div class="flex gap-lg min-h-[60px]">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-warning-amber pulse-orange flex items-center justify-center text-white shrink-0">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</div>
+<div class="stepper-line bg-border-beige"></div>
+</div>
+<div class="pb-gap-lg">
+<h3 class="font-headline-sm text-[16px] text-primary">يتم تحضير الطعام الآن</h3>
+<p class="font-body-base text-label-sm text-muted-gray">المطعم يقوم بتجهيز وجبتك</p>
+</div>
+</div>
+<!-- Item: On the way -->
+<div class="flex gap-lg min-h-[60px]">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-border-beige flex items-center justify-center text-muted-gray shrink-0">
+<span class="material-symbols-outlined text-[18px]">delivery_dining</span>
+</div>
+<div class="stepper-line bg-border-beige"></div>
+</div>
+<div class="pb-gap-lg">
+<h3 class="font-headline-sm text-[16px] text-muted-gray">في الطريق إليك</h3>
+<p class="font-body-base text-label-sm text-muted-gray">بانتظار السائق</p>
+</div>
+</div>
+<!-- Item: Delivered -->
+<div class="flex gap-lg">
+<div class="flex flex-col items-center">
+<div class="w-8 h-8 rounded-full bg-border-beige flex items-center justify-center text-muted-gray shrink-0">
+<span class="material-symbols-outlined text-[18px]">home</span>
+</div>
+</div>
+<div class="pb-0">
+<h3 class="font-headline-sm text-[16px] text-muted-gray">تم التوصيل</h3>
+<p class="font-body-base text-label-sm text-muted-gray">شكراً لاستخدامك خدمتنا</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Driver Info Section -->
+<div class="bg-surface-white rounded-xl shadow-md p-margin-standard border border-primary/5">
+<div class="flex items-center gap-md">
+<div class="relative">
+<img class="w-16 h-16 rounded-full object-cover border-2 border-primary-fixed shadow-sm" data-alt="A professional Palestinian delivery driver wearing a branded polo shirt, smiling warmly at the camera. He is positioned in a sun-drenched outdoor setting in Ramallah, with warm daylight highlighting a friendly and reliable appearance. The image captures a sense of trustworthy service and modern hospitality with a soft, clean aesthetic and a background of a classic stone-built Palestinian street." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7RWnmp356XctRFq8IaDwf9mZFD2CI8vQU6irfySg76nVBQM-osy8mC_4tZ46PR1w6UrSogFcqK4SW8C-SgcA9QuhNSLZb-qAKOUsG729Px1PaGcG2agF-gYdbgE-lKimworGyaYr9xwwOn0WbQOUG-P26uHlqYHPnqA2elcFWLq62OzHz1XDE2tiixg1MYxFnEK2FHAz8Ddj7b-nEV5yDNCjm81DRpX2IxfyS0e4MuKUTdwTAKvd01zfva_9mbQDUwOlngJD2hYkM"/>
+<div class="absolute -bottom-1 -right-1 bg-success-green w-4 h-4 rounded-full border-2 border-white"></div>
+</div>
+<div class="flex-grow">
+<h4 class="font-headline-sm text-[18px] text-on-surface">أحمد محمود</h4>
+<div class="flex items-center gap-xs text-warning-amber">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md text-on-surface-variant">4.9 (120+ تقييم)</span>
+</div>
+</div>
+<a class="flex items-center justify-center w-12 h-12 rounded-full bg-success-green text-white shadow-lg active:scale-90 transition-transform" href="tel:059000000">
+<span class="material-symbols-outlined">call</span>
+</a>
+</div>
+<div class="mt-margin-standard pt-margin-standard border-t border-border-beige flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">directions_bike</span>
+<span class="font-body-base text-label-md text-on-surface-variant">نوع المركبة: دراجة نارية</span>
+</div>
+<button class="text-primary font-button-text text-label-md flex items-center gap-xs">
+                    مراسلة 
+                    <span class="material-symbols-outlined text-[18px]">chat</span>
+</button>
+</div>
+</div>
+<!-- Map Placeholder Asymmetric Card -->
+<div class="relative overflow-hidden rounded-xl shadow-lg h-56 bg-surface-variant group">
+<img class="w-full h-full object-cover transition-transform duration-[5000ms] group-hover:scale-110" data-alt="A high-quality top-down digital map of a bustling Palestinian neighborhood in the West Bank, showing clean graphic streets and warm-toned buildings. The map features a soft cream and beige color palette to match the heritage brand style. A small animated motorcycle icon is seen moving along a highlighted path toward a pulsating home destination icon, representing live delivery tracking with high precision and modern UI flair." data-location="Ramallah" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUrOVW5pZb3qDHPCQqs3nTPOCPbSGgFvexRX9JuQy549aAx_f6V3OhMPK2CPp6WL24_yrJQlPSnNUB34gDOLZJJNazJRYwudHdmeRPBgxPXZtYrGXNDtqtVe2Gc1R3mB_W6ulthH7-BQ1QM962zvwEr6v9G3Ss_FCKoYZsooqQI8tsJjbEbyraZ0gVUyGN_GmAiGWjFT1xITRq2zBH7gPGlT8B8wC8zIEiShfUx00HeUQmhLXTMwa-zkEmcJDPtdTXXNFj1rfi-4Mj"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end p-margin-standard">
+<div class="bg-white/90 backdrop-blur-md rounded-lg px-4 py-2 flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary animate-bounce">location_on</span>
+<p class="font-label-md text-label-md text-on-surface">السائق على بعد 2.4 كم منك</p>
+</div>
+</div>
+</div>
+<!-- Order Summary Glassmorphism Style -->
+<div class="bg-white/60 backdrop-blur-lg border border-white/40 rounded-xl p-margin-standard space-y-gap-md">
+<h5 class="font-headline-sm text-[16px] text-on-surface mb-2">تفاصيل الطلب</h5>
+<div class="flex justify-between items-center text-on-surface-variant font-body-base text-label-md">
+<span>وجبة شاورما عائلية × 1</span>
+<span>₪ 85.00</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant font-body-base text-label-md">
+<span>مقبلات مشكلة × 2</span>
+<span>₪ 30.00</span>
+</div>
+<div class="pt-gap-md border-t border-primary/10 flex justify-between items-center">
+<span class="font-headline-sm text-[16px] text-on-surface">المجموع الكلي</span>
+<span class="font-headline-md text-headline-sm text-primary">₪ 115.00</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-white dark:bg-inverse-surface border-t border-border-beige dark:border-outline shadow-lg fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold hover:bg-surface-container-low transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for the track button
+        document.querySelectorAll('button, a').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.classList.add('scale-95');
+            });
+            btn.addEventListener('touchend', function() {
+                this.classList.remove('scale-95');
+            });
+        });
+
+        // Add periodic pulse effect to the preparing status
+        setInterval(() => {
+            const statusIcon = document.querySelector('.pulse-orange');
+            if(statusIcon) {
+                statusIcon.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    statusIcon.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }, 2500);
+    </script>
+</body></html>

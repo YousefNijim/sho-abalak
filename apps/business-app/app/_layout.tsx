@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { I18nManager } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { colors } from '@shu/ui-components';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { colors } from '../src/theme';
 
 export default function RootLayout() {
   useEffect(() => {
@@ -13,15 +14,21 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.textPrimary,
+          headerTitleStyle: { fontWeight: '700' },
+          headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
         }}
-      />
-    </>
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="order/[id]" options={{ title: 'تفاصيل الطلب' }} />
+        <Stack.Screen name="driver-selection" options={{ title: 'اختر عامل التوصيل' }} />
+      </Stack>
+    </SafeAreaProvider>
   );
 }

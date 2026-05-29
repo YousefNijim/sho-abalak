@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&amp;family=Montserrat:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #fbf8ff; /* surface */
+        }
+        .sidebar-active {
+            background-color: #e6781e !important; /* style_active_navigation from primary-container */
+            color: #4e2200 !important; /* on-primary-container */
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 224, 213, 0.5); /* border-beige */
+        }
+        @media (max-width: 768px) {
+            .mobile-hide { display: none; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#fbf8ff",
+                        "muted-gray": "#6B7280",
+                        "secondary": "#296a43",
+                        "on-secondary-container": "#2e6f47",
+                        "primary-container": "#e6781e",
+                        "background": "#fbf8ff",
+                        "inverse-surface": "#303037",
+                        "surface-bright": "#fbf8ff",
+                        "surface-container-low": "#f5f2fc",
+                        "success-green": "#22C55E",
+                        "error": "#ba1a1a",
+                        "outline-variant": "#ddc1b1",
+                        "on-primary-fixed": "#311300",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#974800",
+                        "surface-container": "#efecf6",
+                        "surface-variant": "#e4e1eb",
+                        "primary": "#974800",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#4e2200",
+                        "surface-dim": "#dbd9e2",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "on-surface-variant": "#564337",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "on-secondary-fixed": "#00210e",
+                        "secondary-container": "#abefbd",
+                        "background-cream": "#FCF3DC",
+                        "on-surface": "#1b1b22",
+                        "on-tertiary-container": "#00314c",
+                        "on-primary-fixed-variant": "#733600",
+                        "on-tertiary-fixed": "#001e30",
+                        "primary-fixed": "#ffdbc7",
+                        "secondary-fixed": "#aef2bf",
+                        "outline": "#8a7265",
+                        "surface-white": "#FFFFFF",
+                        "tertiary-fixed": "#cbe6ff",
+                        "warning-amber": "#F59E0B",
+                        "tertiary-container": "#009ee8",
+                        "primary-fixed-dim": "#ffb688",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error-red": "#EF4444",
+                        "tertiary": "#006495",
+                        "surface-container-highest": "#e4e1eb",
+                        "surface-container-lowest": "#ffffff",
+                        "border-beige": "#E5E0D5",
+                        "inverse-on-surface": "#f2eff9",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae7f1",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "on-background": "#1b1b22",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb688"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "nav-height": "64px",
+                        "gap-lg": "20px",
+                        "margin-standard": "16px",
+                        "section-lg": "32px",
+                        "gap-xs": "4px",
+                        "gap-md": "12px",
+                        "section-md": "24px",
+                        "gap-sm": "8px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Montserrat"],
+                        "hero-lg": ["Cairo"],
+                        "headline-sm": ["Cairo"],
+                        "label-sm": ["Montserrat"],
+                        "headline-lg-mobile": ["Cairo"],
+                        "headline-md": ["Cairo"],
+                        "button-text": ["Montserrat"],
+                        "label-md": ["Montserrat"],
+                        "headline-lg": ["Cairo"],
+                        "body-base": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-cream min-h-screen text-on-surface">
+<!-- Sidebar Shell -->
+<aside class="fixed inset-y-0 right-0 w-64 bg-[#165A34] text-white z-50 transform transition-transform duration-300 mobile-hide md:translate-x-0">
+<div class="p-6">
+<h2 class="font-headline-md text-headline-md text-white mb-8">شو عبالك؟</h2>
+<nav class="space-y-4">
+<a class="sidebar-active flex items-center gap-md px-4 py-3 rounded-xl transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">لوحة التحكم</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-label-md text-label-md">الطلبات</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span class="font-label-md text-label-md">المتاجر</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">المستخدمين</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">التقارير</span>
+</a>
+<a class="flex items-center gap-md px-4 py-3 rounded-xl hover:bg-white/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">الإعدادات</span>
+</a>
+</nav>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:mr-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface shadow-sm sticky top-0 z-40 px-margin-standard h-nav-height flex items-center justify-between">
+<div class="flex items-center gap-md">
+<img alt="Logo" class="h-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKXNmkD_13rQjKLnZv4c_xyVwSZ2nM3maotxyPlXnEmPCgqCaCrQWqzz9fBi-Qk4Wkq5epumeWgWHUHkGt2sxG84OqMj39uhi9qH_pd-5JQ-Bg83Yu5Weyy9lkpV_zkvK_RUyMpff4Ls4obSdbzACl-Fll1GgqzOEdZb_Hrzc5qxoqfIWzP45VNx11GcV0qUQfDhmDee3ZggYfrUZ7jLVQyiouR9-hiiKIUqawWIs0PkHNobAc-ZkwU-uZzxxjDHH2GvJugiiODOfu"/>
+<h1 class="font-headline-sm text-headline-sm text-primary mobile-hide">لوحة الإدارة</h1>
+</div>
+<div class="flex items-center gap-lg">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<div class="flex items-center gap-sm">
+<div class="text-left mobile-hide">
+<p class="font-label-md text-label-md leading-none">أحمد المحمود</p>
+<p class="text-[10px] text-muted-gray uppercase tracking-wider">مدير النظام</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a smiling middle-aged man with dark hair and a neat beard. He is wearing a professional light-colored shirt, suitable for a corporate environment. The lighting is soft and natural, emphasizing a friendly and trustworthy persona for a platform administrator in a light-themed modern application interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEYG3WNGI3OfRJboV7uGwonCSwUvaBBhyBrfm76SK3t8nggtHmdUcm0tgntRHxZktYqCytcGu6DWTVW8Oa_z44h5BgI1rV7aUghMVuWpzLrjSRyofdJL9mbfN2lRlo4umV1oM7RdNubxKBBNpFKhk9k8hSkwGeURUzcehPqGYbLuEIFP2GAk3pIdWtXcIph8h0eSccCBnLTSKS7T0x-PW2FRIa0QAKYk58hFNNeKnTmQ35V3st-Lys7ainlH8wkJNz6lPYPQbHW2vo"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-margin-standard md:p-section-md space-y-section-md">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-margin-standard">
+<div class="bg-surface-white p-5 rounded-xl shadow-sm border border-border-beige flex items-center gap-md group hover:shadow-md transition-all">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">shopping_basket</span>
+</div>
+<div>
+<p class="text-muted-gray font-label-md text-label-md">إجمالي الطلبات</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">1,284</h3>
+</div>
+</div>
+<div class="bg-surface-white p-5 rounded-xl shadow-sm border border-border-beige flex items-center gap-md group hover:shadow-md transition-all">
+<div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<p class="text-muted-gray font-label-md text-label-md">الإيراد اليومي</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">₪4,520</h3>
+</div>
+</div>
+<div class="bg-surface-white p-5 rounded-xl shadow-sm border border-border-beige flex items-center gap-md group hover:shadow-md transition-all">
+<div class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:bg-tertiary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+<div>
+<p class="text-muted-gray font-label-md text-label-md">مستخدمون جدد</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">42</h3>
+</div>
+</div>
+<div class="bg-surface-white p-5 rounded-xl shadow-sm border border-border-beige flex items-center gap-md group hover:shadow-md transition-all">
+<div class="w-12 h-12 rounded-lg bg-warning-amber/10 flex items-center justify-center text-warning-amber group-hover:bg-warning-amber group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">store</span>
+</div>
+<div>
+<p class="text-muted-gray font-label-md text-label-md">متاجر نشطة</p>
+<h3 class="font-headline-md text-headline-md text-on-surface">156</h3>
+</div>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-margin-standard">
+<!-- Weekly Orders Chart -->
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-border-beige">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">الطلبات الأسبوعية</h3>
+<span class="text-primary material-symbols-outlined">trending_up</span>
+</div>
+<div class="chart-container flex items-end justify-between gap-sm px-2">
+<!-- Custom CSS Line Chart Visualization -->
+<div class="flex-1 bg-surface-container rounded-t-lg h-[60%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">450</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-t-lg h-[80%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">620</div>
+</div>
+<div class="flex-1 bg-primary-container rounded-t-lg h-[95%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">780</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-t-lg h-[70%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">540</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-t-lg h-[85%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">690</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-t-lg h-[55%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">410</div>
+</div>
+<div class="flex-1 bg-surface-container rounded-t-lg h-[75%] relative group">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">590</div>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-muted-gray font-label-sm text-label-sm">
+<span>السبت</span><span>الأحد</span><span>الاثنين</span><span>الثلاثاء</span><span>الأربعاء</span><span>الخميس</span><span>الجمعة</span>
+</div>
+</div>
+<!-- Monthly Revenue Chart -->
+<div class="bg-surface-white p-6 rounded-xl shadow-sm border border-border-beige">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">الإيرادات الشهرية</h3>
+<span class="text-secondary material-symbols-outlined">bar_chart</span>
+</div>
+<div class="chart-container flex items-end justify-between gap-md px-4">
+<div class="w-full bg-secondary-container h-[40%] rounded-md hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary-container h-[65%] rounded-md hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary h-[90%] rounded-md hover:brightness-95 transition-all"></div>
+<div class="w-full bg-secondary-container h-[75%] rounded-md hover:brightness-95 transition-all"></div>
+</div>
+<div class="flex justify-between mt-4 text-muted-gray font-label-sm text-label-sm">
+<span class="w-full text-center">سبتمبر</span>
+<span class="w-full text-center">أكتوبر</span>
+<span class="w-full text-center">نوفمبر</span>
+<span class="w-full text-center">ديسمبر</span>
+</div>
+</div>
+</div>
+<!-- Recent Orders Table -->
+<div class="bg-surface-white rounded-xl shadow-sm border border-border-beige overflow-hidden">
+<div class="p-6 border-b border-border-beige flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">آخر الطلبات</h3>
+<button class="text-primary font-button-text text-button-text flex items-center gap-sm hover:underline">
+                        عرض الكل
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-right border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-muted-gray font-label-md text-label-md">
+<th class="px-6 py-4">رقم الطلب</th>
+<th class="px-6 py-4">الزبون</th>
+<th class="px-6 py-4">المتجر</th>
+<th class="px-6 py-4">المجموع</th>
+<th class="px-6 py-4">الحالة</th>
+<th class="px-6 py-4">الوقت</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-beige">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-label-md text-label-md">#ORD-9421</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-outline-variant flex items-center justify-center text-xs">س</div>
+<span>سامي علي</span>
+</div>
+</td>
+<td class="px-6 py-4">مطعم الشام</td>
+<td class="px-6 py-4 font-bold">₪85.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[12px] font-bold bg-[#D1FAE5] text-[#065F46]">مكتمل</span>
+</td>
+<td class="px-6 py-4 text-muted-gray text-label-sm">منذ 5 دقائق</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-label-md text-label-md">#ORD-9420</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-outline-variant flex items-center justify-center text-xs">ن</div>
+<span>نور حسين</span>
+</div>
+</td>
+<td class="px-6 py-4">برجر هاوس</td>
+<td class="px-6 py-4 font-bold">₪120.50</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[12px] font-bold bg-[#FEF3C7] text-[#92400E]">قيد التنفيذ</span>
+</td>
+<td class="px-6 py-4 text-muted-gray text-label-sm">منذ 12 دقيقة</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-label-md text-label-md">#ORD-9419</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-outline-variant flex items-center justify-center text-xs">م</div>
+<span>مريم يوسف</span>
+</div>
+</td>
+<td class="px-6 py-4">حلويات القدس</td>
+<td class="px-6 py-4 font-bold">₪45.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[12px] font-bold bg-[#FEE2E2] text-[#991B1B]">ملغي</span>
+</td>
+<td class="px-6 py-4 text-muted-gray text-label-sm">منذ 18 دقيقة</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-label-md text-label-md">#ORD-9418</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-outline-variant flex items-center justify-center text-xs">خ</div>
+<span>خالد إبراهيم</span>
+</div>
+</td>
+<td class="px-6 py-4">بيتزا إيطالية</td>
+<td class="px-6 py-4 font-bold">₪65.00</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-[12px] font-bold bg-[#DBEAFE] text-[#1E40AF]">في الطريق</span>
+</td>
+<td class="px-6 py-4 text-muted-gray text-label-sm">منذ 25 دقيقة</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Footer / Copy Info -->
+<footer class="p-margin-standard text-center text-muted-gray font-label-sm text-label-sm">
+            © 2024 شو عبالك؟ - جميع الحقوق محفوظة
+        </footer>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-white border-t border-border-beige flex justify-around items-center h-nav-height z-50">
+<a class="flex flex-col items-center justify-center text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-bold">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="text-[10px]">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px]">الحساب</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions for chart bars
+        document.querySelectorAll('.flex-1.bg-surface-container, .w-full.bg-secondary-container').forEach(bar => {
+            bar.addEventListener('mouseenter', () => {
+                bar.style.transform = 'scaleY(1.05)';
+                bar.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            bar.addEventListener('mouseleave', () => {
+                bar.style.transform = 'scaleY(1)';
+            });
+        });
+
+        // Simple real-time update simulation
+        setInterval(() => {
+            const timeElements = document.querySelectorAll('tbody td:last-child');
+            timeElements.forEach(el => {
+                if(el.textContent.includes('دقائق')) {
+                    // Simulation of time passing
+                }
+            });
+        }, 60000);
+    </script>
+</body></html>

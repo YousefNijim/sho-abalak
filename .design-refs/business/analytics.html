@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>مدير المتجر - تحليلات الأعمال</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#e6781e",
+                        "secondary-fixed": "#aef2bf",
+                        "surface": "#fbf8ff",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "on-tertiary-container": "#00314c",
+                        "surface-container-low": "#f5f2fc",
+                        "warning-amber": "#F59E0B",
+                        "tertiary-container": "#009ee8",
+                        "on-primary-container": "#4e2200",
+                        "on-background": "#1b1b22",
+                        "background": "#fbf8ff",
+                        "background-cream": "#FCF3DC",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#cbe6ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#296a43",
+                        "primary-fixed-dim": "#ffb688",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "success-green": "#22C55E",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "inverse-primary": "#ffb688",
+                        "inverse-surface": "#303037",
+                        "surface-container": "#efecf6",
+                        "surface-white": "#FFFFFF",
+                        "on-surface": "#1b1b22",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#733600",
+                        "outline-variant": "#ddc1b1",
+                        "on-primary": "#ffffff",
+                        "muted-gray": "#6B7280",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#564337",
+                        "tertiary": "#006495",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#8a7265",
+                        "primary-fixed": "#ffdbc7",
+                        "border-beige": "#E5E0D5",
+                        "surface-bright": "#fbf8ff",
+                        "secondary-container": "#abefbd",
+                        "surface-variant": "#e4e1eb",
+                        "surface-dim": "#dbd9e2",
+                        "surface-tint": "#974800",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#e4e1eb",
+                        "error-red": "#EF4444",
+                        "inverse-on-surface": "#f2eff9",
+                        "on-tertiary-fixed": "#001e30",
+                        "surface-container-high": "#eae7f1",
+                        "on-primary-fixed": "#311300",
+                        "primary": "#974800",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "on-secondary-container": "#2e6f47",
+                        "on-secondary-fixed": "#00210e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-lg": "32px",
+                        "gap-sm": "8px",
+                        "base": "4px",
+                        "nav-height": "64px",
+                        "section-md": "24px",
+                        "margin-standard": "16px",
+                        "gap-xs": "4px",
+                        "gap-md": "12px",
+                        "gap-lg": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Cairo"],
+                        "label-md": ["Montserrat"],
+                        "body-lg": ["Montserrat"],
+                        "label-sm": ["Montserrat"],
+                        "headline-lg": ["Cairo"],
+                        "headline-sm": ["Cairo"],
+                        "headline-lg-mobile": ["Cairo"],
+                        "button-text": ["Montserrat"],
+                        "body-base": ["Montserrat"],
+                        "hero-lg": ["Cairo"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .chart-bar {
+            transition: height 1s ease-out;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface bg-background-cream min-h-screen pb-32">
+<!-- Top App Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height shadow-sm bg-background-cream dark:bg-background">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary hover:bg-surface-container-low p-2 rounded-full transition-colors active:scale-95" data-icon="menu">menu</button>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">مدير المتجر</h1>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container/20 border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional close-up of a smiling Palestinian restaurant owner in a modern business setting. The lighting is warm and inviting, echoing the heritage cream and saffron brand colors. The background shows a blurry but clean kitchen environment, conveying a sense of authentic hospitality and modern efficiency." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCneLcCChPIk1cy35z2oL020p3YoWvZYLhd2-0i_EOTynUTzdxiXrCLKDAFCUThDztm1cNekQcV_2n_P5iJrbU2wxavzTx7wbZFkkZ0p1Ofrzy9nZPJFAoU8tvOc9pGoumTFtCJcIdKydsKIRoeD1sNXIMh12K9VD4adjyRwMPk5QTaFNfW3qlEmUk2TGk-hKJTekniDubTooyp6ZylKaVgohEoYkZ1SbJq0HXq4R3kZHz308vj-S9vPWV2g7Khf5v5OHqLku5ThcvP"/>
+</div>
+</header>
+<main class="pt-24 px-margin-standard max-w-5xl mx-auto">
+<!-- Period Selector -->
+<section class="mb-section-md">
+<div class="flex bg-surface-white p-1 rounded-xl shadow-sm border border-border-beige max-w-sm mx-auto rtl">
+<button class="flex-1 py-2 font-button-text text-button-text rounded-lg text-muted-gray hover:bg-surface-container transition-all" onclick="updateActive(this)">اليوم</button>
+<button class="flex-1 py-2 font-button-text text-button-text rounded-lg text-muted-gray hover:bg-surface-container transition-all" onclick="updateActive(this)">الأسبوع</button>
+<button class="flex-1 py-2 font-button-text text-button-text rounded-lg bg-primary text-on-primary shadow-md transition-all" onclick="updateActive(this)">الشهر</button>
+</div>
+</section>
+<!-- Analytics Cards -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gap-lg mb-section-lg">
+<!-- Total Sales -->
+<div class="bg-surface-white p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-border-beige flex flex-col items-center text-center transform hover:translate-y-[-4px] transition-transform">
+<span class="material-symbols-outlined text-primary-container text-4xl mb-2" data-icon="payments">payments</span>
+<span class="font-label-md text-label-md text-muted-gray uppercase tracking-wider">إجمالي المبيعات</span>
+<span class="font-headline-md text-headline-md text-on-surface mt-1">₪ 12,450.00</span>
+<div class="flex items-center gap-xs mt-2 text-success-green">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label-sm text-label-sm">+12% منذ الشهر الماضي</span>
+</div>
+</div>
+<!-- Total Orders -->
+<div class="bg-surface-white p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-border-beige flex flex-col items-center text-center transform hover:translate-y-[-4px] transition-transform">
+<span class="material-symbols-outlined text-primary-container text-4xl mb-2" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-md text-label-md text-muted-gray uppercase tracking-wider">عدد الطلبات</span>
+<span class="font-headline-md text-headline-md text-on-surface mt-1">342</span>
+<div class="flex items-center gap-xs mt-2 text-success-green">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label-sm text-label-sm">+5% منذ الشهر الماضي</span>
+</div>
+</div>
+<!-- Avg Order Value -->
+<div class="bg-surface-white p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-border-beige flex flex-col items-center text-center transform hover:translate-y-[-4px] transition-transform">
+<span class="material-symbols-outlined text-primary-container text-4xl mb-2" data-icon="analytics">analytics</span>
+<span class="font-label-md text-label-md text-muted-gray uppercase tracking-wider">متوسط قيمة الطلب</span>
+<span class="font-headline-md text-headline-md text-on-surface mt-1">₪ 36.40</span>
+<div class="flex items-center gap-xs mt-2 text-error-red">
+<span class="material-symbols-outlined text-sm" data-icon="trending_down">trending_down</span>
+<span class="font-label-sm text-label-sm">-2% منذ الشهر الماضي</span>
+</div>
+</div>
+</section>
+<!-- Chart Section -->
+<section class="mb-section-lg">
+<div class="bg-surface-white p-6 rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-border-beige">
+<div class="flex justify-between items-center mb-6">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">نشاط الطلبات اليومي</h2>
+<span class="material-symbols-outlined text-muted-gray" data-icon="info">info</span>
+</div>
+<div class="h-64 flex items-end justify-between gap-base md:gap-md px-2">
+<!-- Bar Chart Implementation -->
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 45%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">12</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الأحد</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 65%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">18</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الاثنين</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 85%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">24</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الثلاثاء</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 70%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">20</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الأربعاء</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 95%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">28</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الخميس</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 55%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">15</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">الجمعة</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-sm">
+<div class="w-full bg-primary-container/20 rounded-t-lg relative group h-full flex items-end">
+<div class="chart-bar w-full bg-primary rounded-t-lg hover:brightness-110" style="height: 80%;">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">22</div>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-muted-gray">السبت</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Top Products List -->
+<section class="mb-section-lg">
+<div class="bg-surface-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-border-beige overflow-hidden">
+<div class="p-6 border-b border-border-beige">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">أكثر 5 منتجات مبيعاً</h2>
+</div>
+<div class="divide-y divide-border-beige">
+<!-- Product Item 1 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-lg object-cover shadow-sm" data-alt="A top-down, high-quality photograph of a traditional Palestinian Chicken Musakhan dish served on a white ceramic plate. The lighting is soft and golden, accentuating the caramelized onions and roasted chicken over warm flatbread. The overall style is culinary photography with a clean, light-mode background and warm saffron tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUsfr1KtBfoT6wJX5yL7YA7WJiAhFyr4bBkqzGoc2hsv3t2Cdrh9XRhIQ1COGuDfZQJTGCTNXNYHz9jusA1IVBj3oEptT2F-WPISWNOuRXg4YyFdoxMJRwvRmR9jZDIOSEOXo0vetCxFwM_ykArUzOXwf9DTt6viRxRxM9RsA79Xpi5gn3JESW3wwcxiKXGqEmB6fydUtmU1jHjKbJVV6qSafxnHuD73Nfuqp87YO89L2jYK27xGEhyfuQBXEbHSgLN2qfIN8OQogg"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">مسخن دجاج فاخر</h3>
+<p class="font-label-sm text-label-sm text-muted-gray">طلب 124 مرة هذا الشهر</p>
+</div>
+</div>
+<div class="text-left">
+<span class="font-headline-sm text-[16px] text-primary">₪ 5,580</span>
+<p class="font-label-sm text-label-sm text-success-green">تزايد +8%</p>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-lg object-cover shadow-sm" data-alt="A close-up of several pieces of golden, honey-drenched Kunafa, a traditional Middle Eastern dessert, garnished with bright green pistachios. The lighting highlights the crispy texture and syrupy sheen, creating a delicious and appetizing visual. The color palette emphasizes warm oranges and yellows against a minimal white surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSUxSt2b-C03a98S7tD7x5igtzFTyCtjg-ng-rjarJ4Pvc_aLT7fPtkG5BMAug6UpC8dJ99eGapWhjQSEIV_fYTmaDqz-G9uRJZRVhH3T_1lzZ_-fk4LDTV3iRCbNTUYok1AnnM-EuL8wBIxXoEKnHE92YvyntTm6syPUO0VGkL16onz7mjfF6Xfseh6lu_Adam0EyTjUbLjOUp4edL_ffUkIjo1kadly4PRwDJqeceAEOxt6PxQXGGm5ImMtqMoix1G1HZSse11bD"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">كنافة نابلسية بالجبنة</h3>
+<p class="font-label-sm text-label-sm text-muted-gray">طلب 98 مرة هذا الشهر</p>
+</div>
+</div>
+<div class="text-left">
+<span class="font-headline-sm text-[16px] text-primary">₪ 2,450</span>
+<p class="font-label-sm text-label-sm text-success-green">تزايد +15%</p>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-lg object-cover shadow-sm" data-alt="A beautiful, rustic arrangement of fresh falafel, creamy hummus, and chopped vegetable salad. The food is vibrant and colorful, lit by soft natural light. The aesthetic is tactile and traditional, presented in a clean, modern lifestyle photography style that aligns with the warm heritage brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr_hQZyRljGefAHlirs1Qgyq3lCEWhgoi6oQdReEZyGQKyfRoaJe1rWFKOO854Bp_7tsGX6KlpZnzGK-HNA_Zk8O21KCmjcUtiN7Gs_du9sMF5j-Xz1JsaKoeXn5_LSZjWyOVCGH6WBAB8I1KQ76937qLdShZekHF5eNTWdGoO4sR5YnRRC20rmHjvwoJoVzjUjvrq7gKVLx5qapeoGG42RHAF_qQXE3E6BtYeBrJ1fEbAevqr5eKYLqKVgZ1pmtVYzvimUZaA3fO_"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">وجبة فلافل عائلية</h3>
+<p class="font-label-sm text-label-sm text-muted-gray">طلب 85 مرة هذا الشهر</p>
+</div>
+</div>
+<div class="text-left">
+<span class="font-headline-sm text-[16px] text-primary">₪ 1,700</span>
+<p class="font-label-sm text-label-sm text-muted-gray">مستقر</p>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-lg object-cover shadow-sm" data-alt="Two glasses of refreshing, freshly squeezed lemonade with mint leaves, glowing with a bright yellow hue. Condensation on the glass suggests it is very cold. The lighting is airy and high-key, creating a fresh, thirst-quenching atmosphere that fits the premium, modern aesthetic of the store." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfOW3YMTXVmMjm4pC5LciS6Ne-Ea_DkM-9zscgStdsIfb0GfffnTUXGhXGLjPfPf9nW6fHXz07-JIcAsspPL0dSEYJT6ALsg_zZdkVKD9dGdG5ng064ffOFBGZlitjCX5UqM0ON08t2PpvIRXOGlOSIJnQSEYEvqjvMyQRHIeuwALRJ8XfVsT6C5milKMnv7J1Tccdk07G8X2QePM8kTprwEYgHEVaaPUBUTyjNSzNev0x-1uYKF-wszn8cRwZYp3Wc6O_mKHaD6kB"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">عصير ليمون بالنعناع</h3>
+<p class="font-label-sm text-label-sm text-muted-gray">طلب 76 مرة هذا الشهر</p>
+</div>
+</div>
+<div class="text-left">
+<span class="font-headline-sm text-[16px] text-primary">₪ 912</span>
+<p class="font-label-sm text-label-sm text-error-red">تناقص -3%</p>
+</div>
+</div>
+<!-- Product Item 5 -->
+<div class="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-16 h-16 rounded-lg object-cover shadow-sm" data-alt="A large, colorful bowl of fresh Mediterranean salad with tomatoes, cucumbers, olives, and feta cheese. The colors are rich and saturated, lit by bright, clean studio lighting. The presentation is modern and healthy, emphasizing quality ingredients and a vibrant culinary experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOhHGS1hugt0SAMgb-n7SsCslLg0z1jPIpVjQ9D7YuHky65OTZHvVZkOyUtwh431fHSA2B5bN60klVjjrXpQxswP6LtsveqxR-8pOY4nd8WpkdnccD-2VmDreDywORNrzaCyAHBbbA90RuaYNtuDnhx7nvA1laVejPjCmfCX9wY0k_M3j1wh2Xk4KrfvEWiqbWanOPL_4f_d4UUI9wktouoMHMj4qQ0NVd5P7o_MyBuWh1uCJeIU_0GfCId5vik4IQJD1ZZdIkiD28"/>
+<div>
+<h3 class="font-headline-sm text-[16px] text-on-surface">سلطة جرجير بالرمان</h3>
+<p class="font-label-sm text-label-sm text-muted-gray">طلب 62 مرة هذا الشهر</p>
+</div>
+</div>
+<div class="text-left">
+<span class="font-headline-sm text-[16px] text-primary">₪ 1,240</span>
+<p class="font-label-sm text-label-sm text-success-green">تزايد +2%</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] bg-surface-white dark:bg-surface-container-lowest rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-dim px-3 py-1 transition-all">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-[10px]">الرئيسية</span>
+</div>
+<div class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-dim px-3 py-1 transition-all">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-[10px]">الطلبات</span>
+</div>
+<div class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-dim px-3 py-1 transition-all">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="font-label-sm text-[10px]">القائمة</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container/10 text-primary dark:text-primary-container rounded-xl px-3 py-1 scale-90 transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span class="font-label-sm text-[10px]">التقارير</span>
+</div>
+</nav>
+<script>
+        function updateActive(btn) {
+            // Find all siblings and reset their styles
+            const buttons = btn.parentElement.querySelectorAll('button');
+            buttons.forEach(b => {
+                b.classList.remove('bg-primary', 'text-on-primary', 'shadow-md');
+                b.classList.add('text-muted-gray');
+            });
+            // Apply active styles to clicked button
+            btn.classList.remove('text-muted-gray');
+            btn.classList.add('bg-primary', 'text-on-primary', 'shadow-md');
+            
+            // Subtle animation for bars
+            const bars = document.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                const originalHeight = bar.style.height;
+                bar.style.height = '0%';
+                setTimeout(() => {
+                    bar.style.height = originalHeight;
+                }, 50);
+            });
+        }
+    </script>
+</body></html>
