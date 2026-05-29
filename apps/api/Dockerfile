@@ -16,6 +16,9 @@ COPY packages/ui-components/package.json ./packages/ui-components/
 COPY packages/api-client/package.json ./packages/api-client/
 COPY apps/api/package.json ./apps/api/
 
+# Enable hoisting so binaries (prisma, tsc) are available at root node_modules/.bin
+RUN echo "shamefully-hoist=true" > .npmrc
+
 # Install build dependencies
 RUN pnpm install --frozen-lockfile
 
@@ -23,13 +26,11 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma Client
-WORKDIR /app/apps/api
-RUN pnpm prisma generate
+RUN ./node_modules/.bin/prisma generate --schema=./apps/api/prisma/schema.prisma
 
 # Compile topological monorepo dependencies and NestJS
-WORKDIR /app
-RUN pnpm --filter @shu/shared-types build
-RUN pnpm --filter @shu/utils build
+RUN cd packages/shared-types && ../../node_modules/.bin/tsc -p tsconfig.build.json
+RUN cd packages/utils && ../../node_modules/.bin/tsc -p tsconfig.build.json
 RUN pnpm --filter @shu/api build
 
 # Stage 2: Runner container

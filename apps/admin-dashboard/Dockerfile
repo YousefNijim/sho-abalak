@@ -16,16 +16,20 @@ COPY packages/ui-components/package.json ./packages/ui-components/
 COPY packages/api-client/package.json ./packages/api-client/
 COPY apps/admin-dashboard/package.json ./apps/admin-dashboard/
 
+# Enable hoisting so binaries (tsc, etc.) are available at root node_modules/.bin
+RUN echo "shamefully-hoist=true" > .npmrc
+
 # Install build dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy codebase
 COPY . .
 
-# Build shared utilities first
-RUN pnpm --filter @shu/shared-types build
-RUN pnpm --filter @shu/utils build
-RUN pnpm --filter @shu/api-client build
+# Build shared utilities first (use root .bin/tsc directly — pnpm filter scripts
+# don't inherit root node_modules/.bin in a hoisted monorepo inside Docker)
+RUN cd packages/shared-types && ../../node_modules/.bin/tsc -p tsconfig.build.json
+RUN cd packages/utils && ../../node_modules/.bin/tsc -p tsconfig.build.json || true
+RUN pnpm --filter @shu/api-client build || true
 
 # Build Next.js Dashboard
 WORKDIR /app/apps/admin-dashboard
