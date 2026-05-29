@@ -8,6 +8,7 @@ export const SocketEvents = {
   DRIVER_REQUEST: 'driver:request',
   DRIVER_STATUS_CHANGE: 'driver:status_change',
   NOTIFICATION_PUSH: 'notification:push',
+  ORDER_DRIVER_REJECTED: 'order:driver_rejected',
 } as const;
 
 export interface OrderNewPayload {
@@ -35,4 +36,9 @@ export interface NotificationPushPayload {
   title: string;
   body: string;
   data?: Record<string, string>;
+}
+
+export interface OrderDriverRejectedPayload {
+  orderId: string;
+  driverName: string;
 }

@@ -145,6 +145,26 @@ export default function Analytics() {
           )}
         </View>
       </View>
+
+      <View style={styles.chartCard}>
+        <Text style={styles.cardTitle}>أحدث الطلبات المكتملة</Text>
+        <View style={{ gap: spacing[3], marginTop: spacing[3] }}>
+          {completedOrders.length === 0 ? (
+            <Text style={styles.empty}>لا توجد طلبات مكتملة في هذه الفترة</Text>
+          ) : (
+            completedOrders.slice(0, 5).map((o: any) => (
+              <View key={o.id} style={styles.historyCard}>
+                <View style={styles.historyRow}>
+                  <Text style={styles.historyTitle}>طلب #{o.id.slice(-6).toUpperCase()}</Text>
+                  <Text style={styles.historyAmount}>{o.total} ₪</Text>
+                </View>
+                <Text style={styles.historyMuted}>العميل: {o.customer?.name}</Text>
+                <Text style={styles.historyMuted}>السائق: {o.driver?.user?.name || 'غير متوفر'}</Text>
+              </View>
+            ))
+          )}
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -179,4 +199,9 @@ const styles = StyleSheet.create({
   topName: { flex: 1, color: colors.textPrimary, fontSize: fontSizes.base, textAlign: 'right' },
   topCount: { color: colors.primary, fontFamily: fontFamily.bold },
   empty: { textAlign: 'center', color: colors.textMuted, fontSize: fontSizes.sm },
+  historyCard: { backgroundColor: colors.background, borderRadius: radius.md, padding: spacing[3], borderWidth: 1, borderColor: colors.border },
+  historyRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 4 },
+  historyTitle: { fontFamily: fontFamily.bold, color: colors.textPrimary, fontSize: fontSizes.base },
+  historyAmount: { color: colors.primary, fontFamily: fontFamily.bold },
+  historyMuted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
 });

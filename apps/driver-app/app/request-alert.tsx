@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
+import { ordersApi } from '@shu/api-client';
 
 export default function RequestAlert() {
   const router = useRouter();
@@ -15,14 +17,29 @@ export default function RequestAlert() {
 
   const [seconds, setSeconds] = useState(165);
 
+  const rejectMutation = useMutation({
+    mutationFn: () => ordersApi.rejectDriver(orderId!),
+    onSettled: () => {
+      router.back();
+    },
+  });
+
+  const handleReject = () => {
+    if (orderId && !rejectMutation.isPending) {
+      rejectMutation.mutate();
+    } else {
+      router.back();
+    }
+  };
+
   useEffect(() => {
     if (seconds <= 0) {
-      router.back();
+      handleReject();
       return;
     }
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(t);
-  }, [seconds, router]);
+  }, [seconds]);
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
@@ -43,10 +60,17 @@ export default function RequestAlert() {
       <Text style={styles.timer}>{mm}:{ss}</Text>
 
       <View style={styles.actions}>
-        <Button title="❌ رفض" variant="danger" style={{ flex: 1 }} onPress={() => router.back()} />
+        <Button 
+          title={rejectMutation.isPending ? "جاري الرفض..." : "❌ رفض"} 
+          variant="danger" 
+          style={{ flex: 1 }} 
+          onPress={handleReject}
+          disabled={rejectMutation.isPending}
+        />
         <Button
           title="✅ قبول"
           style={{ flex: 1 }}
+          disabled={rejectMutation.isPending}
           onPress={() =>
             router.replace({
               pathname: '/active-delivery',

@@ -88,28 +88,68 @@ export default function Orders() {
             const s = STATUS[o.status] || { label: o.status, bg: colors.border, fg: colors.textPrimary };
             const itemsCount = o.items?.reduce((acc: number, it: any) => acc + it.quantity, 0) ?? 0;
             return (
-              <View key={o.id} style={styles.card}>
-                <View style={styles.row}>
-                  <Text style={styles.business}>{o.business?.name || 'منشأة شو عبالك'}</Text>
-                  <View style={[styles.badge, { backgroundColor: s.bg }]}>
-                    <Text style={[styles.badgeText, { color: s.fg }]}>{s.label}</Text>
-                  </View>
-                </View>
-                <Text style={styles.muted}>{formatDate(o.createdAt)}</Text>
-                <Text style={styles.muted}>{itemsCount} عناصر · {o.total} ₪</Text>
-                <View style={styles.actions}>
-                  <Pressable style={styles.secondaryBtn} onPress={() => handleReorder(o)}>
-                    <Text style={styles.secondaryText}>أعد الطلب</Text>
-                  </Pressable>
-                  <Pressable style={styles.detailsBtn} onPress={() => router.push({ pathname: '/tracking', params: { id: o.id } })}>
-                    <Text style={styles.detailsText}>تفاصيل</Text>
-                  </Pressable>
-                </View>
-              </View>
+              <OrderCard key={o.id} o={o} s={s} itemsCount={itemsCount} handleReorder={handleReorder} router={router} formatDate={formatDate} />
             );
           })}
           {list.length === 0 ? <Text style={styles.empty}>لا توجد طلبات</Text> : null}
         </ScrollView>
+      )}
+    </View>
+  );
+}
+
+function OrderCard({ o, s, itemsCount, handleReorder, router, formatDate }: any) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <View style={styles.card}>
+      <Pressable onPress={() => setExpanded(!expanded)} style={{ gap: 4 }}>
+        <View style={styles.row}>
+          <Text style={styles.business}>{o.business?.name || 'منشأة شو عبالك'}</Text>
+          <View style={[styles.badge, { backgroundColor: s.bg }]}>
+            <Text style={[styles.badgeText, { color: s.fg }]}>{s.label}</Text>
+          </View>
+        </View>
+        <Text style={styles.muted}>{formatDate(o.createdAt)}</Text>
+        <Text style={styles.muted}>{itemsCount} عناصر · {o.total} ₪</Text>
+      </Pressable>
+
+      {expanded && (
+        <View style={styles.expandedContent}>
+          <Text style={styles.sectionTitle}>المنتجات:</Text>
+          {o.items?.map((it: any) => (
+            <View key={it.id} style={styles.itemRow}>
+              <Text style={styles.itemText}>{it.quantity}x {it.product?.name}</Text>
+              <Text style={styles.itemText}>{it.unitPrice} ₪</Text>
+            </View>
+          ))}
+          <View style={styles.itemRow}>
+            <Text style={[styles.itemText, { fontFamily: fontFamily.bold }]}>رسوم التوصيل</Text>
+            <Text style={[styles.itemText, { fontFamily: fontFamily.bold }]}>
+              {o.total - (o.items?.reduce((acc: number, it: any) => acc + it.quantity * it.unitPrice, 0) || 0)} ₪
+            </Text>
+          </View>
+          
+          {o.driver && o.status === 'DELIVERED' && (
+            <Text style={styles.driverInfo}>تم التوصيل بواسطة: {o.driver?.user?.name}</Text>
+          )}
+
+          <View style={styles.actions}>
+            <Pressable style={styles.secondaryBtn} onPress={() => handleReorder(o)}>
+              <Text style={styles.secondaryText}>أعد الطلب</Text>
+            </Pressable>
+            <Pressable style={styles.detailsBtn} onPress={() => router.push({ pathname: '/tracking', params: { id: o.id } })}>
+              <Text style={styles.detailsText}>التتبع والتفاصيل</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+      {!expanded && (
+        <View style={styles.actions}>
+          <Pressable style={styles.secondaryBtn} onPress={() => handleReorder(o)}>
+            <Text style={styles.secondaryText}>أعد الطلب</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -133,4 +173,9 @@ const styles = StyleSheet.create({
   detailsBtn: { flex: 1, height: 44, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   detailsText: { color: '#fff', fontFamily: fontFamily.bold },
   empty: { textAlign: 'center', color: colors.textMuted, fontFamily: fontFamily.regular, marginTop: spacing[12] },
+  expandedContent: { marginTop: spacing[2], borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing[3] },
+  sectionTitle: { fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2], textAlign: 'right' },
+  itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 4 },
+  itemText: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: fontFamily.regular },
+  driverInfo: { marginTop: spacing[2], color: colors.primary, fontSize: fontSizes.sm, fontFamily: fontFamily.semibold, textAlign: 'right' },
 });

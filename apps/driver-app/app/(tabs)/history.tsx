@@ -1,4 +1,5 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -60,17 +61,7 @@ export default function History() {
       </View>
 
       {completedOrders.map((o: any) => (
-        <View key={o.id} style={styles.card}>
-          <View style={styles.row}>
-            <Text style={styles.business}>{o.business?.name || 'المنشأة التجارية'}</Text>
-            <Text style={styles.amount}>+{o.business?.area?.deliveryFee ?? 5} ₪</Text>
-          </View>
-          <Text style={styles.muted}>{o.customer?.area?.city} - {o.customer?.area?.name || 'العنوان المسجل'}</Text>
-          <View style={styles.row}>
-            <Text style={styles.muted}>{formatDate(o.createdAt)}</Text>
-            <View style={styles.badge}><Text style={styles.badgeText}>تم التسليم</Text></View>
-          </View>
-        </View>
+        <DriverOrderCard key={o.id} o={o} formatDate={formatDate} />
       ))}
 
       {completedOrders.length === 0 ? (
@@ -79,6 +70,35 @@ export default function History() {
         </View>
       ) : null}
     </ScrollView>
+  );
+}
+
+function DriverOrderCard({ o, formatDate }: any) {
+  const [expanded, setExpanded] = useState(false);
+  const itemsCount = o.items?.reduce((acc: number, it: any) => acc + it.quantity, 0) ?? 0;
+
+  return (
+    <Pressable style={styles.card} onPress={() => setExpanded(!expanded)}>
+      <View style={styles.row}>
+        <Text style={styles.business}>{o.business?.name || 'المنشأة التجارية'}</Text>
+        <Text style={styles.amount}>+{o.business?.area?.deliveryFee ?? 5} ₪</Text>
+      </View>
+      <Text style={styles.muted}>{o.customer?.area?.city} - {o.customer?.area?.name || 'العنوان المسجل'}</Text>
+      <View style={styles.row}>
+        <Text style={styles.muted}>{formatDate(o.createdAt)}</Text>
+        <View style={styles.badge}><Text style={styles.badgeText}>تم التسليم</Text></View>
+      </View>
+      
+      {expanded && (
+        <View style={styles.expandedContent}>
+          <Text style={styles.sectionTitle}>تفاصيل إضافية:</Text>
+          <Text style={styles.detailText}>رقم الطلب: #{o.id.slice(-6).toUpperCase()}</Text>
+          <Text style={styles.detailText}>العميل: {o.customer?.name} ({o.customer?.phone})</Text>
+          <Text style={styles.detailText}>العناصر: {itemsCount}</Text>
+          <Text style={styles.detailText}>دفع العميل: {o.total} ₪ ({o.paymentMethod === 'CASH' ? 'نقدي' : 'إلكتروني'})</Text>
+        </View>
+      )}
+    </Pressable>
   );
 }
 
@@ -95,4 +115,7 @@ const styles = StyleSheet.create({
   badgeText: { color: '#166534', fontFamily: fontFamily.bold, fontSize: fontSizes.xs },
   emptyCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[8], borderWidth: 1, borderColor: colors.border, alignItems: 'center', marginTop: spacing[4] },
   emptyText: { color: colors.textMuted, fontSize: fontSizes.sm },
+  expandedContent: { marginTop: spacing[3], paddingTop: spacing[3], borderTopWidth: 1, borderTopColor: colors.border },
+  sectionTitle: { fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2], textAlign: 'right' },
+  detailText: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: fontFamily.regular, textAlign: 'right', marginBottom: 2 },
 });

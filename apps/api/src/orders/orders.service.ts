@@ -157,6 +157,61 @@ export class OrdersService {
     return updatedOrder;
   }
 
+  async rejectDriver(id: string, user: AuthUser) {
+    if (user.role !== UserRole.DRIVER) {
+      throw new ForbiddenException('فقط السائق يمكنه رفض الطلب');
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { driver: { include: { user: true } }, business: true },
+    });
+
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+
+    // Make sure the driver rejecting is the one currently assigned
+    if (!order.driverId || order.driver?.userId !== user.id) {
+      throw new ForbiddenException('أنت غير معين لهذا الطلب أو الطلب غير مسند لأي سائق');
+    }
+
+    if (order.status !== OrderStatus.PICKED_UP) {
+      throw new BadRequestException('يمكنك رفض الطلبات التي قيد الاستلام (في الطريق) فقط');
+    }
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      // Revert order status to READY and unassign driver
+      await tx.order.update({
+        where: { id },
+        data: {
+          status: OrderStatus.READY,
+          driverId: null,
+          statusHistory: { create: { status: OrderStatus.READY, changedBy: user.id } },
+        },
+      });
+
+      // Free the driver
+      await tx.driver.update({
+        where: { id: order.driverId! },
+        data: { status: DriverStatus.AVAILABLE },
+      });
+
+      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+    });
+
+    // Notify Business Owner
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderDriverRejected(updatedOrder.business.ownerId, {
+        orderId: updatedOrder.id,
+        driverName: order.driver.user?.name || 'سائق غير معروف',
+      });
+    }
+
+    // Update customer tracking that order is back to READY
+    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.READY);
+
+    return updatedOrder;
+  }
+
   // --- authorization helpers ---
 
   private async scopeFor(user: AuthUser): Promise<Prisma.OrderWhereInput> {

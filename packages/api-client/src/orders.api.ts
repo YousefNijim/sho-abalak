@@ -58,4 +58,7 @@ export const ordersApi = {
 
   updateStatus: (id: string, dto: UpdateOrderStatusDto) =>
     http.patch<Order>(`/orders/${id}/status`, dto).then((r) => r.data),
+
+  rejectDriver: (id: string) =>
+    http.patch<Order>(`/orders/${id}/reject-driver`).then((r) => r.data),
 };

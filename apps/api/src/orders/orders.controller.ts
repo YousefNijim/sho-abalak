@@ -38,4 +38,11 @@ export class OrdersController {
   updateStatus(@Param('id') id: string, @CurrentUser() user: AuthUser, @Body() dto: UpdateStatusDto) {
     return this.orders.updateStatus(id, user, dto);
   }
+
+  @Patch(':id/reject-driver')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.DRIVER)
+  rejectDriver(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.orders.rejectDriver(id, user);
+  }
 }

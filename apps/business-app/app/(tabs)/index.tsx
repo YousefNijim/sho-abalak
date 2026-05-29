@@ -47,12 +47,20 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['business-orders'] });
     };
 
+    const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
+      console.log('WS order driver rejected:', payload.orderId);
+      Alert.alert('سائق غير متاح', `اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+    };
+
     socket.on('order:new', handleNewOrder);
     socket.on('order:status_update', handleStatusUpdate);
+    socket.on('order:driver_rejected', handleDriverRejected);
 
     return () => {
       socket.off('order:new', handleNewOrder);
       socket.off('order:status_update', handleStatusUpdate);
+      socket.off('order:driver_rejected', handleDriverRejected);
     };
   }, [socket, queryClient]);
 

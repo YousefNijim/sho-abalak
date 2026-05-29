@@ -97,4 +97,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       status,
     });
   }
+
+  /** Alerts the business owner that the driver rejected the assignment */
+  emitOrderDriverRejected(businessOwnerId: string, payload: { orderId: string; driverName: string }) {
+    this.logger.log(`Emit driver rejected to business owner business:owner:${businessOwnerId} for order:${payload.orderId}`);
+    this.server.to(`business:owner:${businessOwnerId}`).emit(SocketEvents.ORDER_DRIVER_REJECTED, payload);
+  }
 }
