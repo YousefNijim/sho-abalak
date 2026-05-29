@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { MapPin, Bike, Phone, Package } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
@@ -34,7 +35,7 @@ export default function Tracking() {
 
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
       if (payload.orderId === id) {
-        console.log(`WS instant order status update received: ${payload.status}`);
+        // socket update received — invalidate query
         queryClient.invalidateQueries({ queryKey: ['order', id] });
       }
     };
@@ -49,7 +50,9 @@ export default function Tracking() {
   if (!id) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <Text style={{ fontSize: 64, marginBottom: spacing[4] }}>📍</Text>
+        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[5] }}>
+          <MapPin size={40} color={colors.primary} />
+        </View>
         <Text style={{ fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2] }}>لا يوجد طلب لتتبعه</Text>
         <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] }}>تصفح طلباتك السابقة لمتابعة حالة أي طلب نشط.</Text>
         <Button title="الذهاب للطلبات" onPress={() => router.replace('/(tabs)/orders')} />
@@ -68,6 +71,9 @@ export default function Tracking() {
   if (error || !order) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
+        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.error + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[4] }}>
+          <Package size={40} color={colors.error} />
+        </View>
         <Text style={{ color: colors.error, fontSize: fontSizes.lg, fontFamily: fontFamily.bold, marginBottom: spacing[4] }}>فشل تحميل تفاصيل الطلب</Text>
         <Button title="تحديث" onPress={() => router.replace('/(tabs)')} />
       </View>
@@ -112,7 +118,7 @@ export default function Tracking() {
       {/* Cancelled Banner */}
       {isCancelled && (
         <View style={styles.cancelledBanner}>
-          <Text style={styles.cancelledText}>❌ هذا الطلب تم إلغاؤه.</Text>
+          <Text style={styles.cancelledText}>هذا الطلب تم إلغاؤه.</Text>
         </View>
       )}
 
@@ -149,7 +155,7 @@ export default function Tracking() {
       {/* Driver Info */}
       {!isCancelled && order.status !== 'PENDING' && order.status !== 'CONFIRMED' && (
         <View style={styles.driver}>
-          <View style={styles.driverAvatar}><Text style={{ fontSize: 28 }}>🛵</Text></View>
+          <View style={styles.driverAvatar}><Bike size={24} color={colors.primary} /></View>
           {order.driver ? (
             <>
               <View style={{ flex: 1 }}>
@@ -157,7 +163,8 @@ export default function Tracking() {
                 <Text style={styles.muted}>سائق التوصيل · {order.driver.user?.phone || ''}</Text>
               </View>
               <Pressable style={styles.callBtn} onPress={handleCallDriver}>
-                <Text style={styles.callText}>📞 اتصال</Text>
+                <Phone size={16} color="#fff" />
+                <Text style={styles.callText}>اتصال</Text>
               </Pressable>
             </>
           ) : (
@@ -203,7 +210,7 @@ const styles = StyleSheet.create({
   driverAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   driverName: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
-  callBtn: { backgroundColor: colors.secondary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
+  callBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.secondary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
   callText: { color: '#fff', fontFamily: fontFamily.bold },
   detailTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right', marginBottom: spacing[2] },
   itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 4 },

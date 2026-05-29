@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ShoppingCart, Minus, Plus } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
@@ -66,7 +67,9 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <Text style={{ fontSize: 64, marginBottom: spacing[4] }}>🛒</Text>
+        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[5] }}>
+          <ShoppingCart size={40} color={colors.primary} />
+        </View>
         <Text style={{ fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2] }}>سلتك فارغة</Text>
         <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] }}>تصفح الأقسام وأضف بعض المنتجات الشهية والمنوعة لسلتك!</Text>
         <Button title="ابدأ التسوق" onPress={() => router.replace('/(tabs)')} />
@@ -87,9 +90,9 @@ export default function Cart() {
               <Text style={styles.price}>{it.price} ₪</Text>
             </View>
             <View style={styles.qtyRow}>
-              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, -1)}><Text style={styles.qtySign}>−</Text></Pressable>
+              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, -1)}><Minus size={14} color={colors.primary} strokeWidth={2.5} /></Pressable>
               <Text style={styles.qty}>{it.quantity}</Text>
-              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, 1)}><Text style={styles.qtySign}>+</Text></Pressable>
+              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, 1)}><Plus size={14} color={colors.primary} strokeWidth={2.5} /></Pressable>
             </View>
           </View>
         ))}

@@ -82,9 +82,9 @@ export default function Home() {
             </Text>
             <Text style={styles.greetingTitle}>شو عبالك اليوم؟</Text>
           </View>
-          <View style={styles.avatarWrap}>
+          <Pressable style={styles.avatarWrap} onPress={() => router.push('/(tabs)/profile')}>
             <MapPin size={18} color={colors.primary} />
-          </View>
+          </Pressable>
         </View>
 
         {/* ─── Search bar ─── */}
@@ -100,7 +100,13 @@ export default function Home() {
               onChangeText={setSearch}
             />
           </View>
-          <Pressable style={styles.filterBtn}>
+          <Pressable
+            style={styles.filterBtn}
+            onPress={() => {
+              setSearch('');
+              setSelectedCat(null);
+            }}
+          >
             <SlidersHorizontal size={18} color={colors.secondary} />
           </Pressable>
         </View>
@@ -119,7 +125,13 @@ export default function Home() {
           <View style={{ flex: 1 }}>
             <Text style={styles.bannerTitle}>خصم 20%{'\n'}على طلبك الأول</Text>
             <Text style={styles.bannerSub}>مأكولات شهية بخصومات حصرية</Text>
-            <Pressable style={styles.bannerBtn}>
+            <Pressable
+              style={styles.bannerBtn}
+              onPress={() => {
+                setSelectedCat('RESTAURANT');
+                setSearch('');
+              }}
+            >
               <Text style={styles.bannerBtnText}>اطلب الآن</Text>
             </Pressable>
           </View>
