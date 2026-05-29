@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-29
-**Current phase:** Phase 8 (All phases completed and verified; monorepo builds flawlessly with 0 errors)
+**Current phase:** Phase 10 (Verification and validation fully completed; monorepo compiles topologically, E2E order lifecycle integration specs are 100% successful, and Docker Compose configurations support a full production staging stack)
 
 ---
 
@@ -131,8 +131,7 @@
 - **All domain modules are now built** (auth, areas, businesses, products, orders, drivers, payments, reviews, users). Not yet built: image uploads (S3/Cloudinary), FCM push.
 - ✅ **Socket.io Gateway is fully operational & wired.**
 - No **Redis** integration (ioredis is installed, not wired).
-- DTOs + class-validator + role guards are in place for the built modules; **no automated tests yet** (verified manually via curl/REST).
-- ~~**DB not migrated yet**~~ ✅ **Done** — Docker Desktop installed, Postgres+Redis up, initial migration `20260528223816_init` applied, areas seeded (22 rows). `.env` created. API verified live on :3001 (`/health` 200, Swagger at `/docs`).
+- DTOs + class-validator + role guards are in place for the built modules; **comprehensive E2E order lifecycle integration tests successfully implemented and passing** (Jest supertest running under `pnpm --filter @shu/api test`).
 - Firebase FCM, S3/Cloudinary uploads: not started.
 
 ### Frontend ↔ data wiring — ✅ **100% CONNECTED**

@@ -22,6 +22,50 @@ services:
     volumes:
       - redis_data:/data
 
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: shu_api
+    restart: unless-stopped
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://shu:shu_password@postgres:5432/shu_abalak
+      PORT: 3001
+      JWT_SECRET: shu_jwt_secret_key_for_testing_and_verification_cairo_montserrat_rtl
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin-dashboard/Dockerfile
+    container_name: shu_admin
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost/api
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:alpine
+    container_name: shu_nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - admin
+
 volumes:
   postgres_data:
   redis_data:
