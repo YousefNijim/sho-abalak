@@ -1,25 +1,29 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { ordersApi } from '@shu/api-client';
 import type { Order } from '@shu/api-client';
 import { useCartStore } from '../../src/stores/cart.store';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Bell, MapPin, Navigation, RefreshCcw } from 'lucide-react-native';
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
-  PENDING: { label: 'بانتظار التأكيد', bg: '#FEF3C7', fg: '#D97706' },
-  CONFIRMED: { label: 'تم التأكيد', bg: '#DBEAFE', fg: '#2563EB' },
-  PREPARING: { label: 'جاري التحضير', bg: '#FFEDD5', fg: '#C2410C' },
-  READY: { label: 'جاهز للاستلام', bg: '#F3E8FF', fg: '#7C3AED' },
-  PICKED_UP: { label: 'في الطريق', bg: '#CFFAFE', fg: '#0E7490' },
-  DELIVERED: { label: 'تم التسليم', bg: '#DCFCE7', fg: '#166534' },
-  CANCELLED: { label: 'ملغى', bg: '#FEE2E2', fg: '#991B1B' },
+  PENDING: { label: 'بانتظار التأكيد', bg: '#ffedd5', fg: '#F59E0B' }, // warning-amber
+  CONFIRMED: { label: 'تم التأكيد', bg: '#ffedd5', fg: '#F59E0B' },
+  PREPARING: { label: 'قيد التحضير', bg: '#ffedd5', fg: '#F59E0B' },
+  READY: { label: 'جاهز للاستلام', bg: '#ffedd5', fg: '#F59E0B' },
+  PICKED_UP: { label: 'في الطريق', bg: '#ffedd5', fg: '#F59E0B' },
+  DELIVERED: { label: 'تم التوصيل', bg: '#dcfce7', fg: '#22C55E' }, // success-green
+  CANCELLED: { label: 'ملغى', bg: '#fee2e2', fg: '#EF4444' }, // error-red
 };
 
 export default function Orders() {
   const router = useRouter();
-  const [tab, setTab] = useState(0);
+  const insets = useSafeAreaInsets();
+  const [tab, setTab] = useState<'CURRENT' | 'PREVIOUS'>('CURRENT');
 
   const addItem = useCartStore((s) => s.addItem);
   const clearCart = useCartStore((s) => s.clear);
@@ -36,7 +40,7 @@ export default function Orders() {
   const past = orders.filter((o: any) =>
     ['DELIVERED', 'CANCELLED'].includes(o.status),
   );
-  const list = tab === 0 ? current : past;
+  const list = tab === 'CURRENT' ? current : past;
 
   const handleReorder = (o: Order) => {
     clearCart();
@@ -48,7 +52,7 @@ export default function Orders() {
           price: it.unitPrice,
         },
         o.businessId,
-        o.customer?.area?.name || '', // fallback
+        o.customer?.area?.name || '',
       );
     });
     router.push('/cart');
@@ -69,113 +73,318 @@ export default function Orders() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={styles.tabs}>
-        {['الحالية', 'السابقة'].map((t, i) => (
-          <Pressable key={t} style={[styles.tab, tab === i && styles.tabActive]} onPress={() => setTab(i)}>
-            <Text style={[styles.tabText, tab === i && styles.tabTextActive]}>{t}</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+        <View style={styles.headerRight}>
+          <Pressable style={styles.iconBtn}>
+            <Bell size={24} color={colors.primary} />
           </Pressable>
-        ))}
+          <View style={styles.avatarWrap}>
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDh93PwDaqVIlUIoTlscPh4woOwQpD7y_Mrs8EiM2sWRt2NN3H18sugX2vvmYNigGR_lw1EA-NDuSPgKx4xKLSBPZ0W9vbN4v9fWK2DSK3wOENLWyRTnm3urIBlTMXd9wdrHZMlglmqzonhHg-Qq_1imfh-5AzD9NS5tl53qdh7zrKVocjAW0tZTLLKQaL8wbu5Tx-H3jCvRJkFd7IjCpWhnR2FCfrEWqHBiTDCcOfFa9hmbq3R_1w79sWTXkOwmQ5l2qWrmqTJYG3e' }}
+              style={styles.avatar}
+              contentFit="cover"
+            />
+          </View>
+        </View>
+        <Text style={styles.headerTitle}>شو عبالك؟</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
-      {isLoading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
-          {list.map((o: any) => {
-            const s = STATUS[o.status] || { label: o.status, bg: colors.border, fg: colors.textPrimary };
-            const itemsCount = o.items?.reduce((acc: number, it: any) => acc + Number(it.quantity), 0) ?? 0;
-            return (
-              <OrderCard key={o.id} o={o} s={s} itemsCount={itemsCount} handleReorder={handleReorder} router={router} formatDate={formatDate} />
-            );
-          })}
-          {list.length === 0 ? <Text style={styles.empty}>لا توجد طلبات</Text> : null}
-        </ScrollView>
-      )}
-    </View>
-  );
-}
-
-function OrderCard({ o, s, itemsCount, handleReorder, router, formatDate }: any) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <View style={styles.card}>
-      <Pressable onPress={() => setExpanded(!expanded)} style={{ gap: 4 }}>
-        <View style={styles.row}>
-          <Text style={styles.business}>{o.business?.name || 'منشأة شو عبالك'}</Text>
-          <View style={[styles.badge, { backgroundColor: s.bg }]}>
-            <Text style={[styles.badgeText, { color: s.fg }]}>{s.label}</Text>
-          </View>
-        </View>
-        <Text style={styles.muted}>{formatDate(o.createdAt)}</Text>
-        <Text style={styles.muted}>{itemsCount} عناصر · {o.total} ₪</Text>
-      </Pressable>
-
-      {expanded && (
-        <View style={styles.expandedContent}>
-          <Text style={styles.sectionTitle}>المنتجات:</Text>
-          {o.items?.map((it: any) => (
-            <View key={it.id} style={styles.itemRow}>
-              <Text style={styles.itemText}>{it.quantity}x {it.product?.name}</Text>
-              <Text style={styles.itemText}>{it.unitPrice} ₪</Text>
-            </View>
-          ))}
-          <View style={styles.itemRow}>
-            <Text style={[styles.itemText, { fontFamily: fontFamily.bold }]}>رسوم التوصيل</Text>
-            <Text style={[styles.itemText, { fontFamily: fontFamily.bold }]}>
-              {o.total - (o.items?.reduce((acc: number, it: any) => acc + it.quantity * it.unitPrice, 0) || 0)} ₪
-            </Text>
-          </View>
-          
-          {o.driver && o.status === 'DELIVERED' && (
-            <Text style={styles.driverInfo}>تم التوصيل بواسطة: {o.driver?.user?.name}</Text>
-          )}
-
-          <View style={styles.actions}>
-            <Pressable style={styles.secondaryBtn} onPress={() => handleReorder(o)}>
-              <Text style={styles.secondaryText}>أعد الطلب</Text>
-            </Pressable>
-            <Pressable style={styles.detailsBtn} onPress={() => router.push({ pathname: '/tracking', params: { id: o.id } })}>
-              <Text style={styles.detailsText}>التتبع والتفاصيل</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-      {!expanded && (
-        <View style={styles.actions}>
-          <Pressable style={styles.secondaryBtn} onPress={() => handleReorder(o)}>
-            <Text style={styles.secondaryText}>أعد الطلب</Text>
+      {/* Main Content */}
+      <View style={styles.mainContent}>
+        {/* Tabs */}
+        <View style={styles.tabsContainer}>
+          <Pressable
+            style={[styles.tab, tab === 'CURRENT' && styles.tabActive]}
+            onPress={() => setTab('CURRENT')}
+          >
+            <Text style={[styles.tabText, tab === 'CURRENT' && styles.tabTextActive]}>الحالية</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tab, tab === 'PREVIOUS' && styles.tabActive]}
+            onPress={() => setTab('PREVIOUS')}
+          >
+            <Text style={[styles.tabText, tab === 'PREVIOUS' && styles.tabTextActive]}>السابقة</Text>
           </Pressable>
         </View>
-      )}
+
+        {/* Orders List */}
+        {isLoading ? (
+          <View style={styles.loaderWrap}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : (
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {list.map((o: any) => {
+              const s = STATUS[o.status] || { label: o.status, bg: '#f5f2fc', fg: colors.textPrimary };
+              const itemsCount = o.items?.reduce((acc: number, it: any) => acc + Number(it.quantity), 0) ?? 0;
+              const isCurrent = tab === 'CURRENT';
+
+              return (
+                <View key={o.id} style={styles.orderCard}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardHeaderInfo}>
+                      <View style={styles.cardTitleRow}>
+                        <Text style={styles.businessName} numberOfLines={1}>{o.business?.name || 'منشأة شو عبالك'}</Text>
+                        <View style={[styles.badge, { backgroundColor: s.bg }]}>
+                          <Text style={[styles.badgeText, { color: s.fg }]}>{s.label}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.dateText}>{formatDate(o.createdAt)}</Text>
+                    </View>
+                    <View style={styles.imageWrap}>
+                      <Image
+                        source={{ uri: o.items?.[0]?.product?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4' }}
+                        style={styles.cardImage}
+                        contentFit="cover"
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.cardFooter}>
+                    <View style={styles.footerInfo}>
+                      <Text style={styles.itemsCountText}>{itemsCount} أصناف</Text>
+                      <Text style={styles.totalPriceText}>{o.total} ₪</Text>
+                    </View>
+                    
+                    {isCurrent ? (
+                      <Pressable
+                        style={styles.actionBtn}
+                        onPress={() => router.push({ pathname: '/tracking', params: { id: o.id } })}
+                      >
+                        <Navigation size={18} color={colors.primary} />
+                        <Text style={styles.actionBtnText}>تتبع الطلب</Text>
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        style={styles.actionBtn}
+                        onPress={() => handleReorder(o)}
+                      >
+                        <RefreshCcw size={18} color={colors.primary} />
+                        <Text style={styles.actionBtnText}>إعادة الطلب</Text>
+                      </Pressable>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+            
+            {list.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <Text style={styles.emptyText}>لا توجد طلبات</Text>
+              </View>
+            ) : null}
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', padding: spacing[4], gap: spacing[2] },
-  tab: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  tabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tabText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
-  tabTextActive: { color: '#fff' },
-  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 4 },
-  row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  business: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
-  badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: radius.full },
-  badgeText: { fontSize: fontSizes.xs, fontFamily: fontFamily.bold },
-  muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right', fontFamily: fontFamily.regular },
-  actions: { flexDirection: 'row-reverse', gap: spacing[3], marginTop: spacing[3] },
-  secondaryBtn: { flex: 1, height: 44, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  secondaryText: { color: colors.primary, fontFamily: fontFamily.bold },
-  detailsBtn: { flex: 1, height: 44, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  detailsText: { color: '#fff', fontFamily: fontFamily.bold },
-  empty: { textAlign: 'center', color: colors.textMuted, fontFamily: fontFamily.regular, marginTop: spacing[12] },
-  expandedContent: { marginTop: spacing[2], borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing[3] },
-  sectionTitle: { fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2], textAlign: 'right' },
-  itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', marginBottom: 4 },
-  itemText: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: fontFamily.regular },
-  driverInfo: { marginTop: spacing[2], color: colors.primary, fontSize: fontSizes.sm, fontFamily: fontFamily.semibold, textAlign: 'right' },
+  container: {
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
+  },
+  header: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    backgroundColor: '#FCF3DC',
+    zIndex: 40,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    }),
+  },
+  headerRight: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
+  },
+  iconBtn: {
+    padding: spacing[1],
+  },
+  avatarWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#ffdbc7', // primary-fixed
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+  },
+  headerTitle: {
+    fontFamily: fontFamily.bold, // headline-lg-mobile
+    fontSize: 26,
+    color: colors.primary,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  mainContent: {
+    flex: 1,
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[6],
+  },
+  tabsContainer: {
+    flexDirection: 'row-reverse',
+    backgroundColor: '#FFFFFF', // surface-white
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(229, 224, 213, 1)', // border-beige
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 1 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    }),
+    marginBottom: spacing[6],
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: colors.primary,
+  },
+  tabText: {
+    fontFamily: fontFamily.semibold, // headline-sm
+    fontSize: 20,
+    color: colors.textMuted, // muted-gray
+  },
+  tabTextActive: {
+    color: colors.primary,
+  },
+  loaderWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollContent: {
+    gap: spacing[4],
+    paddingBottom: spacing[8],
+  },
+  orderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
+    padding: spacing[4],
+    borderWidth: 1,
+    borderColor: 'transparent',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  cardHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'flex-start',
+    gap: spacing[3],
+    marginBottom: spacing[4],
+  },
+  imageWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardHeaderInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  cardTitleRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  businessName: {
+    fontFamily: fontFamily.semibold, // headline-sm
+    fontSize: 20,
+    color: colors.textPrimary, // on-surface
+    flex: 1,
+    textAlign: 'right',
+  },
+  badge: {
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    borderRadius: radius.full,
+    marginLeft: spacing[2],
+  },
+  badgeText: {
+    fontFamily: fontFamily.medium, // label-md
+    fontSize: 13,
+  },
+  dateText: {
+    fontFamily: fontFamily.medium, // label-sm
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 4,
+    textAlign: 'right',
+  },
+  cardFooter: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(229, 224, 213, 1)', // border-beige
+  },
+  footerInfo: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+  },
+  itemsCountText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  totalPriceText: {
+    fontFamily: fontFamily.bold, // body-lg
+    fontSize: 17,
+    color: colors.primary,
+  },
+  actionBtn: {
+    height: 44,
+    paddingHorizontal: spacing[6],
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  actionBtnText: {
+    fontFamily: fontFamily.bold, // button-text
+    fontSize: 16,
+    color: colors.primary,
+  },
+  emptyWrap: {
+    marginTop: spacing[12],
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: fontFamily.regular,
+    color: colors.textMuted,
+    fontSize: 16,
+  },
 });

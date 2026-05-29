@@ -1,26 +1,31 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, Minus, Plus } from 'lucide-react-native';
+import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { businessesApi, ordersApi } from '@shu/api-client';
 import type { CreateOrderDto } from '@shu/api-client';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Cart() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
   const items = useCartStore((s) => s.items);
   const updateQty = useCartStore((s) => s.updateQty);
+  const removeItem = useCartStore((s) => s.removeItem);
   const businessId = useCartStore((s) => s.businessId);
   const areaId = useCartStore((s) => s.areaId);
   const clearCart = useCartStore((s) => s.clear);
   const subtotal = useCartStore((s) => s.total());
 
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
+  const [notes, setNotes] = useState('');
 
   // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -38,7 +43,6 @@ export default function Cart() {
     onSuccess: (data: any) => {
       clearCart();
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      // Navigate to tracking screen with order ID
       router.replace({
         pathname: '/tracking',
         params: { id: data.id },
@@ -52,7 +56,6 @@ export default function Cart() {
 
   const handleConfirm = () => {
     if (!businessId || !areaId) return;
-
     createOrder.mutate({
       businessId,
       areaId,
@@ -61,106 +64,454 @@ export default function Cart() {
         productId: it.productId,
         quantity: it.quantity,
       })),
-    });
+      notes: notes.trim() || undefined,
+    } as CreateOrderDto & { notes?: string });
   };
 
   if (items.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[5] }}>
-          <ShoppingCart size={40} color={colors.primary} />
+      <View style={[styles.emptyContainer, { paddingTop: insets.top }]}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+            <ArrowRight size={28} color={colors.primary} />
+          </Pressable>
+          <Text style={styles.headerTitle}>سلّتك</Text>
         </View>
-        <Text style={{ fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2] }}>سلتك فارغة</Text>
-        <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] }}>تصفح الأقسام وأضف بعض المنتجات الشهية والمنوعة لسلتك!</Text>
-        <Button title="ابدأ التسوق" onPress={() => router.replace('/(tabs)')} />
+        <View style={styles.emptyWrap}>
+          <View style={styles.emptyCircle}>
+            <ShoppingCart size={40} color={colors.primary} />
+          </View>
+          <Text style={styles.emptyTitle}>سلتك فارغة</Text>
+          <Text style={styles.emptyDesc}>تصفح الأقسام وأضف بعض المنتجات الشهية والمنوعة لسلتك!</Text>
+          <Button title="ابدأ التسوق" onPress={() => router.replace('/(tabs)')} style={styles.emptyBtn} />
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 120, gap: spacing[3] }}>
-        <Text style={styles.businessHeader}>طلبك من {business?.name || 'المنشأة'}</Text>
-
-        {items.map((it) => (
-          <View key={it.productId} style={styles.item}>
-            <View style={styles.img}><Text style={{ fontSize: 28 }}>🍽️</Text></View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{it.name}</Text>
-              <Text style={styles.price}>{it.price} ₪</Text>
-            </View>
-            <View style={styles.qtyRow}>
-              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, -1)}><Minus size={14} color={colors.primary} strokeWidth={2.5} /></Pressable>
-              <Text style={styles.qty}>{it.quantity}</Text>
-              <Pressable style={styles.qtyBtn} onPress={() => updateQty(it.productId, 1)}><Plus size={14} color={colors.primary} strokeWidth={2.5} /></Pressable>
-            </View>
-          </View>
-        ))}
-
-        {/* Summary */}
-        {loadingBusiness ? (
-          <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 16 }} />
-        ) : (
-          <View style={styles.summary}>
-            <Row label="المجموع الفرعي" value={`${subtotal} ₪`} />
-            <Row label="رسوم التوصيل" value={`${fee} ₪`} />
-            <View style={styles.divider} />
-            <Row label="الإجمالي" value={`${total} ₪`} bold />
-          </View>
-        )}
-
-        {/* Payment */}
-        <Text style={styles.sectionTitle}>طريقة الدفع</Text>
-        <Pressable style={styles.payOption} onPress={() => setPayment('CASH')}>
-          <View style={[styles.radio, payment === 'CASH' && styles.radioOn]} />
-          <Text style={styles.payText}>نقدي عند الاستلام</Text>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+        <Text style={styles.headerTitle}>سلّتك</Text>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <ArrowRight size={28} color={colors.primary} />
         </Pressable>
-        <Pressable style={styles.payOption} onPress={() => setPayment('ELECTRONIC')}>
-          <View style={[styles.radio, payment === 'ELECTRONIC' && styles.radioOn]} />
-          <Text style={styles.payText}>دفع إلكتروني</Text>
-        </Pressable>
+      </View>
+
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 120 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Cart Items */}
+        <View style={styles.itemsSection}>
+          {items.map((it) => (
+            <View key={it.productId} style={styles.itemCard}>
+              <View style={styles.itemImageWrap}>
+                {it.imageUrl ? (
+                  <Image source={{ uri: it.imageUrl }} style={styles.itemImage} contentFit="cover" />
+                ) : (
+                  <View style={styles.itemImagePlaceholder}>
+                    <Text style={{ fontSize: 32 }}>🍽️</Text>
+                  </View>
+                )}
+              </View>
+              
+              <View style={styles.itemContent}>
+                <View style={styles.itemHeader}>
+                  <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
+                  <Pressable onPress={() => removeItem(it.productId)} style={styles.deleteBtn}>
+                    <Trash2 size={20} color={colors.error} />
+                  </Pressable>
+                </View>
+                <Text style={styles.itemPrice}>{it.price} ₪</Text>
+                
+                <View style={styles.itemFooter}>
+                  <View style={styles.qtyWrap}>
+                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1)}>
+                      <Plus size={18} color={colors.white} />
+                    </Pressable>
+                    <Text style={styles.qtyText}>{it.quantity}</Text>
+                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1)}>
+                      <Minus size={18} color={colors.textPrimary} />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Restaurant Notes */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>ملاحظات للمطعم</Text>
+          <TextInput
+            style={styles.notesInput}
+            multiline
+            placeholder="مثلاً: بدون بصل، صوص زيادة..."
+            placeholderTextColor={colors.textMuted}
+            value={notes}
+            onChangeText={setNotes}
+            textAlign="right"
+          />
+        </View>
+
+        {/* Payment Selection */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>طريقة الدفع</Text>
+          <View style={styles.paymentGrid}>
+            <Pressable
+              style={[styles.paymentCard, payment === 'CASH' && styles.paymentCardActive]}
+              onPress={() => setPayment('CASH')}
+            >
+              <Banknote size={32} color={payment === 'CASH' ? colors.primary : colors.textMuted} style={styles.paymentIcon} />
+              <Text style={[styles.paymentText, payment === 'CASH' && styles.paymentTextActive]}>نقد عند الاستلام</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.paymentCard, payment === 'ELECTRONIC' && styles.paymentCardActive]}
+              onPress={() => setPayment('ELECTRONIC')}
+            >
+              <CreditCard size={32} color={payment === 'ELECTRONIC' ? colors.primary : colors.textMuted} style={styles.paymentIcon} />
+              <Text style={[styles.paymentText, payment === 'ELECTRONIC' && styles.paymentTextActive]}>دفع إلكتروني</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Order Summary */}
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>المجموع الفرعي</Text>
+            <Text style={styles.summaryValueBold}>{subtotal} ₪</Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>رسوم التوصيل</Text>
+            <Text style={styles.summaryValueBold}>{loadingBusiness ? '...' : `${fee} ₪`}</Text>
+          </View>
+          <View style={styles.dashedDivider} />
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryTotalLabel}>الإجمالي</Text>
+            <Text style={styles.summaryTotalValue}>{loadingBusiness ? '...' : `${total} ₪`}</Text>
+          </View>
+        </View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Button
-          title={createOrder.isPending ? 'جاري إرسال الطلب...' : 'تأكيد الطلب'}
-          onPress={handleConfirm}
-          disabled={createOrder.isPending}
-        />
+      {/* Sticky Bottom Action Bar */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom || spacing[4] }]}>
+        <View style={styles.footerContent}>
+          <Button
+            onPress={handleConfirm}
+            loading={createOrder.isPending}
+            disabled={createOrder.isPending || loadingBusiness}
+            style={styles.confirmBtn}
+          >
+            <View style={styles.confirmBtnContent}>
+              <Text style={styles.confirmBtnText}>تأكيد الطلب</Text>
+              <ShoppingBag size={24} color={colors.white} />
+            </View>
+          </Button>
+        </View>
       </View>
     </View>
   );
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
-  return (
-    <View style={styles.row}>
-      <Text style={[styles.rowLabel, bold && styles.bold]}>{label}</Text>
-      <Text style={[styles.rowValue, bold && styles.bold]}>{value}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  businessHeader: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.primary, marginBottom: spacing[2], textAlign: 'right' },
-  item: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[3], borderWidth: 1, borderColor: colors.border },
-  img: { width: 56, height: 56, borderRadius: radius.md, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
-  price: { color: colors.primary, fontFamily: fontFamily.bold, marginTop: 2 },
-  qtyRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
-  qtyBtn: { width: 32, height: 32, borderRadius: radius.sm, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  qtySign: { fontSize: 18, fontFamily: fontFamily.bold, color: colors.primary },
-  qty: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, minWidth: 20, textAlign: 'center' },
-  summary: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2], marginTop: spacing[2] },
-  row: { flexDirection: 'row', justifyContent: 'space-between' },
-  rowLabel: { color: colors.textMuted, fontSize: fontSizes.base },
-  rowValue: { color: colors.textPrimary, fontSize: fontSizes.base },
-  bold: { fontFamily: fontFamily.bold, color: colors.textPrimary, fontSize: fontSizes.lg },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing[1] },
-  sectionTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing[2] },
-  payOption: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.md, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.border },
-  radioOn: { borderColor: colors.primary, backgroundColor: colors.primary },
-  payText: { fontSize: fontSizes.base, color: colors.textPrimary },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
+  container: {
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
+  },
+  header: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    backgroundColor: '#FCF3DC',
+    zIndex: 50,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  headerTitle: {
+    fontFamily: fontFamily.bold, // headline-sm equivalent
+    fontSize: 20,
+    color: colors.primary,
+  },
+  backBtn: {
+    padding: spacing[2],
+  },
+  scrollContent: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[6],
+    gap: spacing[6],
+  },
+  itemsSection: {
+    gap: spacing[3],
+  },
+  itemCard: {
+    backgroundColor: '#FFFFFF', // surface-white
+    borderRadius: radius.lg, // 12px or 16px
+    padding: spacing[3],
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  itemImageWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(229, 224, 213, 1)', // border-beige
+  },
+  itemImage: {
+    width: '100%',
+    height: '100%',
+  },
+  itemImagePlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  itemHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  itemName: {
+    fontFamily: fontFamily.semibold, // headline-sm
+    fontSize: 16,
+    color: colors.textPrimary,
+    flex: 1,
+    textAlign: 'right',
+  },
+  deleteBtn: {
+    padding: 2,
+  },
+  itemPrice: {
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
+    marginTop: 4,
+    textAlign: 'right',
+  },
+  itemFooter: {
+    marginTop: spacing[2],
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  qtyWrap: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: '#efecf6', // surface-container
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[2],
+    paddingVertical: spacing[1],
+    gap: spacing[3],
+  },
+  qtyBtnPlus: {
+    width: 32,
+    height: 32,
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qtyText: {
+    fontFamily: fontFamily.bold, // body-base
+    fontSize: 15,
+    color: colors.textPrimary,
+  },
+  qtyBtnMinus: {
+    width: 32,
+    height: 32,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: 'rgba(138, 114, 101, 1)', // outline
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  section: {
+    gap: spacing[2],
+  },
+  sectionTitle: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 16,
+    color: colors.textPrimary,
+    paddingHorizontal: 4,
+    textAlign: 'right',
+  },
+  notesInput: {
+    height: 96,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderRadius: radius.lg,
+    padding: spacing[4],
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    textAlignVertical: 'top',
+  },
+  paymentGrid: {
+    flexDirection: 'row-reverse',
+    gap: spacing[3],
+  },
+  paymentCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: 'transparent',
+    borderRadius: radius.lg,
+    padding: spacing[4],
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  paymentCardActive: {
+    borderColor: colors.primary,
+    backgroundColor: '#ffdbc7', // primary-fixed
+  },
+  paymentIcon: {
+    marginBottom: 4,
+  },
+  paymentText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textMuted, // on-surface-variant
+  },
+  paymentTextActive: {
+    color: colors.primary,
+  },
+  summaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.lg,
+    padding: spacing[4],
+    gap: spacing[3],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  summaryRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontFamily: fontFamily.regular,
+    fontSize: 15, // body-base
+    color: colors.textMuted, // on-surface-variant
+  },
+  summaryValueBold: {
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+    color: colors.textPrimary,
+  },
+  dashedDivider: {
+    height: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderStyle: 'dashed',
+    marginVertical: spacing[2],
+  },
+  summaryTotalLabel: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 20, // headline-sm
+    color: colors.textPrimary,
+  },
+  summaryTotalValue: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 20, // headline-sm
+    color: colors.primary,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[4],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 10 },
+      android: { elevation: 10 },
+      web: { boxShadow: '0 -4px 10px rgba(0,0,0,0.05)' },
+    }),
+    zIndex: 50,
+  },
+  footerContent: {
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  confirmBtn: {
+    width: '100%',
+    height: 52,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+  },
+  confirmBtnContent: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+  },
+  confirmBtnText: {
+    fontFamily: fontFamily.bold,
+    fontSize: 16, // button-text
+    color: colors.white,
+  },
+  emptyContainer: {
+    flex: 1,
+    backgroundColor: '#FCF3DC',
+  },
+  emptyWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing[6],
+  },
+  emptyCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: 'rgba(151, 72, 0, 0.1)', // primary with opacity
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[5],
+  },
+  emptyTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 24, // headline-md
+    color: colors.textPrimary,
+    marginBottom: spacing[2],
+  },
+  emptyDesc: {
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing[6],
+  },
+  emptyBtn: {
+    paddingHorizontal: spacing[8],
+  },
 });

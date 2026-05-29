@@ -14,11 +14,16 @@ import {
   Coffee,
   ChefHat,
   Plus,
+  ArrowRight,
+  Share2,
+  Heart,
+  Banknote
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi } from '@shu/api-client';
 import type { Product } from '@shu/api-client';
 import { useCartStore } from '../../src/stores/cart.store';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const CAT_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> = {
   RESTAURANT: { Icon: UtensilsCrossed, color: colors.primary },
@@ -29,22 +34,25 @@ const CAT_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> 
 export default function BusinessDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  
   const addItem    = useCartStore((s) => s.addItem);
   const clearCart  = useCartStore((s) => s.clear);
   const cartItems  = useCartStore((s) => s.items);
+  const cartTotal  = useCartStore((s) => s.total());
   const cartQty    = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const [tab, setTab] = useState(0);
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', id],
-    queryFn: () => businessesApi.getById(id),
+    queryFn: () => businessesApi.getById(id!),
     enabled: !!id,
   });
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -52,7 +60,7 @@ export default function BusinessDetail() {
 
   if (!business) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loaderContainer}>
         <Text style={{ color: colors.textMuted }}>المنشأة غير موجودة</Text>
       </View>
     );
@@ -92,8 +100,11 @@ export default function BusinessDetail() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: cartQty > 0 ? 100 : 24 }}>
+    <View style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={{ paddingBottom: cartQty > 0 ? 100 : spacing[8] }}
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* ── Hero image ── */}
         <View style={styles.heroWrap}>
@@ -107,155 +118,464 @@ export default function BusinessDetail() {
             </View>
           )}
           <LinearGradient
-            colors={['transparent', 'rgba(0,0,0,0.55)']}
+            colors={['rgba(0,0,0,0.4)', 'transparent', 'transparent']}
             style={styles.heroGradient}
             pointerEvents="none"
           />
+          
+          {/* Back Button & Actions */}
+          <View style={[styles.heroActions, { top: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
+            <Pressable style={styles.heroBtn} onPress={() => router.back()}>
+              <ArrowRight size={24} color={colors.textPrimary} />
+            </Pressable>
+            <View style={styles.heroActionsRight}>
+              <Pressable style={styles.heroBtn}>
+                <Share2 size={22} color={colors.textPrimary} />
+              </Pressable>
+              <Pressable style={styles.heroBtn}>
+                <Heart size={22} color={colors.textPrimary} />
+              </Pressable>
+            </View>
+          </View>
         </View>
 
-        {/* ── Info block ── */}
-        <View style={styles.info}>
-          <View style={styles.infoRow}>
-            <Text style={styles.name}>{business.name}</Text>
-            <View style={[styles.statusPill, { backgroundColor: business.isOpen ? colors.secondary : '#374151' }]}>
-              <Text style={styles.statusText}>{business.isOpen ? 'مفتوح' : 'مغلق'}</Text>
+        {/* ── Info block (overlapping) ── */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoHeader}>
+            <View style={styles.infoTitleWrap}>
+              <Text style={styles.businessName}>{business.name}</Text>
+              <Text style={styles.businessLocation}>{business.area?.city || 'فلسطين'} - {business.area?.name || ''}</Text>
+            </View>
+            <View style={styles.ratingBadge}>
+              <Star size={16} color="#733600" fill="#733600" />
+              <Text style={styles.ratingText}>{business.rating ? business.rating.toFixed(1) : '4.8'}</Text>
             </View>
           </View>
 
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <Star size={14} color="#F59E0B" fill="#F59E0B" />
-              <Text style={styles.metaText}>{business.rating ? business.rating.toFixed(1) : '5.0'}</Text>
+          <View style={styles.infoDetailsRow}>
+            <View style={styles.detailItem}>
+              <Clock size={18} color={colors.primary} />
+              <Text style={styles.detailText}>25-35 دقيقة</Text>
             </View>
-            <View style={styles.metaDot} />
-            <View style={styles.metaItem}>
-              <Clock size={14} color={colors.textMuted} />
-              <Text style={styles.metaText}>٣٠ دقيقة</Text>
+            <View style={styles.detailItem}>
+              <Bike size={18} color={colors.primary} />
+              <Text style={styles.detailText}>توصيل {business.area?.deliveryFee ?? 0} ₪</Text>
             </View>
-            <View style={styles.metaDot} />
-            <View style={styles.metaItem}>
-              <MapPin size={14} color={colors.textMuted} />
-              <Text style={styles.metaText}>{business.area?.city}، {business.area?.name}</Text>
-            </View>
-          </View>
-
-          <View style={styles.metaRow}>
-            <View style={styles.metaItem}>
-              <Bike size={14} color={colors.primary} />
-              <Text style={[styles.metaText, { color: colors.primary }]}>
-                رسوم التوصيل: {business.area?.deliveryFee ?? 0} ₪
-              </Text>
+            <View style={styles.detailItem}>
+              <Banknote size={18} color={colors.primary} />
+              <Text style={styles.detailText}>دفع نقدي</Text>
             </View>
           </View>
         </View>
 
         {/* ── Category tabs ── */}
-        {categories.length > 1 && (
-          <View style={styles.tabs}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[5] }}>
-              {categories.map((t, i) => (
-                <Pressable key={t} onPress={() => setTab(i)} style={styles.tabBtn}>
-                  <Text style={[styles.tabText, tab === i && styles.tabActive]}>{t}</Text>
-                  {tab === i && <View style={styles.tabUnderline} />}
-                </Pressable>
-              ))}
+        {categories.length > 0 && (
+          <View style={styles.tabsContainer}>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              contentContainerStyle={styles.tabsScrollContent}
+            >
+              {categories.map((cat, i) => {
+                const isActive = tab === i;
+                return (
+                  <Pressable 
+                    key={cat} 
+                    onPress={() => setTab(i)} 
+                    style={[styles.tabBtn, isActive ? styles.tabBtnActive : styles.tabBtnInactive]}
+                  >
+                    <Text style={[styles.tabText, isActive ? styles.tabTextActive : styles.tabTextInactive]}>{cat}</Text>
+                  </Pressable>
+                );
+              })}
             </ScrollView>
           </View>
         )}
 
         {/* ── Products ── */}
-        <View style={{ paddingHorizontal: spacing[4], gap: spacing[3], marginTop: spacing[2] }}>
+        <View style={styles.productsContainer}>
           {filteredProducts.length === 0 ? (
-            <Text style={styles.empty}>لا توجد منتجات متوفرة حالياً</Text>
+            <Text style={styles.emptyText}>لا توجد منتجات متوفرة حالياً</Text>
           ) : (
             filteredProducts.map((p: any) => (
-              <View key={p.id} style={styles.product}>
-                {/* Product image */}
-                <View style={styles.productImgWrap}>
+              <View key={p.id} style={styles.productCard}>
+                <View style={styles.productImageWrap}>
                   {p.imageUrl ? (
-                    <Image source={{ uri: p.imageUrl }} style={styles.productImg} contentFit="cover" />
+                    <Image source={{ uri: p.imageUrl }} style={styles.productImage} contentFit="cover" />
                   ) : (
-                    <View style={[styles.productImg, styles.productImgPlaceholder]}>
+                    <View style={[styles.productImage, styles.productImagePlaceholder]}>
                       <ChefHat size={24} color={colors.border} />
                     </View>
                   )}
                 </View>
 
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.productName}>{p.name}</Text>
-                  <Text style={styles.muted} numberOfLines={2}>
-                    {p.description || 'وصف شهي للمنتج'}
-                  </Text>
-                  <Text style={styles.price}>{p.price} ₪</Text>
-                </View>
-
-                {p.isAvailable && business.isOpen ? (
-                  <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
-                    <Plus size={20} color="#fff" strokeWidth={2.5} />
-                  </Pressable>
-                ) : (
-                  <View style={styles.unavailable}>
-                    <Text style={styles.unavailableText}>غير متوفر</Text>
+                <View style={styles.productInfo}>
+                  <View>
+                    <Text style={styles.productName}>{p.name}</Text>
+                    <Text style={styles.productDesc} numberOfLines={2}>
+                      {p.description || 'وصف شهي للمنتج'}
+                    </Text>
                   </View>
-                )}
+                  
+                  <View style={styles.productFooter}>
+                    <Text style={styles.productPrice}>{p.price} ₪</Text>
+                    {p.isAvailable && business.isOpen ? (
+                      <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
+                        <Plus size={20} color="#fff" strokeWidth={2.5} />
+                      </Pressable>
+                    ) : (
+                      <View style={styles.unavailableBadge}>
+                        <Text style={styles.unavailableText}>غير متوفر</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
               </View>
             ))
           )}
         </View>
       </ScrollView>
 
-      {/* ── Cart bar ── */}
+      {/* ── Floating Cart Bar ── */}
       {cartQty > 0 && (
-        <Pressable style={styles.cartBar} onPress={() => router.push('/cart')}>
-          <Text style={styles.cartBarText}>
-            {cartQty} عناصر — عرض السلة ({useCartStore.getState().total()} ₪)
-          </Text>
-        </Pressable>
+        <View style={[styles.cartBarContainer, { paddingBottom: Platform.OS === 'ios' ? insets.bottom || spacing[4] : spacing[4] }]}>
+          <Pressable style={styles.cartBar} onPress={() => router.push('/cart')}>
+            <View style={styles.cartBarLeft}>
+              <View style={styles.cartBarBadge}>
+                <Text style={styles.cartBarBadgeText}>{cartQty}</Text>
+              </View>
+              <Text style={styles.cartBarText}>عرض السلة</Text>
+            </View>
+            <Text style={styles.cartBarTotal}>{cartTotal} ₪</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#FCF3DC',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  
   // Hero
-  heroWrap:        { height: 220, position: 'relative' },
-  heroImg:         { width: '100%', height: 220 },
-  heroPlaceholder: { backgroundColor: colors.border + '50', alignItems: 'center', justifyContent: 'center' },
-  heroIcon:        { width: 88, height: 88, borderRadius: radius.xl, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 8, elevation: 3 },
-  heroGradient:    { position: 'absolute', bottom: 0, left: 0, right: 0, height: 100 },
+  heroWrap: { 
+    height: 256, // h-64
+    position: 'relative',
+    width: '100%'
+  },
+  heroImg: { 
+    width: '100%', 
+    height: '100%' 
+  },
+  heroPlaceholder: { 
+    backgroundColor: 'rgba(151, 72, 0, 0.1)', 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  heroIcon: { 
+    width: 88, 
+    height: 88, 
+    borderRadius: radius.xl, 
+    backgroundColor: '#FFF', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
+      android: { elevation: 4 },
+    }),
+  },
+  heroGradient: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0,
+  },
+  heroActions: {
+    position: 'absolute',
+    left: spacing[4],
+    right: spacing[4],
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  heroActionsRight: {
+    flexDirection: 'row-reverse',
+    gap: spacing[2],
+  },
+  heroBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+      android: { elevation: 4 },
+    }),
+  },
 
-  // Info
-  info:       { padding: spacing[4], gap: spacing[3], backgroundColor: colors.surface, marginHorizontal: spacing[4], borderRadius: radius.lg, marginTop: -spacing[6], shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
-  infoRow:    { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  name:       { fontSize: fontSizes['2xl'], fontFamily: fontFamily.bold, color: colors.textPrimary, flex: 1, textAlign: 'right', marginLeft: spacing[3] },
-  statusPill: { paddingHorizontal: spacing[3], paddingVertical: 4, borderRadius: radius.full },
-  statusText: { color: '#fff', fontSize: fontSizes.xs, fontFamily: fontFamily.semibold },
-  metaRow:    { flexDirection: 'row-reverse', alignItems: 'center', flexWrap: 'wrap', gap: spacing[2] },
-  metaItem:   { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
-  metaText:   { fontSize: fontSizes.sm, color: colors.textMuted, fontFamily: fontFamily.regular },
-  metaDot:    { width: 3, height: 3, borderRadius: 2, backgroundColor: colors.border },
+  // Info Card
+  infoCard: { 
+    backgroundColor: '#FFFFFF', 
+    marginHorizontal: spacing[4], 
+    borderRadius: radius.xl, 
+    marginTop: -40, // overlap
+    padding: spacing[4],
+    zIndex: 10,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12 },
+      android: { elevation: 6 },
+      web: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+    }),
+  },
+  infoHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing[2],
+  },
+  infoTitleWrap: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  businessName: { 
+    fontSize: 26, // headline-lg-mobile
+    fontFamily: fontFamily.bold, 
+    color: colors.textPrimary,
+    marginBottom: 4,
+  },
+  businessLocation: {
+    fontSize: 15,
+    fontFamily: fontFamily.regular,
+    color: colors.textMuted,
+  },
+  ratingBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#ffdbc7', // primary-fixed
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  ratingText: {
+    fontSize: 13, // label-md
+    fontFamily: fontFamily.bold,
+    color: '#4e2200', // on-primary-container
+  },
+  infoDetailsRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[5],
+    paddingTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(229, 224, 213, 1)', // border-beige
+    marginTop: spacing[3],
+  },
+  detailItem: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+  },
+  detailText: {
+    fontSize: 13, // label-md
+    fontFamily: fontFamily.medium,
+    color: '#564337', // on-surface-variant
+  },
 
   // Tabs
-  tabs:         { flexDirection: 'row', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border, marginTop: spacing[4], marginBottom: spacing[2] },
-  tabBtn:       { alignItems: 'center', gap: 4 },
-  tabText:      { color: colors.textMuted, fontSize: fontSizes.base, fontFamily: fontFamily.semibold },
-  tabActive:    { color: colors.primary },
-  tabUnderline: { height: 2, backgroundColor: colors.primary, borderRadius: 1, width: '100%' },
+  tabsContainer: {
+    marginTop: spacing[4],
+    backgroundColor: '#FCF3DC',
+    paddingVertical: spacing[4],
+  },
+  tabsScrollContent: {
+    paddingHorizontal: spacing[4],
+    gap: spacing[2],
+    flexDirection: 'row-reverse',
+  },
+  tabBtn: {
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabBtnActive: {
+    backgroundColor: colors.primary,
+  },
+  tabBtnInactive: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+  },
+  tabText: {
+    fontSize: 16,
+    fontFamily: fontFamily.bold,
+  },
+  tabTextActive: {
+    color: '#FFFFFF',
+  },
+  tabTextInactive: {
+    color: colors.textPrimary,
+    fontFamily: fontFamily.medium,
+  },
 
   // Products
-  product:             { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[3], shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
-  productImgWrap:      { borderRadius: radius.md, overflow: 'hidden' },
-  productImg:          { width: 72, height: 72, borderRadius: radius.md },
-  productImgPlaceholder: { backgroundColor: colors.border + '40', alignItems: 'center', justifyContent: 'center' },
-  productName:         { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
-  muted:               { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
-  price:               { color: colors.primary, fontFamily: fontFamily.bold, marginTop: 4, textAlign: 'right' },
-  addBtn:              { width: 36, height: 36, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  unavailable:         { paddingHorizontal: spacing[2], paddingVertical: 4, borderRadius: radius.sm, backgroundColor: colors.border },
-  unavailableText:     { color: colors.textMuted, fontSize: fontSizes.xs, fontFamily: fontFamily.semibold },
+  productsContainer: {
+    paddingHorizontal: spacing[4],
+    gap: spacing[3],
+    paddingBottom: spacing[4],
+  },
+  productCard: { 
+    flexDirection: 'row-reverse', 
+    alignItems: 'stretch', 
+    gap: spacing[3], 
+    backgroundColor: '#FFFFFF', 
+    borderRadius: radius.xl, 
+    padding: spacing[3],
+    borderWidth: 1,
+    borderColor: 'transparent',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 1 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    }),
+  },
+  productImageWrap: { 
+    width: 80, 
+    height: 80, 
+    borderRadius: radius.lg, 
+    overflow: 'hidden',
+    backgroundColor: '#f5f2fc', // surface-container-low
+    flexShrink: 0,
+  },
+  productImage: { 
+    width: '100%', 
+    height: '100%' 
+  },
+  productImagePlaceholder: { 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  productInfo: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  productName: { 
+    fontSize: 16, 
+    fontFamily: fontFamily.bold, 
+    color: colors.textPrimary, 
+    textAlign: 'right' 
+  },
+  productDesc: { 
+    color: colors.textMuted, 
+    fontSize: 13, 
+    textAlign: 'right',
+    marginTop: 2,
+    fontFamily: fontFamily.regular,
+  },
+  productFooter: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: spacing[2],
+  },
+  productPrice: { 
+    color: colors.primary, 
+    fontFamily: fontFamily.bold, 
+    fontSize: 17, // body-lg
+  },
+  addBtn: { 
+    width: 32, 
+    height: 32, 
+    borderRadius: radius.md, 
+    backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
+    alignItems: 'center', 
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+      android: { elevation: 2 },
+    }),
+  },
+  unavailableBadge: { 
+    paddingHorizontal: spacing[2], 
+    paddingVertical: 4, 
+    borderRadius: radius.sm, 
+    backgroundColor: colors.border 
+  },
+  unavailableText: { 
+    color: colors.textMuted, 
+    fontSize: fontSizes.xs, 
+    fontFamily: fontFamily.semibold 
+  },
 
   // Cart bar
-  cartBar:     { position: 'absolute', bottom: 24, left: spacing[4], right: spacing[4], height: 52, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: colors.primary, shadowOpacity: 0.35, shadowRadius: 10, elevation: 4 },
-  cartBarText: { color: '#fff', fontFamily: fontFamily.bold, fontSize: fontSizes.base },
-  empty:       { textAlign: 'center', color: colors.textMuted, marginTop: spacing[6], fontFamily: fontFamily.regular },
+  cartBarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing[4],
+    backgroundColor: 'transparent',
+  },
+  cartBar: { 
+    height: 56, 
+    borderRadius: radius.xl, 
+    backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
+    flexDirection: 'row-reverse',
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: spacing[6],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
+      android: { elevation: 6 },
+    }),
+  },
+  cartBarLeft: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  cartBarBadge: {
+    backgroundColor: 'rgba(78, 34, 0, 0.2)', // on-primary-container/20
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  cartBarBadgeText: {
+    fontFamily: fontFamily.bold,
+    fontSize: 13,
+    color: '#4e2200', // on-primary-container
+  },
+  cartBarText: { 
+    color: '#4e2200', 
+    fontFamily: fontFamily.bold, 
+    fontSize: 16, 
+  },
+  cartBarTotal: {
+    fontFamily: fontFamily.bold,
+    fontSize: 16,
+    color: '#4e2200',
+  },
+  emptyText: { 
+    textAlign: 'center', 
+    color: colors.textMuted, 
+    marginTop: spacing[6], 
+    fontFamily: fontFamily.regular 
+  },
 });

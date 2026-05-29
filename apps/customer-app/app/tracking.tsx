@@ -1,26 +1,42 @@
-import { useEffect } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View, Platform, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MapPin, Bike, Phone, Package } from 'lucide-react-native';
+import { MapPin, X, CheckCircle, Utensils, Bike, Home, Phone, Star, MessageCircle } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
 import { useSocket } from '../src/hooks/useSocket';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const STEPS = [
-  { status: 'PENDING', label: 'تم استلام الطلب' },
-  { status: 'CONFIRMED', label: 'تم تأكيد المنشأة' },
-  { status: 'PREPARING', label: 'جاري تحضير الطلب' },
-  { status: 'PICKED_UP', label: 'في الطريق إليك' },
-  { status: 'DELIVERED', label: 'تم التسليم' },
+  { status: 'PENDING', label: 'تم استلام الطلب', desc: 'بانتظار التأكيد', icon: CheckCircle },
+  { status: 'CONFIRMED', label: 'تم تأكيد الطلب', desc: 'تم قبول طلبك', icon: CheckCircle },
+  { status: 'PREPARING', label: 'يتم تحضير الطعام الآن', desc: 'المطعم يقوم بتجهيز وجبتك', icon: Utensils },
+  { status: 'PICKED_UP', label: 'في الطريق إليك', desc: 'السائق في الطريق', icon: Bike },
+  { status: 'DELIVERED', label: 'تم التوصيل', desc: 'شكراً لاستخدامك خدمتنا', icon: Home },
 ] as const;
 
 export default function Tracking() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const socket = useSocket();
+
+  // Animation for active step
+  const [pulseAnim] = useState(new Animated.Value(1));
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.2, duration: 1000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true })
+      ])
+    ).start();
+  }, [pulseAnim]);
 
   // Poll order status every 30 seconds as a heartbeat fallback; sockets handle instant updates
   const { data: order, isLoading, error } = useQuery({
@@ -32,16 +48,12 @@ export default function Tracking() {
 
   useEffect(() => {
     if (!socket || !id) return;
-
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
       if (payload.orderId === id) {
-        // socket update received — invalidate query
         queryClient.invalidateQueries({ queryKey: ['order', id] });
       }
     };
-
     socket.on('order:status_update', handleStatusUpdate);
-
     return () => {
       socket.off('order:status_update', handleStatusUpdate);
     };
@@ -49,12 +61,12 @@ export default function Tracking() {
 
   if (!id) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[5] }}>
+      <View style={styles.errorContainer}>
+        <View style={styles.errorIconWrap}>
           <MapPin size={40} color={colors.primary} />
         </View>
-        <Text style={{ fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2] }}>لا يوجد طلب لتتبعه</Text>
-        <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] }}>تصفح طلباتك السابقة لمتابعة حالة أي طلب نشط.</Text>
+        <Text style={styles.errorTitle}>لا يوجد طلب لتتبعه</Text>
+        <Text style={styles.errorDesc}>تصفح طلباتك السابقة لمتابعة حالة أي طلب نشط.</Text>
         <Button title="الذهاب للطلبات" onPress={() => router.replace('/(tabs)/orders')} />
       </View>
     );
@@ -62,7 +74,7 @@ export default function Tracking() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -70,11 +82,11 @@ export default function Tracking() {
 
   if (error || !order) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <View style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: colors.error + '15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[4] }}>
-          <Package size={40} color={colors.error} />
+      <View style={styles.errorContainer}>
+        <View style={[styles.errorIconWrap, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+          <MapPin size={40} color={colors.error} />
         </View>
-        <Text style={{ color: colors.error, fontSize: fontSizes.lg, fontFamily: fontFamily.bold, marginBottom: spacing[4] }}>فشل تحميل تفاصيل الطلب</Text>
+        <Text style={[styles.errorTitle, { color: colors.error }]}>فشل تحميل تفاصيل الطلب</Text>
         <Button title="تحديث" onPress={() => router.replace('/(tabs)')} />
       </View>
     );
@@ -104,119 +116,516 @@ export default function Tracking() {
     }
   };
 
+  const orderTime = new Date(order.createdAt).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4] }}>
-      <Text style={styles.heading}>طلبك من {order.business?.name || 'المنشأة'}</Text>
-      <Text style={styles.eta}>
-        {isCancelled
-          ? 'تم إلغاء هذا الطلب'
-          : order.status === 'DELIVERED'
-          ? 'تم تسليم الطلب بنجاح!'
-          : 'وقت التوصيل المتوقع: 25-35 دقيقة'}
-      </Text>
-
-      {/* Cancelled Banner */}
-      {isCancelled && (
-        <View style={styles.cancelledBanner}>
-          <Text style={styles.cancelledText}>هذا الطلب تم إلغاؤه.</Text>
-        </View>
-      )}
-
-      {/* Stepper */}
-      {!isCancelled && (
-        <View style={styles.stepper}>
-          {STEPS.map((s, i) => {
-            const stepIdx = i;
-            let state: 'done' | 'active' | 'pending' = 'pending';
-            if (currentIdx > stepIdx) {
-              state = 'done';
-            } else if (currentIdx === stepIdx) {
-              state = 'active';
-            }
-
-            const color = state === 'done' ? colors.secondary : state === 'active' ? colors.primary : colors.border;
-            return (
-              <View key={s.status} style={styles.step}>
-                <View style={styles.stepLeft}>
-                  <View style={[styles.dot, { backgroundColor: color }]}>
-                    <Text style={styles.dotText}>{state === 'done' ? '✓' : state === 'active' ? '●' : ''}</Text>
-                  </View>
-                  {i < STEPS.length - 1 ? (
-                    <View style={[styles.line, { backgroundColor: state === 'done' ? colors.secondary : colors.border }]} />
-                  ) : null}
-                </View>
-                <Text style={[styles.stepLabel, state === 'pending' && { color: colors.textMuted }]}>{s.label}</Text>
-              </View>
-            );
-          })}
-        </View>
-      )}
-
-      {/* Driver Info */}
-      {!isCancelled && order.status !== 'PENDING' && order.status !== 'CONFIRMED' && (
-        <View style={styles.driver}>
-          <View style={styles.driverAvatar}><Bike size={24} color={colors.primary} /></View>
-          {order.driver ? (
-            <>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.driverName}>{order.driver.user?.name || 'سائق منصة شو عبالك'}</Text>
-                <Text style={styles.muted}>سائق التوصيل · {order.driver.user?.phone || ''}</Text>
-              </View>
-              <Pressable style={styles.callBtn} onPress={handleCallDriver}>
-                <Phone size={16} color="#fff" />
-                <Text style={styles.callText}>اتصال</Text>
-              </Pressable>
-            </>
-          ) : (
-            <View style={{ flex: 1 }}>
-              <Text style={styles.driverName}>جاري تعيين سائق...</Text>
-              <Text style={styles.muted}>سنقوم بإعلامك فور انطلاق السائق.</Text>
-            </View>
-          )}
-        </View>
-      )}
-
-      <View style={{ marginTop: spacing[6], gap: spacing[2] }}>
-        <Text style={styles.detailTitle}>تفاصيل الطلب:</Text>
-        {order.items?.map((it: any) => (
-          <View key={it.id} style={styles.itemRow}>
-            <Text style={styles.itemName}>{it.product?.name} (x{it.quantity})</Text>
-            <Text style={styles.itemPrice}>{it.unitPrice * it.quantity} ₪</Text>
+    <View style={styles.container}>
+      {/* TopAppBar */}
+      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+        <View style={styles.headerRight}>
+          <View style={styles.storeIconWrap}>
+            <Text style={{ fontSize: 20 }}>🏪</Text>
           </View>
-        ))}
-        <View style={styles.divider} />
-        <View style={styles.itemRow}>
-          <Text style={styles.totalLabel}>الإجمالي مع التوصيل:</Text>
-          <Text style={styles.totalValue}>{order.total} ₪</Text>
+          <Text style={styles.headerTitle}>طلبك من {order.business?.name || 'المنشأة'}</Text>
         </View>
+        <Pressable onPress={() => router.back()} style={styles.closeBtn}>
+          <X size={24} color={colors.textMuted} />
+        </Pressable>
       </View>
-    </ScrollView>
+
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing[8] }]} showsVerticalScrollIndicator={false}>
+        
+        {/* Cancelled Banner */}
+        {isCancelled && (
+          <View style={styles.cancelledBanner}>
+            <Text style={styles.cancelledText}>تم إلغاء هذا الطلب</Text>
+          </View>
+        )}
+
+        {/* Live Status Card */}
+        {!isCancelled && (
+          <View style={styles.card}>
+            <View style={styles.statusHeaderRow}>
+              <View style={styles.orderIdBadge}>
+                <Text style={styles.orderIdText}>رقم الطلب: #{order.id.slice(-5).toUpperCase()}</Text>
+              </View>
+              <Text style={styles.timeElapsedText}>منذ قليل</Text>
+            </View>
+
+            {/* Vertical Stepper */}
+            <View style={styles.stepperContainer}>
+              {STEPS.map((step, idx) => {
+                const isDone = currentIdx > idx;
+                const isActive = currentIdx === idx;
+                const isPending = currentIdx < idx;
+                
+                let iconBg = 'rgba(229, 224, 213, 1)'; // border-beige
+                let iconColor = colors.textMuted;
+                let titleColor = colors.textMuted;
+
+                if (isDone) {
+                  iconBg = '#22C55E'; // success-green
+                  iconColor = '#fff';
+                  titleColor = colors.textPrimary;
+                } else if (isActive) {
+                  iconBg = '#F59E0B'; // warning-amber
+                  iconColor = '#fff';
+                  titleColor = colors.primary;
+                }
+
+                const StepIcon = step.icon;
+
+                return (
+                  <View key={step.status} style={styles.stepItem}>
+                    <View style={styles.stepIndicator}>
+                      {isActive ? (
+                        <Animated.View style={[styles.stepIconWrap, { backgroundColor: iconBg, transform: [{ scale: pulseAnim }] }]}>
+                          <StepIcon size={18} color={iconColor} />
+                        </Animated.View>
+                      ) : (
+                        <View style={[styles.stepIconWrap, { backgroundColor: iconBg }]}>
+                          <StepIcon size={18} color={iconColor} />
+                        </View>
+                      )}
+                      
+                      {idx < STEPS.length - 1 && (
+                        <View style={[styles.stepperLine, { backgroundColor: isDone ? '#22C55E' : 'rgba(229, 224, 213, 1)' }]} />
+                      )}
+                    </View>
+                    
+                    <View style={styles.stepContent}>
+                      <Text style={[styles.stepTitle, { color: titleColor }]}>{step.label}</Text>
+                      <Text style={styles.stepDesc}>{idx === 0 ? orderTime : step.desc}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* Driver Info Section */}
+        {!isCancelled && (order.status === 'PICKED_UP' || order.status === 'DELIVERED') && (
+          <View style={[styles.card, styles.driverCard]}>
+            <View style={styles.driverHeader}>
+              <View style={styles.driverAvatarContainer}>
+                <Image
+                  source={{ uri: order.driver?.user?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB7RWnmp356XctRFq8IaDwf9mZFD2CI8vQU6irfySg76nVBQM-osy8mC_4tZ46PR1w6UrSogFcqK4SW8C-SgcA9QuhNSLZb-qAKOUsG729Px1PaGcG2agF-gYdbgE-lKimworGyaYr9xwwOn0WbQOUG-P26uHlqYHPnqA2elcFWLq62OzHz1XDE2tiixg1MYxFnEK2FHAz8Ddj7b-nEV5yDNCjm81DRpX2IxfyS0e4MuKUTdwTAKvd01zfva_9mbQDUwOlngJD2hYkM' }}
+                  style={styles.driverAvatar}
+                  contentFit="cover"
+                />
+                <View style={styles.onlineDot} />
+              </View>
+              
+              <View style={styles.driverInfo}>
+                <Text style={styles.driverName}>{order.driver?.user?.name || 'سائق التوصيل'}</Text>
+                <View style={styles.ratingRow}>
+                  <Star size={14} color="#F59E0B" fill="#F59E0B" />
+                  <Text style={styles.ratingText}>4.9 (120+ تقييم)</Text>
+                </View>
+              </View>
+              
+              <Pressable style={styles.callBtn} onPress={handleCallDriver}>
+                <Phone size={24} color="#fff" />
+              </Pressable>
+            </View>
+            
+            <View style={styles.driverFooter}>
+              <View style={styles.vehicleRow}>
+                <Bike size={20} color={colors.primary} />
+                <Text style={styles.vehicleText}>نوع المركبة: دراجة نارية</Text>
+              </View>
+              <Pressable style={styles.msgBtn}>
+                <Text style={styles.msgBtnText}>مراسلة</Text>
+                <MessageCircle size={18} color={colors.primary} />
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        {/* Map Placeholder */}
+        {!isCancelled && order.status === 'PICKED_UP' && (
+          <View style={styles.mapCard}>
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAUrOVW5pZb3qDHPCQqs3nTPOCPbSGgFvexRX9JuQy549aAx_f6V3OhMPK2CPp6WL24_yrJQlPSnNUB34gDOLZJJNazJRYwudHdmeRPBgxPXZtYrGXNDtqtVe2Gc1R3mB_W6ulthH7-BQ1QM962zvwEr6v9G3Ss_FCKoYZsooqQI8tsJjbEbyraZ0gVUyGN_GmAiGWjFT1xITRq2zBH7gPGlT8B8wC8zIEiShfUx00HeUQmhLXTMwa-zkEmcJDPtdTXXNFj1rfi-4Mj' }}
+              style={styles.mapImage}
+              contentFit="cover"
+            />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.4)']}
+              style={styles.mapOverlay}
+            >
+              <View style={styles.mapBadge}>
+                <MapPin size={20} color={colors.primary} style={{ marginRight: 8 }} />
+                <Text style={styles.mapBadgeText}>السائق على بعد 2.4 كم منك</Text>
+              </View>
+            </LinearGradient>
+          </View>
+        )}
+
+        {/* Order Summary (Glassmorphism style) */}
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>تفاصيل الطلب</Text>
+          
+          {order.items?.map((it: any) => (
+            <View key={it.id} style={styles.summaryRow}>
+              <Text style={styles.summaryItemText}>{it.product?.name} × {it.quantity}</Text>
+              <Text style={styles.summaryItemText}>₪ {it.unitPrice * it.quantity}</Text>
+            </View>
+          ))}
+          
+          <View style={styles.summaryTotalRow}>
+            <Text style={styles.summaryTotalLabel}>المجموع الكلي</Text>
+            <Text style={styles.summaryTotalValue}>₪ {order.total}</Text>
+          </View>
+        </View>
+
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
-  eta: { color: colors.textMuted, marginTop: 4, marginBottom: spacing[6], textAlign: 'right' },
-  cancelledBanner: { backgroundColor: '#FEE2E2', borderRadius: radius.md, padding: spacing[4], marginBottom: spacing[6] },
-  cancelledText: { color: '#991B1B', fontFamily: fontFamily.bold, fontSize: fontSizes.base, textAlign: 'right' },
-  stepper: { gap: 0, alignItems: 'flex-start' },
-  step: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: spacing[3], width: '100%' },
-  stepLeft: { alignItems: 'center' },
-  dot: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  dotText: { color: '#fff', fontSize: 14, fontFamily: fontFamily.bold },
-  line: { width: 2, height: 32 },
-  stepLabel: { fontSize: fontSizes.base, color: colors.textPrimary, fontFamily: fontFamily.semibold, paddingTop: 4, flex: 1, textAlign: 'right' },
-  driver: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, marginTop: spacing[6] },
-  driverAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
-  driverName: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
-  muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
-  callBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.secondary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
-  callText: { color: '#fff', fontFamily: fontFamily.bold },
-  detailTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right', marginBottom: spacing[2] },
-  itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 4 },
-  itemName: { color: colors.textPrimary, fontSize: fontSizes.sm },
-  itemPrice: { color: colors.textPrimary, fontSize: fontSizes.sm, fontFamily: fontFamily.semibold },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing[2] },
-  totalLabel: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
-  totalValue: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.primary },
+  container: {
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
+  },
+  header: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    backgroundColor: '#FCF3DC',
+    zIndex: 50,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
+    }),
+  },
+  headerRight: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
+  },
+  storeIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(230, 120, 30, 0.2)', // primary-container/20
+    borderWidth: 1,
+    borderColor: 'rgba(151, 72, 0, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontFamily: fontFamily.semibold, // headline-sm
+    fontSize: 20,
+    color: colors.primary,
+  },
+  closeBtn: {
+    padding: spacing[2],
+  },
+  scrollContent: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[6],
+    gap: spacing[6],
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
+    padding: spacing[4],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  statusHeaderRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[6],
+  },
+  orderIdBadge: {
+    backgroundColor: 'rgba(230, 120, 30, 0.1)',
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  orderIdText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.primary,
+  },
+  timeElapsedText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  stepperContainer: {
+    flexDirection: 'column',
+  },
+  stepItem: {
+    flexDirection: 'row-reverse',
+    alignItems: 'flex-start',
+    gap: spacing[4],
+    minHeight: 60,
+  },
+  stepIndicator: {
+    alignItems: 'center',
+    width: 32,
+  },
+  stepIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+  stepperLine: {
+    width: 2,
+    flexGrow: 1,
+    minHeight: 28,
+  },
+  stepContent: {
+    flex: 1,
+    paddingBottom: spacing[4],
+    alignItems: 'flex-end', // RTL
+  },
+  stepTitle: {
+    fontFamily: fontFamily.semibold, // headline-sm
+    fontSize: 16,
+    textAlign: 'right',
+  },
+  stepDesc: {
+    fontFamily: fontFamily.regular, // body-base
+    fontSize: 11, // label-sm
+    color: colors.textMuted,
+    marginTop: 2,
+    textAlign: 'right',
+  },
+  driverCard: {
+    borderWidth: 1,
+    borderColor: 'rgba(151, 72, 0, 0.05)',
+  },
+  driverHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[4],
+  },
+  driverAvatarContainer: {
+    position: 'relative',
+  },
+  driverAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#ffdbc7', // primary-fixed
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    width: 16,
+    height: 16,
+    backgroundColor: '#22C55E',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#FFF',
+  },
+  driverInfo: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  driverName: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 18,
+    color: colors.textPrimary,
+  },
+  ratingRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
+  ratingText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  callBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#22C55E', // success-green
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: { shadowColor: '#22C55E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
+      android: { elevation: 6 },
+    }),
+  },
+  driverFooter: {
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(229, 224, 213, 1)',
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  vehicleRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  vehicleText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  msgBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+  },
+  msgBtnText: {
+    fontFamily: fontFamily.bold,
+    fontSize: 13,
+    color: colors.primary,
+  },
+  mapCard: {
+    position: 'relative',
+    height: 224,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    backgroundColor: '#e4e1eb', // surface-variant
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
+      android: { elevation: 4 },
+    }),
+  },
+  mapImage: {
+    width: '100%',
+    height: '100%',
+  },
+  mapOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 100,
+    justifyContent: 'flex-end',
+    padding: spacing[4],
+    flexDirection: 'row-reverse', // Align badge to right? Actually the design shows it just in the bottom.
+  },
+  mapBadge: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    alignSelf: 'flex-start', // to not stretch
+  },
+  mapBadgeText: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: colors.textPrimary,
+  },
+  summaryCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: radius.xl,
+    padding: spacing[4],
+    gap: spacing[3],
+    // Glassmorphism effect requires special handling in RN, but we approximate it with semi-transparent bg.
+    // In actual Expo we might use BlurView, but simple translucent bg works fine for this step.
+  },
+  summaryTitle: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 16,
+    color: colors.textPrimary,
+    textAlign: 'right',
+    marginBottom: spacing[2],
+  },
+  summaryRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryItemText: {
+    fontFamily: fontFamily.regular,
+    fontSize: 13,
+    color: colors.textMuted,
+  },
+  summaryTotalRow: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[3],
+    paddingTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(151, 72, 0, 0.1)',
+  },
+  summaryTotalLabel: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  summaryTotalValue: {
+    fontFamily: fontFamily.bold,
+    fontSize: 20,
+    color: colors.primary,
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#FCF3DC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing[6],
+  },
+  errorIconWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: 'rgba(151, 72, 0, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[5],
+  },
+  errorTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 20,
+    color: colors.textPrimary,
+    marginBottom: spacing[2],
+  },
+  errorDesc: {
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginBottom: spacing[6],
+  },
+  cancelledBanner: {
+    backgroundColor: '#fee2e2',
+    padding: spacing[4],
+    borderRadius: radius.lg,
+  },
+  cancelledText: {
+    fontFamily: fontFamily.bold,
+    color: '#EF4444',
+    textAlign: 'center',
+  },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: '#FCF3DC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
