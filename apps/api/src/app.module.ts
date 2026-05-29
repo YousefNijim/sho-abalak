@@ -6,6 +6,7 @@ import { AreasModule } from './areas/areas.module';
 import { BusinessesModule } from './businesses/businesses.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
+import { DriversModule } from './drivers/drivers.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -17,6 +18,7 @@ import { HealthController } from './health.controller';
     BusinessesModule,
     ProductsModule,
     OrdersModule,
+    DriversModule,
   ],
   controllers: [HealthController],
 })

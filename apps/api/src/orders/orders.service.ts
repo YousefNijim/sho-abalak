@@ -76,7 +76,7 @@ export class OrdersService {
     if (!canTransition(from, dto.status)) {
       throw new BadRequestException(`لا يمكن الانتقال من ${from} إلى ${dto.status}`);
     }
-    await this.assertCanTransition(order, user, dto.status);
+    await this.assertCanTransition(order, user, dto.status, dto.driverId);
 
     return this.prisma.order.update({
       where: { id },
@@ -126,32 +126,50 @@ export class OrdersService {
   }
 
   /**
-   * Who may drive which transition:
-   * - CONFIRMED/PREPARING/READY/CANCELLED(by business) → business owner
-   * - PICKED_UP/DELIVERED → assigned driver
-   * - CANCELLED → customer (only while PENDING) or business
+   * Who may drive which transition (matches FRONTEND_DESIGN.md flows):
+   * - CONFIRMED / PREPARING / READY → business owner.
+   * - PICKED_UP → business owner assigns the driver (the "اختيار سائق" screen lives in the
+   *   business app); a `driverId` must be provided so the order gets an assignee.
+   * - DELIVERED → the assigned driver only (the "تم التسليم" button in the driver app).
+   * - CANCELLED → the customer (only while still PENDING) or the business owner.
    */
   private async assertCanTransition(
     order: { customerId: string; businessId: string; driverId: string | null; status: string },
     user: AuthUser,
     to: OrderStatus,
+    driverId?: string,
   ) {
     if (user.role === UserRole.ADMIN) return;
 
-    if ([OrderStatus.PICKED_UP, OrderStatus.DELIVERED].includes(to)) {
+    // Final delivery — assigned driver only.
+    if (to === OrderStatus.DELIVERED) {
       const driver = await this.prisma.driver.findUnique({ where: { userId: user.id } });
       if (user.role === UserRole.DRIVER && driver && driver.id === order.driverId) return;
-      throw new ForbiddenException('فقط السائق المعيّن يمكنه تنفيذ هذا الإجراء');
+      throw new ForbiddenException('فقط السائق المعيّن يمكنه تأكيد التسليم');
     }
 
+    // Assigning a driver — business owner, must supply a driverId.
+    if (to === OrderStatus.PICKED_UP) {
+      if (!driverId) throw new BadRequestException('يجب تحديد السائق عند تعيين الطلب');
+      await this.assertOwnsOrderBusiness(order.businessId, user);
+      return;
+    }
+
+    // Cancellation by the customer — only before the business confirms.
     if (to === OrderStatus.CANCELLED && user.role === UserRole.CUSTOMER) {
       if (order.customerId === user.id && order.status === OrderStatus.PENDING) return;
       throw new ForbiddenException('يمكن إلغاء الطلب فقط قبل تأكيده');
     }
 
+    // Everything else (CONFIRMED/PREPARING/READY, or business-side CANCELLED) — business owner.
+    await this.assertOwnsOrderBusiness(order.businessId, user);
+  }
+
+  /** Confirms the current user is the BUSINESS owner of the order's business. */
+  private async assertOwnsOrderBusiness(businessId: string, user: AuthUser) {
     if (user.role === UserRole.BUSINESS) {
       const business = await this.prisma.business.findUnique({ where: { ownerId: user.id } });
-      if (business && business.id === order.businessId) return;
+      if (business && business.id === businessId) return;
     }
     throw new ForbiddenException('لا تملك صلاحية تغيير حالة هذا الطلب');
   }
