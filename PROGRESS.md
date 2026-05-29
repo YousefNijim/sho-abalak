@@ -100,12 +100,17 @@
 
 ## ⚠️ What's missing / not done
 
-### API (apps/api) — auth done; rest is scaffold
-- ✅ **Auth module DONE** (`src/auth/`): `POST /auth/register` (bcryptjs hash), `POST /auth/login` (JWT), `GET /auth/me` (JWT guard), `POST /auth/otp/request|verify` (stub, devCode `0000`). Plus `JwtStrategy`, `JwtAuthGuard`, `RolesGuard` + `@Roles()`, `@CurrentUser()`. **Verified end-to-end against live DB:** register→login→me works, 401 on no/bad token, 409 dup phone, 400 bad-phone validation, password stored as bcrypt hash. (Test loop in chat history.)
-- Still no feature modules: **users**, **businesses**, **products**, **orders**, **drivers**, **areas**, **reviews**, **payments**.
+### API (apps/api) — auth + core domain done
+- ✅ **Auth module** (`src/auth/`): `POST /auth/register` (bcryptjs hash), `POST /auth/login` (JWT), `GET /auth/me` (JWT guard), `POST /auth/otp/request|verify` (stub, devCode `0000`). Plus `JwtStrategy`, `JwtAuthGuard`, `RolesGuard` + `@Roles()`, `@CurrentUser()`.
+- ✅ **Areas** (`GET /areas` — public).
+- ✅ **Businesses** (`src/businesses/`): `GET /businesses` (filter category/area/search), `GET /businesses/:id` (with available products), `GET /businesses/mine`, `POST` + `PATCH` (BUSINESS role, ownership-checked).
+- ✅ **Products** (`src/products/`): `GET /products?businessId=` (public), `POST`/`PATCH`/`DELETE` (BUSINESS role, must own the parent business).
+- ✅ **Orders** (`src/orders/`): `POST /orders` (CUSTOMER — server computes total from real product prices + area delivery fee, writes items + initial history in one create), `GET /orders` (role-scoped: customer=own, business=its orders, driver=assigned, admin=all), `GET /orders/:id` (view-authz), `PATCH /orders/:id/status` (validates via `@shu/utils` `canTransition`, enforces who-can-do-which-transition, appends `OrderStatusHistory`).
+- **Verified end-to-end against live DB:** registered BUSINESS owner → created business → 2 products → CUSTOMER placed order (total correctly = items + delivery fee = 47) → customer-confirm blocked 403 → illegal PENDING→READY blocked 400 → business advanced CONFIRMED→PREPARING→READY → 4 history rows + 2 items persisted (confirmed in Postgres).
+- Remaining modules: **users** (admin mgmt), **drivers** (create/assign — needed to test the PICKED_UP/DELIVERED order leg; transition logic already built & guarded), **reviews**, **payments**.
 - No **Socket.io gateway** (events are typed in shared-types but not implemented).
 - No **Redis** integration (ioredis is installed, not wired).
-- No DTOs/validation, no guards/role decorators, no tests.
+- DTOs + class-validator + role guards are in place for the built modules; **no automated tests yet** (verified manually via curl/REST).
 - ~~**DB not migrated yet**~~ ✅ **Done** — Docker Desktop installed, Postgres+Redis up, initial migration `20260528223816_init` applied, areas seeded (22 rows). `.env` created. API verified live on :3001 (`/health` 200, Swagger at `/docs`).
 - Firebase FCM, S3/Cloudinary uploads: not started.
 
@@ -122,11 +127,12 @@
 
 ## 👉 Next steps (suggested order)
 
-1. ~~**API auth module**~~ ✅ DONE — see above.
-2. **API orders + businesses + products modules** — CRUD + the order-status state machine (reuse `@shu/utils` `canTransition`). Protect routes with `JwtAuthGuard` + `@Roles()` (already built).
-3. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state.
-4. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
-5. **Infra** — CI (GitHub Actions), Sentry, deploy config.
+1. ~~**API auth module**~~ ✅ DONE.
+2. ~~**API orders + businesses + products modules**~~ ✅ DONE (+ areas).
+3. **Drivers module** — register/list drivers, set availability+area, assign to order. Unblocks the PICKED_UP/DELIVERED order leg (transition logic already built). Then **users** (admin mgmt), **reviews**, **payments**.
+4. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state. (`order:new` on create, `order:status_update` on each transition.)
+5. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
+6. **Infra** — CI (GitHub Actions), Sentry, deploy config.
 
 ---
 
