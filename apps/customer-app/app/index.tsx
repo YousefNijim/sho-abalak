@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, fontSizes } from '../src/theme';
+import { colors, fontSizes, fontFamily } from '../src/theme';
 import { useAuthStore } from '../src/stores/auth.store';
 
 export default function Splash() {
@@ -34,6 +34,6 @@ export default function Splash() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  logo: { fontSize: fontSizes['4xl'], fontWeight: '800' },
+  logo: { fontSize: fontSizes['4xl'], fontFamily: fontFamily.extrabold },
   tagline: { fontSize: fontSizes.base, color: colors.textMuted, marginTop: 8 },
 });

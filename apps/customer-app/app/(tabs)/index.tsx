@@ -1,11 +1,10 @@
-'use client';
-
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { Search, ShoppingCart, MapPin } from 'lucide-react-native';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi } from '@shu/api-client';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
@@ -26,7 +25,6 @@ export default function Home() {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  // Fetch businesses with parameters
   const { data: businesses = [], isLoading } = useQuery({
     queryKey: ['businesses', selectedCat, search, user?.areaId],
     queryFn: () =>
@@ -39,7 +37,10 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120, paddingHorizontal: spacing[4] }}>
+      <ScrollView
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 120, paddingHorizontal: spacing[4] }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <View>
@@ -53,7 +54,7 @@ export default function Home() {
 
         {/* Search */}
         <View style={styles.search}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Search size={18} color={colors.textMuted} />
           <TextInput
             placeholder="ابحث عن منشأة..."
             placeholderTextColor={colors.textMuted}
@@ -86,7 +87,7 @@ export default function Home() {
           {CATEGORIES.map((c) => (
             <Pressable
               key={c.id}
-              style={[styles.catItem, selectedCat === c.id && styles.catItemActive]}
+              style={styles.catItem}
               onPress={() => setSelectedCat(selectedCat === c.id ? null : c.id)}
             >
               <View style={[styles.catCircle, selectedCat === c.id && styles.catCircleActive]}>
@@ -100,7 +101,10 @@ export default function Home() {
         {/* Nearby businesses */}
         <View style={styles.sectionHead}>
           <Text style={styles.sectionTitle}>المنشآت القريبة</Text>
-          <Text style={styles.muted}>📍 {user?.areaId ? 'منطقتك الحالية' : 'كل المناطق'}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <MapPin size={14} color={colors.textMuted} />
+            <Text style={styles.muted}>{user?.areaId ? 'منطقتك الحالية' : 'كل المناطق'}</Text>
+          </View>
         </View>
 
         {isLoading ? (
@@ -147,7 +151,7 @@ export default function Home() {
       {/* Cart FAB */}
       {cartQty > 0 ? (
         <Pressable style={[styles.fab, { bottom: 24 }]} onPress={() => router.push('/cart')}>
-          <Text style={{ fontSize: 26 }}>🛒</Text>
+          <ShoppingCart size={24} color="#fff" />
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{cartQty}</Text>
           </View>
@@ -159,39 +163,36 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  greetingMuted: { color: colors.textMuted, fontSize: fontSizes.sm },
-  greeting: { color: colors.primary, fontSize: fontSizes['2xl'], fontWeight: '800' },
+  greetingMuted: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: fontFamily.regular },
+  greeting: { color: colors.primary, fontSize: fontSizes['2xl'], fontFamily: fontFamily.extrabold },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  search: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: spacing[4], height: 52, marginTop: spacing[5], gap: spacing[2] },
-  searchIcon: { fontSize: 18 },
-  searchInput: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  search: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border, borderRadius: 14, paddingHorizontal: spacing[4], height: 52, marginTop: spacing[5], gap: spacing[2] },
+  searchInput: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary, fontFamily: fontFamily.regular, textAlign: 'right' },
   banner: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: spacing[6], marginTop: spacing[6] },
-  bannerTitle: { color: '#fff', fontSize: fontSizes['2xl'], fontWeight: '700' },
-  bannerText: { color: '#fff', opacity: 0.9, marginTop: spacing[1] },
+  bannerTitle: { color: '#fff', fontSize: fontSizes['2xl'], fontFamily: fontFamily.bold },
+  bannerText: { color: '#fff', opacity: 0.9, marginTop: spacing[1], fontFamily: fontFamily.regular },
   bannerBtn: { backgroundColor: '#fff', alignSelf: 'flex-start', borderRadius: radius.full, paddingHorizontal: spacing[6], paddingVertical: spacing[2], marginTop: spacing[3] },
-  bannerBtnText: { color: colors.primary, fontWeight: '700' },
+  bannerBtnText: { color: colors.primary, fontFamily: fontFamily.bold },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing[6], marginBottom: spacing[3] },
-  sectionTitle: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary },
-  link: { color: colors.primary, fontSize: fontSizes.sm, fontWeight: '600' },
-  muted: { color: colors.textMuted, fontSize: fontSizes.sm },
+  sectionTitle: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  link: { color: colors.primary, fontSize: fontSizes.sm, fontFamily: fontFamily.semibold },
+  muted: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: fontFamily.regular },
   catItem: { alignItems: 'center', gap: spacing[2] },
-  catItemActive: {},
   catCircle: { width: 64, height: 64, borderRadius: radius.lg, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 1 },
   catCircleActive: { backgroundColor: colors.primary + '20', borderWidth: 2, borderColor: colors.primary },
-  catLabel: { fontSize: fontSizes.sm, color: colors.textPrimary },
-  catLabelActive: { color: colors.primary, fontWeight: '700' },
+  catLabel: { fontSize: fontSizes.sm, color: colors.textPrimary, fontFamily: fontFamily.regular },
+  catLabelActive: { color: colors.primary, fontFamily: fontFamily.bold },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 2 },
   cardImage: { height: 140, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   tag: { position: 'absolute', top: 12, left: 12, paddingHorizontal: 12, paddingVertical: 4, borderRadius: radius.full },
-  tagText: { color: '#fff', fontSize: fontSizes.xs, fontWeight: '600' },
+  tagText: { color: '#fff', fontSize: fontSizes.xs, fontFamily: fontFamily.semibold },
   cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary },
-  rating: { fontWeight: '700', color: colors.textPrimary },
+  cardTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  rating: { fontFamily: fontFamily.bold, color: colors.textPrimary },
   cardMeta: { flexDirection: 'row', gap: spacing[4], marginTop: spacing[3] },
-  fee: { color: colors.primary, fontWeight: '700', fontSize: fontSizes.sm },
+  fee: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.sm },
   fab: { position: 'absolute', left: 16, width: 56, height: 56, borderRadius: 28, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
   badge: { position: 'absolute', top: -2, right: -2, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.error, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.surface },
-  badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[12] },
+  badgeText: { color: '#fff', fontSize: 10, fontFamily: fontFamily.bold },
+  empty: { textAlign: 'center', color: colors.textMuted, fontFamily: fontFamily.regular, marginTop: spacing[12] },
 });
-

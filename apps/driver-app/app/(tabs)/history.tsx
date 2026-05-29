@@ -1,7 +1,7 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
 export default function History() {
   // Query historical orders scoped to this driver
@@ -84,15 +84,15 @@ export default function History() {
 
 const styles = StyleSheet.create({
   summary: { backgroundColor: colors.secondary, borderRadius: radius.lg, padding: spacing[5], alignItems: 'center' },
-  summaryLabel: { color: '#fff', opacity: 0.9, fontFamily: 'Cairo-Bold' },
-  summaryValue: { color: '#fff', fontSize: 32, fontWeight: '800', marginTop: 4, fontFamily: 'Cairo-Bold' },
+  summaryLabel: { color: '#fff', opacity: 0.9 },
+  summaryValue: { color: '#fff', fontSize: 32, fontFamily: fontFamily.extrabold, marginTop: 4 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
   row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  business: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary, fontFamily: 'Cairo-Bold' },
-  amount: { color: colors.primary, fontWeight: '700', fontSize: fontSizes.base },
+  business: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  amount: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   badge: { backgroundColor: '#DCFCE7', borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: 4 },
-  badgeText: { color: '#166534', fontWeight: '700', fontSize: fontSizes.xs, fontFamily: 'Cairo-Bold' },
+  badgeText: { color: '#166534', fontFamily: fontFamily.bold, fontSize: fontSizes.xs },
   emptyCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[8], borderWidth: 1, borderColor: colors.border, alignItems: 'center', marginTop: spacing[4] },
-  emptyText: { color: colors.textMuted, fontSize: fontSizes.sm, fontFamily: 'Cairo-Bold' },
+  emptyText: { color: colors.textMuted, fontSize: fontSizes.sm },
 });

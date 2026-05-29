@@ -2,7 +2,7 @@
 
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, productsApi } from '@shu/api-client';
 
 export default function Menu() {
@@ -149,14 +149,14 @@ export default function Menu() {
 
 const styles = StyleSheet.create({
   head: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: spacing[4] },
-  title: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary },
+  title: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
   addBtn: { backgroundColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
-  addText: { color: '#fff', fontWeight: '700' },
+  addText: { color: '#fff', fontFamily: fontFamily.bold },
   item: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[3], borderWidth: 1, borderColor: colors.border },
   img: { width: 56, height: 56, borderRadius: radius.md, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary },
+  name: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },
-  price: { color: colors.primary, fontWeight: '700', marginTop: 2 },
+  price: { color: colors.primary, fontFamily: fontFamily.bold, marginTop: 2 },
   actions: { flexDirection: 'row', gap: spacing[3], paddingLeft: 4 },
   actionIcon: { fontSize: 18 },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[12] },

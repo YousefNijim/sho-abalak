@@ -11,11 +11,20 @@
       "backgroundColor": "#FCF3DC",
       "resizeMode": "contain"
     },
-    "ios": { "supportsTablet": false },
-    "android": {
-      "adaptiveIcon": { "backgroundColor": "#FCF3DC" }
+    "ios": {
+      "supportsTablet": false
     },
-    "plugins": ["expo-router"],
-    "experiments": { "typedRoutes": true }
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FCF3DC"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

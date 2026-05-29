@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@shu/ui-components/native';
-import { colors, fontSizes, radius, spacing } from '../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 
 export default function RequestAlert() {
   const router = useRouter();
@@ -71,11 +71,11 @@ function Row({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: spacing[5], backgroundColor: colors.background, alignItems: 'center' },
   emoji: { fontSize: 56, marginTop: spacing[6] },
-  title: { fontSize: fontSizes['2xl'], fontWeight: '800', color: colors.textPrimary, marginVertical: spacing[4] },
+  title: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.extrabold, color: colors.textPrimary, marginVertical: spacing[4] },
   card: { width: '100%', backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[3] },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   muted: { color: colors.textMuted, fontSize: fontSizes.base },
-  value: { color: colors.textPrimary, fontWeight: '700', fontSize: fontSizes.base },
-  timer: { fontSize: 40, fontWeight: '800', color: colors.primary, marginVertical: spacing[5] },
+  value: { color: colors.textPrimary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
+  timer: { fontSize: 40, fontFamily: fontFamily.extrabold, color: colors.primary, marginVertical: spacing[5] },
   actions: { flexDirection: 'row', gap: spacing[3], width: '100%' },
 });

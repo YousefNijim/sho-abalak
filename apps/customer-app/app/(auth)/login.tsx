@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input } from '@shu/ui-components/native';
-import { colors, fontSizes, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
 
 export default function Login() {
@@ -38,14 +38,19 @@ export default function Login() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.container, { paddingTop: insets.top + 40 }]}
+      contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing[10] }]}
       keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.logo}>
-        <Text style={{ color: colors.primary }}>شو </Text>
-        <Text style={{ color: colors.secondary }}>عبالك؟</Text>
-      </Text>
-      <Text style={styles.welcome}>مرحباً بك</Text>
+      {/* Logo */}
+      <View style={styles.header}>
+        <Text style={styles.logo}>
+          <Text style={{ color: colors.primary }}>شو </Text>
+          <Text style={{ color: colors.secondary }}>عبالك؟</Text>
+        </Text>
+        <Text style={styles.welcome}>مرحباً بك</Text>
+        <Text style={styles.subtitle}>سجّل دخولك للمتابعة</Text>
+      </View>
 
       <View style={styles.form}>
         <Input
@@ -63,12 +68,15 @@ export default function Login() {
           onChangeText={setPassword}
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        <Link href="/(auth)/register" style={styles.forgot}>
+
+        <Link href="/(auth)/register" style={styles.forgotWrap}>
           <Text style={styles.link}>نسيت كلمة المرور؟</Text>
         </Link>
+
         <Button
-          title={loading ? 'جاري الدخول...' : 'دخول'}
+          title="دخول"
           onPress={handleLogin}
+          loading={loading}
           disabled={loading}
         />
       </View>
@@ -84,13 +92,36 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, paddingHorizontal: spacing[5], backgroundColor: colors.background },
-  logo: { fontSize: fontSizes['3xl'], fontWeight: '800', textAlign: 'center' },
-  welcome: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary, textAlign: 'center', marginTop: spacing[2], marginBottom: spacing[8] },
-  form: { gap: spacing[4] },
-  forgot: { alignSelf: 'flex-start' },
-  link: { color: colors.primary, fontWeight: '600', fontSize: fontSizes.base },
-  bottom: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing[6] },
-  muted: { color: colors.textMuted, fontSize: fontSizes.base },
-  errorText: { color: colors.error, fontSize: fontSizes.sm, textAlign: 'center' },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: spacing[6],
+    paddingBottom: spacing[8],
+    backgroundColor: colors.background,
+  },
+  header: { alignItems: 'center', marginBottom: spacing[10] },
+  logo: { fontSize: fontSizes['3xl'], fontFamily: fontFamily.extrabold, textAlign: 'center' },
+  welcome: {
+    fontSize: fontSizes['2xl'],
+    fontFamily: fontFamily.bold,
+    color: colors.textPrimary,
+    textAlign: 'center',
+    marginTop: spacing[6],
+  },
+  subtitle: {
+    fontSize: fontSizes.base,
+    fontFamily: fontFamily.regular,
+    color: colors.textMuted,
+    marginTop: spacing[1],
+  },
+  form: { gap: spacing[6] },
+  forgotWrap: { alignSelf: 'flex-start' },
+  link: { color: colors.primary, fontFamily: fontFamily.semibold, fontSize: fontSizes.base },
+  bottom: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing[8] },
+  muted: { color: colors.textMuted, fontSize: fontSizes.base, fontFamily: fontFamily.regular },
+  errorText: {
+    color: colors.error,
+    fontSize: fontSizes.sm,
+    textAlign: 'center',
+    fontFamily: fontFamily.regular,
+  },
 });

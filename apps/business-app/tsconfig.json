@@ -13,7 +13,8 @@
       "@shu/utils": ["../../packages/utils/src/index.ts"],
       "@shu/ui-components": ["../../packages/ui-components/src/index.ts"],
       "@shu/ui-components/native": ["../../packages/ui-components/src/native/index.ts"],
-      "@shu/api-client": ["../../packages/api-client/src/index.ts"]
+      "@shu/api-client": ["../../packages/api-client/src/index.ts"],
+      "react-native-reanimated": ["node_modules/react-native-reanimated"]
     }
   },
   "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"]

@@ -1,5 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
-import { colors, radius, components, fontSizes } from '../tokens';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { colors, radius, components, fontSizes, fontFamily } from '../tokens';
 
 type Variant = 'primary' | 'secondary' | 'danger';
 
@@ -12,42 +13,62 @@ interface Props {
   style?: ViewStyle;
 }
 
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
 export function Button({ title, onPress, variant = 'primary', loading, disabled, style }: Props) {
   const isDisabled = disabled || loading;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
       disabled={isDisabled}
-      style={({ pressed }) => [
+      onPressIn={() => { scale.value = withSpring(0.97, { damping: 15 }); }}
+      onPressOut={() => { scale.value = withSpring(1, { damping: 15 }); }}
+      style={[
         styles.base,
         styles[variant],
         isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
+        animatedStyle,
         style,
       ]}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'secondary' ? colors.primary : '#fff'} />
       ) : (
-        <Text style={[styles.text, variant === 'secondary' && styles.textSecondary]}>{title}</Text>
+        <Text style={[styles.text, variant === 'secondary' && styles.textSecondary, variant === 'danger' && styles.textWhite]}>
+          {title}
+        </Text>
       )}
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
     height: components.buttonHeight,
-    borderRadius: radius.md,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
   primary: { backgroundColor: colors.primary },
-  secondary: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.primary },
+  secondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: colors.secondary,
+  },
   danger: { backgroundColor: colors.error },
   disabled: { opacity: 0.6 },
-  pressed: { opacity: 0.9 },
-  text: { color: '#fff', fontSize: fontSizes.lg, fontWeight: '700' },
-  textSecondary: { color: colors.primary },
+  text: {
+    color: '#fff',
+    fontSize: fontSizes.lg,
+    fontFamily: fontFamily.bold,
+  },
+  textSecondary: { color: colors.secondary },
+  textWhite: { color: '#fff' },
 });

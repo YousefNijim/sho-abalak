@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
-import { colors, fontSizes, radius, spacing } from '../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 
 const STEPS = ['استلام من المنشأة', 'في الطريق', 'تسليم للزبون'];
 
@@ -170,24 +170,24 @@ const styles = StyleSheet.create({
   stepItem: { alignItems: 'center', flex: 1, gap: 6 },
   stepDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   stepDotActive: { backgroundColor: colors.primary },
-  stepNum: { fontWeight: '700', color: colors.textMuted },
-  stepLabel: { fontSize: fontSizes.xs, color: colors.textPrimary, textAlign: 'center', fontFamily: 'Cairo-Bold' },
+  stepNum: { fontFamily: fontFamily.bold, color: colors.textMuted },
+  stepLabel: { fontSize: fontSizes.xs, color: colors.textPrimary, textAlign: 'center' },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
   cardHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  cardTitle: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary, fontFamily: 'Cairo-Bold', textAlign: 'right' },
-  nameText: { fontSize: fontSizes.base, fontWeight: '800', color: colors.primary, textAlign: 'right', fontFamily: 'Cairo-Bold', marginVertical: 2 },
+  cardTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
+  nameText: { fontSize: fontSizes.base, fontFamily: fontFamily.extrabold, color: colors.primary, textAlign: 'right', marginVertical: 2 },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   callBtn: { backgroundColor: colors.secondary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2], alignSelf: 'flex-start', marginTop: spacing[2] },
-  callText: { color: '#fff', fontWeight: '700', fontSize: fontSizes.sm, fontFamily: 'Cairo-Bold' },
+  callText: { color: '#fff', fontFamily: fontFamily.bold, fontSize: fontSizes.sm },
   itemsList: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing[2], marginTop: spacing[1], gap: spacing[2] },
   itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
   itemName: { fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right' },
-  itemQty: { fontSize: fontSizes.sm, fontWeight: '700', color: colors.primary },
+  itemQty: { fontSize: fontSizes.sm, fontFamily: fontFamily.bold, color: colors.primary },
   noteContainer: { backgroundColor: colors.background, borderRadius: radius.md, padding: spacing[3], marginTop: spacing[2] },
-  noteTitle: { fontSize: fontSizes.xs, fontWeight: '700', color: colors.textPrimary, textAlign: 'right', fontFamily: 'Cairo-Bold' },
+  noteTitle: { fontSize: fontSizes.xs, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   noteText: { fontSize: fontSizes.xs, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
   cashCallout: { backgroundColor: '#FEF9C3', borderRadius: radius.md, padding: spacing[4], borderWidth: 1, borderColor: '#FEF08A' },
-  cashText: { color: '#854D0E', fontWeight: '700', fontSize: fontSizes.base, textAlign: 'center', fontFamily: 'Cairo-Bold' },
+  cashText: { color: '#854D0E', fontFamily: fontFamily.bold, fontSize: fontSizes.base, textAlign: 'center' },
   electronicCallout: { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' },
   electronicText: { color: '#166534' },
   footer: { padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },

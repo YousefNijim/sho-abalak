@@ -2,7 +2,7 @@
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
 
 const ITEMS = [
@@ -58,16 +58,16 @@ export default function Profile() {
 const styles = StyleSheet.create({
   head: { alignItems: 'center', gap: spacing[2], marginBottom: spacing[6] },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary },
-  phone: { color: colors.textMuted },
+  name: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  phone: { color: colors.textMuted, fontFamily: fontFamily.regular },
   editBtn: { borderWidth: 1.5, borderColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing[6], paddingVertical: spacing[2], marginTop: spacing[2] },
-  editText: { color: colors.primary, fontWeight: '600' },
-  list: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  editText: { color: colors.primary, fontFamily: fontFamily.semibold },
+  list: { backgroundColor: colors.surface, borderRadius: radius.lg, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, elevation: 2, overflow: 'hidden' },
   item: { flexDirection: 'row-reverse', alignItems: 'center', padding: spacing[4], gap: spacing[3] },
   itemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
   itemIcon: { fontSize: 20 },
-  itemLabel: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  itemLabel: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right', fontFamily: fontFamily.regular },
   chevron: { fontSize: 24, color: colors.textMuted },
   logout: { marginTop: spacing[6], alignItems: 'center', padding: spacing[4] },
-  logoutText: { color: colors.error, fontWeight: '700', fontSize: fontSizes.base },
+  logoutText: { color: colors.error, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
 });

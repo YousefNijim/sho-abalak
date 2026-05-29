@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
-import { colors, fontSizes, radius, spacing } from '../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { businessesApi, driversApi, ordersApi } from '@shu/api-client';
 
 export default function DriverSelection() {
@@ -106,14 +106,14 @@ const styles = StyleSheet.create({
   filters: { flexDirection: 'row-reverse', gap: spacing[2], padding: spacing[4] },
   filter: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   filterActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  filterText: { color: colors.textMuted, fontWeight: '600' },
+  filterText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   filterTextActive: { color: '#fff' },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
   row: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
   avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
-  name: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary },
+  name: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },
   availTag: { backgroundColor: '#DCFCE7', borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: 4 },
-  availText: { color: '#166534', fontWeight: '700', fontSize: fontSizes.sm },
+  availText: { color: '#166534', fontFamily: fontFamily.bold, fontSize: fontSizes.sm },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[12] },
 });

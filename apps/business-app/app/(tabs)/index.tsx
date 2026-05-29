@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Te
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, ordersApi } from '@shu/api-client';
 import { useSocket } from '../../src/hooks/useSocket';
 
@@ -201,23 +201,23 @@ function Stat({ label, value, bg }: { label: string; value: string; bg: string }
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: spacing[4], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
-  storeName: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
-  status: { fontSize: fontSizes.sm, marginTop: 2, fontWeight: '600', textAlign: 'right' },
+  storeName: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
+  status: { fontSize: fontSizes.sm, marginTop: 2, fontFamily: fontFamily.semibold, textAlign: 'right' },
   statsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[3], marginBottom: spacing[5] },
   stat: { width: '47%', borderRadius: radius.lg, padding: spacing[4], flexGrow: 1, alignItems: 'flex-end' },
-  statValue: { color: '#fff', fontSize: 24, fontWeight: '800' },
+  statValue: { color: '#fff', fontSize: 24, fontFamily: fontFamily.extrabold },
   statLabel: { color: '#fff', fontSize: fontSizes.sm, opacity: 0.9, marginTop: 2 },
   tabs: { flexDirection: 'row-reverse', gap: spacing[2], marginBottom: spacing[4] },
   tab: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   tabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tabText: { color: colors.textMuted, fontWeight: '600' },
+  tabText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   tabTextActive: { color: '#fff' },
   redDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
   orderCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
   orderRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  orderId: { fontWeight: '700', color: colors.textPrimary, fontSize: fontSizes.base },
+  orderId: { fontFamily: fontFamily.bold, color: colors.textPrimary, fontSize: fontSizes.base },
   customer: { color: colors.textPrimary, fontSize: fontSizes.base, textAlign: 'right' },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },
-  total: { color: colors.primary, fontWeight: '700', fontSize: fontSizes.base },
+  total: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[10] },
 });

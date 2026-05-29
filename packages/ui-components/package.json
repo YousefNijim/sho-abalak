@@ -10,11 +10,13 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-reanimated": "*"
   },
   "peerDependenciesMeta": {
     "react": { "optional": true },
-    "react-native": { "optional": true }
+    "react-native": { "optional": true },
+    "react-native-reanimated": { "optional": true }
   },
   "devDependencies": {
     "@types/react": "~18.2.79"

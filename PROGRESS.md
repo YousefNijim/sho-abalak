@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-29
-**Current phase:** Phase 10 (Verification and validation fully completed; monorepo compiles topologically, E2E order lifecycle integration specs are 100% successful, and Docker Compose configurations support a full production staging stack)
+**Current phase:** Phase 11 (UI polish complete — Cairo fonts, Lucide icons, reanimated button animations, bottom-sheet area picker, polished components across all 3 mobile apps; all 3 apps typecheck clean)
 
 ---
 
@@ -26,6 +26,9 @@
 - **Password hashing uses `bcryptjs`, not `bcrypt`.** The native `bcrypt` failed to load its `.node` binding on this Windows setup (`Cannot find module bcrypt_lib.node`). Swapped to pure-JS `bcryptjs` (same API). Don't reintroduce native `bcrypt`.
 - **The API runtime needs `@shu/shared-types` and `@shu/utils` COMPILED.** Node can't `require()` their `.ts` source, so both packages now have `main: dist/index.js` + a `build` script (`tsc -p tsconfig.build.json`, CommonJS). **Run `pnpm --filter @shu/shared-types build && pnpm --filter @shu/utils build` before `start:prod`/`start:dev`** (or whenever those packages change), else the API dies with `ERR_MODULE_NOT_FOUND .../enums`. The web/RN apps are unaffected — they import these via tsconfig `paths` to source, not `main`. TODO: wire these builds as an Nx `dependsOn` so they run automatically.
 - **Orphaned node on :3001/:3000** — stopping a dev/prod API leaves a node holding the port; next start hits `EADDRINUSE`. Kill it: PowerShell `Get-NetTCPConnection -LocalPort 3001 -State Listen | %{ Stop-Process -Id $_.OwningProcess -Force }`. (A running API also locks the Prisma query-engine DLL → `prisma generate` fails with `EPERM`; stop node first.)
+- **Cairo font strings use underscores, not hyphens:** `fontFamily: 'Cairo_700Bold'` (from `@expo-google-fonts/cairo`) — NOT `'Cairo-Bold'`. The old screens used hyphens which rendered as system fallback. All screens now use `fontFamily.*` tokens from `tokens.ts`.
+- **reanimated path alias in tsconfigs:** each app's `tsconfig.json` has `"react-native-reanimated": ["node_modules/react-native-reanimated"]` so that tsc resolves it from the app's own node_modules when typechecking shared ui-components source. Without this, Button.tsx causes TS2307 during `tsc --noEmit`.
+- **`@gorhom/bottom-sheet` + `react-native-reanimated` + `react-native-gesture-handler` must all be present** for BottomSheet to work at runtime. If gesture-handler missing, BottomSheet crashes.
 - **Prisma migrations must be non-interactive here.** `prisma migrate dev` prompts on warnings and the shell is non-interactive (it errors out). Instead: edit schema → `prisma migrate diff --from-url <DATABASE_URL> --to-schema-datamodel prisma/schema.prisma --script > migration.sql` into a new `prisma/migrations/<timestamp>_<name>/` dir → `prisma migrate deploy` → `prisma generate` (with node stopped). Don't leave stray dirs under `prisma/migrations/` (Prisma treats every subdir as a migration → P3015).
 
 ---
@@ -160,6 +163,7 @@
 7. ~~**Wire frontends to the API**~~ ✅ **100% DONE** — All 4 frontends (Admin Dashboard, Customer App, Business App, and Driver App) are fully wired, authenticated, typecheck clean, and successfully linked to the live API!
 8. ~~**DevOps & Infra (Phase 7)**~~ ✅ **100% DONE** — GitHub Actions CI pipeline, multi-stage Dockerfiles for NestJS and Next.js, Sentry incident capturer filters, and Nginx reverse proxy gateway configurations mapped and validated.
 9. ~~**Feature Leftovers & Polish (Phase 8)**~~ ✅ **100% DONE** — Local/S3 Uploads REST module registered, SMS & Push alert interfaces injected, supertest E2E integration specs running, and atomic driver availability automation toggles configured.
+10. ~~**UI Polish (Phase 11 — branch `feat/ui-polish`)**~~ ✅ **100% DONE** — Cairo font loaded in all 3 app layouts (blocks splash until ready); `fontFamily` tokens added to `tokens.ts`; Button upgraded with Reanimated scale press animation; Input/Card polished; Lucide icons replace emoji tabs in all 3 apps; Register screen upgraded with `@gorhom/bottom-sheet` area picker; all screens use `fontFamily.*` tokens instead of raw `fontWeight` strings; `tsc --noEmit` clean on customer-app, business-app, driver-app.
 
 ---
 

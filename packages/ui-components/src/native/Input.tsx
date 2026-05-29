@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
-import { colors, radius, components, fontSizes } from '../tokens';
+import { colors, radius, components, fontSizes, fontFamily, spacing } from '../tokens';
 
 interface Props extends TextInputProps {
   label?: string;
@@ -32,18 +32,28 @@ export function Input({ label, error, style, ...rest }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 6 },
-  label: { fontSize: fontSizes.sm, color: colors.textPrimary, fontWeight: '500' },
+  label: {
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    fontFamily: fontFamily.medium,
+  },
   input: {
     height: components.inputHeight,
     backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: 16,
+    borderRadius: 14,
+    paddingHorizontal: spacing[4],
     fontSize: fontSizes.base,
     color: colors.textPrimary,
+    fontFamily: fontFamily.regular,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 1,
   },
-  focused: { borderColor: colors.primary },
-  errored: { borderColor: colors.error },
-  error: { fontSize: fontSizes.xs, color: colors.error },
+  focused: { borderColor: colors.primary, borderWidth: 2 },
+  errored: { borderColor: colors.error, borderWidth: 2 },
+  error: { fontSize: fontSizes.xs, color: colors.error, fontFamily: fontFamily.regular },
 });

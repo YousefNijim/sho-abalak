@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Te
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { driversApi, ordersApi } from '@shu/api-client';
 import { useSocket } from '../../src/hooks/useSocket';
 
@@ -186,23 +186,23 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  greeting: { fontSize: fontSizes['2xl'], fontWeight: '800', color: colors.primary, textAlign: 'right' },
+  greeting: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.extrabold, color: colors.primary, textAlign: 'right' },
   availCard: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  availStatus: { fontSize: fontSizes.lg, fontWeight: '700' },
+  availStatus: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, marginTop: 2 },
   stats: { flexDirection: 'row-reverse', gap: spacing[3] },
   stat: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
-  statValue: { fontSize: fontSizes.xl, fontWeight: '800', color: colors.textPrimary },
+  statValue: { fontSize: fontSizes.xl, fontFamily: fontFamily.extrabold, color: colors.textPrimary },
   statLabel: { color: colors.textMuted, fontSize: fontSizes.xs, marginTop: 2 },
-  sectionTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary, marginBottom: spacing[3], textAlign: 'right' },
+  sectionTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[3], textAlign: 'right' },
   orderCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
   orderRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  orderTitle: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary },
-  amount: { color: colors.primary, fontWeight: '700' },
+  orderTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  amount: { color: colors.primary, fontFamily: fontFamily.bold },
   deliverBtn: { backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: spacing[3], alignItems: 'center', marginTop: spacing[3] },
-  deliverText: { color: '#fff', fontWeight: '700' },
+  deliverText: { color: '#fff', fontFamily: fontFamily.bold },
   simulate: { borderWidth: 1.5, borderColor: colors.primary, borderRadius: radius.md, padding: spacing[4], alignItems: 'center' },
-  simulateText: { color: colors.primary, fontWeight: '700' },
+  simulateText: { color: colors.primary, fontFamily: fontFamily.bold },
   emptyCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[6], borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
   emptyText: { color: colors.textMuted, fontSize: fontSizes.sm },
 });

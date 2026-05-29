@@ -1,1 +1,1 @@
-export { colors, fontSizes, spacing, radius, fontWeights } from '@shu/ui-components';
+export { colors, fontSizes, spacing, radius, fontWeights, fontFamily } from '@shu/ui-components';

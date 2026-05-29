@@ -22,6 +22,15 @@ export const fonts = {
   latin: 'Montserrat',
 } as const;
 
+/** Cairo font family strings — use these in fontFamily style props */
+export const fontFamily = {
+  regular: 'Cairo_400Regular',
+  medium: 'Cairo_500Medium',
+  semibold: 'Cairo_600SemiBold',
+  bold: 'Cairo_700Bold',
+  extrabold: 'Cairo_800ExtraBold',
+} as const;
+
 export const fontWeights = {
   regular: 400,
   medium: 500,

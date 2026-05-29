@@ -4,7 +4,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 're
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { ordersApi } from '@shu/api-client';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -153,21 +153,21 @@ export default function OrderDetail() {
 function Info({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <View style={styles.infoRow}>
-      <Text style={[styles.infoValue, bold && { fontWeight: '800', color: colors.primary, fontSize: fontSizes.lg }]}>{value}</Text>
+      <Text style={[styles.infoValue, bold && { fontFamily: fontFamily.extrabold, color: colors.primary, fontSize: fontSizes.lg }]}>{value}</Text>
       <Text style={styles.muted}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary },
+  title: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   statusBanner: { backgroundColor: colors.primary + '10', borderLeftWidth: 4, borderLeftColor: colors.primary, padding: spacing[3], borderRadius: radius.sm },
-  statusLabel: { color: colors.primary, fontWeight: '700', fontSize: fontSizes.sm, textAlign: 'right' },
+  statusLabel: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.sm, textAlign: 'right' },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between' },
   itemName: { color: colors.textPrimary, fontSize: fontSizes.base },
-  itemPrice: { color: colors.textPrimary, fontWeight: '600' },
+  itemPrice: { color: colors.textPrimary, fontFamily: fontFamily.semibold },
   note: { backgroundColor: '#FEF9C3', borderRadius: radius.md, padding: spacing[3] },
   noteText: { color: '#854D0E', fontSize: fontSizes.sm, textAlign: 'right' },
   infoCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
@@ -176,5 +176,5 @@ const styles = StyleSheet.create({
   footer: { padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
   btnRow: { flexDirection: 'row', gap: spacing[3] },
   completedState: { alignItems: 'center', paddingVertical: 12 },
-  completedText: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textMuted },
+  completedText: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textMuted },
 });

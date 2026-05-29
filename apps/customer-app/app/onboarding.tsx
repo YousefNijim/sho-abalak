@@ -3,7 +3,7 @@ import { Dimensions, FlatList, Pressable, StyleSheet, Text, View } from 'react-n
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@shu/ui-components/native';
-import { colors, fontSizes, spacing } from '../src/theme';
+import { colors, fontSizes, fontFamily, spacing } from '../src/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   skipText: { color: colors.textMuted, fontSize: fontSizes.base },
   slide: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing[6] },
   emoji: { fontSize: 120, marginBottom: spacing[6] },
-  title: { fontSize: fontSizes['2xl'], fontWeight: '700', color: colors.textPrimary, marginBottom: spacing[3] },
+  title: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[3] },
   text: { fontSize: fontSizes.lg, color: colors.textMuted, textAlign: 'center' },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: spacing[6] },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },

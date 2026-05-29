@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
 import { useSocket } from '../src/hooks/useSocket';
@@ -50,7 +50,7 @@ export default function Tracking() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
         <Text style={{ fontSize: 64, marginBottom: spacing[4] }}>📍</Text>
-        <Text style={{ fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary, marginBottom: spacing[2] }}>لا يوجد طلب لتتبعه</Text>
+        <Text style={{ fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[2] }}>لا يوجد طلب لتتبعه</Text>
         <Text style={{ color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] }}>تصفح طلباتك السابقة لمتابعة حالة أي طلب نشط.</Text>
         <Button title="الذهاب للطلبات" onPress={() => router.replace('/(tabs)/orders')} />
       </View>
@@ -68,7 +68,7 @@ export default function Tracking() {
   if (error || !order) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[6] }}>
-        <Text style={{ color: colors.error, fontSize: fontSizes.lg, fontWeight: '700', marginBottom: spacing[4] }}>فشل تحميل تفاصيل الطلب</Text>
+        <Text style={{ color: colors.error, fontSize: fontSizes.lg, fontFamily: fontFamily.bold, marginBottom: spacing[4] }}>فشل تحميل تفاصيل الطلب</Text>
         <Button title="تحديث" onPress={() => router.replace('/(tabs)')} />
       </View>
     );
@@ -188,28 +188,28 @@ export default function Tracking() {
 }
 
 const styles = StyleSheet.create({
-  heading: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  heading: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   eta: { color: colors.textMuted, marginTop: 4, marginBottom: spacing[6], textAlign: 'right' },
   cancelledBanner: { backgroundColor: '#FEE2E2', borderRadius: radius.md, padding: spacing[4], marginBottom: spacing[6] },
-  cancelledText: { color: '#991B1B', fontWeight: '700', fontSize: fontSizes.base, textAlign: 'right' },
+  cancelledText: { color: '#991B1B', fontFamily: fontFamily.bold, fontSize: fontSizes.base, textAlign: 'right' },
   stepper: { gap: 0, alignItems: 'flex-start' },
   step: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: spacing[3], width: '100%' },
   stepLeft: { alignItems: 'center' },
   dot: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  dotText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  dotText: { color: '#fff', fontSize: 14, fontFamily: fontFamily.bold },
   line: { width: 2, height: 32 },
-  stepLabel: { fontSize: fontSizes.base, color: colors.textPrimary, fontWeight: '600', paddingTop: 4, flex: 1, textAlign: 'right' },
+  stepLabel: { fontSize: fontSizes.base, color: colors.textPrimary, fontFamily: fontFamily.semibold, paddingTop: 4, flex: 1, textAlign: 'right' },
   driver: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, marginTop: spacing[6] },
   driverAvatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
-  driverName: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  driverName: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   callBtn: { backgroundColor: colors.secondary, borderRadius: radius.full, paddingHorizontal: spacing[4], paddingVertical: spacing[2] },
-  callText: { color: '#fff', fontWeight: '700' },
-  detailTitle: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary, textAlign: 'right', marginBottom: spacing[2] },
+  callText: { color: '#fff', fontFamily: fontFamily.bold },
+  detailTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right', marginBottom: spacing[2] },
   itemRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', paddingVertical: 4 },
   itemName: { color: colors.textPrimary, fontSize: fontSizes.sm },
-  itemPrice: { color: colors.textPrimary, fontSize: fontSizes.sm, fontWeight: '600' },
+  itemPrice: { color: colors.textPrimary, fontSize: fontSizes.sm, fontFamily: fontFamily.semibold },
   divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing[2] },
-  totalLabel: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary },
-  totalValue: { fontSize: fontSizes.base, fontWeight: '700', color: colors.primary },
+  totalLabel: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
+  totalValue: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.primary },
 });

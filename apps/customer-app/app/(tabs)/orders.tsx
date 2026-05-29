@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { ordersApi } from '@shu/api-client';
 import type { Order } from '@shu/api-client';
 import { useCartStore } from '../../src/stores/cart.store';
@@ -121,18 +121,18 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: 'row', padding: spacing[4], gap: spacing[2] },
   tab: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   tabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tabText: { color: colors.textMuted, fontWeight: '600' },
+  tabText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   tabTextActive: { color: '#fff' },
-  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
+  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2, gap: 4 },
   row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
-  business: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  business: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   badge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: radius.full },
-  badgeText: { fontSize: fontSizes.xs, fontWeight: '700' },
-  muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
+  badgeText: { fontSize: fontSizes.xs, fontFamily: fontFamily.bold },
+  muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right', fontFamily: fontFamily.regular },
   actions: { flexDirection: 'row-reverse', gap: spacing[3], marginTop: spacing[3] },
   secondaryBtn: { flex: 1, height: 44, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  secondaryText: { color: colors.primary, fontWeight: '700' },
+  secondaryText: { color: colors.primary, fontFamily: fontFamily.bold },
   detailsBtn: { flex: 1, height: 44, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  detailsText: { color: '#fff', fontWeight: '700' },
-  empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[12] },
+  detailsText: { color: '#fff', fontFamily: fontFamily.bold },
+  empty: { textAlign: 'center', color: colors.textMuted, fontFamily: fontFamily.regular, marginTop: spacing[12] },
 });

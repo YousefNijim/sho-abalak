@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi } from '@shu/api-client';
 import type { Product } from '@shu/api-client';
 import { useCartStore } from '../../src/stores/cart.store';
@@ -163,21 +163,21 @@ export default function BusinessDetail() {
 const styles = StyleSheet.create({
   hero: { height: 200, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   info: { padding: spacing[4], gap: 6 },
-  name: { fontSize: fontSizes['2xl'], fontWeight: '700', color: colors.textPrimary },
+  name: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.bold, color: colors.textPrimary },
   metaLine: { color: colors.textMuted, fontSize: fontSizes.sm },
   tabs: { flexDirection: 'row', paddingHorizontal: spacing[4], paddingVertical: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border, marginBottom: spacing[3] },
-  tabText: { color: colors.textMuted, fontSize: fontSizes.base, fontWeight: '600' },
+  tabText: { color: colors.textMuted, fontSize: fontSizes.base, fontFamily: fontFamily.semibold },
   tabActive: { color: colors.primary, borderBottomWidth: 2, borderBottomColor: colors.primary, paddingBottom: 4 },
   product: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[3], borderWidth: 1, borderColor: colors.border },
   productImg: { width: 72, height: 72, borderRadius: radius.md, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  productName: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textPrimary },
+  productName: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },
-  price: { color: colors.primary, fontWeight: '700', marginTop: 4 },
+  price: { color: colors.primary, fontFamily: fontFamily.bold, marginTop: 4 },
   add: { width: 36, height: 36, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  addText: { color: '#fff', fontSize: 22, fontWeight: '700', lineHeight: 24 },
+  addText: { color: '#fff', fontSize: 22, fontFamily: fontFamily.bold, lineHeight: 24 },
   unavailable: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.sm, backgroundColor: colors.border },
-  unavailableText: { color: colors.textMuted, fontSize: fontSizes.xs, fontWeight: '600' },
+  unavailableText: { color: colors.textMuted, fontSize: fontSizes.xs, fontFamily: fontFamily.semibold },
   cartBar: { position: 'absolute', bottom: 24, left: 16, right: 16, height: 52, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, elevation: 4 },
-  cartBarText: { color: '#fff', fontWeight: '700', fontSize: fontSizes.base },
+  cartBarText: { color: '#fff', fontFamily: fontFamily.bold, fontSize: fontSizes.base },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[6] },
 });

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, ordersApi } from '@shu/api-client';
 
 const PERIODS = ['اليوم', 'الأسبوع', 'الشهر'];
@@ -164,21 +164,21 @@ const styles = StyleSheet.create({
   periods: { flexDirection: 'row-reverse', gap: spacing[2], backgroundColor: colors.surface, padding: 4, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   period: { flex: 1, paddingVertical: spacing[2], borderRadius: radius.sm, alignItems: 'center' },
   periodActive: { backgroundColor: colors.primary },
-  periodText: { color: colors.textMuted, fontWeight: '600' },
+  periodText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   periodTextActive: { color: '#fff' },
   cards: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[3] },
   statCard: { width: '47%', flexGrow: 1, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, alignItems: 'flex-end' },
-  statValue: { fontSize: fontSizes.xl, fontWeight: '800', color: colors.textPrimary },
+  statValue: { fontSize: fontSizes.xl, fontFamily: fontFamily.extrabold, color: colors.textPrimary },
   statLabel: { color: colors.textMuted, fontSize: fontSizes.sm, marginTop: 2 },
   chartCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  cardTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  cardTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   chart: { flexDirection: 'row-reverse', alignItems: 'flex-end', justifyContent: 'space-between', height: 160, marginTop: spacing[4] },
   barCol: { flex: 1, alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 6 },
   bar: { width: '60%', backgroundColor: colors.primary, borderTopLeftRadius: 6, borderTopRightRadius: 6 },
   barLabel: { color: colors.textMuted, fontSize: fontSizes.xs },
   topRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
-  topRank: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, color: '#fff', textAlign: 'center', lineHeight: 24, fontWeight: '700' },
+  topRank: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, color: '#fff', textAlign: 'center', lineHeight: 24, fontFamily: fontFamily.bold },
   topName: { flex: 1, color: colors.textPrimary, fontSize: fontSizes.base, textAlign: 'right' },
-  topCount: { color: colors.primary, fontWeight: '700' },
+  topCount: { color: colors.primary, fontFamily: fontFamily.bold },
   empty: { textAlign: 'center', color: colors.textMuted, fontSize: fontSizes.sm },
 });
