@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -66,6 +66,13 @@ export default function BusinessDetail() {
   const handleAdd = (p: Product) => {
     const result = addItem({ productId: p.id, name: p.name, price: p.price }, business.id, business.areaId);
     if (result === 'different_business') {
+      if (Platform.OS === 'web') {
+        if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
+          clearCart();
+          addItem({ productId: p.id, name: p.name, price: p.price }, business.id, business.areaId);
+        }
+        return;
+      }
       Alert.alert(
         'تنبيه السلة',
         'سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟',

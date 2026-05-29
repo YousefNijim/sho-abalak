@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   MapPin,
@@ -31,6 +31,13 @@ export default function Profile() {
   const logout = useAuthStore((s) => s.logout);
 
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('هل أنت متأكد أنك تريد الخروج؟')) {
+        logout();
+        router.replace('/(auth)/login');
+      }
+      return;
+    }
     Alert.alert('تسجيل الخروج', 'هل أنت متأكد أنك تريد الخروج؟', [
       { text: 'إلغاء', style: 'cancel' },
       {
@@ -66,9 +73,13 @@ export default function Profile() {
         <Text style={styles.phone}>{user?.phone || ''}</Text>
         <Pressable
           style={styles.editBtn}
-          onPress={() =>
-            Alert.alert('قريباً', 'تعديل الملف الشخصي سيكون متاحاً قريباً')
-          }
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              window.alert('تعديل الملف الشخصي سيكون متاحاً قريباً');
+            } else {
+              Alert.alert('قريباً', 'تعديل الملف الشخصي سيكون متاحاً قريباً');
+            }
+          }}
         >
           <User size={14} color={colors.primary} />
           <Text style={styles.editText}>تعديل الملف</Text>
@@ -85,7 +96,11 @@ export default function Profile() {
               if (route) {
                 router.push(route as any);
               } else {
-                Alert.alert('قريباً', `شاشة ${label} ستكون متاحة قريباً`);
+                if (Platform.OS === 'web') {
+                  window.alert(`شاشة ${label} ستكون متاحة قريباً`);
+                } else {
+                  Alert.alert('قريباً', `شاشة ${label} ستكون متاحة قريباً`);
+                }
               }
             }}
           >
