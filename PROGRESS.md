@@ -114,8 +114,10 @@
   - **Online (ELECTRONIC):** built to be swappable. A `PaymentProvider` interface (`providers/payment-provider.interface.ts`, DI token `PAYMENT_PROVIDER`) is implemented today by `MockPaymentProvider` (returns a fake checkout URL + reference; confirm flips PENDING→PAID, or →FAILED if `{paid:false}`). **To go live, implement the interface for a real gateway and change the one binding in `PaymentsModule`** — no service/controller changes. `POST /payments/confirm` is the gateway webhook home (public; provider verifies signature). `GET /payments/:orderId` reuses order view-authz.
   - **Schema:** added `provider`, `reference` (unique), `createdAt`, `updatedAt` to `Payment` (migration `20260529120447_payment_gateway_fields`). Orders now `include` their payment.
   - **Verified end-to-end:** cash → PENDING then PAID on delivery (response + DB); electronic → PENDING + checkout URL → confirm → PAID; failed confirm → FAILED.
+- ✅ **Reviews** (`src/reviews/`): `POST /reviews` (CUSTOMER, own order, only after DELIVERED, once) — creating a review recomputes the business's avg rating and (if rated) the driver's avg rating in one transaction. `GET /reviews/business?businessId=` and `GET /reviews/driver?driverId=` (public). Schema gained `comment`, `createdAt`. **Verified:** review set business→5, driver→4; duplicate 409; pre-delivery review 400.
+- ✅ **Users** (`src/users/`, ADMIN-only): `GET /users` (filter role/status/search), `GET /users/:id`, `PATCH /users/:id/status` (ACTIVE/SUSPENDED/BANNED). Never returns password hashes (explicit `select`). Admin accounts protected from status changes. Added `UserStatus` enum + `User.status` (migration `20260529122029_users_status_and_review_fields`). **Suspended/banned users are blocked both at login AND on existing tokens** (check in `AuthService.login` + `JwtStrategy.validate`). **Verified:** non-admin 403; password not leaked; suspend → login 403 + existing token 403; admin status-change 403.
 - **Verified end-to-end against live DB — FULL lifecycle:** business→product→order; total = items + delivery fee; customer-confirm 403; illegal PENDING→READY 400; business CONFIRMED→PREPARING→READY; driver registers (OFFLINE) → not in `available` → goes AVAILABLE → appears in `available`; assign without `driverId` 400; **business assigns READY→PICKED_UP**; **driver completes PICKED_UP→DELIVERED** (6 history rows); driver sees only assigned orders; customer blocked from `/drivers/register` 403; duplicate driver 409. All confirmed in Postgres.
-- Remaining modules: **reviews** (rate business + driver after DELIVERED), **users** (admin list/suspend).
+- **All domain modules are now built** (auth, areas, businesses, products, orders, drivers, payments, reviews, users). Not yet built: image uploads (S3/Cloudinary), FCM push.
 - No **Socket.io gateway** (events are typed in shared-types but not implemented).
 - No **Redis** integration (ioredis is installed, not wired).
 - DTOs + class-validator + role guards are in place for the built modules; **no automated tests yet** (verified manually via curl/REST).
@@ -139,10 +141,10 @@
 2. ~~**API orders + businesses + products modules**~~ ✅ DONE (+ areas).
 3. ~~**Drivers module**~~ ✅ DONE — full order lifecycle (PENDING→DELIVERED) now works end-to-end.
 4. ~~**Payments module**~~ ✅ DONE — cash settles on delivery; online infra ready behind `PaymentProvider` (mock today). To enable real online payments: implement `PaymentProvider` for a gateway + rebind `PAYMENT_PROVIDER` in `PaymentsModule`.
-5. **Remaining modules:** **reviews** (rate business + driver after DELIVERED), **users** (admin list/suspend). Consider: set driver→BUSY on assignment / →AVAILABLE on delivery (minor enhancement, not done).
+5. ~~**Reviews + Users modules**~~ ✅ DONE — all domain modules complete.
 6. **Socket.io gateway** — implement the 5 events from `@shu/shared-types` `SocketEvents`; wire Redis for real-time state. (`order:new` on create, `order:status_update` on each transition.)
 7. **Wire frontends to the API** — add an axios client + React Query in each app; replace mock data in the (already-built) screens with live calls. Add Zustand stores (cart, auth) and Socket.io-client.
-8. **Infra** — CI (GitHub Actions), Sentry, deploy config.
+8. **Infra** — CI (GitHub Actions), Sentry, deploy config. Smaller leftovers: image uploads (S3/Cloudinary), FCM push, real SMS for OTP, automated tests, driver→BUSY-on-assignment enhancement.
 
 ---
 

@@ -1,7 +1,7 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UserRole } from '@shu/shared-types';
+import { UserRole, UserStatus } from '@shu/shared-types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -35,6 +35,11 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('رقم الهاتف أو كلمة المرور غير صحيحة');
+    }
+    if (user.status !== UserStatus.ACTIVE) {
+      throw new ForbiddenException(
+        user.status === UserStatus.BANNED ? 'تم حظر هذا الحساب' : 'تم تعليق هذا الحساب',
+      );
     }
     return this.sign(user.id, user.role as UserRole, user);
   }

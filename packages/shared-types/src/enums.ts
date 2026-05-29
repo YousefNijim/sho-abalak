@@ -6,6 +6,13 @@ export enum UserRole {
   ADMIN = 'ADMIN',
 }
 
+/** حالة حساب المستخدم (يديرها الأدمن) */
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  BANNED = 'BANNED',
+}
+
 /**
  * حالات الطلب
  * PENDING → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED

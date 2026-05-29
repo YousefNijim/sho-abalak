@@ -17,6 +17,13 @@ enum UserRole {
   ADMIN
 }
 
+// حالة حساب المستخدم (يديرها الأدمن)
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED
@@ -69,18 +76,19 @@ model Area {
 }
 
 model User {
-  id        String    @id @default(uuid())
+  id        String     @id @default(uuid())
   role      UserRole
+  status    UserStatus @default(ACTIVE)
   name      String
-  phone     String    @unique
-  email     String?   @unique
+  phone     String     @unique
+  email     String?    @unique
   password  String
   areaId    String?
-  area      Area?     @relation(fields: [areaId], references: [id])
+  area      Area?      @relation(fields: [areaId], references: [id])
   business  Business?
   driver    Driver?
-  orders    Order[]   @relation("CustomerOrders")
-  createdAt DateTime  @default(now())
+  orders    Order[]    @relation("CustomerOrders")
+  createdAt DateTime   @default(now())
 
   @@map("users")
 }
@@ -176,11 +184,13 @@ model OrderStatusHistory {
 }
 
 model Review {
-  id             String @id @default(uuid())
-  orderId        String @unique
-  order          Order  @relation(fields: [orderId], references: [id])
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  order          Order    @relation(fields: [orderId], references: [id])
   businessRating Int
   driverRating   Int?
+  comment        String?
+  createdAt      DateTime @default(now())
 
   @@map("reviews")
 }

@@ -6,6 +6,7 @@ import {
   PaymentMethod,
   PaymentStatus,
   UserRole,
+  UserStatus,
 } from './enums';
 
 export interface Area {
@@ -18,6 +19,7 @@ export interface Area {
 export interface User {
   id: string;
   role: UserRole;
+  status: UserStatus;
   name: string;
   phone: string;
   email: string | null;
@@ -90,6 +92,8 @@ export interface Review {
   orderId: string;
   businessRating: number;
   driverRating: number | null;
+  comment: string | null;
+  createdAt: string;
 }
 
 export interface Payment {

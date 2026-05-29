@@ -1,8 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserRole } from '@shu/shared-types';
+import { UserRole, UserStatus } from '@shu/shared-types';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface JwtPayload {
@@ -33,6 +33,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload): Promise<AuthUser> {
     const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) throw new UnauthorizedException();
+    // Reject tokens of suspended/banned users (revokes access without waiting for expiry).
+    if (user.status !== UserStatus.ACTIVE) throw new ForbiddenException('الحساب غير نشط');
     return { id: user.id, role: user.role as UserRole, name: user.name, phone: user.phone };
   }
 }
