@@ -1,18 +1,29 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TableCard, StatusDot, RowActions } from '@/components/data-table';
+import { usersApi } from '@shu/api-client';
+import type { AdminUser } from '@shu/api-client';
 
 const TABS = ['الزبائن', 'السائقون', 'أصحاب المنشآت'] as const;
+const TAB_ROLES = ['CUSTOMER', 'DRIVER', 'BUSINESS'] as const;
 
-const USERS = [
-  { name: 'سامي علي', phone: '0599-123-456', area: 'رام الله', joined: '2026-01-12', lastOrder: 'منذ 5 دقائق', active: true },
-  { name: 'نور حسين', phone: '0598-222-789', area: 'نابلس', joined: '2025-11-03', lastOrder: 'منذ يومين', active: true },
-  { name: 'مريم يوسف', phone: '0567-908-114', area: 'الخليل', joined: '2025-09-21', lastOrder: 'منذ شهر', active: false },
-];
 
 export default function UsersPage() {
   const [tab, setTab] = useState(0);
+  const qc = useQueryClient();
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users', TAB_ROLES[tab]],
+    queryFn: () => usersApi.list({ role: TAB_ROLES[tab] }),
+  });
+
+  const suspend = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'ACTIVE' | 'SUSPENDED' | 'BANNED' }) =>
+      usersApi.updateStatus(id, status),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+  });
 
   return (
     <>
@@ -41,13 +52,12 @@ export default function UsersPage() {
           { label: 'رقم الهاتف' },
           { label: 'المنطقة' },
           { label: 'تاريخ التسجيل' },
-          { label: 'آخر طلب' },
           { label: 'الحالة' },
           { label: 'الإجراءات', align: 'left' },
         ]}
       >
-        {USERS.map((u) => (
-          <tr key={u.phone} className="group transition-colors hover:bg-background/30">
+        {users.map((u: AdminUser) => (
+          <tr key={u.id} className="group transition-colors hover:bg-background/30">
             <td className="px-6 py-4">
               <div className="flex items-center gap-gap-sm">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-outline-variant text-xs">
@@ -57,17 +67,27 @@ export default function UsersPage() {
               </div>
             </td>
             <td className="px-6 py-4" dir="ltr">{u.phone}</td>
-            <td className="px-6 py-4">{u.area}</td>
-            <td className="px-6 py-4 text-muted-gray" dir="ltr">{u.joined}</td>
-            <td className="px-6 py-4 text-[13px] text-muted-gray">{u.lastOrder}</td>
+            <td className="px-6 py-4">{u.area?.city ?? '—'}</td>
+            <td className="px-6 py-4 text-muted-gray" dir="ltr">{u.createdAt.slice(0, 10)}</td>
             <td className="px-6 py-4">
-              <StatusDot active={u.active} />
+              <StatusDot active={u.status === 'ACTIVE'} />
             </td>
             <td className="px-6 py-4">
-              <RowActions />
+              <RowActions
+                onSuspend={
+                  u.status === 'ACTIVE'
+                    ? () => suspend.mutate({ id: u.id, status: 'SUSPENDED' })
+                    : () => suspend.mutate({ id: u.id, status: 'ACTIVE' })
+                }
+              />
             </td>
           </tr>
         ))}
+        {users.length === 0 && (
+          <tr>
+            <td colSpan={6} className="px-6 py-8 text-center text-muted-gray">لا يوجد مستخدمون</td>
+          </tr>
+        )}
       </TableCard>
     </>
   );

@@ -11,7 +11,9 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 
 const ORDER_INCLUDE = {
   items: { include: { product: true } },
-  business: true,
+  business: { include: { area: true, owner: { select: { phone: true, name: true } } } },
+  customer: { include: { area: true } },
+  driver: { include: { user: true, area: true } },
   statusHistory: { orderBy: { createdAt: 'asc' as const } },
   payment: true,
 } satisfies Prisma.OrderInclude;

@@ -27,6 +27,9 @@
       ],
       "@shu/utils": [
         "../../packages/utils/src/index.ts"
+      ],
+      "@shu/api-client": [
+        "../../packages/api-client/src/index.ts"
       ]
     },
     "isolatedModules": true

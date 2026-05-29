@@ -3,11 +3,16 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { useAuthStore } from '../../src/stores/auth.store';
+import { authApi } from '@shu/api-client';
 
 export default function Otp() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const [digits, setDigits] = useState(['', '', '', '']);
   const [seconds, setSeconds] = useState(60);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const refs = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -21,6 +26,21 @@ export default function Otp() {
     next[i] = v.slice(-1);
     setDigits(next);
     if (v && i < 3) refs.current[i + 1]?.focus();
+  };
+
+  const handleVerify = async () => {
+    const code = digits.join('');
+    if (code.length < 4) return;
+    setError('');
+    setLoading(true);
+    try {
+      await authApi.otpVerify(user?.phone ?? '', code);
+      router.replace('/(tabs)');
+    } catch {
+      setError('الكود غير صحيح');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,7 +69,8 @@ export default function Otp() {
         {seconds > 0 ? `إعادة إرسال بعد ${seconds} ثانية` : 'إعادة إرسال الكود'}
       </Text>
 
-      <Button title="تأكيد" onPress={() => router.replace('/(tabs)')} style={{ marginTop: spacing[6] }} />
+      {error ? <Text style={{ color: colors.error, textAlign: 'center', marginTop: spacing[2] }}>{error}</Text> : null}
+      <Button title={loading ? 'جاري التحقق...' : 'تأكيد'} onPress={handleVerify} disabled={loading} style={{ marginTop: spacing[6] }} />
     </View>
   );
 }

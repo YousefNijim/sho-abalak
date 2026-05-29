@@ -44,7 +44,7 @@ export function StatusDot({ active, on = 'نشط', off = 'غير نشط' }: { ac
   );
 }
 
-export function RowActions() {
+export function RowActions({ onSuspend }: { onSuspend?: () => void }) {
   return (
     <div className="flex items-center justify-end gap-2 opacity-60 transition-opacity group-hover:opacity-100">
       <button className="flex h-10 w-10 items-center justify-center rounded-lg text-primary hover:bg-surface-container">
@@ -53,9 +53,20 @@ export function RowActions() {
       <button className="flex h-10 w-10 items-center justify-center rounded-lg text-secondary hover:bg-surface-container">
         <span className="material-symbols-outlined">edit</span>
       </button>
-      <button className="flex h-10 w-10 items-center justify-center rounded-lg text-error hover:bg-error/10">
-        <span className="material-symbols-outlined">delete</span>
-      </button>
+      {onSuspend && (
+        <button
+          onClick={onSuspend}
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-error hover:bg-error/10"
+        >
+          <span className="material-symbols-outlined">block</span>
+        </button>
+      )}
+      {!onSuspend && (
+        <button className="flex h-10 w-10 items-center justify-center rounded-lg text-error hover:bg-error/10">
+          <span className="material-symbols-outlined">delete</span>
+        </button>
+      )}
     </div>
   );
 }
+

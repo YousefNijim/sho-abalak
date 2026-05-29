@@ -1,6 +1,9 @@
+'use client';
+
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { useAuthStore } from '../../src/stores/auth.store';
 
 const ITEMS = [
   { icon: '📍', label: 'عناويني المحفوظة' },
@@ -14,14 +17,22 @@ const ITEMS = [
 
 export default function Profile() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/(auth)/login');
+  };
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4] }}>
       <View style={styles.head}>
         <View style={styles.avatar}>
           <Text style={{ fontSize: 32 }}>👤</Text>
         </View>
-        <Text style={styles.name}>أحمد محمد</Text>
-        <Text style={styles.phone} >+970 59X-XXX-XXX</Text>
+        <Text style={styles.name}>{user?.name || 'مستكشف شو عبالك'}</Text>
+        <Text style={styles.phone}>{user?.phone || 'جوال غير معرف'}</Text>
         <Pressable style={styles.editBtn}>
           <Text style={styles.editText}>تعديل الملف</Text>
         </Pressable>
@@ -37,7 +48,7 @@ export default function Profile() {
         ))}
       </View>
 
-      <Pressable style={styles.logout} onPress={() => router.replace('/(auth)/login')}>
+      <Pressable style={styles.logout} onPress={handleLogout}>
         <Text style={styles.logoutText}>🚪 تسجيل الخروج</Text>
       </Pressable>
     </ScrollView>
@@ -52,10 +63,10 @@ const styles = StyleSheet.create({
   editBtn: { borderWidth: 1.5, borderColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing[6], paddingVertical: spacing[2], marginTop: spacing[2] },
   editText: { color: colors.primary, fontWeight: '600' },
   list: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
-  item: { flexDirection: 'row', alignItems: 'center', padding: spacing[4], gap: spacing[3] },
+  item: { flexDirection: 'row-reverse', alignItems: 'center', padding: spacing[4], gap: spacing[3] },
   itemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
   itemIcon: { fontSize: 20 },
-  itemLabel: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary },
+  itemLabel: { flex: 1, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
   chevron: { fontSize: 24, color: colors.textMuted },
   logout: { marginTop: spacing[6], alignItems: 'center', padding: spacing[4] },
   logoutText: { color: colors.error, fontWeight: '700', fontSize: fontSizes.base },

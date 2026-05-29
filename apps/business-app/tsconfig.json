@@ -12,7 +12,8 @@
       "@shu/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@shu/utils": ["../../packages/utils/src/index.ts"],
       "@shu/ui-components": ["../../packages/ui-components/src/index.ts"],
-      "@shu/ui-components/native": ["../../packages/ui-components/src/native/index.ts"]
+      "@shu/ui-components/native": ["../../packages/ui-components/src/native/index.ts"],
+      "@shu/api-client": ["../../packages/api-client/src/index.ts"]
     }
   },
   "include": ["app/**/*", "src/**/*", "*.ts", "*.tsx"]

@@ -1,64 +1,149 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+'use client';
+
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
-import { ORDERS } from '../../src/mock';
+import { ordersApi } from '@shu/api-client';
 
-type Stage = 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY';
-
-const ITEMS = [
-  { name: 'شاورما دجاج ×2', price: 36 },
-  { name: 'صحن حمص ×1', price: 12 },
-  { name: 'عصير برتقال ×3', price: 24 },
-];
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'بانتظار التأكيد',
+  CONFIRMED: 'تم القبول',
+  PREPARING: 'جاري التحضير',
+  READY: 'جاهز للاستلام',
+  PICKED_UP: 'مع السائق (في الطريق)',
+  DELIVERED: 'تم التسليم بنجاح',
+  CANCELLED: 'تم إلغاء الطلب',
+};
 
 export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const order = ORDERS.find((o) => o.id === id) ?? ORDERS[0];
-  const [stage, setStage] = useState<Stage>('PENDING');
+  const queryClient = useQueryClient();
+
+  // Fetch live order details
+  const { data: order, isLoading } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => ordersApi.getById(id!),
+    enabled: !!id,
+  });
+
+  // Mutation to update order status
+  const updateStatus = useMutation({
+    mutationFn: (status: string) => ordersApi.updateStatus(id!, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'فشل تحديث حالة الطلب.';
+      Alert.alert('خطأ', msg);
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!order) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: colors.textMuted }}>الطلب غير موجود</Text>
+      </View>
+    );
+  }
+
+  const items = order.items || [];
+  const status = order.status;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 24, gap: spacing[4] }}>
-        <View>
-          <Text style={styles.title}>طلب #{order.id}</Text>
-          <Text style={styles.muted}>{order.customer}</Text>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 100, gap: spacing[4] }}>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={styles.title}>طلب #{order.id.slice(-6).toUpperCase()}</Text>
+          <Text style={styles.muted}>{order.customer?.name || 'زبون شو عبالك'}</Text>
+          <Text style={styles.muted}>{order.customer?.phone || ''}</Text>
         </View>
 
+        {/* Status indicator */}
+        <View style={styles.statusBanner}>
+          <Text style={styles.statusLabel}>الحالة الحالية: {STATUS_LABELS[status] || status}</Text>
+        </View>
+
+        {/* Items */}
         <View style={styles.card}>
-          {ITEMS.map((it) => (
-            <View key={it.name} style={styles.itemRow}>
-              <Text style={styles.itemName}>{it.name}</Text>
-              <Text style={styles.itemPrice}>{it.price} ₪</Text>
+          {items.map((it: any) => (
+            <View key={it.id} style={styles.itemRow}>
+              <Text style={styles.itemPrice}>{it.unitPrice * it.quantity} ₪</Text>
+              <Text style={styles.itemName}>{it.product?.name} (x{it.quantity})</Text>
             </View>
           ))}
         </View>
 
-        <View style={styles.note}>
-          <Text style={styles.noteText}>ملاحظة الزبون: بدون بصل، صوص زيادة 🙏</Text>
-        </View>
+        {/* Customer Note */}
+        {order.note && (
+          <View style={styles.note}>
+            <Text style={styles.noteText}>📝 ملاحظة الزبون: {order.note}</Text>
+          </View>
+        )}
 
+        {/* Info */}
         <View style={styles.infoCard}>
-          <Info label="المنطقة" value="رام الله - المصيون" />
-          <Info label="طريقة الدفع" value="نقدي" />
+          <Info label="المنطقة" value={`${order.customer?.area?.name || 'المصيون'}`} />
+          <Info label="طريقة الدفع" value={order.paymentMethod === 'CASH' ? 'نقدي عند الاستلام' : 'دفع إلكتروني'} />
           <Info label="الإجمالي" value={`${order.total} ₪`} bold />
         </View>
       </ScrollView>
 
+      {/* Footer transitions */}
       <View style={styles.footer}>
-        {stage === 'PENDING' ? (
+        {status === 'PENDING' ? (
           <View style={styles.btnRow}>
-            <Button title="رفض" variant="danger" style={{ flex: 1 }} onPress={() => router.back()} />
-            <Button title="قبول الطلب" style={{ flex: 1 }} onPress={() => setStage('CONFIRMED')} />
+            <Button
+              title="رفض"
+              variant="danger"
+              style={{ flex: 1 }}
+              onPress={() => updateStatus.mutate('CANCELLED')}
+              disabled={updateStatus.isPending}
+            />
+            <Button
+              title="قبول الطلب"
+              style={{ flex: 1 }}
+              onPress={() => updateStatus.mutate('CONFIRMED')}
+              disabled={updateStatus.isPending}
+            />
           </View>
-        ) : stage === 'CONFIRMED' ? (
-          <Button title="بدء التحضير" onPress={() => setStage('PREPARING')} />
-        ) : stage === 'PREPARING' ? (
-          <Button title="الطلب جاهز ✅" onPress={() => setStage('READY')} />
+        ) : status === 'CONFIRMED' ? (
+          <Button
+            title="بدء التحضير"
+            onPress={() => updateStatus.mutate('PREPARING')}
+            disabled={updateStatus.isPending}
+          />
+        ) : status === 'PREPARING' ? (
+          <Button
+            title="الطلب جاهز ✅"
+            onPress={() => updateStatus.mutate('READY')}
+            disabled={updateStatus.isPending}
+          />
+        ) : status === 'READY' ? (
+          <Button
+            title="اختيار سائق 🚗"
+            onPress={() =>
+              router.push({
+                pathname: '/driver-selection',
+                params: { orderId: order.id },
+              })
+            }
+          />
         ) : (
-          <Button title="اختيار سائق 🚗" onPress={() => router.push('/driver-selection')} />
+          <View style={styles.completedState}>
+            <Text style={styles.completedText}>🏁 {STATUS_LABELS[status]}</Text>
+          </View>
         )}
       </View>
     </View>
@@ -68,24 +153,28 @@ export default function OrderDetail() {
 function Info({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
   return (
     <View style={styles.infoRow}>
-      <Text style={styles.muted}>{label}</Text>
       <Text style={[styles.infoValue, bold && { fontWeight: '800', color: colors.primary, fontSize: fontSizes.lg }]}>{value}</Text>
+      <Text style={styles.muted}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   title: { fontSize: fontSizes.xl, fontWeight: '700', color: colors.textPrimary },
-  muted: { color: colors.textMuted, fontSize: fontSizes.sm },
+  muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
+  statusBanner: { backgroundColor: colors.primary + '10', borderLeftWidth: 4, borderLeftColor: colors.primary, padding: spacing[3], borderRadius: radius.sm },
+  statusLabel: { color: colors.primary, fontWeight: '700', fontSize: fontSizes.sm, textAlign: 'right' },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between' },
   itemName: { color: colors.textPrimary, fontSize: fontSizes.base },
   itemPrice: { color: colors.textPrimary, fontWeight: '600' },
   note: { backgroundColor: '#FEF9C3', borderRadius: radius.md, padding: spacing[3] },
-  noteText: { color: '#854D0E', fontSize: fontSizes.sm },
+  noteText: { color: '#854D0E', fontSize: fontSizes.sm, textAlign: 'right' },
   infoCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
-  infoRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
   infoValue: { color: colors.textPrimary, fontSize: fontSizes.base },
   footer: { padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
   btnRow: { flexDirection: 'row', gap: spacing[3] },
+  completedState: { alignItems: 'center', paddingVertical: 12 },
+  completedText: { fontSize: fontSizes.base, fontWeight: '700', color: colors.textMuted },
 });

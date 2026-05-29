@@ -1,25 +1,42 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TableCard } from '@/components/data-table';
+import { ordersApi } from '@shu/api-client';
+import type { Order } from '@shu/api-client';
 
 const PERIODS = ['اليوم', 'الأسبوع', 'الشهر'] as const;
 
-const CARDS = [
-  { label: 'إجمالي المبيعات', value: '₪14,250', icon: 'payments', tone: 'text-primary bg-primary/10' },
-  { label: 'عمولة المنصة', value: '₪1,710', icon: 'percent', tone: 'text-secondary bg-secondary/10' },
-  { label: 'رسوم التوصيل', value: '₪2,450', icon: 'local_shipping', tone: 'text-tertiary bg-tertiary/10' },
-  { label: 'صافي الإيراد', value: '₪10,090', icon: 'account_balance', tone: 'text-warning-amber bg-warning-amber/10' },
-];
-
-const TXNS = [
-  { id: '#ORD-9421', store: 'مطعم الشام', amount: '₪85.00', commission: '₪10.20', method: 'نقدي', date: '2026-05-29 14:05', settled: true },
-  { id: '#ORD-9420', store: 'برجر هاوس', amount: '₪120.50', commission: '₪14.46', method: 'إلكتروني', date: '2026-05-29 13:52', settled: true },
-  { id: '#ORD-9419', store: 'حلويات القدس', amount: '₪45.00', commission: '₪5.40', method: 'نقدي', date: '2026-05-29 13:40', settled: false },
-];
 
 export default function ReportsPage() {
   const [period, setPeriod] = useState(0);
+
+  const { data: allOrders = [] } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => ordersApi.list(),
+  });
+
+  const now = new Date();
+  const filtered = allOrders.filter((o: Order) => {
+    const d = new Date(o.createdAt);
+    if (period === 0) return d.toDateString() === now.toDateString();
+    if (period === 1) return (now.getTime() - d.getTime()) < 7 * 86400_000;
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const delivered = filtered.filter((o: Order) => o.status === 'DELIVERED');
+  const totalSales = delivered.reduce((s: number, o: Order) => s + o.total, 0);
+  const commission = totalSales * 0.10;
+  const deliveryFees = delivered.length * 3;
+  const netRevenue = totalSales - commission;
+
+  const CARDS = [
+    { label: 'إجمالي المبيعات', value: `₪${totalSales.toFixed(0)}`, icon: 'payments', tone: 'text-primary bg-primary/10' },
+    { label: 'عمولة المنصة (10%)', value: `₪${commission.toFixed(0)}`, icon: 'percent', tone: 'text-secondary bg-secondary/10' },
+    { label: 'رسوم التوصيل', value: `₪${deliveryFees}`, icon: 'local_shipping', tone: 'text-tertiary bg-tertiary/10' },
+    { label: 'صافي الإيراد', value: `₪${netRevenue.toFixed(0)}`, icon: 'account_balance', tone: 'text-warning-amber bg-warning-amber/10' },
+  ];
 
   return (
     <>
@@ -76,30 +93,39 @@ export default function ReportsPage() {
           { label: 'الحالة' },
         ]}
       >
-        {TXNS.map((t) => (
-          <tr key={t.id} className="transition-colors hover:bg-background/30">
-            <td className="px-6 py-4 text-[13px]">{t.id}</td>
-            <td className="px-6 py-4">{t.store}</td>
-            <td className="px-6 py-4 font-bold">{t.amount}</td>
-            <td className="px-6 py-4 text-secondary">{t.commission}</td>
+        {filtered.map((o: Order) => (
+          <tr key={o.id} className="transition-colors hover:bg-background/30">
+            <td className="px-6 py-4 text-[13px]">#{o.id.slice(0, 8)}</td>
+            <td className="px-6 py-4">{o.business?.name ?? '—'}</td>
+            <td className="px-6 py-4 font-bold">₪{o.total.toFixed(2)}</td>
+            <td className="px-6 py-4 text-secondary">₪{(o.total * 0.1).toFixed(2)}</td>
             <td className="px-6 py-4">
-              <span className="rounded-full bg-surface-container px-3 py-1 text-[12px]">{t.method}</span>
+              <span className="rounded-full bg-surface-container px-3 py-1 text-[12px]">
+                {o.paymentMethod === 'CASH' ? 'نقدي' : 'إلكتروني'}
+              </span>
             </td>
-            <td className="px-6 py-4 text-[13px] text-muted-gray" dir="ltr">{t.date}</td>
+            <td className="px-6 py-4 text-[13px] text-muted-gray" dir="ltr">
+              {new Date(o.createdAt).toLocaleString('ar-PS')}
+            </td>
             <td className="px-6 py-4">
               <span
                 className="rounded-full px-3 py-1 text-[12px] font-bold"
                 style={
-                  t.settled
+                  o.status === 'DELIVERED'
                     ? { backgroundColor: '#D1FAE5', color: '#065F46' }
                     : { backgroundColor: '#FEF3C7', color: '#92400E' }
                 }
               >
-                {t.settled ? 'مُسوّى' : 'معلّق'}
+                {o.status === 'DELIVERED' ? 'مُسوّى' : 'معلّق'}
               </span>
             </td>
           </tr>
         ))}
+        {filtered.length === 0 && (
+          <tr>
+            <td colSpan={7} className="px-6 py-8 text-center text-muted-gray">لا توجد معاملات</td>
+          </tr>
+        )}
       </TableCard>
     </>
   );

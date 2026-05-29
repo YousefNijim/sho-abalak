@@ -1,39 +1,66 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
 import { StatCard } from '@/components/stat-card';
 import { StatusBadge } from '@/components/status-badge';
+import { ordersApi, usersApi, businessesApi } from '@shu/api-client';
+import type { Order } from '@shu/api-client';
 
-const WEEKLY = [
-  { day: 'السبت', value: 60 },
-  { day: 'الأحد', value: 80 },
-  { day: 'الاثنين', value: 95 },
-  { day: 'الثلاثاء', value: 70 },
-  { day: 'الأربعاء', value: 85 },
-  { day: 'الخميس', value: 55 },
-  { day: 'الجمعة', value: 75 },
-];
-
-const MONTHLY = [
-  { month: 'سبتمبر', value: 40 },
-  { month: 'أكتوبر', value: 65 },
-  { month: 'نوفمبر', value: 90 },
-  { month: 'ديسمبر', value: 75 },
-];
-
-const ORDERS = [
-  { id: '#ORD-9421', customer: 'سامي علي', business: 'مطعم الشام', total: '₪85.00', status: 'مكتمل', time: 'منذ 5 دقائق' },
-  { id: '#ORD-9420', customer: 'نور حسين', business: 'برجر هاوس', total: '₪120.50', status: 'قيد التنفيذ', time: 'منذ 12 دقيقة' },
-  { id: '#ORD-9419', customer: 'مريم يوسف', business: 'حلويات القدس', total: '₪45.00', status: 'ملغي', time: 'منذ 18 دقيقة' },
-  { id: '#ORD-9418', customer: 'خالد إبراهيم', business: 'بيتزا إيطالية', total: '₪65.00', status: 'في الطريق', time: 'منذ 25 دقيقة' },
-];
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: 'معلق',
+  CONFIRMED: 'مؤكد',
+  PREPARING: 'جاري التحضير',
+  READY: 'جاهز',
+  PICKED_UP: 'في الطريق',
+  DELIVERED: 'مكتمل',
+  CANCELLED: 'ملغي',
+};
 
 export default function DashboardPage() {
+  const { data: orders = [] } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => ordersApi.list(),
+  });
+
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => usersApi.list(),
+  });
+
+  const { data: businesses = [] } = useQuery({
+    queryKey: ['businesses'],
+    queryFn: () => businessesApi.list(),
+  });
+
+  const todayOrders = orders.filter((o: Order) => {
+    const d = new Date(o.createdAt);
+    const now = new Date();
+    return (
+      d.getDate() === now.getDate() &&
+      d.getMonth() === now.getMonth() &&
+      d.getFullYear() === now.getFullYear()
+    );
+  });
+
+  const todayRevenue = todayOrders
+    .filter((o: Order) => o.status === 'DELIVERED')
+    .reduce((s: number, o: Order) => s + o.total, 0);
+
+  const activeBusinesses = businesses.filter((b: { isOpen: boolean }) => b.isOpen).length;
+  const recentOrders = orders.slice(0, 10);
+
+  // Build chart data from real orders (last 7 days)
+  const weeklyData = buildWeekly(orders);
+  const maxWeekly = Math.max(...weeklyData.map((d) => d.value), 1);
+
   return (
     <>
       {/* Stats */}
       <div className="grid grid-cols-1 gap-margin-standard sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon="shopping_basket" label="إجمالي الطلبات" value="1,284" tone="primary" />
-        <StatCard icon="payments" label="الإيراد اليومي" value="₪4,520" tone="secondary" />
-        <StatCard icon="person_add" label="مستخدمون جدد" value="42" tone="tertiary" />
-        <StatCard icon="store" label="متاجر نشطة" value="156" tone="warning-amber" />
+        <StatCard icon="shopping_basket" label="طلبات اليوم" value={String(todayOrders.length)} tone="primary" />
+        <StatCard icon="payments" label="الإيراد اليومي" value={`₪${todayRevenue.toFixed(0)}`} tone="secondary" />
+        <StatCard icon="person_add" label="إجمالي المستخدمين" value={String(users.length)} tone="tertiary" />
+        <StatCard icon="store" label="متاجر مفتوحة" value={String(activeBusinesses)} tone="warning-amber" />
       </div>
 
       {/* Charts */}
@@ -45,40 +72,40 @@ export default function DashboardPage() {
             <span className="material-symbols-outlined text-primary">trending_up</span>
           </div>
           <div className="flex h-[200px] items-end justify-between gap-gap-sm px-2">
-            {WEEKLY.map((d, i) => (
+            {weeklyData.map((d, i) => (
               <div
                 key={d.day}
-                className={`flex-1 rounded-t-lg ${i === 2 ? 'bg-primary' : 'bg-surface-container'}`}
-                style={{ height: `${d.value}%` }}
+                className={`flex-1 rounded-t-lg ${i === weeklyData.length - 1 ? 'bg-primary' : 'bg-surface-container'}`}
+                style={{ height: `${Math.round((d.value / maxWeekly) * 100)}%` }}
               />
             ))}
           </div>
           <div className="mt-4 flex justify-between text-[11px] text-muted-gray">
-            {WEEKLY.map((d) => (
+            {weeklyData.map((d) => (
               <span key={d.day}>{d.day}</span>
             ))}
           </div>
         </div>
 
-        {/* Monthly revenue */}
+        {/* Monthly orders count */}
         <div className="rounded-xl border border-border-beige bg-surface-white p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-xl font-semibold text-on-surface">الإيرادات الشهرية</h3>
             <span className="material-symbols-outlined text-secondary">bar_chart</span>
           </div>
           <div className="flex h-[200px] items-end justify-between gap-gap-md px-4">
-            {MONTHLY.map((d, i) => (
+            {buildMonthly(orders).map((d, i, arr) => (
               <div
                 key={d.month}
                 className={`w-full rounded-md transition-all hover:brightness-95 ${
-                  i === 2 ? 'bg-secondary' : 'bg-secondary-container'
+                  i === arr.length - 1 ? 'bg-secondary' : 'bg-secondary-container'
                 }`}
-                style={{ height: `${d.value}%` }}
+                style={{ height: `${Math.round((d.value / (Math.max(...arr.map((x) => x.value), 1))) * 100)}%` }}
               />
             ))}
           </div>
           <div className="mt-4 flex justify-between text-[11px] text-muted-gray">
-            {MONTHLY.map((d) => (
+            {buildMonthly(orders).map((d) => (
               <span key={d.month} className="w-full text-center">
                 {d.month}
               </span>
@@ -109,29 +136,73 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-beige">
-              {ORDERS.map((o) => (
+              {recentOrders.map((o: Order) => (
                 <tr key={o.id} className="transition-colors hover:bg-surface-container-lowest">
-                  <td className="px-6 py-4 text-[13px]">{o.id}</td>
+                  <td className="px-6 py-4 text-[13px]">#{o.id.slice(0, 8)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-gap-sm">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-outline-variant text-xs">
-                        {o.customer.charAt(0)}
+                        {o.customer?.name?.charAt(0) ?? '?'}
                       </div>
-                      <span>{o.customer}</span>
+                      <span>{o.customer?.name ?? '—'}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">{o.business}</td>
-                  <td className="px-6 py-4 font-bold">{o.total}</td>
+                  <td className="px-6 py-4">{o.business?.name ?? '—'}</td>
+                  <td className="px-6 py-4 font-bold">₪{o.total.toFixed(2)}</td>
                   <td className="px-6 py-4">
-                    <StatusBadge label={o.status} />
+                    <StatusBadge label={STATUS_LABEL[o.status] ?? o.status} />
                   </td>
-                  <td className="px-6 py-4 text-[11px] text-muted-gray">{o.time}</td>
+                  <td className="px-6 py-4 text-[11px] text-muted-gray">
+                    {timeAgo(o.createdAt)}
+                  </td>
                 </tr>
               ))}
+              {recentOrders.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-gray">
+                    لا توجد طلبات بعد
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
     </>
   );
+}
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+const DAYS_AR = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+function buildWeekly(orders: Order[]): { day: string; value: number }[] {
+  const now = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - (6 - i));
+    const count = orders.filter((o) => {
+      const od = new Date(o.createdAt);
+      return od.toDateString() === d.toDateString();
+    }).length;
+    return { day: DAYS_AR[d.getDay()]!, value: count };
+  });
+}
+
+function buildMonthly(orders: Order[]): { month: string; value: number }[] {
+  const now = new Date();
+  return Array.from({ length: 4 }, (_, i) => {
+    const m = (now.getMonth() - (3 - i) + 12) % 12;
+    const count = orders.filter((o) => new Date(o.createdAt).getMonth() === m).length;
+    return { month: MONTHS_AR[m]!, value: count };
+  });
+}
+
+function timeAgo(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'الآن';
+  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+  return `منذ ${Math.floor(diff / 86400)} يوم`;
 }

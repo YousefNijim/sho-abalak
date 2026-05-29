@@ -1,8 +1,16 @@
-const BUSINESSES = [
-  { id: '#M-10293', name: 'مطعم الزيتون الأصيل', category: 'مطاعم', cat: 'restaurant', area: 'رام الله', orders: '1,240', rating: '4.8', active: true },
-  { id: '#S-22481', name: 'سوبر ماركت النجمة', category: 'محلات', cat: 'store', area: 'نابلس', orders: '856', rating: '4.5', active: true },
-  { id: '#C-44912', name: 'كافيه الصباح', category: 'كافيه', cat: 'cafe', area: 'الخليل', orders: '512', rating: '4.2', active: false },
-];
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
+import { businessesApi } from '@shu/api-client';
+import type { Business } from '@shu/api-client';
+
+const CATEGORY_LABEL: Record<string, string> = {
+  RESTAURANT: 'مطاعم',
+  STORE: 'محلات',
+  CAFE: 'كافيه',
+};
+
+
 
 const CATEGORY_STYLE: Record<string, string> = {
   restaurant: 'bg-primary/10 text-primary',
@@ -23,6 +31,11 @@ const inputCls =
   'w-full h-12 px-4 bg-background/50 border-[1.5px] border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[15px]';
 
 export default function BusinessesPage() {
+  const { data: businesses = [] } = useQuery({
+    queryKey: ['businesses'],
+    queryFn: () => businessesApi.list(),
+  });
+
   return (
     <>
       {/* Header row */}
@@ -91,7 +104,7 @@ export default function BusinessesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-beige">
-              {BUSINESSES.map((b) => (
+              {businesses.map((b: Business) => (
                 <tr key={b.id} className="group transition-colors hover:bg-background/30">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-gap-md">
@@ -100,32 +113,32 @@ export default function BusinessesPage() {
                       </div>
                       <div>
                         <p className="text-[15px] font-semibold text-on-surface">{b.name}</p>
-                        <p className="text-[11px] text-muted-gray">ID: {b.id}</p>
+                        <p className="text-[11px] text-muted-gray">ID: {b.id.slice(0, 8)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`rounded-full px-3 py-1 text-[12px] ${CATEGORY_STYLE[b.cat]}`}>
-                      {b.category}
+                    <span className={`rounded-full px-3 py-1 text-[12px] ${CATEGORY_STYLE[b.category.toLowerCase()] ?? ''}`}>
+                      {CATEGORY_LABEL[b.category] ?? b.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-[15px]">{b.area}</td>
-                  <td className="px-6 py-4 text-center font-bold">{b.orders}</td>
+                  <td className="px-6 py-4 text-[15px]">{b.area?.city ?? '—'}</td>
+                  <td className="px-6 py-4 text-center font-bold">—</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-1 text-warning-amber">
                       <span className="material-symbols-outlined text-[18px]">star</span>
-                      <span className="text-[14px] font-bold">{b.rating}</span>
+                      <span className="text-[14px] font-bold">{b.rating.toFixed(1)}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`h-2.5 w-2.5 rounded-full ${b.active ? 'bg-success' : 'bg-error'}`}
+                        className={`h-2.5 w-2.5 rounded-full ${b.isOpen ? 'bg-success' : 'bg-error'}`}
                       />
                       <span
-                        className={`text-[13px] font-bold ${b.active ? 'text-success' : 'text-error'}`}
+                        className={`text-[13px] font-bold ${b.isOpen ? 'text-success' : 'text-error'}`}
                       >
-                        {b.active ? 'نشط' : 'غير نشط'}
+                        {b.isOpen ? 'مفتوح' : 'مغلق'}
                       </span>
                     </div>
                   </td>
@@ -137,18 +150,20 @@ export default function BusinessesPage() {
                       <button className="flex h-10 w-10 items-center justify-center rounded-lg text-secondary hover:bg-surface-container">
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button className="flex h-10 w-10 items-center justify-center rounded-lg text-error hover:bg-error/10">
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
                     </div>
                   </td>
                 </tr>
               ))}
+              {businesses.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-muted-gray">لا توجد منشآت</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
         <div className="flex items-center justify-between border-t border-border-beige bg-surface-container-lowest px-6 py-4">
-          <p className="text-[13px] text-muted-gray">عرض 1-10 من أصل 45 منشأة</p>
+          <p className="text-[13px] text-muted-gray">إجمالي: {businesses.length} منشأة</p>
           <div className="flex items-center gap-gap-sm">
             <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-border-beige text-on-surface hover:bg-surface-container">
               <span className="material-symbols-outlined">chevron_right</span>

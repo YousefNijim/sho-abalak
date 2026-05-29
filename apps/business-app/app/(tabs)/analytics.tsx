@@ -1,19 +1,106 @@
+'use client';
+
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import { colors, fontSizes, radius, spacing } from '../../src/theme';
+import { businessesApi, ordersApi } from '@shu/api-client';
 
 const PERIODS = ['اليوم', 'الأسبوع', 'الشهر'];
-const BARS = [40, 65, 90, 55, 75, 50, 80];
-const DAYS = ['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'];
-const TOP = [
-  { name: 'شاورما دجاج', count: 142 },
-  { name: 'شاورما لحمة', count: 98 },
-  { name: 'صحن حمص', count: 76 },
-  { name: 'عصير برتقال', count: 54 },
-];
 
 export default function Analytics() {
   const [period, setPeriod] = useState(0);
+
+  // Fetch business profile
+  const { data: business } = useQuery({
+    queryKey: ['business-mine'],
+    queryFn: () => businessesApi.mine(),
+  });
+
+  // Fetch all orders
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['business-orders'],
+    queryFn: () => ordersApi.list(),
+  });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Filter orders by selected period
+  const filterOrdersByPeriod = (arr: any[], periodIdx: number) => {
+    const now = new Date();
+    return arr.filter((o: any) => {
+      try {
+        const d = new Date(o.createdAt);
+        if (periodIdx === 0) { // Today
+          return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        } else if (periodIdx === 1) { // This Week (last 7 days)
+          const diff = now.getTime() - d.getTime();
+          return diff <= 7 * 24 * 60 * 60 * 1000;
+        } else { // This Month (last 30 days)
+          const diff = now.getTime() - d.getTime();
+          return diff <= 30 * 24 * 60 * 60 * 1000;
+        }
+      } catch {
+        return false;
+      }
+    });
+  };
+
+  const periodOrders = filterOrdersByPeriod(orders, period);
+  const completedOrders = periodOrders.filter((o: any) => o.status === 'DELIVERED');
+
+  const totalSales = completedOrders.reduce((acc: number, o: any) => acc + o.total, 0);
+  const avgOrder = completedOrders.length > 0 ? Math.round(totalSales / completedOrders.length) : 0;
+
+  // Compile top selling products
+  const compileTopProducts = (arr: any[]) => {
+    const counts: Record<string, number> = {};
+    arr.forEach((o: any) => {
+      if (o.status === 'DELIVERED') {
+        o.items?.forEach((it: any) => {
+          const name = it.product?.name || 'منتج';
+          counts[name] = (counts[name] || 0) + it.quantity;
+        });
+      }
+    });
+    return Object.keys(counts)
+      .map((name) => ({ name, count: counts[name] }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
+  };
+
+  const topProducts = compileTopProducts(periodOrders);
+
+  // Compile chart data (last 7 days of the week)
+  const compileWeeklyChart = (arr: any[]) => {
+    const days = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+    const counts = Array(7).fill(0);
+    const now = new Date();
+
+    arr.forEach((o: any) => {
+      try {
+        const d = new Date(o.createdAt);
+        const diff = now.getTime() - d.getTime();
+        if (diff <= 7 * 24 * 60 * 60 * 1000) {
+          counts[d.getDay()] += 1;
+        }
+      } catch {}
+    });
+
+    const maxVal = Math.max(...counts, 1);
+    return counts.map((count, idx) => ({
+      label: days[idx],
+      heightPercent: (count / maxVal) * 100,
+    }));
+  };
+
+  const chartData = compileWeeklyChart(orders);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4], gap: spacing[5] }}>
@@ -26,19 +113,19 @@ export default function Analytics() {
       </View>
 
       <View style={styles.cards}>
-        <Card label="إجمالي المبيعات" value="₪8,420" />
-        <Card label="عدد الطلبات" value="312" />
-        <Card label="متوسط الطلب" value="₪27" />
-        <Card label="التقييم العام" value="4.8 ⭐" />
+        <Card label="إجمالي المبيعات" value={`₪${totalSales}`} />
+        <Card label="عدد الطلبات" value={String(periodOrders.length)} />
+        <Card label="متوسط الطلب" value={`₪${avgOrder}`} />
+        <Card label="التقييم العام" value={`${business?.rating ? business.rating.toFixed(1) : '5.0'} ⭐`} />
       </View>
 
       <View style={styles.chartCard}>
-        <Text style={styles.cardTitle}>الطلبات اليومية</Text>
+        <Text style={styles.cardTitle}>الطلبات اليومية (هذا الأسبوع)</Text>
         <View style={styles.chart}>
-          {BARS.map((h, i) => (
+          {chartData.map((d, i) => (
             <View key={i} style={styles.barCol}>
-              <View style={[styles.bar, { height: `${h}%` }]} />
-              <Text style={styles.barLabel}>{DAYS[i]}</Text>
+              <View style={[styles.bar, { height: `${d.heightPercent}%` }]} />
+              <Text style={styles.barLabel}>{d.label}</Text>
             </View>
           ))}
         </View>
@@ -47,13 +134,17 @@ export default function Analytics() {
       <View style={styles.chartCard}>
         <Text style={styles.cardTitle}>أكثر المنتجات طلباً</Text>
         <View style={{ gap: spacing[3], marginTop: spacing[3] }}>
-          {TOP.map((t, i) => (
-            <View key={t.name} style={styles.topRow}>
-              <Text style={styles.topRank}>{i + 1}</Text>
-              <Text style={styles.topName}>{t.name}</Text>
-              <Text style={styles.topCount}>{t.count}</Text>
-            </View>
-          ))}
+          {topProducts.length === 0 ? (
+            <Text style={styles.empty}>لا توجد بيانات لمنتجات مكتملة في هذه الفترة</Text>
+          ) : (
+            topProducts.map((t, i) => (
+              <View key={t.name} style={styles.topRow}>
+                <Text style={styles.topRank}>{i + 1}</Text>
+                <Text style={styles.topName}>{t.name}</Text>
+                <Text style={styles.topCount}>{t.count} طلب</Text>
+              </View>
+            ))
+          )}
         </View>
       </View>
     </ScrollView>
@@ -70,23 +161,24 @@ function Card({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  periods: { flexDirection: 'row', gap: spacing[2], backgroundColor: colors.surface, padding: 4, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
+  periods: { flexDirection: 'row-reverse', gap: spacing[2], backgroundColor: colors.surface, padding: 4, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   period: { flex: 1, paddingVertical: spacing[2], borderRadius: radius.sm, alignItems: 'center' },
   periodActive: { backgroundColor: colors.primary },
   periodText: { color: colors.textMuted, fontWeight: '600' },
   periodTextActive: { color: '#fff' },
-  cards: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] },
-  statCard: { width: '47%', flexGrow: 1, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  statValue: { fontSize: fontSizes['2xl'], fontWeight: '800', color: colors.textPrimary },
+  cards: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[3] },
+  statCard: { width: '47%', flexGrow: 1, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, alignItems: 'flex-end' },
+  statValue: { fontSize: fontSizes.xl, fontWeight: '800', color: colors.textPrimary },
   statLabel: { color: colors.textMuted, fontSize: fontSizes.sm, marginTop: 2 },
   chartCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  cardTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary },
-  chart: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', height: 160, marginTop: spacing[4] },
+  cardTitle: { fontSize: fontSizes.lg, fontWeight: '700', color: colors.textPrimary, textAlign: 'right' },
+  chart: { flexDirection: 'row-reverse', alignItems: 'flex-end', justifyContent: 'space-between', height: 160, marginTop: spacing[4] },
   barCol: { flex: 1, alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 6 },
   bar: { width: '60%', backgroundColor: colors.primary, borderTopLeftRadius: 6, borderTopRightRadius: 6 },
   barLabel: { color: colors.textMuted, fontSize: fontSizes.xs },
-  topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
+  topRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
   topRank: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, color: '#fff', textAlign: 'center', lineHeight: 24, fontWeight: '700' },
-  topName: { flex: 1, color: colors.textPrimary, fontSize: fontSizes.base },
+  topName: { flex: 1, color: colors.textPrimary, fontSize: fontSizes.base, textAlign: 'right' },
   topCount: { color: colors.primary, fontWeight: '700' },
+  empty: { textAlign: 'center', color: colors.textMuted, fontSize: fontSizes.sm },
 });

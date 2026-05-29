@@ -1,12 +1,40 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input } from '@shu/ui-components/native';
 import { colors, fontSizes, spacing } from '../../src/theme';
+import { useAuthStore } from '../../src/stores/auth.store';
 
 export default function Login() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const login = useAuthStore((s) => s.login);
+
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    setError('');
+    if (!phone || !password) {
+      setError('الرجاء إدخال رقم الهاتف وكلمة المرور');
+      return;
+    }
+    setLoading(true);
+    try {
+      await login({ phone, password });
+      router.replace('/(tabs)');
+    } catch (e: unknown) {
+      const msg =
+        (e as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? 'بيانات الدخول غير صحيحة';
+      setError(Array.isArray(msg) ? msg.join(' ، ') : String(msg));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -20,12 +48,29 @@ export default function Login() {
       <Text style={styles.welcome}>مرحباً بك</Text>
 
       <View style={styles.form}>
-        <Input label="رقم الهاتف" placeholder="59X-XXX-XXX" keyboardType="phone-pad" />
-        <Input label="كلمة المرور" placeholder="••••••••" secureTextEntry />
+        <Input
+          label="رقم الهاتف"
+          placeholder="59X-XXX-XXX"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
+        />
+        <Input
+          label="كلمة المرور"
+          placeholder="••••••••"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
         <Link href="/(auth)/register" style={styles.forgot}>
           <Text style={styles.link}>نسيت كلمة المرور؟</Text>
         </Link>
-        <Button title="دخول" onPress={() => router.replace('/(tabs)')} />
+        <Button
+          title={loading ? 'جاري الدخول...' : 'دخول'}
+          onPress={handleLogin}
+          disabled={loading}
+        />
       </View>
 
       <View style={styles.bottom}>
@@ -47,4 +92,5 @@ const styles = StyleSheet.create({
   link: { color: colors.primary, fontWeight: '600', fontSize: fontSizes.base },
   bottom: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing[6] },
   muted: { color: colors.textMuted, fontSize: fontSizes.base },
+  errorText: { color: colors.error, fontSize: fontSizes.sm, textAlign: 'center' },
 });

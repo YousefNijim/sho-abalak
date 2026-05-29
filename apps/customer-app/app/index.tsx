@@ -1,15 +1,25 @@
+'use client';
+
 import { useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, fontSizes } from '../src/theme';
+import { useAuthStore } from '../src/stores/auth.store';
 
 export default function Splash() {
   const router = useRouter();
+  const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
-    const t = setTimeout(() => router.replace('/onboarding'), 1400);
+    const t = setTimeout(() => {
+      if (token) {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/onboarding');
+      }
+    }, 1400);
     return () => clearTimeout(t);
-  }, [router]);
+  }, [router, token]);
 
   return (
     <View style={styles.container}>

@@ -17,7 +17,8 @@
     "paths": {
       "@shu/shared-types": ["packages/shared-types/src/index.ts"],
       "@shu/utils": ["packages/utils/src/index.ts"],
-      "@shu/ui-components": ["packages/ui-components/src/index.ts"]
+      "@shu/ui-components": ["packages/ui-components/src/index.ts"],
+      "@shu/api-client": ["packages/api-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
