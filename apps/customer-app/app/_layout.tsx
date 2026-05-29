@@ -68,6 +68,10 @@ export default function RootLayout() {
             <Stack.Screen name="business/[id]" options={{ title: '' }} />
             <Stack.Screen name="cart" options={{ title: 'سلّتك' }} />
             <Stack.Screen name="tracking" options={{ title: 'تتبع الطلب' }} />
+            <Stack.Screen name="profile/addresses" options={{ title: 'عناويني المحفوظة' }} />
+            <Stack.Screen name="profile/notifications" options={{ title: 'الإشعارات' }} />
+            <Stack.Screen name="profile/change-password" options={{ title: 'تغيير كلمة المرور' }} />
+            <Stack.Screen name="profile/about" options={{ title: 'عن التطبيق' }} />
           </Stack>
         </SafeAreaProvider>
       </QueryClientProvider>

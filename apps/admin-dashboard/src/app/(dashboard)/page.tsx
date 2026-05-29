@@ -1,10 +1,26 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { StatCard } from '@/components/stat-card';
 import { StatusBadge } from '@/components/status-badge';
 import { ordersApi, usersApi, businessesApi } from '@shu/api-client';
 import type { Order } from '@shu/api-client';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from '@tanstack/react-table';
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: 'معلق',
@@ -15,6 +31,8 @@ const STATUS_LABEL: Record<string, string> = {
   DELIVERED: 'مكتمل',
   CANCELLED: 'ملغي',
 };
+
+const columnHelper = createColumnHelper<Order>();
 
 export default function DashboardPage() {
   const { data: orders = [] } = useQuery({
@@ -47,11 +65,53 @@ export default function DashboardPage() {
     .reduce((s: number, o: Order) => s + o.total, 0);
 
   const activeBusinesses = businesses.filter((b: { isOpen: boolean }) => b.isOpen).length;
-  const recentOrders = orders.slice(0, 10);
+  const recentOrders = useMemo(() => orders.slice(0, 10), [orders]);
 
-  // Build chart data from real orders (last 7 days)
-  const weeklyData = buildWeekly(orders);
-  const maxWeekly = Math.max(...weeklyData.map((d) => d.value), 1);
+  const weeklyData = useMemo(() => buildWeekly(orders), [orders]);
+  const monthlyData = useMemo(() => buildMonthly(orders), [orders]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('id', {
+        header: 'رقم الطلب',
+        cell: (info) => `#${info.getValue().slice(0, 8)}`,
+      }),
+      columnHelper.accessor('customer.name', {
+        header: 'الزبون',
+        cell: (info) => (
+          <div className="flex items-center gap-gap-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-outline-variant text-xs">
+              {info.getValue()?.charAt(0) ?? '?'}
+            </div>
+            <span>{info.getValue() ?? '—'}</span>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('business.name', {
+        header: 'المتجر',
+        cell: (info) => info.getValue() ?? '—',
+      }),
+      columnHelper.accessor('total', {
+        header: 'المجموع',
+        cell: (info) => <span className="font-bold">₪{info.getValue().toFixed(2)}</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'الحالة',
+        cell: (info) => <StatusBadge label={STATUS_LABEL[info.getValue()] ?? info.getValue()} />,
+      }),
+      columnHelper.accessor('createdAt', {
+        header: 'الوقت',
+        cell: (info) => <span className="text-[11px] text-muted-gray">{timeAgo(info.getValue())}</span>,
+      }),
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: recentOrders,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <>
@@ -64,58 +124,48 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-margin-standard lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-margin-standard lg:grid-cols-2 mt-margin-standard">
         {/* Weekly orders */}
-        <div className="rounded-xl border border-border-beige bg-surface-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border-beige bg-surface-white p-6 shadow-sm h-[320px]">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-xl font-semibold text-on-surface">الطلبات الأسبوعية</h3>
             <span className="material-symbols-outlined text-primary">trending_up</span>
           </div>
-          <div className="flex h-[200px] items-end justify-between gap-gap-sm px-2">
-            {weeklyData.map((d, i) => (
-              <div
-                key={d.day}
-                className={`flex-1 rounded-t-lg ${i === weeklyData.length - 1 ? 'bg-primary' : 'bg-surface-container'}`}
-                style={{ height: `${Math.round((d.value / maxWeekly) * 100)}%` }}
-              />
-            ))}
-          </div>
-          <div className="mt-4 flex justify-between text-[11px] text-muted-gray">
-            {weeklyData.map((d) => (
-              <span key={d.day}>{d.day}</span>
-            ))}
+          <div className="h-[200px] w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" fill="#E6781E" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
         {/* Monthly orders count */}
-        <div className="rounded-xl border border-border-beige bg-surface-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border-beige bg-surface-white p-6 shadow-sm h-[320px]">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-xl font-semibold text-on-surface">الإيرادات الشهرية</h3>
             <span className="material-symbols-outlined text-secondary">bar_chart</span>
           </div>
-          <div className="flex h-[200px] items-end justify-between gap-gap-md px-4">
-            {buildMonthly(orders).map((d, i, arr) => (
-              <div
-                key={d.month}
-                className={`w-full rounded-md transition-all hover:brightness-95 ${
-                  i === arr.length - 1 ? 'bg-secondary' : 'bg-secondary-container'
-                }`}
-                style={{ height: `${Math.round((d.value / (Math.max(...arr.map((x) => x.value), 1))) * 100)}%` }}
-              />
-            ))}
-          </div>
-          <div className="mt-4 flex justify-between text-[11px] text-muted-gray">
-            {buildMonthly(orders).map((d) => (
-              <span key={d.month} className="w-full text-center">
-                {d.month}
-              </span>
-            ))}
+          <div className="h-[200px] w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#6B7280' }} />
+                <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="value" fill="#165A34" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
 
       {/* Recent orders */}
-      <div className="overflow-hidden rounded-xl border border-border-beige bg-surface-white shadow-sm">
+      <div className="mt-margin-standard overflow-hidden rounded-xl border border-border-beige bg-surface-white shadow-sm">
         <div className="flex items-center justify-between border-b border-border-beige p-6">
           <h3 className="text-xl font-semibold text-on-surface">آخر الطلبات</h3>
           <button className="flex items-center gap-gap-sm text-[16px] font-bold text-primary hover:underline">
@@ -126,35 +176,24 @@ export default function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-right">
             <thead>
-              <tr className="bg-surface-container-low text-[13px] text-muted-gray">
-                <th className="px-6 py-4 font-medium">رقم الطلب</th>
-                <th className="px-6 py-4 font-medium">الزبون</th>
-                <th className="px-6 py-4 font-medium">المتجر</th>
-                <th className="px-6 py-4 font-medium">المجموع</th>
-                <th className="px-6 py-4 font-medium">الحالة</th>
-                <th className="px-6 py-4 font-medium">الوقت</th>
-              </tr>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="bg-surface-container-low text-[13px] text-muted-gray">
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id} className="px-6 py-4 font-medium">
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
             </thead>
             <tbody className="divide-y divide-border-beige">
-              {recentOrders.map((o: Order) => (
-                <tr key={o.id} className="transition-colors hover:bg-surface-container-lowest">
-                  <td className="px-6 py-4 text-[13px]">#{o.id.slice(0, 8)}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-gap-sm">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-outline-variant text-xs">
-                        {o.customer?.name?.charAt(0) ?? '?'}
-                      </div>
-                      <span>{o.customer?.name ?? '—'}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">{o.business?.name ?? '—'}</td>
-                  <td className="px-6 py-4 font-bold">₪{o.total.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <StatusBadge label={STATUS_LABEL[o.status] ?? o.status} />
-                  </td>
-                  <td className="px-6 py-4 text-[11px] text-muted-gray">
-                    {timeAgo(o.createdAt)}
-                  </td>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id} className="transition-colors hover:bg-surface-container-lowest">
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-6 py-4 text-[13px]">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
                 </tr>
               ))}
               {recentOrders.length === 0 && (

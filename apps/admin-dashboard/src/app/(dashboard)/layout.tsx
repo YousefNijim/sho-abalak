@@ -1,7 +1,16 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
 import { TopBar } from '@/components/topbar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = cookies();
+  const token = cookieStore.get('admin_token')?.value;
+
+  if (!token) {
+    redirect('/login');
+  }
+
   return (
     <>
       <Sidebar />

@@ -1,16 +1,21 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { businessesApi } from '@shu/api-client';
 import type { Business } from '@shu/api-client';
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from '@tanstack/react-table';
 
 const CATEGORY_LABEL: Record<string, string> = {
   RESTAURANT: 'مطاعم',
   STORE: 'محلات',
   CAFE: 'كافيه',
 };
-
-
 
 const CATEGORY_STYLE: Record<string, string> = {
   restaurant: 'bg-primary/10 text-primary',
@@ -30,10 +35,89 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const inputCls =
   'w-full h-12 px-4 bg-background/50 border-[1.5px] border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[15px]';
 
+const columnHelper = createColumnHelper<Business>();
+
 export default function BusinessesPage() {
   const { data: businesses = [] } = useQuery({
     queryKey: ['businesses'],
     queryFn: () => businessesApi.list(),
+  });
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('name', {
+        header: 'المنشأة',
+        cell: (info) => (
+          <div className="flex items-center gap-gap-md">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border-beige bg-background text-primary">
+              <span className="material-symbols-outlined">storefront</span>
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-on-surface">{info.getValue()}</p>
+              <p className="text-[11px] text-muted-gray">ID: {info.row.original.id.slice(0, 8)}</p>
+            </div>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('category', {
+        header: 'التصنيف',
+        cell: (info) => (
+          <span className={`rounded-full px-3 py-1 text-[12px] ${CATEGORY_STYLE[info.getValue().toLowerCase()] ?? ''}`}>
+            {CATEGORY_LABEL[info.getValue()] ?? info.getValue()}
+          </span>
+        ),
+      }),
+      columnHelper.accessor('area.city', {
+        header: 'المنطقة',
+        cell: (info) => <span className="text-[15px]">{info.getValue() ?? '—'}</span>,
+      }),
+      columnHelper.display({
+        id: 'totalOrders',
+        header: () => <div className="text-center">إجمالي الطلبات</div>,
+        cell: () => <div className="text-center font-bold">—</div>,
+      }),
+      columnHelper.accessor('rating', {
+        header: () => <div className="text-center">التقييم</div>,
+        cell: (info) => (
+          <div className="flex items-center justify-center gap-1 text-warning-amber">
+            <span className="material-symbols-outlined text-[18px]">star</span>
+            <span className="text-[14px] font-bold">{info.getValue().toFixed(1)}</span>
+          </div>
+        ),
+      }),
+      columnHelper.accessor('isOpen', {
+        header: 'الحالة',
+        cell: (info) => (
+          <div className="flex items-center gap-2">
+            <div className={`h-2.5 w-2.5 rounded-full ${info.getValue() ? 'bg-success' : 'bg-error'}`} />
+            <span className={`text-[13px] font-bold ${info.getValue() ? 'text-success' : 'text-error'}`}>
+              {info.getValue() ? 'مفتوح' : 'مغلق'}
+            </span>
+          </div>
+        ),
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: () => <div className="text-left">الإجراءات</div>,
+        cell: () => (
+          <div className="flex items-center justify-end gap-2 opacity-60 transition-opacity group-hover:opacity-100">
+            <button className="flex h-10 w-10 items-center justify-center rounded-lg text-primary hover:bg-surface-container">
+              <span className="material-symbols-outlined">visibility</span>
+            </button>
+            <button className="flex h-10 w-10 items-center justify-center rounded-lg text-secondary hover:bg-surface-container">
+              <span className="material-symbols-outlined">edit</span>
+            </button>
+          </div>
+        ),
+      }),
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: businesses,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
   });
 
   return (
@@ -48,7 +132,7 @@ export default function BusinessesPage() {
       </div>
 
       {/* Filters */}
-      <div className="rounded-2xl border border-border-beige bg-surface-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-border-beige bg-surface-white p-6 shadow-sm mt-margin-standard mb-margin-standard">
         <div className="grid grid-cols-1 items-end gap-gap-md md:grid-cols-4 lg:grid-cols-5">
           <div className="space-y-2 lg:col-span-2">
             <label className="mr-2 block text-[13px] text-on-surface">البحث عن منشأة</label>
@@ -93,65 +177,24 @@ export default function BusinessesPage() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-right">
             <thead>
-              <tr className="border-b border-border-beige bg-surface-container-low text-[14px] text-on-surface">
-                <th className="px-6 py-4 font-semibold">المنشأة</th>
-                <th className="px-6 py-4 font-semibold">التصنيف</th>
-                <th className="px-6 py-4 font-semibold">المنطقة</th>
-                <th className="px-6 py-4 text-center font-semibold">إجمالي الطلبات</th>
-                <th className="px-6 py-4 text-center font-semibold">التقييم</th>
-                <th className="px-6 py-4 font-semibold">الحالة</th>
-                <th className="px-6 py-4 text-left font-semibold">الإجراءات</th>
-              </tr>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="border-b border-border-beige bg-surface-container-low text-[14px] text-on-surface">
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id} className="px-6 py-4 font-semibold">
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
             </thead>
             <tbody className="divide-y divide-border-beige">
-              {businesses.map((b: Business) => (
-                <tr key={b.id} className="group transition-colors hover:bg-background/30">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-gap-md">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border-beige bg-background text-primary">
-                        <span className="material-symbols-outlined">storefront</span>
-                      </div>
-                      <div>
-                        <p className="text-[15px] font-semibold text-on-surface">{b.name}</p>
-                        <p className="text-[11px] text-muted-gray">ID: {b.id.slice(0, 8)}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`rounded-full px-3 py-1 text-[12px] ${CATEGORY_STYLE[b.category.toLowerCase()] ?? ''}`}>
-                      {CATEGORY_LABEL[b.category] ?? b.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-[15px]">{b.area?.city ?? '—'}</td>
-                  <td className="px-6 py-4 text-center font-bold">—</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-1 text-warning-amber">
-                      <span className="material-symbols-outlined text-[18px]">star</span>
-                      <span className="text-[14px] font-bold">{b.rating.toFixed(1)}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-2.5 w-2.5 rounded-full ${b.isOpen ? 'bg-success' : 'bg-error'}`}
-                      />
-                      <span
-                        className={`text-[13px] font-bold ${b.isOpen ? 'text-success' : 'text-error'}`}
-                      >
-                        {b.isOpen ? 'مفتوح' : 'مغلق'}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2 opacity-60 transition-opacity group-hover:opacity-100">
-                      <button className="flex h-10 w-10 items-center justify-center rounded-lg text-primary hover:bg-surface-container">
-                        <span className="material-symbols-outlined">visibility</span>
-                      </button>
-                      <button className="flex h-10 w-10 items-center justify-center rounded-lg text-secondary hover:bg-surface-container">
-                        <span className="material-symbols-outlined">edit</span>
-                      </button>
-                    </div>
-                  </td>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id} className="group transition-colors hover:bg-background/30">
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-6 py-4">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
                 </tr>
               ))}
               {businesses.length === 0 && (

@@ -16,13 +16,13 @@ import { colors, fontSizes, fontFamily, radius, spacing, components } from '../.
 import { useAuthStore } from '../../src/stores/auth.store';
 
 const ITEMS = [
-  { Icon: MapPin,  label: 'عناويني المحفوظة',   onPress: () => {} },
-  { Icon: Bell,   label: 'الإشعارات',             onPress: () => {} },
-  { Icon: Globe,  label: 'اللغة',                 onPress: () => {} },
-  { Icon: Lock,   label: 'تغيير كلمة المرور',    onPress: () => {} },
-  { Icon: Star,   label: 'قيّم التطبيق',          onPress: () => {} },
-  { Icon: Phone,  label: 'تواصل معنا',             onPress: () => {} },
-  { Icon: Info,   label: 'عن التطبيق',             onPress: () => {} },
+  { Icon: MapPin,  label: 'عناويني المحفوظة',   route: '/profile/addresses' },
+  { Icon: Bell,   label: 'الإشعارات',             route: '/profile/notifications' },
+  { Icon: Globe,  label: 'اللغة',                 route: null },
+  { Icon: Lock,   label: 'تغيير كلمة المرور',    route: '/profile/change-password' },
+  { Icon: Star,   label: 'قيّم التطبيق',          route: null },
+  { Icon: Phone,  label: 'تواصل معنا',             route: null },
+  { Icon: Info,   label: 'عن التطبيق',             route: '/profile/about' },
 ];
 
 export default function Profile() {
@@ -77,11 +77,17 @@ export default function Profile() {
 
       {/* Settings list */}
       <View style={styles.list}>
-        {ITEMS.map(({ Icon, label, onPress }, i) => (
+        {ITEMS.map(({ Icon, label, route }, i) => (
           <Pressable
             key={label}
             style={[styles.item, i < ITEMS.length - 1 && styles.itemBorder]}
-            onPress={onPress}
+            onPress={() => {
+              if (route) {
+                router.push(route as any);
+              } else {
+                Alert.alert('قريباً', `شاشة ${label} ستكون متاحة قريباً`);
+              }
+            }}
           >
             <View style={styles.iconWrap}>
               <Icon size={18} color={colors.secondary} />

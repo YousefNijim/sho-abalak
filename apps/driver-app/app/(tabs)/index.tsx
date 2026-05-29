@@ -168,10 +168,7 @@ export default function DriverHome() {
         )}
       </View>
 
-      {/* Simulate incoming request */}
-      <Pressable style={styles.simulate} onPress={() => router.push('/request-alert')}>
-        <Text style={styles.simulateText}>🔔 محاكاة طلب جديد وارد</Text>
-      </Pressable>
+
     </ScrollView>
   );
 }

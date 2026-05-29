@@ -64,8 +64,8 @@
 - **Verified:** `nest build` passes, Prisma client generates.
 
 ### apps/admin-dashboard (`@shu/admin-dashboard`) — Next.js 14 — **6 pages, all from Stitch designs** — ✅ **FULLY WIRED TO LIVE API**
-- `(dashboard)` route group with shared shell: `Sidebar` (green, active-route highlight via `usePathname`), `TopBar`.
-- Pages: **Dashboard** (stat cards, 2 bar charts, recent-orders table), **Businesses** (filters + data table + pagination), **Users** (tabs + table), **Drivers** (table), **Reports/Finance** (period selector, 4 cards, transactions table). All RTL, brand-themed, dynamic backend queries!
+- `(dashboard)` route group with shared shell: `Sidebar` (green, active-route highlight via `usePathname`), `TopBar`. Protected by Next.js middleware / layout auth guard reading cookies.
+- Pages: **Login** (new), **Dashboard** (stat cards, Recharts bar charts, TanStack recent-orders table), **Businesses** (filters + TanStack data table + pagination), **Users** (tabs + table), **Drivers** (table), **Reports/Finance** (period selector, 4 cards, transactions table). All RTL, brand-themed, dynamic backend queries!
 - Shared components: `stat-card`, `status-badge`, `data-table` (TableCard/StatusDot/RowActions with live suspend/unsuspend actions), `page-placeholder`, `nav-items`.
 - `tailwind.config.ts` extended with the Stitch token set; `globals.css` loads Cairo/Montserrat + Material Symbols.
 - **Verified:** Wires live data queries using React Query and `@shu/api-client`. Next build compiles 10 routes cleanly.
@@ -86,7 +86,7 @@
 ### apps/driver-app — Expo SDK 51 — **4 screens** — ✅ **FULLY WIRED TO LIVE API**
 - Nav: Stack + `(tabs)` (Home/History) + stack `request-alert` (modal), `active-delivery`.
 - Zustand store: `auth.store` (persisted token/profile).
-- Screens: Home (driver details, online/offline availability switch, live deliveries/earnings stats, active PICKED_UP order link), Request Alert (clean simulated order alert modal), Active Delivery (dynamic customer/business detail, dynamic cash collection vs electronic payment notice, direct native telephone dialers, DELIVERED state update mutation), Delivery History (dynamic monthly earnings aggregate, detailed delivered orders log).
+- Screens: Home (driver details, online/offline availability switch, live deliveries/earnings stats, active PICKED_UP order link), Request Alert (driven by live `driver:request` socket event), Active Delivery (dynamic customer/business detail, dynamic cash collection vs electronic payment notice, direct native telephone dialers, DELIVERED state update mutation), Delivery History (dynamic monthly earnings aggregate, detailed delivered orders log).
 - **Verified:** Compiles perfectly with zero TypeScript errors.
 
 ### packages/ui-components — RN primitives added
