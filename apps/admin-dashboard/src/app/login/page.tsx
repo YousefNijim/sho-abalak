@@ -23,7 +23,7 @@ export default function LoginPage() {
         setError('غير مصرح لك بالدخول إلى لوحة التحكم');
         return;
       }
-      setToken(res.access_token);
+      setToken(res.accessToken);
       // Wait for cookie to be set, then reload/redirect
       setTimeout(() => {
         router.push('/');

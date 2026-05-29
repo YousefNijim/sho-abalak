@@ -30,14 +30,14 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (dto) => {
         const res = await authApi.login(dto);
-        setAuthToken(res.access_token);
-        set({ user: res.user as AuthUser, token: res.access_token });
+        setAuthToken(res.accessToken);
+        set({ user: res.user as AuthUser, token: res.accessToken });
       },
 
       register: async (dto) => {
         const res = await authApi.register(dto);
-        setAuthToken(res.access_token);
-        set({ user: res.user as AuthUser, token: res.access_token });
+        setAuthToken(res.accessToken);
+        set({ user: res.user as AuthUser, token: res.accessToken });
       },
 
       logout: () => {
