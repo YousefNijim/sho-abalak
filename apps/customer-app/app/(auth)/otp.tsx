@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, View, Pressable, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
-import { useRouter } from 'react-native-expo-router' || require('expo-router');
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
