@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag } from 'lucide-react-native';
+import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronLeft } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
-import { businessesApi, ordersApi } from '@shu/api-client';
+import { useActiveOrderStore } from '../src/stores/active-order.store';
+import { businessesApi, ordersApi, areasApi } from '@shu/api-client';
+import { useAuthStore } from '../src/stores/auth.store';
 import type { CreateOrderDto } from '@shu/api-client';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,9 +25,20 @@ export default function Cart() {
   const areaId = useCartStore((s) => s.areaId);
   const clearCart = useCartStore((s) => s.clear);
   const subtotal = useCartStore((s) => s.total());
+  const setActiveOrder = useActiveOrderStore((s) => s.set);
 
+  const user = useAuthStore((s) => s.user);
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
   const [notes, setNotes] = useState('');
+  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(user?.areaId ?? null);
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.list(),
+  });
+
+  const selectedArea = areas.find((a: any) => a.id === selectedAreaId);
 
   // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -41,6 +54,12 @@ export default function Cart() {
   const createOrder = useMutation({
     mutationFn: (dto: CreateOrderDto) => ordersApi.create(dto),
     onSuccess: (data: any) => {
+      setActiveOrder({
+        id: data.id,
+        businessName: business?.name ?? '',
+        status: 'PENDING',
+        total: Number(data.total),
+      });
       clearCart();
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       router.replace({
@@ -98,6 +117,37 @@ export default function Cart() {
           <ArrowRight size={28} color={colors.primary} />
         </Pressable>
       </View>
+
+      {/* Fix 4: Address selector */}
+      <Pressable style={styles.addressStrip} onPress={() => setAreaPickerVisible(true)}>
+        <ChevronLeft size={18} color={colors.primary} />
+        <Text style={styles.addressStripText} numberOfLines={1}>
+          {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر منطقة التوصيل'}
+        </Text>
+        <MapPin size={18} color={colors.primary} />
+      </Pressable>
+
+      <Modal visible={areaPickerVisible} transparent animationType="slide" onRequestClose={() => setAreaPickerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setAreaPickerVisible(false)} />
+        <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
+          <View style={styles.modalHandle} />
+          <Text style={styles.modalTitle}>اختر منطقة التوصيل</Text>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {areas.map((a: any) => (
+              <Pressable
+                key={a.id}
+                style={[styles.areaRow, selectedAreaId === a.id && styles.areaRowActive]}
+                onPress={() => { setSelectedAreaId(a.id); setAreaPickerVisible(false); }}
+              >
+                <MapPin size={16} color={selectedAreaId === a.id ? colors.primary : colors.textMuted} />
+                <Text style={[styles.areaText, selectedAreaId === a.id && styles.areaTextActive]}>
+                  {a.city} — {a.name}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 120 }]}
@@ -513,5 +563,70 @@ const styles = StyleSheet.create({
   },
   emptyBtn: {
     paddingHorizontal: spacing[8],
+  },
+  addressStrip: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    gap: spacing[2],
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  addressStripText: {
+    flex: 1,
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalSheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    padding: spacing[4],
+    maxHeight: '60%',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    alignSelf: 'center',
+    marginBottom: spacing[4],
+  },
+  modalTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.lg,
+    color: colors.textPrimary,
+    textAlign: 'right',
+    marginBottom: spacing[3],
+  },
+  areaRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[2],
+    borderRadius: radius.md,
+  },
+  areaRowActive: {
+    backgroundColor: colors.primary + '15',
+  },
+  areaText: {
+    flex: 1,
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  areaTextActive: {
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
   },
 });

@@ -10,6 +10,7 @@ import { useSocket } from '../src/hooks/useSocket';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useActiveOrderStore } from '../src/stores/active-order.store';
 
 const STEPS = [
   { status: 'PENDING', label: 'تم استلام الطلب', desc: 'بانتظار التأكيد', icon: CheckCircle },
@@ -25,6 +26,8 @@ export default function Tracking() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const socket = useSocket();
+  const setActiveOrder = useActiveOrderStore((s) => s.set);
+  const clearActiveOrder = useActiveOrderStore((s) => s.clear);
 
   // Animation for active step
   const [pulseAnim] = useState(new Animated.Value(1));
@@ -58,6 +61,22 @@ export default function Tracking() {
       socket.off('order:status_update', handleStatusUpdate);
     };
   }, [socket, id, queryClient]);
+
+  // Keep global active-order store in sync so the Home banner stays current
+  useEffect(() => {
+    if (!order) return;
+    const terminal = order.status === 'DELIVERED' || order.status === 'CANCELLED';
+    if (terminal) {
+      clearActiveOrder();
+    } else {
+      setActiveOrder({
+        id: order.id,
+        businessName: order.business?.name ?? '',
+        status: order.status,
+        total: Number(order.total),
+      });
+    }
+  }, [order, setActiveOrder, clearActiveOrder]);
 
   if (!id) {
     return (

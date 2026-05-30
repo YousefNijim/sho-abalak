@@ -14,6 +14,7 @@ import {
   Coffee,
   ChefHat,
   Plus,
+  Minus,
   ArrowRight,
   Share2,
   Heart,
@@ -37,6 +38,7 @@ export default function BusinessDetail() {
   const insets = useSafeAreaInsets();
   
   const addItem    = useCartStore((s) => s.addItem);
+  const updateQty  = useCartStore((s) => s.updateQty);
   const clearCart  = useCartStore((s) => s.clear);
   const cartItems  = useCartStore((s) => s.items);
   const cartTotal  = useCartStore((s) => s.total());
@@ -219,11 +221,24 @@ export default function BusinessDetail() {
                   
                   <View style={styles.productFooter}>
                     <Text style={styles.productPrice}>{p.price} ₪</Text>
-                    {p.isAvailable && business.isOpen ? (
-                      <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
-                        <Plus size={20} color="#fff" strokeWidth={2.5} />
-                      </Pressable>
-                    ) : (
+                    {p.isAvailable && business.isOpen ? (() => {
+                      const cartItem = cartItems.find((i) => i.productId === p.id);
+                      return cartItem ? (
+                        <View style={styles.stepperWrap}>
+                          <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, -1)}>
+                            <Minus size={16} color={colors.primary} strokeWidth={2.5} />
+                          </Pressable>
+                          <Text style={styles.stepperQty}>{cartItem.quantity}</Text>
+                          <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, 1)}>
+                            <Plus size={16} color={colors.primary} strokeWidth={2.5} />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
+                          <Plus size={20} color="#fff" strokeWidth={2.5} />
+                        </Pressable>
+                      );
+                    })() : (
                       <View style={styles.unavailableBadge}>
                         <Text style={styles.unavailableText}>غير متوفر</Text>
                       </View>
@@ -572,10 +587,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4e2200',
   },
-  emptyText: { 
-    textAlign: 'center', 
-    color: colors.textMuted, 
-    marginTop: spacing[6], 
-    fontFamily: fontFamily.regular 
+  emptyText: {
+    textAlign: 'center',
+    color: colors.textMuted,
+    marginTop: spacing[6],
+    fontFamily: fontFamily.regular
+  },
+  stepperWrap: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+  },
+  stepperBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepperQty: {
+    minWidth: 24,
+    textAlign: 'center',
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
   },
 });

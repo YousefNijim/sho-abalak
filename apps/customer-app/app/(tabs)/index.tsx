@@ -1,18 +1,19 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
   Platform,
-  Animated as RNAnimated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Search,
   ShoppingCart,
@@ -25,16 +26,16 @@ import {
   Star,
   Clock,
   Bike,
-  Apple,
-  Beef,
   ImageIcon,
+  ChevronLeft,
+  Package,
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colors, fontSizes, fontFamily, radius, spacing, components } from '../../src/theme';
-import { businessesApi } from '@shu/api-client';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
+import { businessesApi, areasApi } from '@shu/api-client';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
+import { useActiveOrderStore } from '../../src/stores/active-order.store';
 
 const CATEGORIES = [
   { id: 'RESTAURANT', label: 'مطاعم', icon: '🍕' },
@@ -44,25 +45,54 @@ const CATEGORIES = [
   { id: 'MEAT', label: 'ملحمة', icon: '🥩' },
 ] as const;
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'بانتظار التأكيد',
+  CONFIRMED: 'تم القبول',
+  PREPARING: 'جاري التحضير',
+  READY: 'جاهز للاستلام',
+  PICKED_UP: 'في الطريق',
+  DELIVERED: 'تم التسليم',
+  CANCELLED: 'ملغي',
+};
+
 export default function Home() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
   const cartItems = useCartStore((s) => s.items);
   const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const activeOrder = useActiveOrderStore((s) => s.order);
 
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
+  // Selected area for delivery — defaults to user's registered area
+  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(user?.areaId ?? null);
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.list(),
+  });
+
+  const selectedArea = areas.find((a: any) => a.id === selectedAreaId);
 
   const { data: businesses = [], isLoading } = useQuery({
-    queryKey: ['businesses', selectedCat, search, user?.areaId],
+    queryKey: ['businesses', selectedCat, search, selectedAreaId],
     queryFn: () =>
       businessesApi.list({
         category: selectedCat || undefined,
         search: search || undefined,
-        areaId: user?.areaId || undefined,
+        areaId: selectedAreaId || undefined,
       }),
   });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['businesses'] });
+    setRefreshing(false);
+  };
 
   const bottomInset = insets.bottom;
 
@@ -85,10 +115,57 @@ export default function Home() {
         <Text style={styles.headerTitle}>شو عبالك؟</Text>
       </View>
 
+      {/* Fix 4: Address selector strip */}
+      <Pressable style={styles.addressStrip} onPress={() => setAreaPickerVisible(true)}>
+        <ChevronLeft size={18} color={colors.primary} />
+        <Text style={styles.addressText} numberOfLines={1}>
+          {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر منطقة التوصيل'}
+        </Text>
+        <MapPin size={18} color={colors.primary} />
+      </Pressable>
+
+      {/* Fix 4: Area picker modal */}
+      <Modal visible={areaPickerVisible} transparent animationType="slide" onRequestClose={() => setAreaPickerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setAreaPickerVisible(false)} />
+        <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
+          <View style={styles.modalHandle} />
+          <Text style={styles.modalTitle}>اختر منطقة التوصيل</Text>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {areas.map((a: any) => (
+              <Pressable
+                key={a.id}
+                style={[styles.areaRow, selectedAreaId === a.id && styles.areaRowActive]}
+                onPress={() => { setSelectedAreaId(a.id); setAreaPickerVisible(false); }}
+              >
+                <MapPin size={16} color={selectedAreaId === a.id ? colors.primary : colors.textMuted} />
+                <Text style={[styles.areaText, selectedAreaId === a.id && styles.areaTextActive]}>
+                  {a.city} — {a.name}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
+      </Modal>
+
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 100 + bottomInset }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary} colors={[colors.primary]} />
+        }
       >
+        {/* Fix 1: Active order banner */}
+        {activeOrder && (
+          <Pressable style={styles.activeOrderBanner} onPress={() => router.push({ pathname: '/tracking', params: { id: activeOrder.id } })}>
+            <Package size={20} color="#fff" />
+            <View style={{ flex: 1, marginHorizontal: spacing[3] }}>
+              <Text style={styles.activeOrderTitle}>{activeOrder.businessName}</Text>
+              <Text style={styles.activeOrderStatus}>{STATUS_LABELS[activeOrder.status] ?? activeOrder.status}</Text>
+            </View>
+            <ChevronLeft size={20} color="#fff" />
+          </Pressable>
+        )}
+
         {/* Search Bar */}
         <View style={styles.searchWrap}>
           <View style={styles.searchBar}>
@@ -558,6 +635,94 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontFamily: fontFamily.bold,
+  },
+  // Fix 4 — address strip
+  addressStrip: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    gap: spacing[2],
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  addressText: {
+    flex: 1,
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  // Fix 4 — area picker modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalSheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    padding: spacing[4],
+    maxHeight: '60%',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    alignSelf: 'center',
+    marginBottom: spacing[4],
+  },
+  modalTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.lg,
+    color: colors.textPrimary,
+    textAlign: 'right',
+    marginBottom: spacing[3],
+  },
+  areaRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[3],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[2],
+    borderRadius: radius.md,
+  },
+  areaRowActive: {
+    backgroundColor: colors.primary + '15',
+  },
+  areaText: {
+    flex: 1,
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  areaTextActive: {
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
+  },
+  // Fix 1 — active order banner
+  activeOrderBanner: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    backgroundColor: colors.secondary,
+    borderRadius: radius.md,
+    padding: spacing[3],
+    marginTop: spacing[3],
+  },
+  activeOrderTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: '#fff',
+    textAlign: 'right',
+  },
+  activeOrderStatus: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'right',
   },
 });
 
