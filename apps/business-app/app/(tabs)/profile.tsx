@@ -14,6 +14,7 @@ import {
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -55,8 +56,14 @@ function notify(title: string, message?: string) {
 
 export default function ProfileTab() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const logout = useAuthStore((s) => s.logout);
+
+  const doLogout = () => {
+    logout();
+    router.replace('/(auth)/login');
+  };
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business-mine'],
@@ -169,13 +176,13 @@ export default function ProfileTab() {
     if (Platform.OS === 'web') {
       // Alert.alert is a no-op on react-native-web — use the native confirm.
       if (typeof window !== 'undefined' && window.confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-        logout();
+        doLogout();
       }
       return;
     }
     Alert.alert('تسجيل الخروج', 'هل أنت متأكد من تسجيل الخروج؟', [
       { text: 'إلغاء', style: 'cancel' },
-      { text: 'تسجيل الخروج', style: 'destructive', onPress: logout },
+      { text: 'تسجيل الخروج', style: 'destructive', onPress: doLogout },
     ]);
   };
 
