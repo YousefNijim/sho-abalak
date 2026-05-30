@@ -21,8 +21,11 @@ import {
   Banknote
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi } from '@shu/api-client';
+import { businessesApi, BASE_URL } from '@shu/api-client';
 import type { Product } from '@shu/api-client';
+
+const mediaUrl = (path: string | null | undefined): string | null =>
+  !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
 import { useCartStore } from '../../src/stores/cart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -111,7 +114,7 @@ export default function BusinessDetail() {
         {/* ── Hero image ── */}
         <View style={styles.heroWrap}>
           {business.imageUrl ? (
-            <Image source={{ uri: business.imageUrl }} style={styles.heroImg} contentFit="cover" />
+            <Image source={{ uri: mediaUrl(business.imageUrl)! }} style={styles.heroImg} contentFit="cover" />
           ) : (
             <View style={[styles.heroImg, styles.heroPlaceholder]}>
               <View style={styles.heroIcon}>
@@ -147,6 +150,18 @@ export default function BusinessDetail() {
             <View style={styles.infoTitleWrap}>
               <Text style={styles.businessName}>{business.name}</Text>
               <Text style={styles.businessLocation}>{business.area?.city || 'فلسطين'} - {business.area?.name || ''}</Text>
+              {business.addressDetail ? (
+                <View style={styles.addressRow}>
+                  <MapPin size={14} color={colors.textMuted} />
+                  <Text style={styles.addressText}>{business.addressDetail}</Text>
+                </View>
+              ) : null}
+              {business.openTime && business.closeTime ? (
+                <View style={styles.addressRow}>
+                  <Clock size={14} color={colors.textMuted} />
+                  <Text style={styles.addressText}>{business.openTime} - {business.closeTime}</Text>
+                </View>
+              ) : null}
             </View>
             <View style={styles.ratingBadge}>
               <Star size={16} color="#733600" fill="#733600" />
@@ -375,6 +390,18 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fontFamily.regular,
     color: colors.textMuted,
+  },
+  addressRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[1],
+    marginTop: spacing[1],
+  },
+  addressText: {
+    fontSize: 13,
+    fontFamily: fontFamily.regular,
+    color: colors.textMuted,
+    flexShrink: 1,
   },
   ratingBadge: {
     flexDirection: 'row-reverse',

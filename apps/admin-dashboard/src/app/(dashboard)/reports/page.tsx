@@ -123,19 +123,19 @@ export default function ReportsPage() {
       }),
       columnHelper.accessor('total', {
         header: 'قيمة الفاتورة الإجمالية',
-        cell: (info) => <span className="font-bold text-primary">₪{info.getValue().toFixed(2)}</span>,
+        cell: (info) => <span className="font-bold text-primary">₪{Number(info.getValue() ?? 0).toFixed(2)}</span>,
       }),
       columnHelper.accessor('commission', {
         header: 'عمولة المنصة المستقطعة',
         cell: (info) => (
           <span className="font-bold text-secondary">
-            {info.row.original.status === 'DELIVERED' ? `₪${info.getValue().toFixed(2)}` : '₪0.00'}
+            {info.row.original.status === 'DELIVERED' ? `₪${Number(info.getValue() ?? 0).toFixed(2)}` : '₪0.00'}
           </span>
         ),
       }),
       columnHelper.accessor('deliveryFee', {
         header: 'رسوم التوصيل',
-        cell: (info) => <span className="text-muted-gray font-semibold">₪{info.getValue().toFixed(2)}</span>,
+        cell: (info) => <span className="text-muted-gray font-semibold">₪{Number(info.getValue() ?? 0).toFixed(2)}</span>,
       }),
       columnHelper.accessor('paymentMethod', {
         header: 'طريقة الدفع',

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>شو عبالك؟ | Shu Abalak?</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "warning-amber": "#F59E0B",
+                    "secondary-fixed": "#aef2bf",
+                    "on-tertiary-fixed": "#001e30",
+                    "surface-tint": "#974800",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-surface-variant": "#564337",
+                    "surface-white": "#FFFFFF",
+                    "primary-container": "#e6781e",
+                    "surface-variant": "#e4e1eb",
+                    "muted-gray": "#6B7280",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-primary-container": "#4e2200",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#006495",
+                    "surface-dim": "#dbd9e2",
+                    "on-secondary-container": "#2e6f47",
+                    "on-primary-fixed": "#311300",
+                    "secondary-container": "#abefbd",
+                    "background": "#fbf8ff",
+                    "surface-container": "#efecf6",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "primary-fixed": "#ffdbc7",
+                    "tertiary-fixed": "#cbe6ff",
+                    "surface-container-high": "#eae7f1",
+                    "border-beige": "#E5E0D5",
+                    "outline": "#8a7265",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#ffb688",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface": "#fbf8ff",
+                    "on-secondary-fixed": "#00210e",
+                    "inverse-on-surface": "#f2eff9",
+                    "outline-variant": "#ddc1b1",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#303037",
+                    "tertiary-container": "#009ee8",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-primary-fixed-variant": "#733600",
+                    "on-background": "#1b1b22",
+                    "background-cream": "#FCF3DC",
+                    "on-tertiary-container": "#00314c",
+                    "error-red": "#EF4444",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fbf8ff",
+                    "secondary": "#296a43",
+                    "primary": "#974800",
+                    "surface-container-low": "#f5f2fc",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "on-secondary": "#ffffff",
+                    "success-green": "#22C55E",
+                    "on-surface": "#1b1b22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "gap-md": "12px",
+                    "section-lg": "32px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "gap-sm": "8px",
+                    "gap-lg": "20px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "body-base": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "body-lg": ["Montserrat"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .hero-gradient {
+            background: linear-gradient(180deg, rgba(252, 243, 220, 0) 0%, rgba(252, 243, 220, 1) 100%);
+        }
+
+        .category-chip:active {
+            transform: scale(0.95);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream font-body-base text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-background-cream dark:bg-background shadow-sm sticky top-0 z-40 w-full transition-transform active:scale-95">
+<div class="flex flex-row justify-between items-center px-margin-standard h-nav-height w-full">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden border-2 border-primary">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a young person with a friendly expression, set against a clean, soft-focus background. The lighting is warm and natural, aligning with a high-end service app's user profile aesthetic. The overall mood is welcoming and reliable, maintaining the heritage brand's warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQDtOl-pOtbtjnDfWNWZz0pe8jRoDCE1-91wXQDyJlM_70BhgKgl67E-zh8FNUuEoGRNW-e3a1itpqeymD3QFqWEkMATFNs6ghYC-HYZBG6hWoiDlzjeIw-Ul9bxNWTawwMV_V_WmBTrB45aVmLVu4AH-LyO-7FEOcn8fRqueBL6SzA8_mkmrpRxOXFc3CuPgR1sWHW5AZNGfHdXQGNWXVF3YWXUYaSVu8aP5jlR9SreaRslLKNgoz8blY4Crfc49OQ-PX0pdqs9kD"/>
+</div>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed font-extrabold tracking-tight">
+                شو عبالك؟
+            </h1>
+<button class="w-10 h-10 flex items-center justify-center text-primary hover:opacity-80">
+<span class="material-symbols-outlined text-headline-sm" data-icon="notifications">notifications</span>
+</button>
+</div>
+<!-- Search Bar Integration -->
+<div class="px-margin-standard pb-4">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-muted-gray" data-icon="search">search</span>
+<input class="w-full h-[52px] bg-surface-white border-1.5 border-border-beige rounded-xl pr-12 pl-4 focus:ring-primary focus:border-primary text-body-base" placeholder="ابحث عن مطعم أو سوبر ماركت..." type="text"/>
+</div>
+</div>
+</header>
+<main class="px-margin-standard space-y-section-lg pt-4">
+<!-- Main Entry Points (Trendyol Style) -->
+<section class="grid grid-cols-2 gap-md">
+<!-- Restaurants Entry -->
+<div class="relative h-64 rounded-xl overflow-hidden shadow-lg group cursor-pointer bg-white">
+<img alt="Restaurants" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A mouth-watering high-angle shot of a gourmet burger platter with golden fries and fresh salad, presented on a rustic wooden board. The lighting is warm and directional, highlighting textures and vibrant food colors like rich reds and golden browns. The image evokes Palestinian hospitality with a modern, appetizing commercial photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDT0jBpHamH2r9Xh1xP_6xy6UJAyRn9GCjnC8onttKR02Ihy6z5X0GWqgM7QHXFfwr93TSa5Aq3Zgt9bQJoUboST64uyMzE4aYH4fSB6B3gMoXEMA2Ahp8zH4h4HnNTsKsbbTPyRCmOUoupJriFbfxzzn-sCDRAS85rq9Q0XNqQAu74lr2XzSUxgFtd_F0j8rq2H2GzZEwmKEVJkxdWd0Pn2PM4qPLSp1Prr9g_8qPFtgDwVy9StHiPEASL1hTEoO_oUSHccpMC-YRh"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 right-4 left-4 text-white text-right">
+<h2 class="font-headline-sm text-headline-sm mb-2">المطاعم</h2>
+<button class="bg-primary hover:bg-primary-container text-white font-button-text text-button-text py-2 px-4 rounded-lg w-full transition-all active:scale-95 flex items-center justify-center gap-xs">
+                        اطلب الآن
+                        <span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+</div>
+<!-- Shops Entry -->
+<div class="relative h-64 rounded-xl overflow-hidden shadow-lg group cursor-pointer bg-white">
+<img alt="Markets" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A lush and vibrant display of fresh fruits and vegetables in a traditional woven basket, including ripe tomatoes, green bell peppers, and citrus fruits. The setting is bright and clean with soft morning light, creating a sense of freshness and quality. The palette is rich with natural greens, oranges, and reds against a neutral warm background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpZnYiu3G10G2wlVwmqLFvnyDMs7ip3Pp1irTAQGvjbvIzqi3p_wpeqKVlRdyxqUzQSUhAB76TtgOY1ZpqPrpyqM3PAarGsXwDgKrg3sOiQXshFnzzcJxl2p5dtkChF3MYk8em89zw_mgOKRXiTq8RFHm7nJs9kjhVtQ8utKFIEj19lVtmU14h0zHpknP7mMze6nOQ7d-B3thO_15rMWDa3RKn2fymv4fQ_L4BPCKNth8h-sunPcTfpHaW0uv8PVCjg-_nS7JjSPBM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+<div class="absolute bottom-4 right-4 left-4 text-white text-right">
+<h2 class="font-headline-sm text-headline-sm mb-2">المحلات</h2>
+<button class="bg-secondary hover:bg-on-secondary-fixed-variant text-white font-button-text text-button-text py-2 px-4 rounded-lg w-full transition-all active:scale-95 flex items-center justify-center gap-xs">
+                        تسوق الآن
+                        <span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Promo Slider -->
+<section>
+<div class="flex justify-between items-center mb-gap-md">
+<h3 class="font-headline-sm text-headline-sm text-primary">عروض حصرية</h3>
+<button class="text-primary font-label-md text-label-md flex items-center">عرض الكل</button>
+</div>
+<div class="flex overflow-x-auto gap-md no-scrollbar pb-2">
+<!-- Promo Card 1 -->
+<div class="min-w-[300px] h-40 rounded-xl bg-primary-container relative flex items-center justify-between px-6 overflow-hidden">
+<div class="z-10 text-white space-y-1">
+<p class="font-label-md text-label-md opacity-90">طلبك الأول</p>
+<h4 class="font-headline-md text-headline-md leading-tight">خصم 20%<br/>على أول طلب</h4>
+<button class="mt-2 bg-white text-primary px-4 py-1.5 rounded-full font-button-text text-sm">استخدم الكود: WELCOME</button>
+</div>
+<div class="absolute -left-4 top-1/2 -translate-y-1/2 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="local_offer">local_offer</span>
+</div>
+</div>
+<!-- Promo Card 2 -->
+<div class="min-w-[300px] h-40 rounded-xl bg-secondary relative flex items-center justify-between px-6 overflow-hidden">
+<div class="z-10 text-white space-y-1">
+<p class="font-label-md text-label-md opacity-90">توصيل مجاني</p>
+<h4 class="font-headline-md text-headline-md leading-tight">توصيل مجاني<br/>من مطاعم مختارة</h4>
+<button class="mt-2 bg-white text-secondary px-4 py-1.5 rounded-full font-button-text text-sm">اطلب الآن</button>
+</div>
+<div class="absolute -left-4 top-1/2 -translate-y-1/2 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="delivery_dining">delivery_dining</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Categories Section -->
+<section>
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant mb-gap-md">الأقسام</h3>
+<div class="flex overflow-x-auto gap-lg no-scrollbar py-2">
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="pizza">local_pizza</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">بيتزا</span>
+</div>
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="lunch_dining">lunch_dining</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">برجر</span>
+</div>
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">تموين</span>
+</div>
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="medical_services">medical_services</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">صيدلية</span>
+</div>
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="cake">cake</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">حلويات</span>
+</div>
+<div class="flex flex-col items-center gap-xs min-w-[64px] category-chip">
+<div class="w-16 h-16 rounded-2xl bg-surface-white border border-border-beige flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="local_cafe">local_cafe</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">قهوة</span>
+</div>
+</div>
+</section>
+<!-- Featured Restaurants Section -->
+<section class="pb-8">
+<div class="flex justify-between items-center mb-gap-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant">مطاعم مشهورة</h3>
+<button class="text-primary font-label-md text-label-md">مشاهدة الكل</button>
+</div>
+<div class="space-y-gap-md">
+<!-- Restaurant Card 1 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-row-reverse items-center p-3 gap-md border border-border-beige transition-all active:scale-[0.98]">
+<div class="w-24 h-24 rounded-lg overflow-hidden shrink-0">
+<img alt="Restaurant Logo" class="w-full h-full object-cover" data-alt="A macro close-up of traditional Middle Eastern food served in a modern restaurant setting. The focus is on the rich colors and textures of hummus with a swirl of olive oil and vibrant spices. The background is softly blurred with a hint of an elegant restaurant interior. The aesthetic is clean, warm, and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE-6l9UNIISqE7J1I99GXe2q27ZwGPCG4ZGLJ_ie9GKMlXLIbDUvYIeZ3eVQjWiIHqLZxNZoha6GnITcSyyld4o_SSQtWwaRGS64GU6B9dh6wNEqmuQPG9LTEUoZqQhU5AcYBDSzcJdsqAF3PfUlRLr4pVQp7o1g-xqh3E-5QqLat6oxoBHXxaKrv6e-XeClceNFNHy4P66Wjba0IaONSr7LmUj9EWPsD2sN0pJRVl7WI1Q3q9XjzVkmsT45r4V4202Jt1-yu8Pr2x"/>
+</div>
+<div class="flex-1 flex flex-col justify-center space-y-1">
+<div class="flex justify-between items-start">
+<h4 class="font-headline-sm text-headline-sm leading-none">فلافل على كيفك</h4>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold">مفتوح</span>
+</div>
+<p class="text-muted-gray text-label-sm">مأكولات شعبية • 25-35 دقيقة</p>
+<div class="flex items-center gap-1 text-warning-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.8</span>
+<span class="text-muted-gray text-label-sm">(100+)</span>
+</div>
+</div>
+</div>
+<!-- Restaurant Card 2 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-row-reverse items-center p-3 gap-md border border-border-beige transition-all active:scale-[0.98]">
+<div class="w-24 h-24 rounded-lg overflow-hidden shrink-0">
+<img alt="Restaurant Logo" class="w-full h-full object-cover" data-alt="A high-quality food photography shot of a fresh pasta dish with basil and cherry tomatoes. The lighting is bright and airy, suggesting a modern Mediterranean bistro. The colors are vibrant and fresh, emphasizing quality and taste. The background features a clean, white marble table setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqTJ_TXHjuhC2MIyPWcDf3-9eOwTsuhRpHzJPa-rvXwr9G09fOiB4xi3kpnKO-wDMM5JClbJIw7Oa5646nyRrbA-yZLnswwpt4-v-i1XYVXSrxjQ54roKlbYEc33wMj-u8plTw8TSdsZYp2Hzy4B2l8YpyfgvvYT9Db0-U9CnvldLxp8056ilDb9ERrULJ8pTR20ZGHG3xAcsIlcXm9SC5KxbWWol8Uj09f3bczf7VCxGlLqLp9cR0lKKf5MUNAKmBicYnHxsuun95"/>
+</div>
+<div class="flex-1 flex flex-col justify-center space-y-1">
+<div class="flex justify-between items-start">
+<h4 class="font-headline-sm text-headline-sm leading-none">باستا هيدواي</h4>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] font-bold">مفتوح</span>
+</div>
+<p class="text-muted-gray text-label-sm">إيطالي • 40-50 دقيقة</p>
+<div class="flex items-center gap-1 text-warning-amber">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-label-md">4.5</span>
+<span class="text-muted-gray text-label-sm">(250+)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-base bg-surface-white dark:bg-inverse-surface border-t border-border-beige dark:border-outline shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-bold transition-all duration-200 active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-all duration-200 active:scale-90 flex-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<!-- FAB for quick basket -->
+<div class="fixed bottom-20 left-4 z-40">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-90">
+<span class="material-symbols-outlined text-3xl" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute -top-1 -right-1 bg-error-red text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white font-bold">3</span>
+</button>
+</div>
+<script>
+        // Simple scroll reveal or micro-interaction logic can go here
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                // Future interaction: filter logic
+                console.log('Category clicked: ' + chip.innerText);
+            });
+        });
+
+        // Sticky Header scroll effect
+        let lastScrollTop = 0;
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > 100) {
+                header.classList.add('shadow-md');
+            } else {
+                header.classList.remove('shadow-md');
+            }
+            lastScrollTop = scrollTop;
+        });
+    </script>
+</body></html>

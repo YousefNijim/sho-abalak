@@ -109,7 +109,7 @@ export default function DashboardPage() {
   const todayRevenue = useMemo(() => {
     return todayOrders
       .filter((o) => o.status === 'DELIVERED')
-      .reduce((sum, o) => sum + o.total, 0);
+      .reduce((sum, o) => sum + Number(o.total ?? 0), 0);
   }, [todayOrders]);
 
   const activeCustomers = useMemo(() => users.filter((u) => u.role === 'CUSTOMER').length, [users]);
@@ -175,7 +175,7 @@ export default function DashboardPage() {
       }),
       columnHelper.accessor('total', {
         header: 'المجموع',
-        cell: (info) => <span className="font-bold text-primary">₪{info.getValue().toFixed(2)}</span>,
+        cell: (info) => <span className="font-bold text-primary">₪{Number(info.getValue() ?? 0).toFixed(2)}</span>,
       }),
       columnHelper.accessor('status', {
         header: 'الحالة',
@@ -245,7 +245,7 @@ export default function DashboardPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 gap-margin-standard sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon="shopping_basket" label="طلبات اليوم" value={String(todayOrders.length)} tone="primary" />
-        <StatCard icon="payments" label="إيرادات اليوم المقبولة" value={`₪${todayRevenue.toFixed(0)}`} tone="secondary" />
+        <StatCard icon="payments" label="إيرادات اليوم المقبولة" value={`₪${Number(todayRevenue).toFixed(0)}`} tone="secondary" />
         <StatCard icon="person_add" label="الزبائن والشركاء" value={`👤 ${activeCustomers} | 🏪 ${activeBusinesses}`} tone="tertiary" />
         <StatCard icon="local_shipping" label="السائقين المتصلين حالياً" value={String(onlineDrivers)} tone="warning-amber" />
       </div>

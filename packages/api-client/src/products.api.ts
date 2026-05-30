@@ -10,6 +10,7 @@ export interface CreateProductDto {
   price: number;
   category?: string;
   isAvailable?: boolean;
+  imageUrl?: string;
 }
 
 export const productsApi = {

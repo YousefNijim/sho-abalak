@@ -8,6 +8,11 @@ export interface Business {
   areaId: string;
   deliveryType: string;
   imageUrl: string | null;
+  logoUrl: string | null;
+  phone: string | null;
+  addressDetail: string | null;
+  openTime: string | null;
+  closeTime: string | null;
   rating: number;
   isOpen: boolean;
   commissionRate?: number;

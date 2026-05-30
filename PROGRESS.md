@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 21 (Admin Dashboard Control Center Transformation — Complete)
+**Current phase:** Phase 22 (Business-App Profile Rebuild + Functionality Audit — Complete)
 
 ---
 
@@ -226,6 +226,17 @@
     - **Gotchas:** Prisma `pendingDriverId` field needed `migrate deploy` + `prisma generate` before TS picked it up. `Button variant="outline"` doesn't exist — use `secondary`. `compileWeeklyChart` was always using raw `orders` regardless of period selector.
 
 ---
+
+20. ~~**Business-App Profile Rebuild + Functionality Audit (Phase 22 — branch `YOUSEF`)**~~ ✅ **DONE** — Rebuilt the business Profile/Account screen ("الحساب الشخصي") to faithfully match the Stitch design (`.design-refs/driver profile and  usiness profile and menu/_4`):
+    - **New screen layout:** header (back-arrow → logout, title in primary), hero **cover image** with "تغيير الغلاف" overlay button, circular **logo** with camera button, "المعلومات الأساسية" card (store name + category select), "الموقع والعنوان" card (detailed address + decorative map preview), "إعدادات إضافية" list card (working-hours row → time-range modal, phone row → phone modal), sticky **"حفظ التغييرات"** FAB (loading/disabled/success states), and a working **"تسجيل الخروج"** link. All RTL, Cairo, lucide icons, brand tokens, soft shadows + rounded cards.
+    - **Cover vs logo:** `imageUrl` = cover (already the customer hero), new `logoUrl` = circular logo. Both upload via the existing `POST /uploads/image` endpoint (`src/lib/upload.ts`).
+    - **Schema:** `Business` gained `logoUrl`, `addressDetail`, `lat`, `lng`, `openTime`, `closeTime` (migration `20260530200000_business_profile_fields`, applied via the diff→deploy→generate flow). `lat`/`lng` columns exist but are **unused** — per product decision the location section is **address-based only** (no GPS/maps libs; matches the app's region model). The map is a decorative styled preview, not real tiles.
+    - **Working hours:** simple time-range modal (hour/minute/ص-م segmented pickers) → `openTime`/`closeTime` strings.
+    - **DTO + api-client:** `CreateBusinessDto` (→ `UpdateBusinessDto` via PartialType) + `Business` type gained `logoUrl`/`addressDetail`/`openTime`/`closeTime`.
+    - **Customer reflection:** customer `business/[id]` hero now resolves relative `/uploads/...` paths via `BASE_URL` (`mediaUrl` helper — fixes latent broken-image bug for any uploaded cover) and surfaces `addressDetail` + `openTime–closeTime` under the business name.
+    - **Logout:** wired to `useAuthStore.logout()` (clears token + axios header + profile) with a confirm Alert — verified it fires (both the header arrow and the bottom link).
+    - **Audit (all ✅, wired to live API):** Dashboard (open/close toggle `businessesApi.update`, live order stats, status sections, card→order detail nav); Orders/Order-detail (status mutations PENDING→CONFIRMED→PREPARING→READY, reject→CANCELLED, double-tap guards from Phase 20); Driver-selection (`driversApi.available` + `ordersApi.sendDriverRequest`, pending/reject handling); Menu (products CRUD + availability toggle + image upload, all `productsApi`); Analytics (live `ordersApi.list` aggregates, period buckets); Profile (this rebuild). **No dead buttons** — every onPress navigates, toggles state, or fires an API mutation.
+    - **Verified:** `nest build` ✅ clean; `tsc --noEmit` on business-app ✅ (only the pre-existing `ui-components/native/Input.tsx` overload error remains, unmodified); customer-app `tsc --noEmit` unchanged at 42 pre-existing errors (none in `business/[id].tsx`). **E2E against live API:** registered a throwaway BUSINESS user → created a business → `PATCH /businesses/:id` with name/category/addressDetail/openTime/closeTime/phone/logoUrl/imageUrl persisted → `GET /businesses/:id` (customer path) returned all of them → cleaned up the test records.
 
 ## 🗂️ How to use this file (for AI agents)
 

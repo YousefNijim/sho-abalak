@@ -252,7 +252,7 @@ export default function OrdersPage() {
       }),
       columnHelper.accessor('total', {
         header: 'المجموع',
-        cell: (info) => <span className="font-bold text-primary">₪{info.getValue().toFixed(2)}</span>,
+        cell: (info) => <span className="font-bold text-primary">₪{Number(info.getValue() ?? 0).toFixed(2)}</span>,
       }),
       columnHelper.accessor('paymentMethod', {
         header: 'طريقة الدفع',
@@ -692,7 +692,7 @@ export default function OrdersPage() {
                   <div>
                     <p className="text-[12px] text-muted-gray">قيمة الدفع وحالته</p>
                     <div className="flex gap-2 items-center mt-1">
-                      <span className="font-bold text-[14px]">₪{selectedOrder.total.toFixed(2)}</span>
+                      <span className="font-bold text-[14px]">₪{Number(selectedOrder.total ?? 0).toFixed(2)}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold border ${PAYMENT_STATUS_COLOR[selectedOrder.payment?.status ?? 'PENDING']}`}>
                         {PAYMENT_STATUS_LABEL[selectedOrder.payment?.status ?? 'PENDING']}
                       </span>
@@ -758,7 +758,7 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-1 text-warning-amber">
                         <span className="material-symbols-outlined text-[18px]">star</span>
                         <span className="text-[13px] font-bold">
-                          {selectedOrder.driver.rating.toFixed(1)}
+                          {Number(selectedOrder.driver.rating ?? 0).toFixed(1)}
                         </span>
                       </div>
                     </div>
@@ -787,7 +787,7 @@ export default function OrdersPage() {
                         <div className="text-left font-mono">
                           <span>{item.quantity}x</span>
                           <span className="text-muted-gray mx-1">@</span>
-                          <span className="font-bold text-primary">₪{item.unitPrice.toFixed(2)}</span>
+                          <span className="font-bold text-primary">₪{Number(item.unitPrice ?? 0).toFixed(2)}</span>
                         </div>
                       </div>
                     ))}
@@ -797,15 +797,15 @@ export default function OrdersPage() {
                   <div className="pt-3 border-t border-border space-y-2 text-[13px]">
                     <div className="flex justify-between text-muted-gray">
                       <span>المجموع الفرعي:</span>
-                      <span className="font-mono">₪{(selectedOrder.total - (selectedOrder.business?.area?.deliveryFee || 3)).toFixed(2)}</span>
+                      <span className="font-mono">₪{(Number(selectedOrder.total ?? 0) - Number(selectedOrder.business?.area?.deliveryFee || 3)).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-muted-gray">
                       <span>رسوم التوصيل:</span>
-                      <span className="font-mono">₪{(selectedOrder.business?.area?.deliveryFee || 3).toFixed(2)}</span>
+                      <span className="font-mono">₪{Number(selectedOrder.business?.area?.deliveryFee || 3).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-on-surface font-extrabold text-[15px] pt-1.5 border-t border-border/60">
                       <span>الإجمالي الكلي:</span>
-                      <span className="font-mono text-primary">₪{selectedOrder.total.toFixed(2)}</span>
+                      <span className="font-mono text-primary">₪{Number(selectedOrder.total ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

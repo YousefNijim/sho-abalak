@@ -105,6 +105,13 @@ model Business {
   area           Area             @relation(fields: [areaId], references: [id])
   deliveryType   DeliveryType     @default(PLATFORM)
   imageUrl       String?
+  logoUrl        String?
+  phone          String?
+  addressDetail  String?
+  lat            Float?
+  lng            Float?
+  openTime       String?
+  closeTime      String?
   rating         Float            @default(0)
   isOpen         Boolean          @default(true)
   commissionRate Decimal          @db.Decimal(5, 2) @default(10.00)
