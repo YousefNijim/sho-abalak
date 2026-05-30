@@ -145,9 +145,10 @@ model Order {
   customer      User                 @relation("CustomerOrders", fields: [customerId], references: [id])
   businessId    String
   business      Business             @relation(fields: [businessId], references: [id])
-  driverId      String?
-  driver        Driver?              @relation(fields: [driverId], references: [id])
-  status        OrderStatus          @default(PENDING)
+  driverId          String?
+  driver            Driver?              @relation(fields: [driverId], references: [id])
+  pendingDriverId   String?
+  status            OrderStatus          @default(PENDING)
   paymentMethod PaymentMethod
   total         Decimal              @db.Decimal(10, 2)
   note          String?

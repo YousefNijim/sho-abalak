@@ -162,56 +162,164 @@ export class OrdersService {
     return updatedOrder;
   }
 
+  /**
+   * Business sends a delivery request to a driver — order stays READY, no assignment yet.
+   * The driver must accept before the order is assigned.
+   */
+  async sendDriverRequest(id: string, user: AuthUser, driverId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { business: true, customer: { include: { area: true } } },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+    if (order.status !== OrderStatus.READY) {
+      throw new BadRequestException('يمكن إرسال طلب للسائق فقط عندما يكون الطلب جاهزاً');
+    }
+    await this.assertOwnsOrderBusiness(order.businessId, user);
+
+    const driver = await this.prisma.driver.findUnique({
+      where: { id: driverId },
+      include: { user: true },
+    });
+    if (!driver) throw new NotFoundException('السائق غير موجود');
+    if (driver.status !== DriverStatus.AVAILABLE) {
+      throw new BadRequestException('السائق غير متاح حالياً');
+    }
+
+    // Store which driver was sent the request (no assignment yet)
+    await this.prisma.order.update({
+      where: { id },
+      data: { pendingDriverId: driverId },
+    });
+
+    // Emit request to driver's socket room
+    this.socketGateway.emitDriverRequest(driver.user.id, {
+      orderId: order.id,
+      businessName: order.business?.name || 'منشأة تجارية',
+      areaName: order.customer?.area?.name || 'العنوان المسجل',
+      total: Number(order.total),
+    });
+
+    return { message: 'تم إرسال الطلب للسائق، بانتظار القبول' };
+  }
+
+  /**
+   * Driver accepts a pending request — order transitions READY → PICKED_UP with assignment.
+   */
+  async acceptDriver(id: string, user: AuthUser) {
+    if (user.role !== UserRole.DRIVER) {
+      throw new ForbiddenException('فقط السائق يمكنه قبول الطلب');
+    }
+
+    const driver = await this.prisma.driver.findUnique({ where: { userId: user.id } });
+    if (!driver) throw new ForbiddenException('لم يتم العثور على ملف السائق');
+
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { business: true, customer: { include: { area: true } } },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+    if (order.pendingDriverId !== driver.id) {
+      throw new ForbiddenException('هذا الطلب لم يُرسل إليك');
+    }
+    if (order.status !== OrderStatus.READY) {
+      throw new BadRequestException('هذا الطلب لم يعد متاحاً للقبول');
+    }
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id },
+        data: {
+          status: OrderStatus.PICKED_UP,
+          driverId: driver.id,
+          pendingDriverId: null,
+          statusHistory: { create: { status: OrderStatus.PICKED_UP, changedBy: user.id } },
+        },
+      });
+
+      await tx.driver.update({
+        where: { id: driver.id },
+        data: { status: DriverStatus.BUSY },
+      });
+
+      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+    });
+
+    // Notify customer and business
+    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.PICKED_UP);
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, OrderStatus.PICKED_UP);
+    }
+
+    return updatedOrder;
+  }
+
   async rejectDriver(id: string, user: AuthUser) {
     if (user.role !== UserRole.DRIVER) {
       throw new ForbiddenException('فقط السائق يمكنه رفض الطلب');
     }
 
+    const driver = await this.prisma.driver.findUnique({ where: { userId: user.id }, include: { user: true } });
+    if (!driver) throw new ForbiddenException('لم يتم العثور على ملف السائق');
+
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { driver: { include: { user: true } }, business: true },
+      include: { business: true },
     });
 
     if (!order) throw new NotFoundException('الطلب غير موجود');
 
-    // Make sure the driver rejecting is the one currently assigned
-    if (!order.driverId || order.driver?.userId !== user.id) {
+    // Handle rejection of a pending request (READY status, pendingDriverId set)
+    if (order.status === OrderStatus.READY && order.pendingDriverId === driver.id) {
+      await this.prisma.order.update({
+        where: { id },
+        data: { pendingDriverId: null },
+      });
+
+      if (order.business?.ownerId) {
+        this.socketGateway.emitOrderDriverRejected(order.business.ownerId, {
+          orderId: order.id,
+          driverName: driver.user?.name ?? 'سائق',
+        });
+      }
+      // Re-read with full includes for a consistent response shape
+      return this.prisma.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+    }
+
+    // Legacy path: driver was already assigned (PICKED_UP) and wants to cancel
+    if (!order.driverId || order.driverId !== driver.id) {
       throw new ForbiddenException('أنت غير معين لهذا الطلب أو الطلب غير مسند لأي سائق');
     }
 
     if (order.status !== OrderStatus.PICKED_UP) {
-      throw new BadRequestException('يمكنك رفض الطلبات التي قيد الاستلام (في الطريق) فقط');
+      throw new BadRequestException('لا يمكن رفض هذا الطلب في حالته الحالية');
     }
 
     const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      // Revert order status to READY and unassign driver
       await tx.order.update({
         where: { id },
         data: {
           status: OrderStatus.READY,
           driverId: null,
+          pendingDriverId: null,
           statusHistory: { create: { status: OrderStatus.READY, changedBy: user.id } },
         },
       });
 
-      // Free the driver
       await tx.driver.update({
-        where: { id: order.driverId! },
+        where: { id: driver.id },
         data: { status: DriverStatus.AVAILABLE },
       });
 
       return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
     });
 
-    // Notify Business Owner
     if (updatedOrder.business?.ownerId) {
       this.socketGateway.emitOrderDriverRejected(updatedOrder.business.ownerId, {
         orderId: updatedOrder.id,
-        driverName: order.driver.user?.name || 'سائق غير معروف',
+        driverName: driver.user?.name ?? 'سائق',
       });
     }
-
-    // Update customer tracking that order is back to READY
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.READY);
 
     return updatedOrder;

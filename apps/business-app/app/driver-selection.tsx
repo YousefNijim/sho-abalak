@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { businessesApi, driversApi, ordersApi } from '@shu/api-client';
+import { useSocket } from '../src/hooks/useSocket';
 
 export default function DriverSelection() {
   const router = useRouter();
@@ -12,8 +13,9 @@ export default function DriverSelection() {
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
 
   const [filter, setFilter] = useState<'mine' | 'all'>('mine');
+  // Track which driver we're waiting on acceptance from
+  const [pendingDriverId, setPendingDriverId] = useState<string | null>(null);
 
-  // Fetch business details to get their area ID
   const { data: business } = useQuery({
     queryKey: ['business-mine'],
     queryFn: () => businessesApi.mine(),
@@ -21,35 +23,82 @@ export default function DriverSelection() {
 
   const areaId = business?.areaId;
 
-  // Fetch available drivers (scoped to areaId or all)
   const { data: drivers = [], isLoading } = useQuery({
     queryKey: ['available-drivers', filter, areaId],
     queryFn: () => driversApi.available(filter === 'mine' ? areaId : undefined),
     enabled: !!business,
   });
 
-  // Assign driver mutation - READY -> PICKED_UP transition
-  const assignDriver = useMutation({
-    mutationFn: (driverId: string) =>
-      ordersApi.updateStatus(orderId!, {
-        status: 'PICKED_UP',
-        driverId,
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
-      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-      router.replace(`/order/${orderId}`);
+  // Send request to driver — order stays READY, waiting for acceptance
+  const sendRequest = useMutation({
+    mutationFn: (driverId: string) => ordersApi.sendDriverRequest(orderId!, driverId),
+    onSuccess: (_, driverId) => {
+      setPendingDriverId(driverId);
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || 'فشل تعيين السائق للطلب.';
+      const msg = err.response?.data?.message || 'فشل إرسال الطلب للسائق.';
       Alert.alert('خطأ', msg);
     },
   });
+
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (!socket || !orderId) return;
+
+    // Driver accepted → order is now PICKED_UP, go back to order detail
+    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+      if (payload.orderId === orderId && payload.status === 'PICKED_UP') {
+        queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+        queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+        router.replace(`/order/${orderId}`);
+      }
+    };
+
+    // Driver rejected → clear pending state, let business pick another
+    const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
+      if (payload.orderId === orderId) {
+        setPendingDriverId(null);
+        queryClient.invalidateQueries({ queryKey: ['available-drivers', filter, areaId] });
+        Alert.alert(
+          'تم رفض الطلب',
+          `اعتذر السائق ${payload.driverName} عن التوصيل. الرجاء اختيار سائق آخر.`,
+        );
+      }
+    };
+
+    socket.on('order:status_update', handleStatusUpdate);
+    socket.on('order:driver_rejected', handleDriverRejected);
+
+    return () => {
+      socket.off('order:status_update', handleStatusUpdate);
+      socket.off('order:driver_rejected', handleDriverRejected);
+    };
+  }, [socket, orderId, filter, areaId, queryClient, router]);
 
   if (isLoading) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  // Waiting for driver to accept/reject
+  if (pendingDriverId) {
+    const pendingDriver = drivers.find((d: any) => d.id === pendingDriverId);
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[5] }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.pendingTitle}>تم إرسال الطلب للسائق</Text>
+        <Text style={styles.pendingName}>{pendingDriver?.user?.name || 'السائق'}</Text>
+        <Text style={styles.pendingSubtitle}>بانتظار القبول...</Text>
+        <Button
+          title="إلغاء واختيار سائق آخر"
+          variant="secondary"
+          style={{ marginTop: spacing[6], width: '100%' }}
+          onPress={() => setPendingDriverId(null)}
+        />
       </View>
     );
   }
@@ -87,9 +136,9 @@ export default function DriverSelection() {
                 <View style={styles.availTag}><Text style={styles.availText}>نشط</Text></View>
               </View>
               <Button
-                title={assignDriver.isPending ? 'جاري التعيين...' : 'إرسال الطلب للسائق'}
-                onPress={() => assignDriver.mutate(d.id)}
-                disabled={assignDriver.isPending}
+                title={sendRequest.isPending && sendRequest.variables === d.id ? 'جاري الإرسال...' : 'إرسال الطلب للسائق'}
+                onPress={() => sendRequest.mutate(d.id)}
+                disabled={sendRequest.isPending}
                 style={{ marginTop: spacing[3] }}
               />
             </View>
@@ -114,4 +163,7 @@ const styles = StyleSheet.create({
   availTag: { backgroundColor: '#DCFCE7', borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: 4 },
   availText: { color: '#166534', fontFamily: fontFamily.bold, fontSize: fontSizes.sm },
   empty: { textAlign: 'center', color: colors.textMuted, marginTop: spacing[12] },
+  pendingTitle: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary, marginTop: spacing[5], textAlign: 'center' },
+  pendingName: { fontSize: fontSizes.lg, fontFamily: fontFamily.extrabold, color: colors.primary, marginTop: spacing[2], textAlign: 'center' },
+  pendingSubtitle: { fontSize: fontSizes.base, color: colors.textMuted, marginTop: spacing[2], textAlign: 'center' },
 });

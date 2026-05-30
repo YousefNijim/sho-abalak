@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
@@ -16,19 +16,47 @@ export default function RequestAlert() {
   }>();
 
   const [seconds, setSeconds] = useState(165);
+  // Prevent double-action after accept or reject fires
+  const settled = useRef(false);
+
+  const acceptMutation = useMutation({
+    mutationFn: () => ordersApi.acceptDriver(orderId!),
+    onSuccess: () => {
+      settled.current = true;
+      // Fix 6: dismiss this screen then navigate to active delivery
+      router.replace({
+        pathname: '/active-delivery',
+        params: { orderId: orderId! },
+      });
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'فشل قبول الطلب.';
+      Alert.alert('خطأ', msg);
+    },
+  });
 
   const rejectMutation = useMutation({
     mutationFn: () => ordersApi.rejectDriver(orderId!),
     onSettled: () => {
+      settled.current = true;
+      // Fix 6: always dismiss after reject
       router.back();
     },
   });
 
   const handleReject = () => {
-    if (orderId && !rejectMutation.isPending) {
+    if (settled.current) return;
+    if (orderId && !rejectMutation.isPending && !acceptMutation.isPending) {
       rejectMutation.mutate();
-    } else {
+    } else if (!orderId) {
       router.back();
+    }
+  };
+
+  const handleAccept = () => {
+    if (settled.current) return;
+    if (!acceptMutation.isPending && !rejectMutation.isPending) {
+      acceptMutation.mutate();
     }
   };
 
@@ -37,12 +65,15 @@ export default function RequestAlert() {
       handleReject();
       return;
     }
+    if (settled.current) return;
     const t = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(t);
   }, [seconds]);
 
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
+
+  const isBusy = acceptMutation.isPending || rejectMutation.isPending;
 
   return (
     <View style={styles.container}>
@@ -60,23 +91,18 @@ export default function RequestAlert() {
       <Text style={styles.timer}>{mm}:{ss}</Text>
 
       <View style={styles.actions}>
-        <Button 
-          title={rejectMutation.isPending ? "جاري الرفض..." : "❌ رفض"} 
-          variant="danger" 
-          style={{ flex: 1 }} 
+        <Button
+          title={rejectMutation.isPending ? 'جاري الرفض...' : '❌ رفض'}
+          variant="danger"
+          style={{ flex: 1 }}
           onPress={handleReject}
-          disabled={rejectMutation.isPending}
+          disabled={isBusy}
         />
         <Button
-          title="✅ قبول"
+          title={acceptMutation.isPending ? 'جاري القبول...' : '✅ قبول'}
           style={{ flex: 1 }}
-          disabled={rejectMutation.isPending}
-          onPress={() =>
-            router.replace({
-              pathname: '/active-delivery',
-              params: { orderId: orderId || 'D-501' },
-            })
-          }
+          onPress={handleAccept}
+          disabled={isBusy}
         />
       </View>
     </View>

@@ -39,6 +39,24 @@ export class OrdersController {
     return this.orders.updateStatus(id, user, dto);
   }
 
+  @Post(':id/send-driver-request')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  sendDriverRequest(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Body('driverId') driverId: string,
+  ) {
+    return this.orders.sendDriverRequest(id, user, driverId);
+  }
+
+  @Post(':id/accept-driver')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.DRIVER)
+  acceptDriver(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.orders.acceptDriver(id, user);
+  }
+
   @Patch(':id/reject-driver')
   @UseGuards(RolesGuard)
   @Roles(UserRole.DRIVER)
