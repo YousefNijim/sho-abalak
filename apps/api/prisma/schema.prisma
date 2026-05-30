@@ -96,19 +96,20 @@ model User {
 }
 
 model Business {
-  id           String           @id @default(uuid())
-  ownerId      String           @unique
-  owner        User             @relation(fields: [ownerId], references: [id])
-  name         String
-  category     BusinessCategory
-  areaId       String
-  area         Area             @relation(fields: [areaId], references: [id])
-  deliveryType DeliveryType     @default(PLATFORM)
-  imageUrl     String?
-  rating       Float            @default(0)
-  isOpen       Boolean          @default(true)
-  products     Product[]
-  orders       Order[]
+  id             String           @id @default(uuid())
+  ownerId        String           @unique
+  owner          User             @relation(fields: [ownerId], references: [id])
+  name           String
+  category       BusinessCategory
+  areaId         String
+  area           Area             @relation(fields: [areaId], references: [id])
+  deliveryType   DeliveryType     @default(PLATFORM)
+  imageUrl       String?
+  rating         Float            @default(0)
+  isOpen         Boolean          @default(true)
+  commissionRate Decimal          @db.Decimal(5, 2) @default(10.00)
+  products       Product[]
+  orders         Order[]
 
   @@map("businesses")
 }
@@ -228,4 +229,16 @@ model Payment {
   updatedAt DateTime      @updatedAt
 
   @@map("payments")
+}
+
+model SystemSettings {
+  id                String   @id @default("default")
+  defaultCommission Decimal  @db.Decimal(5, 2) @default(10.00)
+  baseDeliveryFee   Decimal  @db.Decimal(10, 2) @default(3.00)
+  customerAppActive Boolean  @default(true)
+  businessAppActive Boolean  @default(true)
+  driverAppActive   Boolean  @default(true)
+  updatedAt         DateTime @updatedAt
+
+  @@map("system_settings")
 }

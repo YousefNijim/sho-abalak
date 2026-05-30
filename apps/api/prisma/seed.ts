@@ -208,6 +208,21 @@ async function seedDemo(areaMap: Map<string, string>) {
   const dUser2 = await upsertUser({ phone: '0599000005', name: 'خالد السائق', password: 'test1234', role: 'DRIVER', areaId: centerId });
   await upsertDriver(dUser2.id, centerId, 4.9);
   console.log('✅ Driver   0599000005 / test1234  → خالد (AVAILABLE, المركز)');
+
+  // ── System Settings ──
+  await prisma.systemSettings.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      defaultCommission: 10.00,
+      baseDeliveryFee: 3.00,
+      customerAppActive: true,
+      businessAppActive: true,
+      driverAppActive: true,
+    },
+  });
+  console.log('✅ System Settings seeded');
 }
 
 // ─── Entry ────────────────────────────────────────────────────────────────────
