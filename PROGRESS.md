@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 15 (Application flow fixes, Math bug fixes, Google Stitch designs port)
+**Current phase:** Phase 16 (UX/Logic fixes batch — branch feat/ux-fixes)
 
 ---
 
@@ -168,6 +168,17 @@
 12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
 13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
 14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
+15. ~~**UX/Logic Fixes Batch (Phase 16 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — 9 fixes across all 3 mobile apps:
+    - **Fix 5 (API+Business+Driver):** Driver assignment now waits for acceptance. New endpoints `POST /orders/:id/send-driver-request` (emits socket, stores `pendingDriverId`, order stays READY) and `POST /orders/:id/accept-driver` (driver does READY→PICKED_UP). Business driver-selection shows pending spinner; rejects return to picker with alert. Schema migration `20260530000001_order_pending_driver` adds `pendingDriverId` to orders.
+    - **Fix 6 (Driver):** `request-alert` screen always dismisses after accept or reject — `settled` ref prevents double-action.
+    - **Fix 7 (Business+Driver):** All API-hitting status buttons show loading labels + are disabled while in-flight. Destructive actions (CANCELLED, DELIVERED) require Alert confirmation.
+    - **Fix 8 (Driver):** Revenue reduce now coerces `deliveryFee` (Prisma Decimal → string) with `Number()`. Total displayed via `formatShekel`.
+    - **Fix 9 (Business):** Analytics chart now uses `periodOrders` not raw `orders`; chart buckets adapt (hourly for today, daily for week/month).
+    - **Fix 1 (Customer):** Zustand `active-order.store` persists current order; Cart sets it, Tracking syncs/clears it. Home shows a green banner (business name + Arabic status) tapping into tracking.
+    - **Fix 2 (Customer):** `RefreshControl` on Home ScrollView (brand orange tint) re-fetches businesses on pull.
+    - **Fix 3 (Customer):** Business detail product cards show inline `+/-` stepper when item is in cart; collapses to `+` at 0.
+    - **Fix 4 (Customer):** Address selector strip (MapPin + area name) on Home and Cart; slide-up Modal lists all areas with active one highlighted.
+    - **Gotchas:** Prisma `pendingDriverId` field needed `migrate deploy` + `prisma generate` before TS picked it up. `Button variant="outline"` doesn't exist — use `secondary`. `compileWeeklyChart` was always using raw `orders` regardless of period selector.
 
 ---
 
