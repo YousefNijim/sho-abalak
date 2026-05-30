@@ -23,7 +23,6 @@ import {
   Camera,
   Save,
   CheckCircle,
-  ChevronDown,
   ChevronLeft,
   MapPin,
   Clock,
@@ -32,16 +31,16 @@ import {
   KeyRound,
   X,
 } from 'lucide-react-native';
-import { businessesApi } from '@shu/api-client';
+import { businessesApi, tagsApi } from '@shu/api-client';
+import type { BusinessType, Tag } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../../src/theme';
 import { uploadImage, imageUrl } from '../../src/lib/upload';
 import { useAuthStore } from '../../src/stores/auth.store';
 
-const CATEGORIES = [
-  { value: 'RESTAURANT', label: 'مطاعم شرقية' },
-  { value: 'STORE', label: 'سوبر ماركت' },
-  { value: 'CAFE', label: 'حلويات ومخابز' },
-] as const;
+const TYPES: { value: BusinessType; label: string }[] = [
+  { value: 'FOOD', label: 'مطعم / مأكولات' },
+  { value: 'STORE', label: 'متجر / سوبرماركت' },
+];
 
 const DEFAULT_OPEN = '09:00 ص';
 const DEFAULT_CLOSE = '11:00 م';
@@ -74,7 +73,8 @@ export default function ProfileTab() {
   // form state
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [category, setCategory] = useState('RESTAURANT');
+  const [type, setType] = useState<BusinessType>('FOOD');
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [addressDetail, setAddressDetail] = useState('');
   const [openTime, setOpenTime] = useState(DEFAULT_OPEN);
   const [closeTime, setCloseTime] = useState(DEFAULT_CLOSE);
@@ -84,17 +84,22 @@ export default function ProfileTab() {
   const [logoLocalUri, setLogoLocalUri] = useState<string | null>(null);
 
   // ui state
-  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const { data: availableTags = [] } = useQuery({
+    queryKey: ['tags', type],
+    queryFn: () => tagsApi.list(type),
+  });
+
   useEffect(() => {
     if (business) {
       setName(business.name ?? '');
       setPhone(business.phone ?? '');
-      setCategory(business.category ?? 'RESTAURANT');
+      setType(business.type ?? 'FOOD');
+      setTagIds((business.tags ?? []).map((t) => t.id));
       setAddressDetail(business.addressDetail ?? '');
       setOpenTime(business.openTime ?? DEFAULT_OPEN);
       setCloseTime(business.closeTime ?? DEFAULT_CLOSE);
@@ -102,6 +107,14 @@ export default function ProfileTab() {
       setLogoLocalUri(null);
     }
   }, [business]);
+
+  const toggleTag = (id: string) =>
+    setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+
+  const selectType = (t: BusinessType) => {
+    setType(t);
+    setTagIds([]); // tags are type-specific
+  };
 
   const updateMutation = useMutation({
     mutationFn: (dto: Partial<Parameters<typeof businessesApi.update>[1]>) =>
@@ -150,7 +163,8 @@ export default function ProfileTab() {
     const dto: Record<string, unknown> = {
       name: name.trim(),
       phone: phone.trim(),
-      category,
+      type,
+      tagIds,
       addressDetail: addressDetail.trim(),
       openTime,
       closeTime,
@@ -189,7 +203,6 @@ export default function ProfileTab() {
 
   const coverImage = coverUri ?? imageUrl(business?.imageUrl);
   const logoImage = logoLocalUri ?? imageUrl(business?.logoUrl);
-  const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label ?? 'مطاعم شرقية';
 
   if (isLoading) {
     return (
@@ -267,29 +280,44 @@ export default function ProfileTab() {
             </View>
 
             <View style={{ marginTop: spacing[4] }}>
-              <Text style={styles.fieldLabel}>تصنيف المتجر</Text>
-              <Pressable style={styles.inputRow} onPress={() => setShowCategoryPicker((v) => !v)}>
-                <ChevronDown size={18} color={colors.textMuted} />
-                <Text style={styles.inputValue}>{categoryLabel}</Text>
-              </Pressable>
-              {showCategoryPicker && (
-                <View style={styles.picker}>
-                  {CATEGORIES.map((cat) => (
+              <Text style={styles.fieldLabel}>نوع المتجر</Text>
+              <View style={styles.typeSeg}>
+                {TYPES.map((t) => {
+                  const active = type === t.value;
+                  return (
                     <Pressable
-                      key={cat.value}
-                      style={[styles.pickerItem, category === cat.value && styles.pickerItemActive]}
-                      onPress={() => {
-                        setCategory(cat.value);
-                        setShowCategoryPicker(false);
-                      }}
+                      key={t.value}
+                      style={[styles.typeSegItem, active && styles.typeSegItemActive]}
+                      onPress={() => selectType(t.value)}
                     >
-                      <Text style={[styles.pickerItemText, category === cat.value && { color: colors.primary }]}>
-                        {cat.label}
-                      </Text>
+                      <Text style={[styles.typeSegText, active && styles.typeSegTextActive]}>{t.label}</Text>
                     </Pressable>
-                  ))}
-                </View>
-              )}
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={{ marginTop: spacing[4] }}>
+              <Text style={styles.fieldLabel}>التصنيفات (اختر واحداً أو أكثر)</Text>
+              <View style={styles.tagsWrap}>
+                {availableTags.length === 0 ? (
+                  <Text style={styles.tagsEmpty}>لا توجد تصنيفات متاحة</Text>
+                ) : (
+                  availableTags.map((tag: Tag) => {
+                    const active = tagIds.includes(tag.id);
+                    return (
+                      <Pressable
+                        key={tag.id}
+                        style={[styles.tagChip, active && styles.tagChipActive]}
+                        onPress={() => toggleTag(tag.id)}
+                      >
+                        {active && <CheckCircle size={14} color="#fff" />}
+                        <Text style={[styles.tagChipText, active && styles.tagChipTextActive]}>{tag.name}</Text>
+                      </Pressable>
+                    );
+                  })
+                )}
+              </View>
             </View>
           </View>
 
@@ -724,6 +752,34 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'right',
   },
+  typeSeg: {
+    flexDirection: 'row-reverse',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  typeSegItem: { flex: 1, paddingVertical: spacing[3], alignItems: 'center', justifyContent: 'center' },
+  typeSegItemActive: { backgroundColor: colors.primary },
+  typeSegText: { fontSize: fontSizes.base, fontFamily: fontFamily.semibold, color: colors.textMuted },
+  typeSegTextActive: { color: '#fff' },
+  tagsWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[2] },
+  tagsEmpty: { fontSize: fontSizes.sm, fontFamily: fontFamily.regular, color: colors.textMuted },
+  tagChip: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tagChipText: { fontSize: fontSizes.sm, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+  tagChipTextActive: { color: '#fff' },
 
   mapPreview: {
     height: 180,

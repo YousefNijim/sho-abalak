@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-05-30
-**Current phase:** Phase 23 (Store Registration / Approval / Password Management — Complete)
+**Last updated:** 2026-05-31
+**Current phase:** Phase 24 (Two-Section Restructure: BusinessType FOOD/STORE + Tags — Complete)
 
 ---
 
@@ -248,6 +248,17 @@
     - **Business-app (Parts B/D):** new `(auth)/register.tsx` store-registration form (reuses Business fields, inline category/area pickers, RTL, brand tokens) → `registerBusiness` → pending-confirmation screen. New `change-password.tsx` wired to `authApi.changePassword`, linked from the profile "إعدادات إضافية" list.
     - **Admin dashboard (Part C):** businesses page gained an "حالة الاعتماد" column (PENDING/معتمد/معلّق/محظور), per-row **موافقة/رفض** buttons for pending stores + a **key** reset-password button for active ones, a PENDING status filter, and an **"إضافة متجر جديد"** modal (create full store + password, immediate activation). Password/reject/create modals with toasts.
     - **Verified:** `nest build` ✅; admin `tsc --noEmit` ✅ clean; business-app `tsc` ✅ (only the pre-existing `ui-components/native/Input.tsx` error); customer-app unchanged at 42 pre-existing errors. **Live-API E2E (9/9):** self-register→PENDING; pending login→401; admin sees PENDING; approve+password→ACTIVE; store login→ok; admin-create→immediate login ok; reset password→old 401/new ok; owner change-password→wrong-current 401/new login ok. Test records cleaned up afterward.
+
+22. ~~**Two-Section Restructure — BusinessType (FOOD/STORE) + multi-value Tags (Phase 24 — branch `YOUSEF`)**~~ ✅ **DONE** — Split the flat `BusinessCategory` into a top-level **section type** + many-to-many **tags**, propagated everywhere, ordering preserved.
+    - **Model (migration `20260531000000_business_type_and_tags`):** new enum `BusinessType { FOOD, STORE }`; **`Business.category` → `Business.type`** (`@default(FOOD)`); new **`Tag` model** (`id, name, type`, unique `[name,type]`) + M2M `Business.tags ↔ _BusinessTags`. Dropped old `BusinessCategory` enum + `category` column. **Data-preserving:** existing rows backfilled to `FOOD`; 13 predefined tags seeded *inside the migration* (9 FOOD: شرقي/غربي/شاورما/فلافل/بيتزا/مشاوي/إفطار/كافيه/حلويات, 4 STORE: سوبرماركت/ماركت صغير/خضار وفواكه/ملحمة). **`Product.category` (free-text menu sections) is UNTOUCHED — different field.**
+    - **Migration gotcha:** `set` is invalid on a Prisma `create` (use `connect` on create, `set` on update). The IDE shows stale-Prisma-client red after a schema change until the TS server reloads; `nest build` uses the regenerated client and is the source of truth.
+    - **Backend:** new **TagsModule** (`GET /tags?type=` public). Businesses `findAll` filters by `type` + `tagId`, includes `tags`; `create`/`update`/`adminUpdate`/`adminCreate` + `auth.registerBusiness` take `type` + `tagIds[]` (helpers `tagConnect`/`tagSet`). DTOs swapped `category`→`type`+`tagIds`. shared-types: `BusinessType` + `Tag`. seed auto-tags the two demo businesses (مطعم القدس→شرقي/شاورما, كافيه الصباح→كافيه/حلويات), both FOOD.
+    - **api-client:** `Business.type`+`tags`, `tagsApi`, `BusinessType`/`Tag`/`BusinessWriteDto` types, `BusinessListParams.{type,tagId}`, register/admin-create DTOs.
+    - **Customer app — NEW ENTRY POINT:** `app/sections.tsx` section picker (two gradient cards: المطاعم→FOOD Home, المتاجر→placeholder). Splash + login + OTP now route to `/sections`. Home (`(tabs)/index.tsx`) is **FOOD-only** with **tag chips fetched from the API** (multi-tag businesses appear under each tag); a LayoutGrid header button switches sections. `app/stores-coming-soon.tsx` = "قريباً" placeholder (back-navigable, `type=STORE` wired for later). `business/[id].tsx` shows tag pills + uses `type` for the hero icon.
+    - **Propagation:** business-app **registration** + **profile edit** = type segmented control + type-specific tag multi-select. Admin businesses page = type+tags column, type filter, create modal (type select + tag chips), **new edit modal** (type/tags via `adminUpdate`), detail drawer shows type + tags.
+    - **Token fix:** added `white: '#FFFFFF'` to `ui-components/tokens.ts` (cleared ~20 pre-existing `colors.white` TS errors across customer-app).
+    - **Verified:** `nest build` ✅, admin `next build` ✅ (13 routes), admin `tsc` ✅, business-app `tsc` ✅ (only pre-existing Input.tsx), customer-app 42→**21** errors (all pre-existing noise; the change *removed* 21, added 0 net). **Migration applied + seed loaded with tags.** **Live-API E2E:** (a) full order lifecycle PENDING→DELIVERED still works on a FOOD business; (b) `GET /tags?type=FOOD|STORE`, `/businesses?type=`, `/businesses?tagId=` all correct; (c) admin-create STORE+tag → appears under type=STORE + filterable by tag. Test records cleaned up.
+    - **Gotcha for next agent:** the seed's `upsertUser` does NOT re-hash passwords on update (no-op), so once a password is changed via the admin/owner endpoints, re-seeding won't reset it — reset via `PATCH /businesses/:id/password` if needed. Seed business logins: `0599000002`/`0599000004` = `test1234` (unless changed since).
 
 ## 🗂️ How to use this file (for AI agents)
 

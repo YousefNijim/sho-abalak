@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { businessesApi, areasApi } from '@shu/api-client';
-import type { Business, Area, Product } from '@shu/api-client';
+import { businessesApi, areasApi, tagsApi } from '@shu/api-client';
+import type { Business, Area, Product, Tag, BusinessType } from '@shu/api-client';
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,16 +12,14 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table';
 
-const CATEGORY_LABEL: Record<string, string> = {
-  RESTAURANT: 'مطاعم',
-  STORE: 'محلات',
-  CAFE: 'كافيه',
+const TYPE_LABEL: Record<string, string> = {
+  FOOD: 'مأكولات',
+  STORE: 'متاجر',
 };
 
-const CATEGORY_STYLE: Record<string, string> = {
-  restaurant: 'bg-primary/10 text-primary border-primary/20',
-  store: 'bg-tertiary/10 text-tertiary border-tertiary/20',
-  cafe: 'bg-secondary-container/40 text-secondary border-secondary-container',
+const TYPE_STYLE: Record<string, string> = {
+  FOOD: 'bg-primary/10 text-primary border-primary/20',
+  STORE: 'bg-secondary-container/40 text-secondary border-secondary-container',
 };
 
 const columnHelper = createColumnHelper<Business>();
@@ -31,7 +29,7 @@ export default function BusinessesPage() {
 
   // Search & Filter state
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [typeFilter, setTypeFilter] = useState('ALL');
   const [areaFilter, setAreaFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
@@ -62,9 +60,23 @@ export default function BusinessesPage() {
 
   // Create-store modal
   const [showCreate, setShowCreate] = useState(false);
-  const emptyCreate = { name: '', category: 'RESTAURANT', ownerName: '', phone: '', areaId: '', password: '', addressDetail: '' };
+  const emptyCreate = {
+    name: '',
+    type: 'FOOD' as BusinessType,
+    tagIds: [] as string[],
+    ownerName: '',
+    phone: '',
+    areaId: '',
+    password: '',
+    addressDetail: '',
+  };
   const [createForm, setCreateForm] = useState(emptyCreate);
   const [createError, setCreateError] = useState('');
+
+  // Edit type/tags modal (admin)
+  const [editTarget, setEditTarget] = useState<Business | null>(null);
+  const [editType, setEditType] = useState<BusinessType>('FOOD');
+  const [editTagIds, setEditTagIds] = useState<string[]>([]);
 
   // Queries
   const { data: businesses = [], isLoading: isBusinessesLoading } = useQuery({
@@ -75,6 +87,19 @@ export default function BusinessesPage() {
   const { data: areas = [] } = useQuery({
     queryKey: ['areas'],
     queryFn: () => areasApi.list(),
+  });
+
+  // Tags for the create modal (depends on the chosen type).
+  const { data: createTags = [] } = useQuery({
+    queryKey: ['tags', createForm.type],
+    queryFn: () => tagsApi.list(createForm.type),
+  });
+
+  // Tags for the edit modal.
+  const { data: editAvailableTags = [] } = useQuery({
+    queryKey: ['tags', editType],
+    queryFn: () => tagsApi.list(editType),
+    enabled: !!editTarget,
   });
 
   const { data: selectedBusiness, isLoading: isDetailLoading } = useQuery({
@@ -153,7 +178,8 @@ export default function BusinessesPage() {
     mutationFn: () =>
       businessesApi.adminCreate({
         name: createForm.name.trim(),
-        category: createForm.category,
+        type: createForm.type,
+        tagIds: createForm.tagIds,
         ownerName: createForm.ownerName.trim(),
         phone: createForm.phone.trim(),
         areaId: createForm.areaId,
@@ -172,6 +198,30 @@ export default function BusinessesPage() {
       setCreateError(Array.isArray(msg) ? msg.join(' ، ') : String(msg));
     },
   });
+
+  const editMutation = useMutation({
+    mutationFn: () => businessesApi.adminUpdate(editTarget!.id, { type: editType, tagIds: editTagIds }),
+    onSuccess: () => {
+      refetchBusinesses();
+      if (selectedBusinessId) qc.invalidateQueries({ queryKey: ['business', selectedBusinessId] });
+      showToast('success', 'تم تحديث النوع والتصنيفات بنجاح');
+      setEditTarget(null);
+    },
+    onError: (err: any) => showToast('error', err.response?.data?.message || 'فشل تحديث المتجر'),
+  });
+
+  const openEdit = (b: Business) => {
+    setEditTarget(b);
+    setEditType(b.type);
+    setEditTagIds((b.tags ?? []).map((t) => t.id));
+  };
+  const toggleCreateTag = (id: string) =>
+    setCreateForm((f) => ({
+      ...f,
+      tagIds: f.tagIds.includes(id) ? f.tagIds.filter((t) => t !== id) : [...f.tagIds, id],
+    }));
+  const toggleEditTag = (id: string) =>
+    setEditTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
 
   const submitPassword = () => {
     if (!pwModal) return;
@@ -196,8 +246,8 @@ export default function BusinessesPage() {
   // Client side filtering
   const filteredBusinesses = useMemo(() => {
     return businesses.filter((b) => {
-      // 1. Category Filter
-      if (categoryFilter !== 'ALL' && b.category !== categoryFilter) return false;
+      // 1. Type Filter
+      if (typeFilter !== 'ALL' && b.type !== typeFilter) return false;
 
       // 2. Area Filter
       if (areaFilter !== 'ALL' && b.areaId !== areaFilter) return false;
@@ -220,7 +270,7 @@ export default function BusinessesPage() {
 
       return true;
     });
-  }, [businesses, search, categoryFilter, areaFilter, statusFilter]);
+  }, [businesses, search, typeFilter, areaFilter, statusFilter]);
 
   // TanStack columns
   const columns = useMemo(
@@ -239,13 +289,21 @@ export default function BusinessesPage() {
           </div>
         ),
       }),
-      columnHelper.accessor('category', {
-        header: 'التصنيف',
-        cell: (info) => (
-          <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold border ${CATEGORY_STYLE[info.getValue().toLowerCase()] ?? ''}`}>
-            {CATEGORY_LABEL[info.getValue()] ?? info.getValue()}
-          </span>
-        ),
+      columnHelper.accessor('type', {
+        header: 'النوع والتصنيفات',
+        cell: (info) => {
+          const b = info.row.original;
+          return (
+            <div className="flex flex-col gap-1 items-end">
+              <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold border ${TYPE_STYLE[info.getValue()] ?? ''}`}>
+                {TYPE_LABEL[info.getValue()] ?? info.getValue()}
+              </span>
+              {b.tags && b.tags.length > 0 && (
+                <span className="text-[11px] text-muted-gray">{b.tags.map((t) => t.name).join('، ')}</span>
+              )}
+            </div>
+          );
+        },
       }),
       columnHelper.accessor('area.city', {
         header: 'المدينة والمنطقة',
@@ -324,13 +382,22 @@ export default function BusinessesPage() {
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={(e) => { e.stopPropagation(); setPwModal({ business: b, mode: 'reset' }); setPwValue(''); }}
-                  title="إعادة تعيين كلمة المرور"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-secondary hover:bg-secondary/10 transition-colors border border-secondary/20"
-                >
-                  <span className="material-symbols-outlined text-[18px]">key</span>
-                </button>
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openEdit(b); }}
+                    title="تعديل النوع والتصنيفات"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors border border-primary/20"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setPwModal({ business: b, mode: 'reset' }); setPwValue(''); }}
+                    title="إعادة تعيين كلمة المرور"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-secondary hover:bg-secondary/10 transition-colors border border-secondary/20"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">key</span>
+                  </button>
+                </>
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); setSelectedBusinessId(b.id); }}
@@ -474,11 +541,14 @@ export default function BusinessesPage() {
                 <input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
               </div>
               <div className="space-y-1">
-                <label className="block text-[12px] font-medium text-muted-gray">التصنيف</label>
-                <select value={createForm.category} onChange={(e) => setCreateForm({ ...createForm, category: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary cursor-pointer">
-                  <option value="RESTAURANT">مطاعم</option>
-                  <option value="STORE">محلات</option>
-                  <option value="CAFE">كافيه</option>
+                <label className="block text-[12px] font-medium text-muted-gray">النوع</label>
+                <select
+                  value={createForm.type}
+                  onChange={(e) => setCreateForm({ ...createForm, type: e.target.value as BusinessType, tagIds: [] })}
+                  className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary cursor-pointer"
+                >
+                  <option value="FOOD">مأكولات (مطاعم/كافيهات)</option>
+                  <option value="STORE">متاجر (سوبرماركت)</option>
                 </select>
               </div>
               <div className="space-y-1">
@@ -504,12 +574,82 @@ export default function BusinessesPage() {
                 <label className="block text-[12px] font-medium text-muted-gray">العنوان بالتفصيل (اختياري)</label>
                 <input value={createForm.addressDetail} onChange={(e) => setCreateForm({ ...createForm, addressDetail: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
               </div>
+              <div className="space-y-2 sm:col-span-2">
+                <label className="block text-[12px] font-medium text-muted-gray">التصنيفات (اختر واحداً أو أكثر)</label>
+                <div className="flex flex-wrap gap-2">
+                  {createTags.length === 0 ? (
+                    <span className="text-[13px] text-muted-gray">لا توجد تصنيفات</span>
+                  ) : (
+                    createTags.map((tag: Tag) => {
+                      const active = createForm.tagIds.includes(tag.id);
+                      return (
+                        <button
+                          type="button"
+                          key={tag.id}
+                          onClick={() => toggleCreateTag(tag.id)}
+                          className={`rounded-full px-3 py-1.5 text-[12px] font-bold border transition ${active ? 'bg-primary text-white border-primary' : 'bg-background/30 text-on-surface border-border-beige hover:border-primary'}`}
+                        >
+                          {tag.name}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
             {createError && <p className="text-error text-[13px] font-semibold mt-3 text-center">{createError}</p>}
             <div className="flex gap-3 justify-end mt-6">
               <button onClick={() => setShowCreate(false)} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
               <button onClick={submitCreate} disabled={createMutation.isPending} className="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50">
                 إنشاء وتفعيل
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit type/tags modal */}
+      {editTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface-white p-6 shadow-xl border border-border border-t-[6px] border-t-primary" dir="rtl">
+            <h3 className="text-lg font-bold text-on-surface mb-1">تعديل النوع والتصنيفات</h3>
+            <p className="text-[13px] text-muted-gray mb-4">{editTarget.name}</p>
+
+            <label className="block text-[12px] font-medium text-muted-gray mb-2">النوع</label>
+            <select
+              value={editType}
+              onChange={(e) => { setEditType(e.target.value as BusinessType); setEditTagIds([]); }}
+              className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary cursor-pointer mb-4"
+            >
+              <option value="FOOD">مأكولات (مطاعم/كافيهات)</option>
+              <option value="STORE">متاجر (سوبرماركت)</option>
+            </select>
+
+            <label className="block text-[12px] font-medium text-muted-gray mb-2">التصنيفات</label>
+            <div className="flex flex-wrap gap-2">
+              {editAvailableTags.length === 0 ? (
+                <span className="text-[13px] text-muted-gray">لا توجد تصنيفات</span>
+              ) : (
+                editAvailableTags.map((tag: Tag) => {
+                  const active = editTagIds.includes(tag.id);
+                  return (
+                    <button
+                      type="button"
+                      key={tag.id}
+                      onClick={() => toggleEditTag(tag.id)}
+                      className={`rounded-full px-3 py-1.5 text-[12px] font-bold border transition ${active ? 'bg-primary text-white border-primary' : 'bg-background/30 text-on-surface border-border-beige hover:border-primary'}`}
+                    >
+                      {tag.name}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => setEditTarget(null)} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
+              <button onClick={() => editMutation.mutate()} disabled={editMutation.isPending} className="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50">
+                حفظ التغييرات
               </button>
             </div>
           </div>
@@ -550,16 +690,15 @@ export default function BusinessesPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="mr-1 block text-[12px] font-medium text-muted-gray">التصنيف</label>
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray">النوع</label>
             <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
               className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer"
             >
-              <option value="ALL">كل التصنيفات</option>
-              <option value="RESTAURANT">مطاعم</option>
-              <option value="STORE">محلات</option>
-              <option value="CAFE">كافيه</option>
+              <option value="ALL">كل الأنواع</option>
+              <option value="FOOD">مأكولات</option>
+              <option value="STORE">متاجر</option>
             </select>
           </div>
 
@@ -784,8 +923,16 @@ export default function BusinessesPage() {
                       <p className="font-bold text-on-surface">{selectedBusiness.name}</p>
                     </div>
                     <div>
-                      <span className="text-muted-gray">التصنيف الرئيسي:</span>
-                      <p className="font-bold text-on-surface">{CATEGORY_LABEL[selectedBusiness.category] || selectedBusiness.category}</p>
+                      <span className="text-muted-gray">النوع:</span>
+                      <p className="font-bold text-on-surface">{TYPE_LABEL[selectedBusiness.type] || selectedBusiness.type}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-muted-gray">التصنيفات:</span>
+                      <p className="font-bold text-on-surface">
+                        {selectedBusiness.tags && selectedBusiness.tags.length > 0
+                          ? selectedBusiness.tags.map((t) => t.name).join('، ')
+                          : '—'}
+                      </p>
                     </div>
                     <div>
                       <span className="text-muted-gray">المنطقة الجغرافية:</span>

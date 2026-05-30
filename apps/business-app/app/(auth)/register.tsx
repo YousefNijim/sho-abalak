@@ -22,40 +22,44 @@ import {
   ChevronDown,
   Check,
   CheckCircle2,
-  Tag,
 } from 'lucide-react-native';
-import { areasApi, authApi } from '@shu/api-client';
+import { areasApi, authApi, tagsApi } from '@shu/api-client';
+import type { BusinessType, Tag } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../../src/theme';
 
-const CATEGORIES = [
-  { value: 'RESTAURANT', label: 'مطاعم شرقية' },
-  { value: 'STORE', label: 'سوبر ماركت' },
-  { value: 'CAFE', label: 'حلويات ومخابز' },
-] as const;
+const TYPES: { value: BusinessType; label: string }[] = [
+  { value: 'FOOD', label: 'مطعم / مأكولات' },
+  { value: 'STORE', label: 'متجر / سوبرماركت' },
+];
 
 export default function RegisterStore() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<string>('RESTAURANT');
+  const [type, setType] = useState<BusinessType>('FOOD');
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState('');
   const [areaId, setAreaId] = useState<string | null>(null);
   const [addressDetail, setAddressDetail] = useState('');
 
-  const [showCategory, setShowCategory] = useState(false);
   const [showArea, setShowArea] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const { data: areas = [] } = useQuery({ queryKey: ['areas'], queryFn: () => areasApi.list() });
+  const { data: tags = [] } = useQuery({
+    queryKey: ['tags', type],
+    queryFn: () => tagsApi.list(type),
+  });
 
   const register = useMutation({
     mutationFn: () =>
       authApi.registerBusiness({
         name: name.trim(),
-        category,
+        type,
+        tagIds,
         ownerName: ownerName.trim(),
         phone: phone.trim(),
         areaId: areaId!,
@@ -68,6 +72,14 @@ export default function RegisterStore() {
     },
   });
 
+  const toggleTag = (id: string) =>
+    setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+
+  const selectType = (t: BusinessType) => {
+    setType(t);
+    setTagIds([]); // tags are type-specific — reset when switching
+  };
+
   const handleSubmit = () => {
     setError('');
     if (!name.trim() || !ownerName.trim() || !phone.trim() || !areaId) {
@@ -77,7 +89,6 @@ export default function RegisterStore() {
     register.mutate();
   };
 
-  const categoryLabel = CATEGORIES.find((c) => c.value === category)?.label ?? '';
   const selectedArea = areas.find((a) => a.id === areaId);
   const areaLabel = selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة';
 
@@ -137,34 +148,45 @@ export default function RegisterStore() {
           </View>
         </Field>
 
-        {/* Category */}
-        <Field label="تصنيف المتجر">
-          <Pressable style={styles.inputRow} onPress={() => setShowCategory((v) => !v)}>
-            <ChevronDown size={18} color={colors.textMuted} />
-            <Text style={styles.inputValue}>{categoryLabel}</Text>
-            <Tag size={18} color={colors.textMuted} />
-          </Pressable>
-          {showCategory && (
-            <View style={styles.picker}>
-              {CATEGORIES.map((c) => (
+        {/* Type (FOOD / STORE) */}
+        <Field label="نوع المتجر">
+          <View style={styles.segment}>
+            {TYPES.map((t) => {
+              const active = type === t.value;
+              return (
                 <Pressable
-                  key={c.value}
-                  style={[styles.pickerItem, category === c.value && styles.pickerItemActive]}
-                  onPress={() => {
-                    setCategory(c.value);
-                    setShowCategory(false);
-                  }}
+                  key={t.value}
+                  style={[styles.segmentItem, active && styles.segmentItemActive]}
+                  onPress={() => selectType(t.value)}
                 >
-                  {category === c.value && <Check size={16} color={colors.primary} />}
-                  <Text
-                    style={[styles.pickerText, category === c.value && { color: colors.primary }]}
-                  >
-                    {c.label}
-                  </Text>
+                  <Text style={[styles.segmentText, active && styles.segmentTextActive]}>{t.label}</Text>
                 </Pressable>
-              ))}
-            </View>
-          )}
+              );
+            })}
+          </View>
+        </Field>
+
+        {/* Tags (multi-select, type-specific) */}
+        <Field label="التصنيفات (اختر واحداً أو أكثر)">
+          <View style={styles.tagsWrap}>
+            {tags.length === 0 ? (
+              <Text style={styles.tagsEmpty}>لا توجد تصنيفات متاحة</Text>
+            ) : (
+              tags.map((tag: Tag) => {
+                const active = tagIds.includes(tag.id);
+                return (
+                  <Pressable
+                    key={tag.id}
+                    style={[styles.tagChip, active && styles.tagChipActive]}
+                    onPress={() => toggleTag(tag.id)}
+                  >
+                    {active && <Check size={14} color="#fff" />}
+                    <Text style={[styles.tagChipText, active && styles.tagChipTextActive]}>{tag.name}</Text>
+                  </Pressable>
+                );
+              })
+            )}
+          </View>
         </Field>
 
         {/* Owner name */}
@@ -379,6 +401,39 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'right',
   },
+  segment: {
+    flexDirection: 'row-reverse',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  segmentItem: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentItemActive: { backgroundColor: colors.primary },
+  segmentText: { fontSize: fontSizes.base, fontFamily: fontFamily.semibold, color: colors.textMuted },
+  segmentTextActive: { color: '#fff' },
+  tagsWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[2] },
+  tagsEmpty: { fontSize: fontSizes.sm, fontFamily: fontFamily.regular, color: colors.textMuted },
+  tagChip: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[1],
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  tagChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  tagChipText: { fontSize: fontSizes.sm, fontFamily: fontFamily.semibold, color: colors.textPrimary },
+  tagChipTextActive: { color: '#fff' },
   errorText: {
     color: colors.error,
     fontSize: fontSizes.sm,
