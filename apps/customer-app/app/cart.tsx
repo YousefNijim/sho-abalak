@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronLeft } from 'lucide-react-native';
+import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronDown, Home as HomeIcon, Check } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
-import { businessesApi, ordersApi, areasApi } from '@shu/api-client';
-import { useAuthStore } from '../src/stores/auth.store';
+import { businessesApi, ordersApi } from '@shu/api-client';
+import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
 import type { CreateOrderDto } from '@shu/api-client';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,18 +27,14 @@ export default function Cart() {
   const subtotal = useCartStore((s) => s.total());
   const setActiveOrder = useActiveOrderStore((s) => s.set);
 
-  const user = useAuthStore((s) => s.user);
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
   const [notes, setNotes] = useState('');
-  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
-  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(user?.areaId ?? null);
+  const [addressPickerVisible, setAddressPickerVisible] = useState(false);
 
-  const { data: areas = [] } = useQuery({
-    queryKey: ['areas'],
-    queryFn: () => areasApi.list(),
-  });
-
-  const selectedArea = areas.find((a: any) => a.id === selectedAreaId);
+  const addresses = useSavedAddressesStore((s) => s.addresses);
+  const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  const selectAddress = useSavedAddressesStore((s) => s.select);
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
   // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -118,34 +114,62 @@ export default function Cart() {
         </Pressable>
       </View>
 
-      {/* Fix 4: Address selector */}
-      <Pressable style={styles.addressStrip} onPress={() => setAreaPickerVisible(true)}>
-        <ChevronLeft size={18} color={colors.primary} />
-        <Text style={styles.addressStripText} numberOfLines={1}>
-          {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر منطقة التوصيل'}
-        </Text>
-        <MapPin size={18} color={colors.primary} />
+      {/* Address bar */}
+      <Pressable style={styles.addressBar} onPress={() => setAddressPickerVisible(true)}>
+        <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
+        <View style={styles.addressBarText}>
+          <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
+          <Text style={styles.addressBarName} numberOfLines={1}>
+            {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
+          </Text>
+        </View>
+        <View style={styles.addressBarIconWrap}>
+          <MapPin size={18} color={colors.primary} />
+        </View>
       </Pressable>
 
-      <Modal visible={areaPickerVisible} transparent animationType="slide" onRequestClose={() => setAreaPickerVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setAreaPickerVisible(false)} />
+      <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
         <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
           <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>اختر منطقة التوصيل</Text>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {areas.map((a: any) => (
-              <Pressable
-                key={a.id}
-                style={[styles.areaRow, selectedAreaId === a.id && styles.areaRowActive]}
-                onPress={() => { setSelectedAreaId(a.id); setAreaPickerVisible(false); }}
-              >
-                <MapPin size={16} color={selectedAreaId === a.id ? colors.primary : colors.textMuted} />
-                <Text style={[styles.areaText, selectedAreaId === a.id && styles.areaTextActive]}>
-                  {a.city} — {a.name}
-                </Text>
-              </Pressable>
-            ))}
+          <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
+            {addresses.length === 0 ? (
+              <View style={styles.emptyAddresses}>
+                <MapPin size={40} color={colors.border} />
+                <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
+                <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
+              </View>
+            ) : (
+              addresses.map((a) => {
+                const isActive = (selectedAddress?.id ?? null) === a.id ||
+                  (selectedAddressId === null && addresses[0]?.id === a.id);
+                return (
+                  <Pressable
+                    key={a.id}
+                    style={[styles.addrRow, isActive && styles.addrRowActive]}
+                    onPress={() => { selectAddress(a.id); setAddressPickerVisible(false); }}
+                  >
+                    <View style={[styles.addrIconCircle, isActive && styles.addrIconCircleActive]}>
+                      <HomeIcon size={18} color={isActive ? colors.primary : colors.textMuted} />
+                    </View>
+                    <View style={styles.addrRowText}>
+                      <Text style={[styles.addrLabel, isActive && styles.addrLabelActive]}>{a.label}</Text>
+                      <Text style={styles.addrDetail} numberOfLines={1}>{a.detail}</Text>
+                    </View>
+                    {isActive && <Check size={18} color={colors.primary} />}
+                  </Pressable>
+                );
+              })
+            )}
           </ScrollView>
+          <Pressable
+            style={styles.addAddressBtn}
+            onPress={() => { setAddressPickerVisible(false); router.push('/profile/addresses'); }}
+          >
+            <Plus size={18} color="#FFFFFF" />
+            <Text style={styles.addAddressBtnText}>إضافة عنوان جديد</Text>
+          </Pressable>
         </View>
       </Modal>
 
@@ -564,20 +588,37 @@ const styles = StyleSheet.create({
   emptyBtn: {
     paddingHorizontal: spacing[8],
   },
-  addressStrip: {
+  addressBar: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    gap: spacing[2],
+    paddingVertical: spacing[3],
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    gap: spacing[3],
   },
-  addressStripText: {
+  addressBarIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressBarText: {
     flex: 1,
-    fontFamily: fontFamily.medium,
-    fontSize: fontSizes.sm,
+    alignItems: 'flex-end',
+  },
+  addressBarLabel: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: colors.textMuted,
+    textAlign: 'right',
+  },
+  addressBarName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
     color: colors.textPrimary,
     textAlign: 'right',
   },
@@ -587,46 +628,105 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: spacing[4],
-    maxHeight: '60%',
+    maxHeight: '70%',
   },
   modalHandle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.border,
+    backgroundColor: colors.primary + '40',
     alignSelf: 'center',
     marginBottom: spacing[4],
   },
   modalTitle: {
     fontFamily: fontFamily.bold,
-    fontSize: fontSizes.lg,
+    fontSize: fontSizes.xl,
     color: colors.textPrimary,
     textAlign: 'right',
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
-  areaRow: {
+  modalScroll: {
+    flexGrow: 0,
+  },
+  addrRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: spacing[3],
     paddingVertical: spacing[3],
-    paddingHorizontal: spacing[2],
+    paddingHorizontal: spacing[3],
     borderRadius: radius.md,
+    marginBottom: spacing[2],
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
-  areaRowActive: {
-    backgroundColor: colors.primary + '15',
+  addrRowActive: {
+    backgroundColor: colors.primary + '0D',
+    borderColor: colors.primary + '40',
   },
-  areaText: {
+  addrIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.border + '80',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addrIconCircleActive: {
+    backgroundColor: colors.primary + '20',
+  },
+  addrRowText: {
     flex: 1,
-    fontFamily: fontFamily.regular,
+    alignItems: 'flex-end',
+  },
+  addrLabel: {
+    fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
     textAlign: 'right',
   },
-  areaTextActive: {
-    fontFamily: fontFamily.bold,
+  addrLabelActive: {
     color: colors.primary,
+  },
+  addrDetail: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  emptyAddresses: {
+    alignItems: 'center',
+    paddingVertical: spacing[8],
+    gap: spacing[3],
+  },
+  emptyAddressesText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  emptyAddressesHint: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  addAddressBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing[3],
+    marginTop: spacing[3],
+  },
+  addAddressBtnText: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: '#FFFFFF',
   },
 });

@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 16 (UX/Logic fixes batch — branch feat/ux-fixes)
+**Current phase:** Phase 17 (Address selector redesign — branch feat/ux-fixes)
 
 ---
 
@@ -168,6 +168,13 @@
 12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
 13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
 14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
+16. ~~**Address Selector Redesign (Phase 17 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Customer app address selector now shows saved addresses instead of delivery zones:
+    - **New store:** `src/stores/saved-addresses.store.ts` — Zustand persist (AsyncStorage), `SavedAddress { id, label, detail, areaId }`, `add/remove/select` actions.
+    - **Home address bar:** Compact two-line row (muted "التوصيل إلى" label + bold address name + MapPin icon in orange circle + ChevronDown). Taps open the bottom sheet.
+    - **Home + Cart bottom sheet:** Title "اختر عنوان التوصيل". Address rows: soft-circle icon (HomeIcon) + bold label + muted detail line + Check on active. Active row: light orange tint + orange border. Empty state (no saved addresses): MapPin + Arabic message + hint. Footer button "إضافة عنوان جديد" (+ icon, orange) routes to `/profile/addresses`.
+    - **Both screens** source from `useSavedAddressesStore` — removed all `areasApi` imports from Home and Cart.
+    - **Businesses query** still passes `selectedAddress?.areaId` for delivery-fee filtering.
+    - **Gotchas:** `colors.white` and `CartItem.imageUrl` errors in cart.tsx/index.tsx are pre-existing (not introduced by this task).
 15. ~~**UX/Logic Fixes Batch (Phase 16 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — 9 fixes across all 3 mobile apps:
     - **Fix 5 (API+Business+Driver):** Driver assignment now waits for acceptance. New endpoints `POST /orders/:id/send-driver-request` (emits socket, stores `pendingDriverId`, order stays READY) and `POST /orders/:id/accept-driver` (driver does READY→PICKED_UP). Business driver-selection shows pending spinner; rejects return to picker with alert. Schema migration `20260530000001_order_pending_driver` adds `pendingDriverId` to orders.
     - **Fix 6 (Driver):** `request-alert` screen always dismisses after accept or reject — `settled` ref prevents double-action.

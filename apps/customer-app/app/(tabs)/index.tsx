@@ -28,14 +28,19 @@ import {
   Bike,
   ImageIcon,
   ChevronLeft,
+  ChevronDown,
   Package,
+  Home as HomeIcon,
+  Check,
+  Plus,
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, areasApi } from '@shu/api-client';
+import { businessesApi } from '@shu/api-client';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
+import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 
 const CATEGORIES = [
   { id: 'RESTAURANT', label: 'مطاعم', icon: '🍕' },
@@ -64,27 +69,24 @@ export default function Home() {
   const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const activeOrder = useActiveOrderStore((s) => s.order);
 
+  const addresses = useSavedAddressesStore((s) => s.addresses);
+  const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  const selectAddress = useSavedAddressesStore((s) => s.select);
+
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
+
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
-  // Selected area for delivery — defaults to user's registered area
-  const [selectedAreaId, setSelectedAreaId] = useState<string | null>(user?.areaId ?? null);
-
-  const { data: areas = [] } = useQuery({
-    queryKey: ['areas'],
-    queryFn: () => areasApi.list(),
-  });
-
-  const selectedArea = areas.find((a: any) => a.id === selectedAreaId);
+  const [addressPickerVisible, setAddressPickerVisible] = useState(false);
 
   const { data: businesses = [], isLoading } = useQuery({
-    queryKey: ['businesses', selectedCat, search, selectedAreaId],
+    queryKey: ['businesses', selectedCat, search, selectedAddress?.areaId],
     queryFn: () =>
       businessesApi.list({
         category: selectedCat || undefined,
         search: search || undefined,
-        areaId: selectedAreaId || undefined,
+        areaId: selectedAddress?.areaId || undefined,
       }),
   });
 
@@ -115,35 +117,62 @@ export default function Home() {
         <Text style={styles.headerTitle}>شو عبالك؟</Text>
       </View>
 
-      {/* Fix 4: Address selector strip */}
-      <Pressable style={styles.addressStrip} onPress={() => setAreaPickerVisible(true)}>
-        <ChevronLeft size={18} color={colors.primary} />
-        <Text style={styles.addressText} numberOfLines={1}>
-          {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر منطقة التوصيل'}
-        </Text>
-        <MapPin size={18} color={colors.primary} />
+      {/* Address bar */}
+      <Pressable style={styles.addressBar} onPress={() => setAddressPickerVisible(true)}>
+        <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
+        <View style={styles.addressBarText}>
+          <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
+          <Text style={styles.addressBarName} numberOfLines={1}>
+            {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
+          </Text>
+        </View>
+        <View style={styles.addressBarIconWrap}>
+          <MapPin size={18} color={colors.primary} />
+        </View>
       </Pressable>
 
-      {/* Fix 4: Area picker modal */}
-      <Modal visible={areaPickerVisible} transparent animationType="slide" onRequestClose={() => setAreaPickerVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setAreaPickerVisible(false)} />
+      {/* Address picker modal */}
+      <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
         <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
           <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>اختر منطقة التوصيل</Text>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {areas.map((a: any) => (
-              <Pressable
-                key={a.id}
-                style={[styles.areaRow, selectedAreaId === a.id && styles.areaRowActive]}
-                onPress={() => { setSelectedAreaId(a.id); setAreaPickerVisible(false); }}
-              >
-                <MapPin size={16} color={selectedAreaId === a.id ? colors.primary : colors.textMuted} />
-                <Text style={[styles.areaText, selectedAreaId === a.id && styles.areaTextActive]}>
-                  {a.city} — {a.name}
-                </Text>
-              </Pressable>
-            ))}
+          <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
+            {addresses.length === 0 ? (
+              <View style={styles.emptyAddresses}>
+                <MapPin size={40} color={colors.border} />
+                <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
+                <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
+              </View>
+            ) : (
+              addresses.map((a) => {
+                const isActive = (selectedAddress?.id ?? null) === a.id || (selectedAddressId === null && addresses[0]?.id === a.id);
+                return (
+                  <Pressable
+                    key={a.id}
+                    style={[styles.addrRow, isActive && styles.addrRowActive]}
+                    onPress={() => { selectAddress(a.id); setAddressPickerVisible(false); }}
+                  >
+                    <View style={[styles.addrIconCircle, isActive && styles.addrIconCircleActive]}>
+                      <HomeIcon size={18} color={isActive ? colors.primary : colors.textMuted} />
+                    </View>
+                    <View style={styles.addrRowText}>
+                      <Text style={[styles.addrLabel, isActive && styles.addrLabelActive]}>{a.label}</Text>
+                      <Text style={styles.addrDetail} numberOfLines={1}>{a.detail}</Text>
+                    </View>
+                    {isActive && <Check size={18} color={colors.primary} />}
+                  </Pressable>
+                );
+              })
+            )}
           </ScrollView>
+          <Pressable
+            style={styles.addAddressBtn}
+            onPress={() => { setAddressPickerVisible(false); router.push('/profile/addresses'); }}
+          >
+            <Plus size={18} color={colors.white} />
+            <Text style={styles.addAddressBtnText}>إضافة عنوان جديد</Text>
+          </Pressable>
         </View>
       </Modal>
 
@@ -636,72 +665,148 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: fontFamily.bold,
   },
-  // Fix 4 — address strip
-  addressStrip: {
+  // Address bar
+  addressBar: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
-    gap: spacing[2],
+    paddingVertical: spacing[3],
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    gap: spacing[3],
   },
-  addressText: {
+  addressBarIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressBarText: {
     flex: 1,
-    fontFamily: fontFamily.medium,
-    fontSize: fontSizes.sm,
+    alignItems: 'flex-end',
+  },
+  addressBarLabel: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: colors.textMuted,
+    textAlign: 'right',
+  },
+  addressBarName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
     color: colors.textPrimary,
     textAlign: 'right',
   },
-  // Fix 4 — area picker modal
+  // Address picker modal
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   modalSheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: spacing[4],
-    maxHeight: '60%',
+    maxHeight: '70%',
   },
   modalHandle: {
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.border,
+    backgroundColor: colors.primary + '40',
     alignSelf: 'center',
     marginBottom: spacing[4],
   },
   modalTitle: {
     fontFamily: fontFamily.bold,
-    fontSize: fontSizes.lg,
+    fontSize: fontSizes.xl,
     color: colors.textPrimary,
     textAlign: 'right',
-    marginBottom: spacing[3],
+    marginBottom: spacing[4],
   },
-  areaRow: {
+  modalScroll: {
+    flexGrow: 0,
+  },
+  addrRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: spacing[3],
     paddingVertical: spacing[3],
-    paddingHorizontal: spacing[2],
+    paddingHorizontal: spacing[3],
     borderRadius: radius.md,
+    marginBottom: spacing[2],
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
-  areaRowActive: {
-    backgroundColor: colors.primary + '15',
+  addrRowActive: {
+    backgroundColor: colors.primary + '0D',
+    borderColor: colors.primary + '40',
   },
-  areaText: {
+  addrIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.border + '80',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addrIconCircleActive: {
+    backgroundColor: colors.primary + '20',
+  },
+  addrRowText: {
     flex: 1,
-    fontFamily: fontFamily.regular,
+    alignItems: 'flex-end',
+  },
+  addrLabel: {
+    fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
     textAlign: 'right',
   },
-  areaTextActive: {
-    fontFamily: fontFamily.bold,
+  addrLabelActive: {
     color: colors.primary,
+  },
+  addrDetail: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  emptyAddresses: {
+    alignItems: 'center',
+    paddingVertical: spacing[8],
+    gap: spacing[3],
+  },
+  emptyAddressesText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  emptyAddressesHint: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  addAddressBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing[3],
+    marginTop: spacing[3],
+  },
+  addAddressBtnText: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: '#FFFFFF',
   },
   // Fix 1 — active order banner
   activeOrderBanner: {
