@@ -1,10 +1,9 @@
 import { useRef } from 'react';
-import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Phone, Bike, MapPin } from 'lucide-react-native';
-import { Button } from '@shu/ui-components/native';
+import { User, Phone, Bike, MapPin, LogOut } from 'lucide-react-native';
 import { driversApi } from '@shu/api-client';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
@@ -42,18 +41,22 @@ export default function DriverProfile() {
   };
 
   const handleLogout = () => {
-    Alert.alert('تسجيل الخروج', 'هل أنت متأكد من تسجيل الخروج؟', [
-      { text: 'إلغاء', style: 'cancel' },
-      {
-        text: 'تسجيل الخروج',
-        style: 'destructive',
-        onPress: () => {
-          logout();
-          queryClient.clear();
-          router.replace('/(auth)/login');
+    Alert.alert(
+      'تسجيل الخروج',
+      'هل أنت متأكد من تسجيل الخروج؟',
+      [
+        { text: 'إلغاء', style: 'cancel' },
+        {
+          text: 'تسجيل الخروج',
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            queryClient.clear();
+            router.replace('/(auth)/login');
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   if (isLoading) {
@@ -70,85 +73,70 @@ export default function DriverProfile() {
   const area = driver?.area ? `${driver.area.city} — ${driver.area.name}` : '—';
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Toggle overlay while status update is in flight */}
-      <Modal visible={toggleAvailable.isPending} transparent animationType="fade">
-        <View style={styles.overlay}>
-          <View style={styles.overlayCard}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.overlayText}>جاري التحديث...</Text>
-          </View>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Orange header — no absolutely-positioned children so nothing overlaps scroll */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <Text style={styles.headerTitle}>الحساب الشخصي</Text>
+        <View style={styles.avatar}>
+          <User size={40} color={colors.primary} />
         </View>
-      </Modal>
+        <Text style={styles.driverName}>{name}</Text>
+      </View>
 
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Orange header banner */}
-        <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-          <Text style={styles.headerTitle}>الحساب الشخصي</Text>
-          <View style={styles.avatarWrap}>
-            <View style={styles.avatar}>
-              <User size={40} color={colors.primary} />
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          {/* Availability toggle */}
-          <View style={styles.card}>
-            <View style={styles.availRow}>
-              <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <View style={styles.availLabelRow}>
-                  <Text style={[styles.availDot, { color: isAvailable ? colors.success : colors.error }]}>●</Text>
-                  <Text style={styles.availLabel}>{isAvailable ? 'متاح للعمل' : 'غير متاح'}</Text>
-                </View>
-                <Text style={styles.muted}>
-                  {isAvailable ? 'يمكنك استقبال الطلبات الآن' : 'لن تستقبل طلبات جديدة'}
-                </Text>
+      <View style={styles.content}>
+        {/* Availability toggle */}
+        <View style={styles.card}>
+          <View style={styles.availRow}>
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <View style={styles.availLabelRow}>
+                <Text style={[styles.availDot, { color: isAvailable ? colors.success : colors.error }]}>●</Text>
+                <Text style={styles.availLabel}>{isAvailable ? 'متاح للعمل' : 'غير متاح'}</Text>
               </View>
-              <Switch
-                value={isAvailable}
-                onValueChange={handleToggle}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor="#fff"
-                disabled={toggleAvailable.isPending}
-              />
+              <Text style={styles.muted}>
+                {isAvailable ? 'يمكنك استقبال الطلبات الآن' : 'لن تستقبل طلبات جديدة'}
+              </Text>
             </View>
-          </View>
-
-          {/* Personal info */}
-          <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
-          <View style={styles.card}>
-            <InfoRow icon={<User size={18} color={colors.primary} />} label="الاسم الكامل" value={name} />
-            <View style={styles.divider} />
-            <InfoRow icon={<Phone size={18} color={colors.primary} />} label="رقم الهاتف" value={phone} />
-          </View>
-
-          {/* Area */}
-          <Text style={styles.sectionTitle}>منطقة العمل</Text>
-          <View style={styles.card}>
-            <InfoRow icon={<MapPin size={18} color={colors.primary} />} label="المنطقة المعيّنة" value={area} />
-          </View>
-
-          {/* Vehicle */}
-          <Text style={styles.sectionTitle}>بيانات المركبة</Text>
-          <View style={styles.card}>
-            <InfoRow icon={<Bike size={18} color={colors.primary} />} label="نوع المركبة" value="دراجة نارية" />
-          </View>
-
-          {/* Logout */}
-          <View style={styles.logoutWrap}>
-            <Button
-              title="تسجيل الخروج"
-              variant="danger"
-              onPress={handleLogout}
+            <Switch
+              value={isAvailable}
+              onValueChange={handleToggle}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#fff"
+              disabled={toggleAvailable.isPending}
             />
           </View>
         </View>
-      </ScrollView>
-    </View>
+
+        {/* Personal info */}
+        <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
+        <View style={styles.card}>
+          <InfoRow icon={<User size={18} color={colors.primary} />} label="الاسم الكامل" value={name} />
+          <View style={styles.divider} />
+          <InfoRow icon={<Phone size={18} color={colors.primary} />} label="رقم الهاتف" value={phone} />
+        </View>
+
+        {/* Area */}
+        <Text style={styles.sectionTitle}>منطقة العمل</Text>
+        <View style={styles.card}>
+          <InfoRow icon={<MapPin size={18} color={colors.primary} />} label="المنطقة المعيّنة" value={area} />
+        </View>
+
+        {/* Vehicle */}
+        <Text style={styles.sectionTitle}>بيانات المركبة</Text>
+        <View style={styles.card}>
+          <InfoRow icon={<Bike size={18} color={colors.primary} />} label="نوع المركبة" value="دراجة نارية" />
+        </View>
+
+        {/* Logout — plain Pressable, no Button wrapper */}
+        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+          <LogOut size={20} color="#EF4444" />
+          <Text style={styles.logoutText}>تسجيل الخروج</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -167,21 +155,15 @@ function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.primary,
-    paddingBottom: 56,
+    paddingBottom: 24,
     paddingHorizontal: spacing[5],
     alignItems: 'center',
+    gap: spacing[3],
   },
   headerTitle: {
     fontFamily: fontFamily.extrabold,
     fontSize: fontSizes.xl,
     color: '#fff',
-    marginBottom: 16,
-  },
-  avatarWrap: {
-    position: 'absolute',
-    bottom: -40,
-    alignSelf: 'center',
-    zIndex: 10,
   },
   avatar: {
     width: 80,
@@ -193,8 +175,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  driverName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.lg,
+    color: '#fff',
+  },
   content: {
-    paddingTop: 56,
+    paddingTop: spacing[4],
     paddingHorizontal: spacing[4],
     gap: spacing[3],
   },
@@ -223,9 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  availDot: {
-    fontSize: 14,
-  },
+  availDot: { fontSize: 14 },
   availLabel: {
     fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
@@ -262,27 +247,21 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.base,
     color: colors.textPrimary,
   },
-  logoutWrap: {
-    marginTop: spacing[4],
-    marginBottom: spacing[2],
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+  logoutBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  overlayCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing[6],
-    alignItems: 'center',
     gap: spacing[3],
-    minWidth: 180,
+    marginTop: spacing[4],
+    padding: spacing[4],
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: radius.lg,
   },
-  overlayText: {
+  logoutText: {
     fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
-    color: colors.textPrimary,
+    color: '#EF4444',
   },
 });
