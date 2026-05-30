@@ -49,4 +49,28 @@ export class BusinessesController {
   update(@Param('id') id: string, @CurrentUser() user: AuthUser, @Body() dto: UpdateBusinessDto) {
     return this.businesses.update(id, user.id, dto);
   }
+
+  @Patch(':id/admin')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminUpdate(@Param('id') id: string, @Body() dto: UpdateBusinessDto) {
+    return this.businesses.adminUpdate(id, dto);
+  }
+
+  @Patch(':id/status')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminUpdateStatus(@Param('id') id: string, @Body('isOpen') isOpen: boolean) {
+    return this.businesses.adminUpdateStatus(id, isOpen);
+  }
+
+  @Patch(':id/commission')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminUpdateCommission(@Param('id') id: string, @Body('commissionRate') commissionRate: number) {
+    return this.businesses.adminUpdateCommission(id, commissionRate);
+  }
 }

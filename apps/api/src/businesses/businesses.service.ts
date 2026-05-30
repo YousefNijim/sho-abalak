@@ -43,6 +43,24 @@ export class BusinessesService {
     return this.prisma.business.update({ where: { id }, data: dto });
   }
 
+  async adminUpdate(id: string, dto: UpdateBusinessDto) {
+    const business = await this.prisma.business.findUnique({ where: { id } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    return this.prisma.business.update({ where: { id }, data: dto });
+  }
+
+  async adminUpdateStatus(id: string, isOpen: boolean) {
+    const business = await this.prisma.business.findUnique({ where: { id } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    return this.prisma.business.update({ where: { id }, data: { isOpen } });
+  }
+
+  async adminUpdateCommission(id: string, commissionRate: number) {
+    const business = await this.prisma.business.findUnique({ where: { id } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    return this.prisma.business.update({ where: { id }, data: { commissionRate } });
+  }
+
   private async assertOwner(id: string, ownerId: string) {
     const business = await this.prisma.business.findUnique({ where: { id } });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');

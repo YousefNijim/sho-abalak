@@ -10,6 +10,7 @@ export interface Business {
   imageUrl: string | null;
   rating: number;
   isOpen: boolean;
+  commissionRate?: number;
   area?: { city: string; name: string; deliveryFee: number };
   products?: Product[];
 }
@@ -46,4 +47,13 @@ export const businessesApi = {
 
   update: (id: string, dto: Partial<Business>) =>
     http.patch<Business>(`/businesses/${id}`, dto).then((r) => r.data),
+
+  adminUpdate: (id: string, dto: Partial<Business>) =>
+    http.patch<Business>(`/businesses/${id}/admin`, dto).then((r) => r.data),
+
+  adminUpdateStatus: (id: string, isOpen: boolean) =>
+    http.patch<Business>(`/businesses/${id}/status`, { isOpen }).then((r) => r.data),
+
+  adminUpdateCommission: (id: string, commissionRate: number) =>
+    http.patch<Business>(`/businesses/${id}/commission`, { commissionRate }).then((r) => r.data),
 };
