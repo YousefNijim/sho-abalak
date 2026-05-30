@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#E6781E",
+                        "secondary": "#165A34",
+                        "background-cream": "#FCF3DC",
+                        "surface-white": "#FFFFFF",
+                        "charcoal": "#1C1C23",
+                        "muted-gray": "#6B7280",
+                        "border-beige": "#E5E0D5",
+                        "warning-amber": "#F59E0B"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "12px",
+                        "2xl": "16px",
+                        "3xl": "20px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gap-xs": "4px",
+                        "gap-sm": "8px",
+                        "gap-md": "12px",
+                        "gap-lg": "20px",
+                        "margin-standard": "16px",
+                        "nav-height": "72px",
+                        "section-md": "24px",
+                        "section-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Cairo", "sans-serif"],
+                        "body": ["Cairo", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-cream font-body text-charcoal selection:bg-primary/30">
+<!-- Header -->
+<header class="bg-background-cream sticky top-0 z-50 px-margin-standard h-16 flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-white border border-border-beige flex items-center justify-center relative shadow-sm">
+<span class="material-symbols-outlined text-charcoal">notifications</span>
+<span class="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full border-2 border-surface-white"></span>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-surface-white overflow-hidden shadow-sm">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiqR61W2ihUH0rTwN34VvJJq9ZSJBrj2Ozc882b_wtsjH9HPbZnvIKgKI_qQ8eGIebHVNrJLwn0Z5MffcYjDhc-ZWFsSVsdcjZprmW3vF8eSbyqjmYVbhfx-iNnUTeBwsV2bOumOaQi72fW9x6vJGe26PZCM51zkDtAJakjt4PG9RNmWUO48FBtPDGXPzuGEBGt_6w-Dz7K7iKDFENHmiAscsOo1aK19VMVQr8rBWJdcQU_PxxSp-SyYjpsAtmpcM-4qpO4Mt5byvA"/>
+</div>
+</div>
+<div class="text-primary font-headline text-2xl font-extrabold tracking-tight">
+            شو عبالك؟
+        </div>
+</header>
+<main class="pb-28 px-margin-standard max-w-2xl mx-auto space-y-section-md">
+<!-- Search Bar -->
+<div class="mt-4">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute right-4 text-muted-gray">search</span>
+<input class="w-full h-14 bg-surface-white border-none rounded-2xl pr-12 pl-12 shadow-sm focus:ring-2 focus:ring-primary font-body text-body-base placeholder:text-muted-gray/70" placeholder="شو عبالك اليوم؟" type="text"/>
+<button class="absolute left-4 material-symbols-outlined text-primary bg-primary/10 p-1.5 rounded-lg">tune</button>
+</div>
+</div>
+<!-- Delivery Address -->
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">location_on</span>
+<div class="flex flex-col">
+<div class="flex items-center gap-xs">
+<span class="text-muted-gray text-xs font-semibold uppercase tracking-wider">التوصيل إلى</span>
+<span class="material-symbols-outlined text-xs text-muted-gray">expand_more</span>
+</div>
+<span class="text-sm font-bold">شارع رفيديا، نابلس</span>
+</div>
+</div>
+<!-- Promo Banner -->
+<section>
+<div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-primary to-[#ff9b4d] p-6 shadow-lg aspect-[16/7] flex flex-col justify-center">
+<div class="z-10 text-white">
+<h2 class="font-headline text-2xl font-bold leading-tight">خصم ٢٠٪ على<br/>طلبك الأول</h2>
+<button class="mt-4 bg-surface-white text-primary px-6 py-2 rounded-full font-bold text-sm shadow-md active:scale-95 transition-transform">اطلب الآن</button>
+</div>
+<!-- Decorative Icon -->
+<div class="absolute -left-4 -bottom-4 opacity-20 transform -rotate-12">
+<span class="material-symbols-outlined text-[140px] text-white">restaurant</span>
+</div>
+</div>
+</section>
+<!-- Categories -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline text-lg font-bold">الأقسام</h3>
+<button class="text-primary text-sm font-bold">عرض الكل</button>
+</div>
+<div class="flex gap-md overflow-x-auto hide-scrollbar pb-2">
+<!-- Category Item 1: Shawarma -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">wrap_text</span>
+</div>
+<span class="text-xs font-bold text-charcoal">شاورما</span>
+</div>
+<!-- Category Item 2: Oriental/Kebabs -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-3xl">skillet</span>
+</div>
+<span class="text-xs font-bold text-charcoal">شرقي</span>
+</div>
+<!-- Category Item 3: Western/Burgers -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">lunch_dining</span>
+</div>
+<span class="text-xs font-bold text-charcoal">غربي</span>
+</div>
+<!-- Category Item 4: Breakfast -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-3xl">egg_alt</span>
+</div>
+<span class="text-xs font-bold text-charcoal">إفطار</span>
+</div>
+<!-- Category Item 5: Falafel -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">fiber_manual_record</span>
+</div>
+<span class="text-xs font-bold text-charcoal">فلافل</span>
+</div>
+<!-- Category Item 6: Pizza -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-3xl">local_pizza</span>
+</div>
+<span class="text-xs font-bold text-charcoal">بيتزا</span>
+</div>
+<!-- Category Item 7: Cafe -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">coffee</span>
+</div>
+<span class="text-xs font-bold text-charcoal">كافيه</span>
+</div>
+<!-- Category Item 8: Desserts -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-3xl">cake</span>
+</div>
+<span class="text-xs font-bold text-charcoal">حلويات</span>
+</div>
+<!-- Category Item 9: Grill -->
+<div class="flex flex-col items-center gap-sm flex-shrink-0 group">
+<div class="w-[72px] h-[72px] bg-surface-white rounded-[14px] flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow cursor-pointer">
+<span class="material-symbols-outlined text-primary text-3xl">local_fire_department</span>
+</div>
+<span class="text-xs font-bold text-charcoal">مشاوي</span>
+</div>
+</div>
+</section>
+<!-- Near Establishments Section -->
+<section class="space-y-4">
+<h3 class="font-headline text-lg font-bold">المنشآت القريبة</h3>
+<!-- Business Card 1 -->
+<article class="bg-surface-white rounded-2xl shadow-sm overflow-hidden active:scale-[0.98] transition-transform">
+<div class="relative aspect-video">
+<img alt="Restaurant" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClMZcCvSETQ16Sw1ehKDCWjKUr4pxXq-ZLjuOtoDeI2X6qFH6VUaJcBt4vPm3WW0-cygPhXum4SQWClhBJsfUSe7vyqvKigp8ZOmIzybviGFQ5_qjnZA3oIXDWKrFnSniFxIiGywjaRZYPQY5I_SgKLBdutV3UXE6EkMH-R_zpgXEYcG84fYQdg56uCUwacxVYAo4gCMroiVJsvIcgHaR8DXjxFxcehxp1fo1SF5uMpePEBfRbJTZUWrYjKfLYTtdQ_W-vdnvIUgdJ"/>
+<div class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-lg text-xs font-bold">مفتوح</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-lg">مطعم القدس</h4>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-warning-amber text-[18px] material-symbols-filled">star</span>
+<span class="font-bold text-sm">4.8</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-muted-gray text-xs mb-3">
+<span>شاورما</span>
+<span class="w-1 h-1 bg-muted-gray/30 rounded-full"></span>
+<span>مشاوي</span>
+<span class="w-1 h-1 bg-muted-gray/30 rounded-full"></span>
+<span>وجبات سريعة</span>
+</div>
+<div class="flex items-center gap-md text-charcoal font-semibold text-xs border-t border-border-beige pt-3">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+<span>٢٥-٣٥ دقيقة</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">delivery_dining</span>
+<span>٣ شيكل توصيل</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Business Card 2 -->
+<article class="bg-surface-white rounded-2xl shadow-sm overflow-hidden active:scale-[0.98] transition-transform">
+<div class="relative aspect-video">
+<img alt="Restaurant" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbXK7hF5QvygPkuPwp1tDYlKnQf0mfJwHl5PHNecb2yVvthRR_k-ZAf6r75mrI9se91WSR504DekbN_yT2SmmydrAql0lvfmTi9zyflzcB0NupfB7zpZhu9XFw7JrYP-pmEESyDkGZxzNFK04CEwak4EfA07kNNlBpZf9VC-uZgiShvmmdWwTYaVGGfi7Tq-zYQ2Zv1uynDlq_2bF3nho37PgwYwv3a5KDRQE3mbSpF8xMQDuA-n8F7DoF3EmPHgO7koPWkemJZjxI"/>
+<div class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-lg text-xs font-bold">مفتوح</div>
+</div>
+<div class="p-4">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-lg">حمص البركة</h4>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-warning-amber text-[18px] material-symbols-filled">star</span>
+<span class="font-bold text-sm">4.9</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-muted-gray text-xs mb-3">
+<span>حمص</span>
+<span class="w-1 h-1 bg-muted-gray/30 rounded-full"></span>
+<span>فلافل</span>
+<span class="w-1 h-1 bg-muted-gray/30 rounded-full"></span>
+<span>فطور شرقي</span>
+</div>
+<div class="flex items-center gap-md text-charcoal font-semibold text-xs border-t border-border-beige pt-3">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
+<span>١٥-٢٠ دقيقة</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px] text-primary">delivery_dining</span>
+<span>٢ شيكل توصيل</span>
+</div>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- Floating Action Button (Cart) -->
+<div class="fixed bottom-24 left-margin-standard z-40">
+<button class="w-14 h-14 bg-primary text-white rounded-2xl shadow-lg flex items-center justify-center transition-transform active:scale-90 hover:opacity-95">
+<span class="material-symbols-outlined text-[28px] material-symbols-filled">shopping_basket</span>
+<div class="absolute -top-2 -right-2 w-6 h-6 bg-secondary text-white text-[12px] rounded-full flex items-center justify-center border-2 border-surface-white font-bold">2</div>
+</button>
+</div>
+<!-- Bottom Navigation -->
+<nav class="bg-surface-white border-t border-border-beige shadow-lg fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 rounded-t-3xl">
+<a class="flex flex-col items-center justify-center text-primary transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined text-2xl material-symbols-filled">home</span>
+<span class="text-[11px] font-bold mt-1">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+<span class="text-[11px] font-bold mt-1">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray transition-all duration-200 active:scale-90" href="#">
+<span class="material-symbols-outlined text-2xl">person</span>
+<span class="text-[11px] font-bold mt-1">حسابي</span>
+</a>
+</nav>
+<script>
+        // Simple scroll reveal
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('article').forEach(card => {
+            card.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-500');
+            observer.observe(card);
+        });
+    </script>
+</body></html>

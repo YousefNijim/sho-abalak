@@ -43,6 +43,7 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
+import { getCategoryImage } from '../../src/constants/CategoryImages';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
@@ -122,18 +123,22 @@ export default function Home() {
       </View>
 
       {/* Address bar */}
-      <Pressable style={styles.addressBar} onPress={() => setAddressPickerVisible(true)}>
-        <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
-        <View style={styles.addressBarText}>
-          <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
-          <Text style={styles.addressBarName} numberOfLines={1}>
-            {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
-          </Text>
-        </View>
-        <View style={styles.addressBarIconWrap}>
-          <MapPin size={18} color={colors.primary} />
-        </View>
-      </Pressable>
+      <View style={styles.addressBarSection}>
+        <Pressable style={styles.addressBarRow} onPress={() => setAddressPickerVisible(true)}>
+          <View style={styles.addressIconWrap}>
+            <MapPin size={24} color={colors.primary} />
+          </View>
+          <View style={styles.addressBarTextCol}>
+            <View style={styles.addressBarLabelRow}>
+              <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
+              <ChevronDown size={14} color={colors.textMuted} />
+            </View>
+            <Text style={styles.addressBarName} numberOfLines={1}>
+              {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
+            </Text>
+          </View>
+        </Pressable>
+      </View>
 
       {/* Address picker modal */}
       <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
@@ -202,17 +207,17 @@ export default function Home() {
         {/* Search Bar */}
         <View style={styles.searchWrap}>
           <View style={styles.searchBar}>
+            <Search size={24} color={colors.textMuted} style={styles.searchIconRight} />
             <TextInput
               placeholder="شو عبالك اليوم؟"
-              placeholderTextColor={colors.textMuted}
+              placeholderTextColor="rgba(107, 114, 128, 0.7)"
               style={styles.searchInput}
               textAlign="right"
               value={search}
               onChangeText={setSearch}
             />
-            <Search size={24} color={colors.textMuted} style={styles.searchIconRight} />
             <Pressable style={styles.filterBtn}>
-              <SlidersHorizontal size={24} color={colors.primary} />
+              <SlidersHorizontal size={20} color={colors.primary} />
             </Pressable>
           </View>
         </View>
@@ -233,29 +238,35 @@ export default function Home() {
           </View>
         </View>
 
-        {/* Tag chips (FOOD section — multi-tag businesses appear under each of their tags) */}
+        {/* Tag chips (FOOD section — Categories) */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>التصنيفات</Text>
-          {selectedTagId && (
-            <Pressable onPress={() => setSelectedTagId(null)}>
-              <Text style={styles.sectionLink}>إظهار الكل</Text>
-            </Pressable>
-          )}
+          <Text style={styles.sectionTitle}>الأقسام</Text>
+          <Pressable onPress={() => setSelectedTagId(null)}>
+            <Text style={styles.sectionLink}>عرض الكل</Text>
+          </Pressable>
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chipScroll}
+          contentContainerStyle={styles.categoriesScroll}
         >
           {foodTags.map((tag: Tag) => {
             const isActive = selectedTagId === tag.id;
+            const catImage = getCategoryImage(tag.name);
             return (
               <Pressable
                 key={tag.id}
-                style={[styles.chip, isActive && styles.chipActive]}
+                style={[styles.categoryItem]}
                 onPress={() => setSelectedTagId(isActive ? null : tag.id)}
               >
-                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{tag.name}</Text>
+                <View style={[styles.categoryBox, isActive && styles.categoryBoxActive]}>
+                  {catImage ? (
+                    <Image source={catImage} style={styles.categoryImage} contentFit="contain" />
+                  ) : (
+                    <UtensilsCrossed size={32} color={isActive ? colors.white : colors.primary} />
+                  )}
+                </View>
+                <Text style={[styles.categoryText, isActive && styles.categoryTextActive]}>{tag.name}</Text>
               </Pressable>
             );
           })}
@@ -388,22 +399,26 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   scroll: {
-    paddingTop: spacing[2],
+    paddingTop: spacing[4],
     paddingHorizontal: spacing[4],
   },
   searchWrap: {
-    marginTop: spacing[4],
+    marginTop: spacing[2],
   },
   searchBar: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     backgroundColor: colors.white,
-    borderWidth: 1.5,
-    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
-    borderRadius: radius.md,
-    height: 52,
+    borderWidth: 0,
+    borderRadius: radius.xl, // 16px
+    height: 56, // h-14
     paddingHorizontal: spacing[4],
     position: 'relative',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 3 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
+    }),
   },
   searchInput: {
     flex: 1,
@@ -411,8 +426,8 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
-    paddingRight: 32, // space for search icon
-    paddingLeft: 32, // space for filter icon
+    paddingRight: 40, // space for search icon
+    paddingLeft: 40, // space for filter icon
   },
   searchIconRight: {
     position: 'absolute',
@@ -421,13 +436,16 @@ const styles = StyleSheet.create({
   filterBtn: {
     position: 'absolute',
     left: spacing[4],
+    backgroundColor: 'rgba(230, 120, 30, 0.1)', // primary/10
+    padding: 6,
+    borderRadius: radius.md,
   },
   bannerSection: {
     marginTop: spacing[6],
   },
   banner: {
     backgroundColor: '#e6781e', // primary-container
-    borderRadius: radius.md,
+    borderRadius: 24, // 3xl
     overflow: 'hidden',
     position: 'relative',
     aspectRatio: 16 / 7,
@@ -491,31 +509,45 @@ const styles = StyleSheet.create({
     fontSize: 13, // label-md
     color: colors.primary,
   },
-  chipScroll: {
-    paddingBottom: spacing[1],
-    paddingHorizontal: spacing[1],
-    gap: spacing[2],
+  categoriesScroll: {
+    paddingBottom: spacing[2],
+    gap: spacing[4],
     flexDirection: 'row-reverse',
   },
-  chip: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[2],
+  categoryItem: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: spacing[2],
+  },
+  categoryBox: {
+    width: 72,
+    height: 72,
     backgroundColor: colors.white,
-    borderRadius: radius.full,
-    borderWidth: 1.5,
-    borderColor: colors.border,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.06)' },
+    }),
   },
-  chipActive: {
+  categoryBoxActive: {
     backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
-  chipText: {
-    fontFamily: fontFamily.semibold,
-    fontSize: 14,
+  categoryImage: {
+    width: 60,
+    height: 60,
+  },
+  categoryText: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.xs,
     color: colors.textPrimary,
   },
-  chipTextActive: {
-    color: colors.white,
+  categoryTextActive: {
+    color: colors.primary,
   },
   locationTag: {
     flexDirection: 'row-reverse',
@@ -663,39 +695,41 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
   },
   // Address bar
-  addressBar: {
+  addressBarSection: {
+    paddingHorizontal: spacing[4],
+    marginTop: spacing[2],
+    marginBottom: 0, // margin is handled by scroll
+  },
+  addressBarRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: spacing[3],
+    gap: spacing[2],
   },
-  addressBarIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primary + '15',
+  addressIconWrap: {
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  addressBarText: {
-    flex: 1,
+  addressBarTextCol: {
+    flexDirection: 'column',
     alignItems: 'flex-end',
   },
+  addressBarLabelRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
+  },
   addressBarLabel: {
-    fontFamily: fontFamily.regular,
+    fontFamily: fontFamily.bold,
     fontSize: fontSizes.xs,
     color: colors.textMuted,
-    textAlign: 'right',
+    textTransform: 'uppercase',
   },
   addressBarName: {
     fontFamily: fontFamily.bold,
-    fontSize: fontSizes.base,
+    fontSize: fontSizes.sm,
     color: colors.textPrimary,
-    textAlign: 'right',
   },
   // Address picker modal
   modalOverlay: {
