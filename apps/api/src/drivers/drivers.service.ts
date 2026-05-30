@@ -76,6 +76,26 @@ export class DriversService {
     return this.prisma.driver.findMany({ include: DRIVER_INCLUDE, orderBy: { rating: 'desc' } });
   }
 
+  async adminUpdate(id: string, dto: UpdateDriverStatusDto) {
+    const driver = await this.prisma.driver.findUnique({ where: { id } });
+    if (!driver) throw new NotFoundException('السائق غير موجود');
+
+    if (dto.areaId) await this.assertAreaExists(dto.areaId);
+
+    const updated = await this.prisma.driver.update({
+      where: { id },
+      data: {
+        status: dto.status,
+        ...(dto.areaId ? { areaId: dto.areaId } : {}),
+      },
+      include: DRIVER_INCLUDE,
+    });
+
+    this.socketGateway.emitDriverStatusChange(updated.id, updated.status as DriverStatus);
+
+    return updated;
+  }
+
   private async assertAreaExists(areaId: string) {
     const area = await this.prisma.area.findUnique({ where: { id: areaId } });
     if (!area) throw new NotFoundException('المنطقة غير موجودة');

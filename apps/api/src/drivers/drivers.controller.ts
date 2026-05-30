@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@shu/shared-types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -51,5 +51,12 @@ export class DriversController {
   @Roles(UserRole.ADMIN)
   findAll() {
     return this.drivers.findAll();
+  }
+
+  /** تعديل حالة أو منطقة السائق يدوياً — لوحة الأدمن. */
+  @Patch(':id/status')
+  @Roles(UserRole.ADMIN)
+  adminUpdate(@Param('id') id: string, @Body() dto: UpdateDriverStatusDto) {
+    return this.drivers.adminUpdate(id, dto);
   }
 }

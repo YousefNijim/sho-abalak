@@ -32,4 +32,7 @@ export const driversApi = {
 
   list: () =>
     http.get<Driver[]>('/drivers').then((r) => r.data),
+
+  adminUpdateStatus: (id: string, dto: UpdateDriverStatusDto) =>
+    http.patch<Driver>(`/drivers/${id}/status`, dto).then((r) => r.data),
 };
