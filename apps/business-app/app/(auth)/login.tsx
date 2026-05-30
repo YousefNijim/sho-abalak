@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, TextInput, Pressable, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View, TextInput, Pressable, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -17,6 +17,21 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Alert.alert is a no-op on react-native-web — fall back to window.alert there.
+  const notify = (title: string, message?: string) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.alert(message ? `${title}\n\n${message}` : title);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
+  const SUPPORT_MSG =
+    'لإعادة تعيين كلمة المرور، يرجى التواصل مع إدارة المنصة وسيتم تعيين كلمة مرور جديدة لمتجرك.\n\nالدعم: 0599-000-000';
+
+  const handleForgotPassword = () => notify('نسيت كلمة المرور؟', SUPPORT_MSG);
+  const handleSupport = () => notify('تواصل مع الدعم', SUPPORT_MSG);
 
   const handleLogin = async () => {
     setError('');
@@ -75,21 +90,20 @@ export default function Login() {
               {/* Phone Input */}
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>رقم الهاتف</Text>
-                <View style={styles.inputWrapper}>
-                  <View style={styles.inputIconRight}>
-                    <Phone size={20} color="#6B7280" />
+                <View style={styles.phoneField}>
+                  <Phone size={20} color="#6B7280" />
+                  <View style={styles.phonePrefix}>
+                    <Text style={styles.prefixText}>970+</Text>
                   </View>
                   <TextInput
-                    style={styles.input}
+                    style={styles.phoneInput}
                     placeholder="59XXXXXXX"
+                    placeholderTextColor="#9CA3AF"
                     keyboardType="phone-pad"
                     value={phone}
                     onChangeText={setPhone}
                     textAlign="left"
                   />
-                  <View style={styles.phonePrefix}>
-                    <Text style={styles.prefixText}>+970</Text>
-                  </View>
                 </View>
               </View>
 
@@ -117,7 +131,7 @@ export default function Login() {
                 </View>
               </View>
 
-              <Pressable style={styles.forgotPassword}>
+              <Pressable style={styles.forgotPassword} onPress={handleForgotPassword}>
                 <Text style={styles.forgotText}>نسيت كلمة المرور؟</Text>
               </Pressable>
 
@@ -140,10 +154,17 @@ export default function Login() {
               </Pressable>
             </View>
 
+            {/* Register a new store */}
+            <Pressable style={styles.registerLink} onPress={() => router.push('/(auth)/register')}>
+              <Text style={styles.registerText}>
+                ليس لديك متجر؟ <Text style={styles.registerTextBold}>سجّل متجرك الجديد</Text>
+              </Text>
+            </Pressable>
+
             {/* Secondary Actions */}
             <View style={styles.secondaryActions}>
               <Text style={styles.supportLabel}>تواجه مشكلة في الدخول؟</Text>
-              <Pressable style={styles.supportBtn}>
+              <Pressable style={styles.supportBtn} onPress={handleSupport}>
                 <Headset size={20} color={colors.primary} />
                 <Text style={styles.supportBtnText}>تواصل مع الدعم</Text>
               </Pressable>
@@ -280,19 +301,36 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: spacing[1],
   },
-  phonePrefix: {
-    position: 'absolute',
-    left: 0,
-    height: '100%',
-    justifyContent: 'center',
+  // Phone field: a single RTL row — [Phone icon] [970+ prefix] [number, LTR]
+  phoneField: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    height: 52,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(229, 224, 213, 1)',
+    borderRadius: radius.lg,
     paddingHorizontal: spacing[3],
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(229, 224, 213, 1)',
+    gap: spacing[2],
+  },
+  phonePrefix: {
+    justifyContent: 'center',
+    paddingLeft: spacing[2],
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(229, 224, 213, 1)',
   },
   prefixText: {
     fontFamily: fontFamily.bold,
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 14,
+  },
+  phoneInput: {
+    flex: 1,
+    height: '100%',
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    color: colors.textPrimary,
+    writingDirection: 'ltr',
   },
 
   forgotPassword: {
@@ -330,6 +368,21 @@ const styles = StyleSheet.create({
     color: '#ffffff', // on-secondary (white) per design
     fontFamily: fontFamily.bold,
     fontSize: 16,
+  },
+
+  registerLink: {
+    marginTop: spacing[4],
+    alignItems: 'center',
+  },
+  registerText: {
+    fontSize: 14,
+    fontFamily: fontFamily.regular,
+    color: '#564337',
+    textAlign: 'center',
+  },
+  registerTextBold: {
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
   },
 
   // Secondary Actions
