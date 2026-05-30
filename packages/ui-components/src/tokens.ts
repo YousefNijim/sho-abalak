@@ -8,6 +8,7 @@ export const colors = {
   secondary: '#165A34', // أخضر فلسطيني
   background: '#FCF3DC', // كريمي دافئ
   surface: '#FFFFFF',
+  white: '#FFFFFF',
   textPrimary: '#1C1C23',
   textMuted: '#6B7280',
   success: '#22C55E',

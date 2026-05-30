@@ -11,7 +11,6 @@ import {
   MapPin,
   UtensilsCrossed,
   Store,
-  Coffee,
   ChefHat,
   Plus,
   Minus,
@@ -29,10 +28,9 @@ const mediaUrl = (path: string | null | undefined): string | null =>
 import { useCartStore } from '../../src/stores/cart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const CAT_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> = {
-  RESTAURANT: { Icon: UtensilsCrossed, color: colors.primary },
-  STORE:      { Icon: Store,           color: colors.secondary },
-  CAFE:       { Icon: Coffee,          color: '#8B5CF6' },
+const TYPE_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> = {
+  FOOD:  { Icon: UtensilsCrossed, color: colors.primary },
+  STORE: { Icon: Store,           color: colors.secondary },
 };
 
 export default function BusinessDetail() {
@@ -71,7 +69,7 @@ export default function BusinessDetail() {
     );
   }
 
-  const catMeta = CAT_ICON[business.category] ?? CAT_ICON.RESTAURANT;
+  const catMeta = TYPE_ICON[business.type] ?? TYPE_ICON.FOOD;
   const products = business.products || [];
   const categories = ['الكل', ...Array.from(new Set(products.map((p: any) => p.category).filter(Boolean) as string[]))];
   const filteredProducts = tab === 0 ? products : products.filter((p: any) => p.category === categories[tab]);
@@ -150,6 +148,15 @@ export default function BusinessDetail() {
             <View style={styles.infoTitleWrap}>
               <Text style={styles.businessName}>{business.name}</Text>
               <Text style={styles.businessLocation}>{business.area?.city || 'فلسطين'} - {business.area?.name || ''}</Text>
+              {business.tags && business.tags.length > 0 ? (
+                <View style={styles.tagsRow}>
+                  {business.tags.map((t) => (
+                    <View key={t.id} style={styles.tagPill}>
+                      <Text style={styles.tagPillText}>{t.name}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
               {business.addressDetail ? (
                 <View style={styles.addressRow}>
                   <MapPin size={14} color={colors.textMuted} />
@@ -402,6 +409,25 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     color: colors.textMuted,
     flexShrink: 1,
+  },
+  tagsRow: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
+    gap: spacing[1],
+    marginTop: spacing[2],
+  },
+  tagPill: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[3],
+    paddingVertical: 2,
+  },
+  tagPillText: {
+    fontSize: 12,
+    fontFamily: fontFamily.medium,
+    color: colors.primary,
   },
   ratingBadge: {
     flexDirection: 'row-reverse',

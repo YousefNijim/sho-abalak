@@ -61,7 +61,7 @@ export default function Splash() {
 
     const t = setTimeout(() => {
       if (token) {
-        router.replace('/(tabs)');
+        router.replace('/sections');
       } else {
         router.replace('/onboarding');
       }

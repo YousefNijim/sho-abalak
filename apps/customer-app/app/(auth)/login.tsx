@@ -27,7 +27,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login({ phone, password });
-      router.replace('/(tabs)');
+      router.replace('/sections');
     } catch (e: unknown) {
       const msg =
         (e as { response?: { data?: { message?: string } } })?.response?.data

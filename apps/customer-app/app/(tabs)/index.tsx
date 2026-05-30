@@ -33,22 +33,16 @@ import {
   Home as HomeIcon,
   Check,
   Plus,
+  LayoutGrid,
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi } from '@shu/api-client';
+import { businessesApi, tagsApi } from '@shu/api-client';
+import type { Tag } from '@shu/api-client';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
-
-const CATEGORIES = [
-  { id: 'RESTAURANT', label: 'مطاعم', icon: '🍕' },
-  { id: 'STORE', label: 'محلات', icon: '🛒' },
-  { id: 'CAFE', label: 'كافيه', icon: '☕' },
-  { id: 'VEG', label: 'خضار', icon: '🍎' },
-  { id: 'MEAT', label: 'ملحمة', icon: '🥩' },
-] as const;
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
@@ -75,16 +69,23 @@ export default function Home() {
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
-  const [selectedCat, setSelectedCat] = useState<string | null>(null);
+  const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
 
+  // FOOD-section tags drive the category chips (a business can match several tags).
+  const { data: foodTags = [] } = useQuery({
+    queryKey: ['tags', 'FOOD'],
+    queryFn: () => tagsApi.list('FOOD'),
+  });
+
   const { data: businesses = [], isLoading } = useQuery({
-    queryKey: ['businesses', selectedCat, search, selectedAddress?.areaId],
+    queryKey: ['businesses', 'FOOD', selectedTagId, search, selectedAddress?.areaId],
     queryFn: () =>
       businessesApi.list({
-        category: selectedCat || undefined,
+        type: 'FOOD',
+        tagId: selectedTagId || undefined,
         search: search || undefined,
         areaId: selectedAddress?.areaId || undefined,
       }),
@@ -103,6 +104,9 @@ export default function Home() {
       {/* TopAppBar */}
       <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
         <View style={styles.headerRight}>
+          <Pressable style={styles.iconBtn} onPress={() => router.replace('/sections')}>
+            <LayoutGrid size={26} color={colors.primary} />
+          </Pressable>
           <Pressable style={styles.iconBtn}>
             <Bell size={28} color={colors.primary} />
           </Pressable>
@@ -229,30 +233,29 @@ export default function Home() {
           </View>
         </View>
 
-        {/* Categories */}
+        {/* Tag chips (FOOD section — multi-tag businesses appear under each of their tags) */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>الأقسام</Text>
-          <Pressable>
-            <Text style={styles.sectionLink}>عرض الكل</Text>
-          </Pressable>
+          <Text style={styles.sectionTitle}>التصنيفات</Text>
+          {selectedTagId && (
+            <Pressable onPress={() => setSelectedTagId(null)}>
+              <Text style={styles.sectionLink}>إظهار الكل</Text>
+            </Pressable>
+          )}
         </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.catScroll}
+          contentContainerStyle={styles.chipScroll}
         >
-          {CATEGORIES.map((cat) => {
-            const isActive = selectedCat === cat.id;
+          {foodTags.map((tag: Tag) => {
+            const isActive = selectedTagId === tag.id;
             return (
               <Pressable
-                key={cat.id}
-                style={styles.catItem}
-                onPress={() => setSelectedCat(isActive ? null : cat.id)}
+                key={tag.id}
+                style={[styles.chip, isActive && styles.chipActive]}
+                onPress={() => setSelectedTagId(isActive ? null : tag.id)}
               >
-                <View style={[styles.catBox, isActive && styles.catBoxActive]}>
-                  <Text style={styles.catEmoji}>{cat.icon}</Text>
-                </View>
-                <Text style={styles.catLabel}>{cat.label}</Text>
+                <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{tag.name}</Text>
               </Pressable>
             );
           })}
@@ -303,7 +306,9 @@ export default function Home() {
                     </View>
                   </View>
                   <Text style={styles.cardDesc} numberOfLines={1}>
-                    {b.category === 'RESTAURANT' ? 'شاورما، مشاوي، وجبات سريعة' : 'حمص، فلافل، فطور شرقي'}
+                    {b.tags && b.tags.length > 0
+                      ? b.tags.map((t: Tag) => t.name).join('، ')
+                      : 'مأكولات ومشروبات'}
                   </Text>
                   <View style={styles.cardMeta}>
                     <View style={styles.metaItem}>
@@ -486,39 +491,31 @@ const styles = StyleSheet.create({
     fontSize: 13, // label-md
     color: colors.primary,
   },
-  catScroll: {
+  chipScroll: {
     paddingBottom: spacing[1],
-    gap: spacing[3],
+    paddingHorizontal: spacing[1],
+    gap: spacing[2],
     flexDirection: 'row-reverse',
   },
-  catItem: {
-    alignItems: 'center',
-    gap: spacing[2],
-  },
-  catBox: {
-    width: 64,
-    height: 64,
+  chip: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[2],
     backgroundColor: colors.white,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
-      android: { elevation: 1 },
-      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
-    }),
+    borderRadius: radius.full,
+    borderWidth: 1.5,
+    borderColor: colors.border,
   },
-  catBoxActive: {
-    borderWidth: 2,
+  chipActive: {
+    backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  catEmoji: {
-    fontSize: 24,
-  },
-  catLabel: {
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
+  chipText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 14,
     color: colors.textPrimary,
+  },
+  chipTextActive: {
+    color: colors.white,
   },
   locationTag: {
     flexDirection: 'row-reverse',

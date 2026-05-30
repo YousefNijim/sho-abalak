@@ -40,7 +40,7 @@ export default function Otp() {
     setLoading(true);
     try {
       await authApi.otpVerify(user?.phone ?? '', code);
-      router.replace('/(tabs)');
+      router.replace('/sections');
     } catch {
       setError('الكود غير صحيح');
     } finally {
