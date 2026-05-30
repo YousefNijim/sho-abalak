@@ -20,6 +20,12 @@ export interface UpdateOrderStatusDto {
   driverId?: string;
 }
 
+export interface AdminInterventionDto {
+  status?: string;
+  driverId?: string | null;
+  paymentStatus?: string;
+}
+
 export interface Order {
   id: string;
   customerId: string;
@@ -39,15 +45,16 @@ export interface Order {
     unitPrice: number;
     product?: { name: string; description: string | null };
   }[];
-  business?: { name: string; area?: { city: string; name: string }; owner?: { phone: string; name: string } };
-  customer?: { name: string; phone: string; area?: { city: string; name: string } };
+  business?: { name: string; area?: { id: string; city: string; name: string; deliveryFee: number }; owner?: { phone: string; name: string } };
+  customer?: { name: string; phone: string; area?: { id: string; city: string; name: string; deliveryFee: number } };
   driver?: {
     id: string;
+    rating: number;
     user?: { name: string; phone: string };
     area?: { name: string };
   };
   payment?: { status: string; method: string; amount: number };
-  statusHistory?: { status: string; createdAt: string }[];
+  statusHistory?: { status: string; changedBy?: string; createdAt: string }[];
 }
 
 export const ordersApi = {
@@ -71,4 +78,7 @@ export const ordersApi = {
 
   rejectDriver: (id: string) =>
     http.patch<Order>(`/orders/${id}/reject-driver`).then((r) => r.data),
+
+  adminIntervention: (id: string, dto: AdminInterventionDto) =>
+    http.patch<Order>(`/orders/${id}/admin-intervention`, dto).then((r) => r.data),
 };

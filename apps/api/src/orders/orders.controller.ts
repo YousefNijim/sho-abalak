@@ -9,6 +9,7 @@ import { AuthUser } from '../auth/jwt.strategy';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { AdminInterventionDto } from './dto/admin-intervention.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth()
@@ -62,5 +63,16 @@ export class OrdersController {
   @Roles(UserRole.DRIVER)
   rejectDriver(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     return this.orders.rejectDriver(id, user);
+  }
+
+  @Patch(':id/admin-intervention')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  adminIntervention(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Body() dto: AdminInterventionDto,
+  ) {
+    return this.orders.adminIntervention(id, user, dto);
   }
 }

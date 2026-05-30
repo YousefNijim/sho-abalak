@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
-import { OrderStatus, UserRole, DriverStatus } from '@shu/shared-types';
+import { OrderStatus, UserRole, DriverStatus, PaymentStatus } from '@shu/shared-types';
 import { canTransition } from '@shu/utils';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from '../auth/jwt.strategy';
@@ -9,6 +9,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { SocketGateway } from '../gateway/socket.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { AdminInterventionDto } from './dto/admin-intervention.dto';
 
 const ORDER_INCLUDE = {
   items: { include: { product: true } },
@@ -325,6 +326,138 @@ export class OrdersService {
       });
     }
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.READY);
+
+    return updatedOrder;
+  }
+
+  async adminIntervention(id: string, user: AuthUser, dto: AdminInterventionDto) {
+    if (user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('فقط المشرف يمكنه استخدام هذا الإجراء');
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { business: true, payment: true },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      // 1. Handle driver reassignment / unassignment
+      let nextDriverId = order.driverId;
+      let nextPendingDriverId = order.pendingDriverId;
+
+      if (dto.driverId !== undefined) {
+        if (dto.driverId === null) {
+          // Unassign driver
+          if (order.driverId) {
+            await tx.driver.update({
+              where: { id: order.driverId },
+              data: { status: DriverStatus.AVAILABLE },
+            });
+          }
+          nextDriverId = null;
+          nextPendingDriverId = null;
+        } else {
+          // Assign driver
+          const driverExists = await tx.driver.findUnique({ where: { id: dto.driverId } });
+          if (!driverExists) throw new NotFoundException('السائق غير موجود');
+
+          // Release previous driver if assigned
+          if (order.driverId && order.driverId !== dto.driverId) {
+            await tx.driver.update({
+              where: { id: order.driverId },
+              data: { status: DriverStatus.AVAILABLE },
+            });
+          }
+
+          nextDriverId = dto.driverId;
+          nextPendingDriverId = null;
+
+          // Set the new driver to BUSY if final status is PICKED_UP
+          const finalStatus = dto.status !== undefined ? dto.status : (order.status as OrderStatus);
+          if (finalStatus === OrderStatus.PICKED_UP) {
+            await tx.driver.update({
+              where: { id: dto.driverId },
+              data: { status: DriverStatus.BUSY },
+            });
+          }
+        }
+      }
+
+      // 2. Handle order status override
+      let finalStatus = order.status as OrderStatus;
+      if (dto.status !== undefined) {
+        finalStatus = dto.status;
+      }
+
+      // If status changed to PICKED_UP and we have a driver, set driver to BUSY
+      if (dto.status === OrderStatus.PICKED_UP && nextDriverId) {
+        await tx.driver.update({
+          where: { id: nextDriverId },
+          data: { status: DriverStatus.BUSY },
+        });
+      }
+
+      // If status changed to DELIVERED and we have a driver, set driver to AVAILABLE
+      if (dto.status === OrderStatus.DELIVERED && nextDriverId) {
+        await tx.driver.update({
+          where: { id: nextDriverId },
+          data: { status: DriverStatus.AVAILABLE },
+        });
+      }
+
+      // If status changed to DELIVERED and cash payment, settle cash payment to PAID
+      if (dto.status === OrderStatus.DELIVERED) {
+        await this.payments.settleCashOnDelivery(id, tx);
+      }
+
+      // 3. Update the Order table row
+      await tx.order.update({
+        where: { id },
+        data: {
+          status: finalStatus,
+          driverId: nextDriverId,
+          pendingDriverId: nextPendingDriverId,
+          ...(dto.status !== undefined
+            ? {
+                statusHistory: {
+                  create: {
+                    status: dto.status,
+                    changedBy: `ADMIN:${user.name} (${user.id})`,
+                  },
+                },
+              }
+            : {}),
+        },
+      });
+
+      // 4. Handle payment status override
+      if (dto.paymentStatus !== undefined && order.payment) {
+        await tx.payment.update({
+          where: { orderId: id },
+          data: { status: dto.paymentStatus },
+        });
+      }
+
+      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+    });
+
+    // 5. Emit socket events to keep clients updated in real time
+    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+    }
+
+    if (updatedOrder.driver?.user?.id) {
+      this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
+        orderId: updatedOrder.id,
+        businessName: updatedOrder.business?.name || 'منشأة تجارية',
+        areaName: updatedOrder.deliveryAreaName || updatedOrder.customer?.area?.name || 'العنوان المسجل',
+        addressDetail: updatedOrder.deliveryAddressDetail || '',
+        total: Number(updatedOrder.total),
+      });
+    }
 
     return updatedOrder;
   }
