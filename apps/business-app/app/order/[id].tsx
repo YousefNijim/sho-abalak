@@ -138,14 +138,19 @@ export default function OrderDetail() {
         {status === 'PENDING' ? (
           <View style={styles.btnRow}>
             <Button
-              title="رفض"
+              title={updateStatus.isPending ? 'جاري...' : 'رفض'}
               variant="danger"
               style={{ flex: 1 }}
-              onPress={() => updateStatus.mutate('CANCELLED')}
               disabled={updateStatus.isPending}
+              onPress={() =>
+                Alert.alert('رفض الطلب', 'هل أنت متأكد من رفض الطلب؟', [
+                  { text: 'تراجع', style: 'cancel' },
+                  { text: 'رفض', style: 'destructive', onPress: () => updateStatus.mutate('CANCELLED') },
+                ])
+              }
             />
             <Button
-              title="قبول الطلب"
+              title={updateStatus.isPending ? 'جاري القبول...' : 'قبول الطلب'}
               style={{ flex: 1 }}
               onPress={() => updateStatus.mutate('CONFIRMED')}
               disabled={updateStatus.isPending}
@@ -153,13 +158,13 @@ export default function OrderDetail() {
           </View>
         ) : status === 'CONFIRMED' ? (
           <Button
-            title="بدء التحضير"
+            title={updateStatus.isPending ? 'جاري التحديث...' : 'بدء التحضير'}
             onPress={() => updateStatus.mutate('PREPARING')}
             disabled={updateStatus.isPending}
           />
         ) : status === 'PREPARING' ? (
           <Button
-            title="الطلب جاهز ✅"
+            title={updateStatus.isPending ? 'جاري التحديث...' : 'الطلب جاهز ✅'}
             onPress={() => updateStatus.mutate('READY')}
             disabled={updateStatus.isPending}
           />

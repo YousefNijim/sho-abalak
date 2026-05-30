@@ -75,30 +75,31 @@ export default function Analytics() {
 
   const topProducts = compileTopProducts(periodOrders);
 
-  // Compile chart data (last 7 days of the week)
-  const compileWeeklyChart = (arr: any[]) => {
+  // Compile chart data bucketed by day (period-aware)
+  const compileChart = (arr: any[], periodIdx: number) => {
+    if (periodIdx === 0) {
+      // Today: bucket by hour (0–23)
+      const counts = Array(24).fill(0);
+      arr.forEach((o: any) => {
+        try { counts[new Date(o.createdAt).getHours()] += 1; } catch {}
+      });
+      const maxVal = Math.max(...counts, 1);
+      return counts
+        .filter((_, h) => h % 3 === 0) // show every 3rd hour to avoid clutter
+        .map((count, i) => ({ label: `${i * 3}`, heightPercent: (count / maxVal) * 100 }));
+    }
+
+    // Week & Month: bucket by day-of-week label
     const days = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
     const counts = Array(7).fill(0);
-    const now = new Date();
-
     arr.forEach((o: any) => {
-      try {
-        const d = new Date(o.createdAt);
-        const diff = now.getTime() - d.getTime();
-        if (diff <= 7 * 24 * 60 * 60 * 1000) {
-          counts[d.getDay()] += 1;
-        }
-      } catch {}
+      try { counts[new Date(o.createdAt).getDay()] += 1; } catch {}
     });
-
     const maxVal = Math.max(...counts, 1);
-    return counts.map((count, idx) => ({
-      label: days[idx],
-      heightPercent: (count / maxVal) * 100,
-    }));
+    return counts.map((count, idx) => ({ label: days[idx], heightPercent: (count / maxVal) * 100 }));
   };
 
-  const chartData = compileWeeklyChart(orders);
+  const chartData = compileChart(periodOrders, period);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4], gap: spacing[5] }}>

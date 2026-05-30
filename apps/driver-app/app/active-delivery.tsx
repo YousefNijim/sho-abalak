@@ -156,8 +156,17 @@ export default function ActiveDelivery() {
           <Button
             title={deliverMutation.isPending ? 'جاري تأكيد التسليم...' : 'تأكيد تسليم الطلب بنجاح ✅'}
             variant="primary"
-            onPress={() => deliverMutation.mutate()}
             disabled={deliverMutation.isPending}
+            onPress={() =>
+              Alert.alert(
+                'تأكيد التسليم',
+                'هل أنت متأكد أن الطلب وصل للزبون؟',
+                [
+                  { text: 'إلغاء', style: 'cancel' },
+                  { text: 'نعم، تم التسليم', onPress: () => deliverMutation.mutate() },
+                ],
+              )
+            }
           />
         )}
       </View>

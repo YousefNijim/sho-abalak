@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
+import { formatShekel } from '@shu/utils';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
 export default function History() {
@@ -35,8 +36,8 @@ export default function History() {
       }
     })
     .reduce((acc: number, o: any) => {
-      // Driver earnings = business area delivery fee
-      return acc + (o.business?.area?.deliveryFee ?? 5);
+      // Prisma Decimal serialises as string — coerce to Number to avoid concatenation
+      return acc + Number(o.business?.area?.deliveryFee ?? 5);
     }, 0);
 
   const formatDate = (dateStr: string) => {
@@ -57,7 +58,7 @@ export default function History() {
     <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}>
       <View style={styles.summary}>
         <Text style={styles.summaryLabel}>إجمالي أرباح التوصيل هذا الشهر</Text>
-        <Text style={styles.summaryValue}>₪{monthlyEarnings}</Text>
+        <Text style={styles.summaryValue}>{formatShekel(monthlyEarnings)}</Text>
       </View>
 
       {completedOrders.map((o: any) => (
@@ -81,7 +82,7 @@ function DriverOrderCard({ o, formatDate }: any) {
     <Pressable style={styles.card} onPress={() => setExpanded(!expanded)}>
       <View style={styles.row}>
         <Text style={styles.business}>{o.business?.name || 'المنشأة التجارية'}</Text>
-        <Text style={styles.amount}>+{o.business?.area?.deliveryFee ?? 5} ₪</Text>
+        <Text style={styles.amount}>+{formatShekel(Number(o.business?.area?.deliveryFee ?? 5))}</Text>
       </View>
       <Text style={styles.muted}>{o.customer?.area?.city} - {o.customer?.area?.name || 'العنوان المسجل'}</Text>
       <View style={styles.row}>
