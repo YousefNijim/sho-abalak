@@ -30,6 +30,9 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (dto) => {
         const res = await authApi.login(dto);
+        if (res.user.role !== 'DRIVER') {
+          throw new Error('هذا الحساب ليس مسجلاً كشريك توصيل (سائق). يرجى استخدام تطبيق الزبائن أو الأعمال.');
+        }
         setAuthToken(res.accessToken);
         set({ user: res.user as AuthUser, token: res.accessToken });
       },

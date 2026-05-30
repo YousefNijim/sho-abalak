@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
@@ -56,6 +56,14 @@ export default function ActiveDelivery() {
   const handleDeliver = () => {
     if (advancing.current || deliverMutation.isPending) return;
     advancing.current = true;
+    if (Platform.OS === 'web') {
+      if (window.confirm('هل أنت متأكد أن الطلب وصل للزبون؟')) {
+        deliverMutation.mutate();
+      } else {
+        advancing.current = false;
+      }
+      return;
+    }
     Alert.alert(
       'تأكيد التسليم',
       'هل أنت متأكد أن الطلب وصل للزبون؟',
@@ -69,7 +77,7 @@ export default function ActiveDelivery() {
           text: 'نعم، تم التسليم',
           onPress: () => deliverMutation.mutate(),
         },
-      ],
+      ]
     );
   };
 

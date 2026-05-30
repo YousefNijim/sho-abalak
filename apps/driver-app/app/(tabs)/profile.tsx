@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, TouchableOpacity, ScrollView, StyleSheet, Switch, Text, View, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +41,14 @@ export default function DriverProfile() {
   };
 
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+        logout();
+        queryClient.clear();
+        router.replace('/(auth)/login');
+      }
+      return;
+    }
     Alert.alert(
       'تسجيل الخروج',
       'هل أنت متأكد من تسجيل الخروج؟',
@@ -55,7 +63,7 @@ export default function DriverProfile() {
             router.replace('/(auth)/login');
           },
         },
-      ],
+      ]
     );
   };
 
@@ -77,6 +85,7 @@ export default function DriverProfile() {
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
       {/* Orange header — no absolutely-positioned children so nothing overlaps scroll */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
@@ -130,11 +139,11 @@ export default function DriverProfile() {
           <InfoRow icon={<Bike size={18} color={colors.primary} />} label="نوع المركبة" value="دراجة نارية" />
         </View>
 
-        {/* Logout — plain Pressable, no Button wrapper */}
-        <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+        {/* Logout — TouchableOpacity instead of Pressable so it works inside ScrollView */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
           <LogOut size={20} color="#EF4444" />
           <Text style={styles.logoutText}>تسجيل الخروج</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
