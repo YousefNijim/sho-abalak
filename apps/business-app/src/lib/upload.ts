@@ -5,27 +5,56 @@ import { http, BASE_URL } from '@shu/api-client';
  * Returns the server-side URL (e.g. "/uploads/xxx.jpg").
  * To display the image, prepend BASE_URL.
  */
+import { Platform } from 'react-native';
+
 export async function uploadImage(localUri: string): Promise<string> {
-  const filename = localUri.split('/').pop() || 'photo.jpg';
-  const ext = filename.split('.').pop()?.toLowerCase() ?? 'jpg';
-  const mimeMap: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    webp: 'image/webp',
-    gif: 'image/gif',
-  };
-  const mimeType = mimeMap[ext] ?? 'image/jpeg';
-
-  const formData = new FormData();
-  // React Native accepts { uri, name, type } as a FormData file entry
-  formData.append('file', { uri: localUri, name: filename, type: mimeType } as unknown as Blob);
-
-  const res = await http.post<{ url: string }>('/uploads/image', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-
-  return res.data.url;
+  let filename = localUri.split('/').pop() || 'photo.jpg';
+  if (!filename.includes('.')) {
+    // Blob URLs on web don't have extensions, default to .jpg
+    filename += '.jpg';
+  }
+  
+  if (Platform.OS === 'web') {
+    // Native fetch is foolproof for web FormData and avoids Axios header conflicts
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+    
+    const formData = new FormData();
+    formData.append('file', blob, filename);
+    
+    const token = http.defaults.headers.common['Authorization'] as string;
+    const res = await fetch(`${BASE_URL}/uploads/image`, {
+      method: 'POST',
+      headers: token ? { Authorization: token } : {},
+      body: formData,
+    });
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || 'Upload failed');
+    }
+    const data = await res.json();
+    return data.url;
+  } else {
+    // React Native specific upload logic
+    const ext = filename.split('.').pop()?.toLowerCase() ?? 'jpg';
+    const mimeMap: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      webp: 'image/webp',
+      gif: 'image/gif',
+    };
+    const mimeType = mimeMap[ext] ?? 'image/jpeg';
+    
+    const formData = new FormData();
+    formData.append('file', { uri: localUri, name: filename, type: mimeType } as unknown as Blob);
+    
+    const res = await http.post<{ url: string }>('/uploads/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.url;
+  }
 }
 
 /** Build full image URL from a server path like "/uploads/xxx.jpg" */
