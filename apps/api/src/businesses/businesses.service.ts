@@ -12,18 +12,31 @@ import { QueryBusinessDto } from './dto/query-business.dto';
 // Owner account fields the admin UI needs to show approval state (never the password hash).
 const OWNER_SELECT = { id: true, name: true, phone: true, status: true } satisfies Prisma.UserSelect;
 
+/** Build a Prisma `tags.connect` clause on create (skip when no tags given). */
+function tagConnect(tagIds?: string[]) {
+  if (!tagIds || tagIds.length === 0) return {};
+  return { tags: { connect: tagIds.map((id) => ({ id })) } };
+}
+
+/** Build a Prisma `tags.set` clause on update — only when tagIds is provided (undefined = leave unchanged). */
+function tagSet(tagIds?: string[]) {
+  if (tagIds === undefined) return {};
+  return { tags: { set: tagIds.map((id) => ({ id })) } };
+}
+
 @Injectable()
 export class BusinessesService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(query: QueryBusinessDto) {
     const where: Prisma.BusinessWhereInput = {};
-    if (query.category) where.category = query.category;
+    if (query.type) where.type = query.type;
+    if (query.tagId) where.tags = { some: { id: query.tagId } };
     if (query.areaId) where.areaId = query.areaId;
     if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
     return this.prisma.business.findMany({
       where,
-      include: { area: true, owner: { select: OWNER_SELECT } },
+      include: { area: true, tags: true, owner: { select: OWNER_SELECT } },
       orderBy: { rating: 'desc' },
     });
   }
@@ -31,14 +44,17 @@ export class BusinessesService {
   async findOne(id: string) {
     const business = await this.prisma.business.findUnique({
       where: { id },
-      include: { area: true, products: { where: { isAvailable: true } } },
+      include: { area: true, tags: true, products: { where: { isAvailable: true } } },
     });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
     return business;
   }
 
   async findByOwner(ownerId: string) {
-    const business = await this.prisma.business.findUnique({ where: { ownerId }, include: { area: true } });
+    const business = await this.prisma.business.findUnique({
+      where: { ownerId },
+      include: { area: true, tags: true },
+    });
     if (!business) throw new NotFoundException('لا توجد منشأة مرتبطة بحسابك');
     return business;
   }
@@ -46,18 +62,32 @@ export class BusinessesService {
   async create(ownerId: string, dto: CreateBusinessDto) {
     const existing = await this.prisma.business.findUnique({ where: { ownerId } });
     if (existing) throw new ConflictException('لديك منشأة مسجّلة بالفعل');
-    return this.prisma.business.create({ data: { ...dto, ownerId } });
+    const { tagIds, ...rest } = dto;
+    return this.prisma.business.create({
+      data: { ...rest, ownerId, ...tagConnect(tagIds) },
+      include: { area: true, tags: true },
+    });
   }
 
   async update(id: string, ownerId: string, dto: UpdateBusinessDto) {
     await this.assertOwner(id, ownerId);
-    return this.prisma.business.update({ where: { id }, data: dto });
+    const { tagIds, ...rest } = dto;
+    return this.prisma.business.update({
+      where: { id },
+      data: { ...rest, ...tagSet(tagIds) },
+      include: { area: true, tags: true },
+    });
   }
 
   async adminUpdate(id: string, dto: UpdateBusinessDto) {
     const business = await this.prisma.business.findUnique({ where: { id } });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
-    return this.prisma.business.update({ where: { id }, data: dto });
+    const { tagIds, ...rest } = dto;
+    return this.prisma.business.update({
+      where: { id },
+      data: { ...rest, ...tagSet(tagIds) },
+      include: { area: true, tags: true },
+    });
   }
 
   async adminUpdateStatus(id: string, isOpen: boolean) {
@@ -143,12 +173,13 @@ export class BusinessesService {
         data: {
           ownerId: owner.id,
           name: dto.name,
-          category: dto.category,
+          type: dto.type,
           areaId: dto.areaId,
           phone: dto.phone,
           addressDetail: dto.addressDetail ?? null,
+          ...tagConnect(dto.tagIds),
         },
-        include: { area: true, owner: { select: OWNER_SELECT } },
+        include: { area: true, tags: true, owner: { select: OWNER_SELECT } },
       });
     });
   }

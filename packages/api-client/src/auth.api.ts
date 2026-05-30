@@ -14,7 +14,8 @@ export interface RegisterDto {
 
 export interface RegisterBusinessDto {
   name: string;
-  category: string;
+  type: 'FOOD' | 'STORE';
+  tagIds?: string[];
   ownerName: string;
   phone: string;
   areaId: string;

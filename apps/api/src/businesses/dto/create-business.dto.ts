@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import { BusinessCategory, DeliveryType } from '@shu/shared-types';
+import { IsArray, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { BusinessType, DeliveryType } from '@shu/shared-types';
 
 export class CreateBusinessDto {
   @ApiProperty({ example: 'مطعم القدس' })
@@ -8,9 +8,15 @@ export class CreateBusinessDto {
   @MinLength(2)
   name!: string;
 
-  @ApiProperty({ enum: BusinessCategory })
-  @IsEnum(BusinessCategory)
-  category!: BusinessCategory;
+  @ApiProperty({ enum: BusinessType, description: 'القسم: مأكولات أو متاجر' })
+  @IsEnum(BusinessType)
+  type!: BusinessType;
+
+  @ApiPropertyOptional({ type: [String], description: 'معرّفات الوسوم' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagIds?: string[];
 
   @ApiProperty({ description: 'معرّف المنطقة' })
   @IsString()

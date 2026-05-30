@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
-import { BusinessCategory } from '@shu/shared-types';
+import { IsArray, IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import { BusinessType } from '@shu/shared-types';
 
 /**
  * Self-service store registration (business login screen).
@@ -12,9 +12,15 @@ export class RegisterBusinessDto {
   @MinLength(2)
   name!: string;
 
-  @ApiProperty({ enum: BusinessCategory })
-  @IsEnum(BusinessCategory)
-  category!: BusinessCategory;
+  @ApiProperty({ enum: BusinessType, description: 'القسم: مأكولات أو متاجر' })
+  @IsEnum(BusinessType)
+  type!: BusinessType;
+
+  @ApiPropertyOptional({ type: [String], description: 'معرّفات الوسوم' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagIds?: string[];
 
   @ApiProperty({ example: 'أحمد محمد', description: 'اسم صاحب المتجر' })
   @IsString()

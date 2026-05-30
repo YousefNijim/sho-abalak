@@ -1,12 +1,17 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { BusinessCategory } from '@shu/shared-types';
+import { BusinessType } from '@shu/shared-types';
 
 export class QueryBusinessDto {
-  @ApiPropertyOptional({ enum: BusinessCategory })
+  @ApiPropertyOptional({ enum: BusinessType, description: 'تصفية حسب القسم' })
   @IsOptional()
-  @IsEnum(BusinessCategory)
-  category?: BusinessCategory;
+  @IsEnum(BusinessType)
+  type?: BusinessType;
+
+  @ApiPropertyOptional({ description: 'تصفية حسب الوسم (معرّف الوسم)' })
+  @IsOptional()
+  @IsString()
+  tagId?: string;
 
   @ApiPropertyOptional({ description: 'تصفية حسب المنطقة' })
   @IsOptional()

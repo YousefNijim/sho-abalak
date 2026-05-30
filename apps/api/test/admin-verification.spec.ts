@@ -124,7 +124,7 @@ describe('Admin Control Center - Verification E2E Spec', () => {
       data: {
         ownerId: merchantId,
         name: 'مطعم القدس الفحص',
-        category: 'RESTAURANT',
+        type: 'FOOD',
         areaId,
         isOpen: true,
         commissionRate: 10.0,

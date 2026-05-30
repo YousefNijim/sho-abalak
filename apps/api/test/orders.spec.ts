@@ -156,7 +156,7 @@ describe('Orders Lifecycle & Platform Integration (E2E)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({
         name: 'مطعم تجربة الفحص',
-        category: 'RESTAURANT',
+        type: 'FOOD',
         areaId,
       })
       .expect(201);

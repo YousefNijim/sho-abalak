@@ -1,10 +1,19 @@
 import { http } from './http';
 
+export type BusinessType = 'FOOD' | 'STORE';
+
+export interface Tag {
+  id: string;
+  name: string;
+  type: BusinessType;
+}
+
 export interface Business {
   id: string;
   ownerId: string;
   name: string;
-  category: string;
+  type: BusinessType;
+  tags?: Tag[];
   areaId: string;
   deliveryType: string;
   imageUrl: string | null;
@@ -21,9 +30,15 @@ export interface Business {
   products?: Product[];
 }
 
+/** Write payload for create/update — Business minus server-managed fields, plus tagIds. */
+export type BusinessWriteDto = Partial<
+  Omit<Business, 'id' | 'ownerId' | 'tags' | 'area' | 'owner' | 'products' | 'rating'>
+> & { tagIds?: string[] };
+
 export interface AdminCreateBusinessDto {
   name: string;
-  category: string;
+  type: BusinessType;
+  tagIds?: string[];
   ownerName: string;
   phone: string;
   areaId: string;
@@ -43,7 +58,8 @@ export interface Product {
 }
 
 export interface BusinessListParams {
-  category?: string;
+  type?: BusinessType;
+  tagId?: string;
   areaId?: string;
   search?: string;
 }
@@ -58,13 +74,13 @@ export const businessesApi = {
   mine: () =>
     http.get<Business>('/businesses/mine').then((r) => r.data),
 
-  create: (dto: Partial<Business>) =>
+  create: (dto: BusinessWriteDto) =>
     http.post<Business>('/businesses', dto).then((r) => r.data),
 
-  update: (id: string, dto: Partial<Business>) =>
+  update: (id: string, dto: BusinessWriteDto) =>
     http.patch<Business>(`/businesses/${id}`, dto).then((r) => r.data),
 
-  adminUpdate: (id: string, dto: Partial<Business>) =>
+  adminUpdate: (id: string, dto: BusinessWriteDto) =>
     http.patch<Business>(`/businesses/${id}/admin`, dto).then((r) => r.data),
 
   adminUpdateStatus: (id: string, isOpen: boolean) =>

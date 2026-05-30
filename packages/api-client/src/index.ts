@@ -4,6 +4,7 @@ export { addressesApi } from './addresses.api';
 export type { SavedAddress, CreateAddressDto as CreateAddressDtoClient, UpdateAddressDto as UpdateAddressDtoClient } from './addresses.api';
 export { areasApi } from './areas.api';
 export { businessesApi } from './businesses.api';
+export { tagsApi } from './tags.api';
 export { productsApi } from './products.api';
 export { ordersApi } from './orders.api';
 export { driversApi } from './drivers.api';
@@ -17,7 +18,7 @@ export type { SystemSettings } from './settings.api';
 export type { FinanceSummary } from './reports.api';
 export type { AuthResponse, LoginDto, RegisterDto, RegisterBusinessDto, ChangePasswordDto } from './auth.api';
 export type { Area } from './areas.api';
-export type { Business, BusinessListParams, AdminCreateBusinessDto } from './businesses.api';
+export type { Business, BusinessListParams, AdminCreateBusinessDto, BusinessWriteDto, BusinessType, Tag } from './businesses.api';
 export type { Product, CreateProductDto } from './products.api';
 export type {
   Order,

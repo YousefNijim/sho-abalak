@@ -75,10 +75,13 @@ export class AuthService {
         data: {
           ownerId: owner.id,
           name: dto.name,
-          category: dto.category,
+          type: dto.type,
           areaId: dto.areaId,
           phone: dto.phone,
           addressDetail: dto.addressDetail ?? null,
+          ...(dto.tagIds && dto.tagIds.length
+            ? { tags: { connect: dto.tagIds.map((id) => ({ id })) } }
+            : {}),
         },
       });
     });
