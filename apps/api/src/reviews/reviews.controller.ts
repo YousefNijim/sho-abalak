@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@shu/shared-types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -33,5 +33,23 @@ export class ReviewsController {
   @Get('driver')
   findByDriver(@Query('driverId') driverId: string) {
     return this.reviews.findByDriver(driverId);
+  }
+
+  /** جلب جميع المراجعات والتقييمات للوحة الأدمن. */
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  findAll() {
+    return this.reviews.findAll();
+  }
+
+  /** حذف تقييم يدوياً — لوحة الأدمن. */
+  @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  delete(@Param('id') id: string) {
+    return this.reviews.delete(id);
   }
 }

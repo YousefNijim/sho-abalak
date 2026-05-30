@@ -67,6 +67,62 @@ export class ReviewsService {
     });
   }
 
+  /** الحصول على جميع التقييمات مع تفاصيل الطلب والزبون والمتجر - لوحة الأدمن */
+  findAll() {
+    return this.prisma.review.findMany({
+      include: {
+        order: {
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+                phone: true,
+              },
+            },
+            business: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            driver: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async delete(id: string) {
+    const review = await this.prisma.review.findUnique({
+      where: { id },
+      include: { order: true },
+    });
+    if (!review) throw new NotFoundException('التقييم غير موجود');
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.review.delete({ where: { id } });
+
+      // Recompute rating for business and driver!
+      await this.recomputeBusinessRating(tx, review.order.businessId);
+      if (review.order.driverId) {
+        await this.recomputeDriverRating(tx, review.order.driverId);
+      }
+
+      return { message: 'تم حذف التقييم بنجاح وإعادة حساب التقييمات' };
+    });
+  }
+
   /** متوسط تقييم المنشأة من كل مراجعات طلباتها. */
   private async recomputeBusinessRating(tx: Prisma.TransactionClient, businessId: string) {
     const agg = await tx.review.aggregate({

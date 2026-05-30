@@ -14,11 +14,33 @@ export interface Review {
   driverRating: number | null;
   comment: string | null;
   createdAt: string;
+  order?: {
+    id: string;
+    customer: {
+      id: string;
+      name: string;
+      phone: string;
+    };
+    business: {
+      id: string;
+      name: string;
+    };
+    driver?: {
+      id: string;
+      user: {
+        id: string;
+        name: string;
+      };
+    } | null;
+  };
 }
 
 export const reviewsApi = {
   create: (dto: CreateReviewDto) =>
     http.post<Review>('/reviews', dto).then((r) => r.data),
+
+  list: () =>
+    http.get<Review[]>('/reviews').then((r) => r.data),
 
   byBusiness: (businessId: string) =>
     http
@@ -29,4 +51,7 @@ export const reviewsApi = {
     http
       .get<Review[]>('/reviews/driver', { params: { driverId } })
       .then((r) => r.data),
+
+  delete: (id: string) =>
+    http.delete<{ message: string }>(`/reviews/${id}`).then((r) => r.data),
 };
