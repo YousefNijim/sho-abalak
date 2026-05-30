@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Clock } from 'lucide-react-native';
+import { Home, Clock, UserCircle } from 'lucide-react-native';
 import { colors, fontFamily } from '../../src/theme';
 
 export default function TabsLayout() {
@@ -39,6 +39,14 @@ export default function TabsLayout() {
         options={{
           title: 'توصيلاتي',
           tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'حسابي',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <UserCircle size={size} color={color} />,
         }}
       />
     </Tabs>
