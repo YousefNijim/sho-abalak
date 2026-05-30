@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, Switch, Text, 
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { LogOut, User, Phone, Bike, MapPin } from 'lucide-react-native';
+import { User, Phone, Bike, MapPin } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { driversApi } from '@shu/api-client';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -49,6 +49,11 @@ export default function DriverProfile() {
         style: 'destructive',
         onPress: () => {
           logout();
+          // Clear all cached queries so the next user starts clean
+          queryClient.clear();
+          // dismissAll() pops back to the root Stack, then replace navigates to login
+          // without going through the splash 2.5s delay.
+          router.dismissAll();
           router.replace('/(auth)/login');
         },
       },
