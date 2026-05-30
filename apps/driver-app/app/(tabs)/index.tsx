@@ -29,7 +29,7 @@ export default function DriverHome() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; total: number }) => {
+    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) => {
       console.log('WS instant driver request received:', payload.orderId);
       router.push({
         pathname: '/request-alert',
@@ -37,6 +37,7 @@ export default function DriverHome() {
           orderId: payload.orderId,
           businessName: payload.businessName,
           areaName: payload.areaName,
+          addressDetail: payload.addressDetail ?? '',
           total: String(payload.total),
         },
       });

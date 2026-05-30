@@ -34,4 +34,14 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  @ApiPropertyOptional({ description: 'اسم منطقة التوصيل — يُحفظ على الطلب كلقطة' })
+  @IsOptional()
+  @IsString()
+  deliveryAreaName?: string;
+
+  @ApiPropertyOptional({ description: 'تفاصيل عنوان التوصيل — يُحفظ على الطلب كلقطة' })
+  @IsOptional()
+  @IsString()
+  deliveryAddressDetail?: string;
 }

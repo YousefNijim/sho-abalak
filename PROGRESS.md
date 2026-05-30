@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 18 (Saved Addresses CRUD — branch feat/ux-fixes)
+**Current phase:** Phase 19 (Delivery address flow — branch feat/ux-fixes)
 
 ---
 
@@ -168,6 +168,17 @@
 12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
 13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
 14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
+18. ~~**Delivery Address Flow (Phase 19 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Selected delivery address flows end-to-end from saved addresses → order → all three apps:
+    - **Area required:** Saved-address form now requires area selection. Inline errors (`الرجاء اختيار المنطقة`, etc.) shown per-field without `Alert.alert`. "Clear area" option removed from picker. `FormErrors` type wired to `setFormErrors` with live clearing on field change.
+    - **DB snapshot:** `deliveryAreaName String?` + `deliveryAddressDetail String?` added to `Order` model. Migration `20260530000003_order_delivery_address` applied. These are snapshot fields — preserved even if the user later edits/deletes their saved address.
+    - **API:** `CreateOrderDto` accepts both new fields (optional, validated). `orders.service.ts` persists them on `order.create`. `DriverRequestPayload` in `shared-types` + `socket.gateway.ts` extended with `addressDetail?`. Both `sendDriverRequest` and `updateStatus` PICKED_UP paths send the snapshot address in the socket payload.
+    - **api-client:** `Order` type gains `deliveryAreaName` + `deliveryAddressDetail`. `CreateOrderDto` gains both fields.
+    - **Cart:** Queries `addressesApi.list()` for full address objects (with area name). `handleConfirm` passes `deliveryAreaName` (`city — name`) + `deliveryAddressDetail` (address text) into `createOrder`. Falls back to cart's `areaId` if no saved address selected.
+    - **Business order detail:** Replaces `customer.area.name` proxy with `deliveryAreaName` + `deliveryAddressDetail` in a dedicated "عنوان التوصيل" card. Only shown when data exists.
+    - **Driver request-alert:** Receives `addressDetail` from socket params. Shows "عنوان التوصيل" block with `areaName` (Bold) + `addressDetail` (muted) + `MapPin` icon.
+    - **Driver active-delivery:** Customer card now shows `order.deliveryAreaName` + `order.deliveryAddressDetail` in a branded orange-tinted block labeled "عنوان التوصيل". Falls back to `customer.area.name` if no snapshot exists (backward compat with old orders).
+    - **Customer tracking:** "عنوان التوصيل" card inserted above order summary. Shows `deliveryAreaName` (Bold) + `deliveryAddressDetail` (muted) with `MapPin` icon in a white card with border.
+    - **Verified:** `nest build` ✅, `tsc --noEmit` on customer/business/driver ✅ — no new errors in changed files.
 17. ~~**Saved Addresses CRUD (Phase 18 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Full end-to-end addresses CRUD for customer app:
     - **DB:** New `SavedAddress` model in Prisma (`id, userId, label, detail, areaId?, createdAt`). Migration `20260530000002_saved_addresses` applied. `User` + `Area` got `savedAddresses[]` relations.
     - **API:** New `addresses` NestJS module. `GET /addresses/me` (list own), `POST /addresses` (create), `PATCH /addresses/:id` (update, ownership-checked), `DELETE /addresses/:id` (delete, ownership-checked). All guarded by `JwtAuthGuard`. Registered in `app.module.ts`. Visible in Swagger at `/docs`.

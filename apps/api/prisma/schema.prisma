@@ -150,10 +150,12 @@ model Order {
   driverId          String?
   driver            Driver?              @relation(fields: [driverId], references: [id])
   pendingDriverId   String?
-  status            OrderStatus          @default(PENDING)
-  paymentMethod PaymentMethod
-  total         Decimal              @db.Decimal(10, 2)
-  note          String?
+  status                OrderStatus          @default(PENDING)
+  paymentMethod         PaymentMethod
+  total                 Decimal              @db.Decimal(10, 2)
+  note                  String?
+  deliveryAreaName      String?
+  deliveryAddressDetail String?
   items         OrderItem[]
   statusHistory OrderStatusHistory[]
   review        Review?

@@ -30,6 +30,7 @@ import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type FormState = { label: string; detail: string; areaId: string };
+type FormErrors = { label?: string; detail?: string; areaId?: string };
 const EMPTY_FORM: FormState = { label: '', detail: '', areaId: '' };
 
 export default function AddressesScreen() {
@@ -45,6 +46,7 @@ export default function AddressesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [areaPicker, setAreaPicker] = useState(false);
 
   // ── data ───────────────────────────────────────────────────────────
@@ -110,21 +112,23 @@ export default function AddressesScreen() {
     setModalVisible(false);
     setEditing(null);
     setForm(EMPTY_FORM);
+    setFormErrors({});
   };
 
   const handleSubmit = () => {
-    if (!form.label.trim()) {
-      Alert.alert('تنبيه', 'الرجاء إدخال اسم / تسمية للعنوان');
+    const errors: FormErrors = {};
+    if (!form.label.trim()) errors.label = 'الرجاء إدخال اسم / تسمية للعنوان';
+    if (!form.detail.trim()) errors.detail = 'الرجاء إدخال تفاصيل العنوان';
+    if (!form.areaId) errors.areaId = 'الرجاء اختيار المنطقة';
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
-    if (!form.detail.trim()) {
-      Alert.alert('تنبيه', 'الرجاء إدخال تفاصيل العنوان');
-      return;
-    }
+    setFormErrors({});
     const dto: CreateAddressDtoClient = {
       label: form.label.trim(),
       detail: form.detail.trim(),
-      areaId: form.areaId || undefined,
+      areaId: form.areaId,
     };
     if (editing) {
       updateMut.mutate({ id: editing.id, dto });
@@ -255,37 +259,43 @@ export default function AddressesScreen() {
           {/* Label */}
           <Text style={styles.fieldLabel}>التسمية *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, !!formErrors.label && styles.inputError]}
             placeholder="مثلاً: المنزل، العمل، بيت العائلة..."
             placeholderTextColor={colors.textMuted}
             value={form.label}
-            onChangeText={(v) => setForm((f) => ({ ...f, label: v }))}
+            onChangeText={(v) => { setForm((f) => ({ ...f, label: v })); setFormErrors((e) => ({ ...e, label: undefined })); }}
             textAlign="right"
             returnKeyType="next"
           />
+          {!!formErrors.label && <Text style={styles.fieldError}>{formErrors.label}</Text>}
 
           {/* Detail */}
           <Text style={styles.fieldLabel}>تفاصيل العنوان *</Text>
           <TextInput
-            style={[styles.input, styles.inputMulti]}
+            style={[styles.input, styles.inputMulti, !!formErrors.detail && styles.inputError]}
             placeholder="الشارع، المبنى، الطابق..."
             placeholderTextColor={colors.textMuted}
             value={form.detail}
-            onChangeText={(v) => setForm((f) => ({ ...f, detail: v }))}
+            onChangeText={(v) => { setForm((f) => ({ ...f, detail: v })); setFormErrors((e) => ({ ...e, detail: undefined })); }}
             textAlign="right"
             multiline
             textAlignVertical="top"
           />
+          {!!formErrors.detail && <Text style={styles.fieldError}>{formErrors.detail}</Text>}
 
-          {/* Area picker */}
-          <Text style={styles.fieldLabel}>المنطقة / منطقة التوصيل</Text>
-          <Pressable style={styles.selectRow} onPress={() => setAreaPicker(true)}>
-            <ChevronDown size={16} color={colors.textMuted} />
-            <Text style={[styles.selectText, !selectedArea && styles.selectPlaceholder]}>
-              {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة (اختياري)'}
+          {/* Area picker — required */}
+          <Text style={styles.fieldLabel}>المنطقة * (مطلوبة للتوصيل)</Text>
+          <Pressable
+            style={[styles.selectRow, !!formErrors.areaId && styles.selectRowError]}
+            onPress={() => { setAreaPicker(true); setFormErrors((e) => ({ ...e, areaId: undefined })); }}
+          >
+            <ChevronDown size={16} color={formErrors.areaId ? colors.error : colors.textMuted} />
+            <Text style={[styles.selectText, !selectedArea && styles.selectPlaceholder, !!formErrors.areaId && styles.selectTextError]}>
+              {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة'}
             </Text>
-            <MapPin size={16} color={colors.textMuted} />
+            <MapPin size={16} color={formErrors.areaId ? colors.error : colors.textMuted} />
           </Pressable>
+          {!!formErrors.areaId && <Text style={styles.fieldError}>{formErrors.areaId}</Text>}
 
           {/* Submit */}
           <Pressable
@@ -315,19 +325,6 @@ export default function AddressesScreen() {
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>اختر المنطقة</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Clear option */}
-              <Pressable
-                style={[styles.areaRow, !form.areaId && styles.areaRowActive]}
-                onPress={() => { setForm((f) => ({ ...f, areaId: '' })); setAreaPicker(false); }}
-              >
-                <View style={[styles.areaIconCircle, !form.areaId && styles.areaIconCircleActive]}>
-                  <MapPin size={16} color={!form.areaId ? colors.primary : colors.textMuted} />
-                </View>
-                <Text style={[styles.areaRowText, !form.areaId && styles.areaRowTextActive]}>
-                  بدون تحديد منطقة
-                </Text>
-                {!form.areaId && <Check size={16} color={colors.primary} />}
-              </Pressable>
               {areas.map((a) => {
                 const active = form.areaId === a.id;
                 return (
@@ -627,5 +624,22 @@ const styles = StyleSheet.create({
   areaRowTextActive: {
     fontFamily: fontFamily.bold,
     color: colors.primary,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  selectRowError: {
+    borderColor: colors.error,
+  },
+  selectTextError: {
+    color: colors.error,
+  },
+  fieldError: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: colors.error,
+    textAlign: 'right',
+    marginTop: -spacing[3],
+    marginBottom: spacing[3],
   },
 });

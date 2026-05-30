@@ -125,9 +125,21 @@ export default function OrderDetail() {
           </View>
         )}
 
+        {/* Delivery address */}
+        {(order.deliveryAreaName || order.deliveryAddressDetail) && (
+          <View style={styles.addressCard}>
+            <Text style={styles.addressCardTitle}>عنوان التوصيل</Text>
+            {order.deliveryAreaName && (
+              <Text style={styles.addressAreaName}>{order.deliveryAreaName}</Text>
+            )}
+            {order.deliveryAddressDetail && (
+              <Text style={styles.addressDetail}>{order.deliveryAddressDetail}</Text>
+            )}
+          </View>
+        )}
+
         {/* Info */}
         <View style={styles.infoCard}>
-          <Info label="المنطقة" value={`${order.customer?.area?.name || 'المصيون'}`} />
           <Info label="طريقة الدفع" value={order.paymentMethod === 'CASH' ? 'نقدي عند الاستلام' : 'دفع إلكتروني'} />
           <Info label="الإجمالي" value={`${order.total} ₪`} bold />
         </View>
@@ -209,6 +221,10 @@ const styles = StyleSheet.create({
   note: { backgroundColor: '#FEF9C3', borderRadius: radius.md, padding: spacing[3] },
   noteText: { color: '#854D0E', fontSize: fontSizes.sm, textAlign: 'right' },
   infoCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
+  addressCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[1] },
+  addressCardTitle: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginBottom: spacing[1] },
+  addressAreaName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  addressDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', lineHeight: 20 },
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
   infoValue: { color: colors.textPrimary, fontSize: fontSizes.base },
   footer: { padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },

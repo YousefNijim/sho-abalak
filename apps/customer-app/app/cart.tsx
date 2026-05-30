@@ -7,7 +7,7 @@ import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
-import { businessesApi, ordersApi } from '@shu/api-client';
+import { businessesApi, ordersApi, addressesApi } from '@shu/api-client';
 import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
 import type { CreateOrderDto } from '@shu/api-client';
 import { Image } from 'expo-image';
@@ -31,10 +31,18 @@ export default function Cart() {
   const [notes, setNotes] = useState('');
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
 
-  const addresses = useSavedAddressesStore((s) => s.addresses);
+  const storeAddresses = useSavedAddressesStore((s) => s.addresses);
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
-  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
+  const selectedStoreAddress = storeAddresses.find((a) => a.id === selectedAddressId) ?? storeAddresses[0] ?? null;
+
+  // Fetch full addresses (with area object) from API for area name snapshot
+  const { data: apiAddresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: () => addressesApi.list(),
+  });
+  const selectedAddress = apiAddresses.find((a) => a.id === selectedStoreAddress?.id ||
+    (storeAddresses[0] && a.label === storeAddresses[0]?.label)) ?? apiAddresses[0] ?? null;
 
   // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -70,17 +78,28 @@ export default function Cart() {
   });
 
   const handleConfirm = () => {
-    if (!businessId || !areaId) return;
+    if (!businessId) return;
+    // Use selected saved address areaId for delivery fee calc; fall back to cart's areaId
+    const deliveryAreaId = selectedAddress?.areaId ?? areaId ?? '';
+    if (!deliveryAreaId) {
+      Alert.alert('تنبيه', 'الرجاء اختيار عنوان توصيل أولاً');
+      return;
+    }
+    const areaLabel = selectedAddress?.area
+      ? `${selectedAddress.area.city} — ${selectedAddress.area.name}`
+      : undefined;
     createOrder.mutate({
       businessId,
-      areaId,
+      areaId: deliveryAreaId,
       paymentMethod: payment,
       items: items.map((it) => ({
         productId: it.productId,
         quantity: it.quantity,
       })),
-      notes: notes.trim() || undefined,
-    } as CreateOrderDto & { notes?: string });
+      note: notes.trim() || undefined,
+      deliveryAreaName: areaLabel,
+      deliveryAddressDetail: selectedAddress?.detail,
+    } as CreateOrderDto);
   };
 
   if (items.length === 0) {
@@ -134,16 +153,16 @@ export default function Cart() {
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
           <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
-            {addresses.length === 0 ? (
+            {apiAddresses.length === 0 ? (
               <View style={styles.emptyAddresses}>
                 <MapPin size={40} color={colors.border} />
                 <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
                 <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
               </View>
             ) : (
-              addresses.map((a) => {
+              apiAddresses.map((a) => {
                 const isActive = (selectedAddress?.id ?? null) === a.id ||
-                  (selectedAddressId === null && addresses[0]?.id === a.id);
+                  (selectedAddressId === null && apiAddresses[0]?.id === a.id);
                 return (
                   <Pressable
                     key={a.id}

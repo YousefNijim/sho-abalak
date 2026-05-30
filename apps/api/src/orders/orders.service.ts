@@ -68,6 +68,8 @@ export class OrdersService {
         paymentMethod: dto.paymentMethod,
         total,
         note: dto.note ?? null,
+        deliveryAreaName: dto.deliveryAreaName ?? null,
+        deliveryAddressDetail: dto.deliveryAddressDetail ?? null,
         items: { create: itemData },
         statusHistory: { create: { status: OrderStatus.PENDING, changedBy: customerId } },
         payment: { create: paymentCreate },
@@ -154,7 +156,8 @@ export class OrdersService {
       this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
         orderId: updatedOrder.id,
         businessName: updatedOrder.business?.name || 'منشأة تجارية',
-        areaName: updatedOrder.customer?.area?.name || 'العنوان المسجل',
+        areaName: updatedOrder.deliveryAreaName || updatedOrder.customer?.area?.name || 'العنوان المسجل',
+        addressDetail: updatedOrder.deliveryAddressDetail || '',
         total: Number(updatedOrder.total),
       });
     }
@@ -192,11 +195,12 @@ export class OrdersService {
       data: { pendingDriverId: driverId },
     });
 
-    // Emit request to driver's socket room
+    // Emit request to driver's socket room — include full delivery address snapshot
     this.socketGateway.emitDriverRequest(driver.user.id, {
       orderId: order.id,
       businessName: order.business?.name || 'منشأة تجارية',
-      areaName: order.customer?.area?.name || 'العنوان المسجل',
+      areaName: order.deliveryAreaName || order.customer?.area?.name || 'العنوان المسجل',
+      addressDetail: order.deliveryAddressDetail || '',
       total: Number(order.total),
     });
 

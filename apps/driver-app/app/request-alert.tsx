@@ -3,15 +3,17 @@ import { StyleSheet, Text, View, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
+import { MapPin } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { ordersApi } from '@shu/api-client';
 
 export default function RequestAlert() {
   const router = useRouter();
-  const { orderId, businessName, areaName, total } = useLocalSearchParams<{
+  const { orderId, businessName, areaName, addressDetail, total } = useLocalSearchParams<{
     orderId: string;
     businessName: string;
     areaName: string;
+    addressDetail: string;
     total: string;
   }>();
 
@@ -82,10 +84,18 @@ export default function RequestAlert() {
 
       <View style={styles.card}>
         <Row label="المنشأة" value={businessName || 'مطعم القدس'} />
-        <Row label="المنطقة" value={areaName || 'رام الله - المصيون'} />
-        <Row label="المسافة التقديرية" value="~2 كم" />
         <Row label="مبلغ الطلب" value={`${total || '45'} ₪`} />
-        <Row label="طريقة الدفع" value="نقدي" />
+        <View style={styles.divider} />
+        <Text style={styles.addressTitle}>عنوان التوصيل</Text>
+        <View style={styles.addressBlock}>
+          <MapPin size={16} color={colors.primary} style={{ marginLeft: spacing[2] }} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.addressAreaName}>{areaName || 'منطقة التوصيل'}</Text>
+            {!!addressDetail && (
+              <Text style={styles.addressDetail}>{addressDetail}</Text>
+            )}
+          </View>
+        </View>
       </View>
 
       <Text style={styles.timer}>{mm}:{ss}</Text>
@@ -128,4 +138,9 @@ const styles = StyleSheet.create({
   value: { color: colors.textPrimary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
   timer: { fontSize: 40, fontFamily: fontFamily.extrabold, color: colors.primary, marginVertical: spacing[5] },
   actions: { flexDirection: 'row', gap: spacing[3], width: '100%' },
+  divider: { height: 1, backgroundColor: colors.border },
+  addressTitle: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right' },
+  addressBlock: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: spacing[2] },
+  addressAreaName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  addressDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
 });

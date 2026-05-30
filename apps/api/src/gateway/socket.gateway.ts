@@ -93,7 +93,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   /** Dispatches delivery request directly to assigned driver's app */
-  emitDriverRequest(driverUserId: string, payload: { orderId: string; businessName: string; areaName: string; total: number }) {
+  emitDriverRequest(driverUserId: string, payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) {
     this.logger.log(`Emit driver request to driver user:${driverUserId} for order:${payload.orderId}`);
     this.server.to(`user:${driverUserId}`).emit(SocketEvents.DRIVER_REQUEST, payload);
   }

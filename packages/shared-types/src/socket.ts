@@ -24,6 +24,7 @@ export interface DriverRequestPayload {
   orderId: string;
   businessName: string;
   areaName: string;
+  addressDetail?: string;
   total: number;
 }
 

@@ -124,9 +124,16 @@ export default function ActiveDelivery() {
             <Text style={styles.cardTitle}>👤 الزبون (نقطة التسليم)</Text>
           </View>
           <Text style={styles.nameText}>{order.customer?.name || 'زبون شو عبالك'}</Text>
-          <Text style={styles.muted}>
-            المنطقة/العنوان: {order.customer?.area?.city} - {order.customer?.area?.name || 'العنوان المسجل'}
-          </Text>
+          {/* Delivery address — snapshot stored on order */}
+          <View style={styles.deliveryAddressBlock}>
+            <Text style={styles.deliveryAddressLabel}>عنوان التوصيل</Text>
+            <Text style={styles.deliveryAreaName}>
+              {order.deliveryAreaName || order.customer?.area?.name || 'المنطقة'}
+            </Text>
+            {!!order.deliveryAddressDetail && (
+              <Text style={styles.deliveryAddressDetail}>{order.deliveryAddressDetail}</Text>
+            )}
+          </View>
           {order.customer?.phone ? (
             <Text style={styles.muted}>هاتف: {order.customer.phone}</Text>
           ) : null}
@@ -200,4 +207,8 @@ const styles = StyleSheet.create({
   electronicCallout: { backgroundColor: '#DCFCE7', borderColor: '#BBF7D0' },
   electronicText: { color: '#166534' },
   footer: { padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
+  deliveryAddressBlock: { backgroundColor: colors.primary + '0D', borderRadius: radius.md, padding: spacing[3], marginVertical: spacing[2], borderWidth: 1, borderColor: colors.primary + '30' },
+  deliveryAddressLabel: { fontFamily: fontFamily.semibold, fontSize: fontSizes.xs, color: colors.primary, textAlign: 'right', marginBottom: 4 },
+  deliveryAreaName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  deliveryAddressDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
 });

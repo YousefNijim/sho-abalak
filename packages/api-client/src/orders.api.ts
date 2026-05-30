@@ -11,6 +11,8 @@ export interface CreateOrderDto {
   paymentMethod: 'CASH' | 'ELECTRONIC';
   items: OrderItem[];
   note?: string;
+  deliveryAreaName?: string;
+  deliveryAddressDetail?: string;
 }
 
 export interface UpdateOrderStatusDto {
@@ -27,6 +29,8 @@ export interface Order {
   paymentMethod: string;
   total: number;
   note: string | null;
+  deliveryAreaName: string | null;
+  deliveryAddressDetail: string | null;
   createdAt: string;
   items?: {
     id: string;

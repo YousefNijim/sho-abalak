@@ -282,6 +282,22 @@ export default function Tracking() {
           </View>
         )}
 
+        {/* Delivery address */}
+        {(order.deliveryAreaName || order.deliveryAddressDetail) && (
+          <View style={styles.deliveryCard}>
+            <View style={styles.deliveryCardHeader}>
+              <MapPin size={16} color={colors.primary} />
+              <Text style={styles.deliveryCardTitle}>عنوان التوصيل</Text>
+            </View>
+            {order.deliveryAreaName && (
+              <Text style={styles.deliveryAreaName}>{order.deliveryAreaName}</Text>
+            )}
+            {order.deliveryAddressDetail && (
+              <Text style={styles.deliveryAddressDetail}>{order.deliveryAddressDetail}</Text>
+            )}
+          </View>
+        )}
+
         {/* Order Summary (Glassmorphism style) */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>تفاصيل الطلب</Text>
@@ -646,5 +662,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  deliveryCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing[4],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing[1],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  deliveryCardHeader: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: spacing[2],
+    marginBottom: spacing[1],
+  },
+  deliveryCardTitle: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    textAlign: 'right',
+  },
+  deliveryAreaName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  deliveryAddressDetail: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'right',
+    lineHeight: 20,
   },
 });
