@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 17 (Address selector redesign — branch feat/ux-fixes)
+**Current phase:** Phase 18 (Saved Addresses CRUD — branch feat/ux-fixes)
 
 ---
 
@@ -168,6 +168,15 @@
 12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
 13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
 14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
+17. ~~**Saved Addresses CRUD (Phase 18 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Full end-to-end addresses CRUD for customer app:
+    - **DB:** New `SavedAddress` model in Prisma (`id, userId, label, detail, areaId?, createdAt`). Migration `20260530000002_saved_addresses` applied. `User` + `Area` got `savedAddresses[]` relations.
+    - **API:** New `addresses` NestJS module. `GET /addresses/me` (list own), `POST /addresses` (create), `PATCH /addresses/:id` (update, ownership-checked), `DELETE /addresses/:id` (delete, ownership-checked). All guarded by `JwtAuthGuard`. Registered in `app.module.ts`. Visible in Swagger at `/docs`.
+    - **api-client:** `addressesApi` added to `packages/api-client` with `SavedAddress` type and `CreateAddressDtoClient` / `UpdateAddressDtoClient` exports.
+    - **Screen (`addresses.tsx`):** Fully rewritten — React Query for list/mutations, slide-up modal for add/edit (label + detail + area picker), delete with `Alert.alert` confirm, loading/empty/error states, `ActivityIndicator` per button while in-flight, all buttons disabled during mutations. Area picker uses same row/check/tint style as Home/Cart selector.
+    - **Store sync:** On create → pushes to `useSavedAddressesStore`; on delete → removes matching entry from store so Home/Cart picker stays in sync.
+    - **Gotchas:** DTO fields need `!` (definite assignment) for `strictPropertyInitialization` — NestJS standard. `prisma generate` requires stopping any node holding port 3001 first (DLL lock on Windows).
+    - **Verified:** `nest build` ✅ clean. `tsc --noEmit` on customer-app ✅ no new errors in changed files.
+    - **Operations:** List ✅ / Add ✅ / Edit ✅ / Delete ✅ — all wired to real API endpoints.
 16. ~~**Address Selector Redesign (Phase 17 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Customer app address selector now shows saved addresses instead of delivery zones:
     - **New store:** `src/stores/saved-addresses.store.ts` — Zustand persist (AsyncStorage), `SavedAddress { id, label, detail, areaId }`, `add/remove/select` actions.
     - **Home address bar:** Compact two-line row (muted "التوصيل إلى" label + bold address name + MapPin icon in orange circle + ChevronDown). Taps open the bottom sheet.

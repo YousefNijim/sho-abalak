@@ -12,6 +12,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { UsersModule } from './users/users.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { AddressesModule } from './addresses/addresses.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -29,6 +30,7 @@ import { HealthController } from './health.controller';
     UsersModule,
     GatewayModule,
     UploadsModule,
+    AddressesModule,
   ],
   controllers: [HealthController],
 })

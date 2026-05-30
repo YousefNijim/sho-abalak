@@ -68,9 +68,10 @@ model Area {
   city        String
   name        String
   deliveryFee Decimal    @db.Decimal(10, 2)
-  users       User[]
-  businesses  Business[]
-  drivers     Driver[]
+  users           User[]
+  businesses      Business[]
+  drivers         Driver[]
+  savedAddresses  SavedAddress[]
 
   @@map("areas")
 }
@@ -85,10 +86,11 @@ model User {
   password  String
   areaId    String?
   area      Area?      @relation(fields: [areaId], references: [id])
-  business  Business?
-  driver    Driver?
-  orders    Order[]    @relation("CustomerOrders")
-  createdAt DateTime   @default(now())
+  business        Business?
+  driver          Driver?
+  orders          Order[]         @relation("CustomerOrders")
+  savedAddresses  SavedAddress[]
+  createdAt       DateTime        @default(now())
 
   @@map("users")
 }
@@ -194,6 +196,19 @@ model Review {
   createdAt      DateTime @default(now())
 
   @@map("reviews")
+}
+
+model SavedAddress {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  detail    String
+  areaId    String?
+  area      Area?    @relation(fields: [areaId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("saved_addresses")
 }
 
 model Payment {

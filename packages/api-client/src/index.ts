@@ -1,5 +1,7 @@
 export { http, setAuthToken, BASE_URL } from './http';
 export { authApi } from './auth.api';
+export { addressesApi } from './addresses.api';
+export type { SavedAddress, CreateAddressDto as CreateAddressDtoClient, UpdateAddressDto as UpdateAddressDtoClient } from './addresses.api';
 export { areasApi } from './areas.api';
 export { businessesApi } from './businesses.api';
 export { productsApi } from './products.api';
