@@ -49,11 +49,7 @@ export default function DriverProfile() {
         style: 'destructive',
         onPress: () => {
           logout();
-          // Clear all cached queries so the next user starts clean
           queryClient.clear();
-          // dismissAll() pops back to the root Stack, then replace navigates to login
-          // without going through the splash 2.5s delay.
-          router.dismissAll();
           router.replace('/(auth)/login');
         },
       },
