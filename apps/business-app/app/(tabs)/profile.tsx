@@ -44,6 +44,15 @@ const CATEGORIES = [
 const DEFAULT_OPEN = '09:00 ص';
 const DEFAULT_CLOSE = '11:00 م';
 
+/** Alert.alert is a no-op on react-native-web — fall back to window.alert there. */
+function notify(title: string, message?: string) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.alert(message ? `${title}\n\n${message}` : title);
+  } else {
+    Alert.alert(title, message);
+  }
+}
+
 export default function ProfileTab() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
@@ -96,7 +105,7 @@ export default function ProfileTab() {
     },
     onError: (err: any) => {
       const msg = err.response?.data?.message || 'فشل في حفظ التغييرات';
-      Alert.alert('خطأ', Array.isArray(msg) ? msg.join('\n') : msg);
+      notify('خطأ', Array.isArray(msg) ? msg.join('\n') : msg);
     },
   });
 
@@ -105,7 +114,7 @@ export default function ProfileTab() {
   const pickImage = async (target: 'cover' | 'logo') => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('تحتاج صلاحية الوصول للمعرض لتغيير الصورة');
+      notify('تحتاج صلاحية الوصول للمعرض لتغيير الصورة');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -121,9 +130,12 @@ export default function ProfileTab() {
   };
 
   const handleSave = async () => {
-    if (!business) return;
+    if (!business) {
+      notify('تعذّر الحفظ', 'لم يتم تحميل بيانات المتجر بعد. تأكد من الاتصال ثم أعد المحاولة.');
+      return;
+    }
     if (!name.trim()) {
-      Alert.alert('تنبيه', 'اسم المتجر لا يمكن أن يكون فارغاً');
+      notify('تنبيه', 'اسم المتجر لا يمكن أن يكون فارغاً');
       return;
     }
 
@@ -142,7 +154,7 @@ export default function ProfileTab() {
         if (coverUri) dto.imageUrl = await uploadImage(coverUri);
         if (logoLocalUri) dto.logoUrl = await uploadImage(logoLocalUri);
       } catch {
-        Alert.alert('خطأ', 'فشل رفع الصورة، يرجى المحاولة مرة أخرى');
+        notify('خطأ', 'فشل رفع الصورة، يرجى المحاولة مرة أخرى');
         setUploading(false);
         return;
       } finally {
@@ -154,6 +166,13 @@ export default function ProfileTab() {
   };
 
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      // Alert.alert is a no-op on react-native-web — use the native confirm.
+      if (typeof window !== 'undefined' && window.confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+        logout();
+      }
+      return;
+    }
     Alert.alert('تسجيل الخروج', 'هل أنت متأكد من تسجيل الخروج؟', [
       { text: 'إلغاء', style: 'cancel' },
       { text: 'تسجيل الخروج', style: 'destructive', onPress: logout },
