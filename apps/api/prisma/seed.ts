@@ -128,22 +128,32 @@ async function upsertUser(data: {
 async function upsertBusiness(params: {
   ownerId: string;
   name: string;
-  category: 'RESTAURANT' | 'CAFE' | 'STORE';
+  type: 'FOOD' | 'STORE';
+  tagNames?: string[];
   areaId: string;
   rating: number;
   products: Array<{ name: string; description: string; price: number; category: string }>;
 }) {
+  // Resolve predefined tags by name (seeded in the migration) for this type.
+  const tags = params.tagNames?.length
+    ? await prisma.tag.findMany({ where: { type: params.type, name: { in: params.tagNames } } })
+    : [];
+  const tagRefs = tags.map((t: { id: string }) => ({ id: t.id }));
+  const tagsCreate = tagRefs.length ? { tags: { connect: tagRefs } } : {};
+  const tagsUpdate = tagRefs.length ? { tags: { set: tagRefs } } : {};
+
   // Upsert the business record itself
   const biz = await prisma.business.upsert({
     where: { ownerId: params.ownerId },
-    update: { name: params.name, isOpen: true, rating: params.rating },
+    update: { name: params.name, isOpen: true, rating: params.rating, type: params.type, ...tagsUpdate },
     create: {
       ownerId: params.ownerId,
       name: params.name,
-      category: params.category,
+      type: params.type,
       areaId: params.areaId,
       isOpen: true,
       rating: params.rating,
+      ...tagsCreate,
     },
   });
 
@@ -191,13 +201,13 @@ async function seedDemo(areaMap: Map<string, string>) {
 
   // ── Business 1: مطعم القدس ──
   const bUser1 = await upsertUser({ phone: '0599000002', name: 'صاحب مطعم القدس',   password: 'test1234', role: 'BUSINESS', areaId: masyonId });
-  await upsertBusiness({ ownerId: bUser1.id, name: 'مطعم القدس',   category: 'RESTAURANT', areaId: masyonId, rating: 4.8, products: PRODUCTS_RESTAURANT });
-  console.log('✅ Business 0599000002 / test1234  → مطعم القدس (RESTAURANT, 6 products, مصيون)');
+  await upsertBusiness({ ownerId: bUser1.id, name: 'مطعم القدس',   type: 'FOOD', tagNames: ['شرقي', 'شاورما'], areaId: masyonId, rating: 4.8, products: PRODUCTS_RESTAURANT });
+  console.log('✅ Business 0599000002 / test1234  → مطعم القدس (FOOD: شرقي/شاورما, 6 products, مصيون)');
 
   // ── Business 2: كافيه الصباح ──
   const bUser2 = await upsertUser({ phone: '0599000004', name: 'صاحبة كافيه الصباح', password: 'test1234', role: 'BUSINESS', areaId: centerId });
-  await upsertBusiness({ ownerId: bUser2.id, name: 'كافيه الصباح', category: 'CAFE',       areaId: centerId,  rating: 4.5, products: PRODUCTS_CAFE });
-  console.log('✅ Business 0599000004 / test1234  → كافيه الصباح (CAFE, 6 products, المركز)');
+  await upsertBusiness({ ownerId: bUser2.id, name: 'كافيه الصباح', type: 'FOOD', tagNames: ['كافيه', 'حلويات'], areaId: centerId,  rating: 4.5, products: PRODUCTS_CAFE });
+  console.log('✅ Business 0599000004 / test1234  → كافيه الصباح (FOOD: كافيه/حلويات, 6 products, المركز)');
 
   // ── Driver 1 ──
   const dUser1 = await upsertUser({ phone: '0599000003', name: 'محمد السائق', password: 'test1234', role: 'DRIVER', areaId: masyonId });

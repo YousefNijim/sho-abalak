@@ -53,10 +53,10 @@ enum DriverStatus {
   OFFLINE
 }
 
-enum BusinessCategory {
-  RESTAURANT
+// القسم الأعلى للمنشأة: مطاعم/مأكولات/كافيهات (FOOD) أو متاجر/سوبرماركت (STORE)
+enum BusinessType {
+  FOOD
   STORE
-  CAFE
 }
 
 enum DeliveryType {
@@ -101,7 +101,8 @@ model Business {
   ownerId        String           @unique
   owner          User             @relation(fields: [ownerId], references: [id])
   name           String
-  category       BusinessCategory
+  type           BusinessType     @default(FOOD)
+  tags           Tag[]            @relation("BusinessTags")
   areaId         String
   area           Area             @relation(fields: [areaId], references: [id])
   deliveryType   DeliveryType     @default(PLATFORM)
@@ -120,6 +121,17 @@ model Business {
   orders         Order[]
 
   @@map("businesses")
+}
+
+// وسوم المنشأة (شرقي، شاورما، سوبرماركت...) — قوائم معرّفة مسبقاً حسب القسم
+model Tag {
+  id         String       @id @default(uuid())
+  name       String
+  type       BusinessType
+  businesses Business[]   @relation("BusinessTags")
+
+  @@unique([name, type])
+  @@map("tags")
 }
 
 model Product {

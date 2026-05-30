@@ -1,5 +1,5 @@
 import {
-  BusinessCategory,
+  BusinessType,
   DeliveryType,
   DriverStatus,
   OrderStatus,
@@ -27,11 +27,18 @@ export interface User {
   createdAt: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  type: BusinessType;
+}
+
 export interface Business {
   id: string;
   ownerId: string;
   name: string;
-  category: BusinessCategory;
+  type: BusinessType;
+  tags?: Tag[];
   areaId: string;
   deliveryType: DeliveryType;
   imageUrl: string | null;

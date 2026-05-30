@@ -47,10 +47,10 @@ export enum DriverStatus {
   OFFLINE = 'OFFLINE',
 }
 
-export enum BusinessCategory {
-  RESTAURANT = 'RESTAURANT',
+// القسم الأعلى للمنشأة: مأكولات (FOOD) أو متاجر (STORE)
+export enum BusinessType {
+  FOOD = 'FOOD',
   STORE = 'STORE',
-  CAFE = 'CAFE',
 }
 
 export enum DeliveryType {
