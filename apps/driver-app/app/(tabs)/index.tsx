@@ -102,10 +102,10 @@ export default function DriverHome() {
     }
   });
 
-  const earnings = completedToday.reduce((acc: number, o: any) => {
+  const earnings = Math.round(completedToday.reduce((acc: number, o: any) => {
     // Driver gets the delivery fee portion
     return acc + Number(o.business?.area?.deliveryFee ?? 5);
-  }, 0);
+  }, 0) * 100) / 100;
 
   return (
     <ScrollView

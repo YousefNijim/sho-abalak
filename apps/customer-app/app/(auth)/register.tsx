@@ -6,18 +6,23 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TextInput,
+  Platform,
+  ActivityIndicator
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { ChevronDown, Check, MapPin } from 'lucide-react-native';
-import { Button, Input } from '@shu/ui-components/native';
+import { ChevronDown, Check, MapPin, User as UserIcon, Phone, Lock, LockKeyhole, Eye, EyeOff, ArrowRight } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { areasApi } from '@shu/api-client';
 import { useAuthStore } from '../../src/stores/auth.store';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 
 export default function Register() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const register = useAuthStore((s) => s.register);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -30,6 +35,7 @@ export default function Register() {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { data: areas = [] } = useQuery({
     queryKey: ['areas'],
@@ -74,85 +80,179 @@ export default function Register() {
   };
 
   return (
-    <>
+    <View style={styles.container}>
+      {/* Top AppBar */}
+      <View style={[styles.appBar, { paddingTop: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <ArrowRight size={24} color={colors.primary} />
+        </Pressable>
+        <Text style={styles.appBarTitle}>شو عبالك؟</Text>
+        <View style={styles.appBarIconWrap}>
+          <UserIcon size={20} color="#4e2200" />
+        </View>
+      </View>
+
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing[8] }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text style={styles.logo}>
-            <Text style={{ color: colors.primary }}>شو </Text>
-            <Text style={{ color: colors.secondary }}>عبالك؟</Text>
-          </Text>
-          <Text style={styles.subtitle}>إنشاء حساب جديد</Text>
+          <Text style={styles.heroTitle}>إنشاء حساب جديد</Text>
+          <Text style={styles.heroSubtitle}>انضم إلينا واستمتع بأشهى المأكولات والخدمات في فلسطين</Text>
         </View>
 
+        {/* Registration Form */}
         <View style={styles.form}>
-          <Input
-            label="الاسم الكامل"
-            placeholder="مثال: أحمد محمد"
-            value={name}
-            onChangeText={setName}
-          />
-          <Input
-            label="رقم الهاتف"
-            placeholder="59X-XXX-XXX"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
-          <Input
-            label="كلمة المرور"
-            placeholder="••••••••"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-          <Input
-            label="تأكيد كلمة المرور"
-            placeholder="••••••••"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
+          {/* Full Name */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>الاسم الكامل</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIconRight}>
+                <UserIcon size={18} color={colors.textMuted} />
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="أدخل اسمك الكامل"
+                placeholderTextColor={colors.border}
+                value={name}
+                onChangeText={setName}
+                textAlign="right"
+              />
+            </View>
+          </View>
 
-          {/* Area selector — triggers bottom sheet */}
-          <View style={styles.fieldWrap}>
-            <Text style={styles.fieldLabel}>المنطقة</Text>
+          {/* Phone Number */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>رقم الهاتف</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIconRight}>
+                <Phone size={18} color={colors.textMuted} />
+              </View>
+              <TextInput
+                style={[styles.input, { paddingLeft: 60 }]}
+                placeholder="059XXXXXXX"
+                placeholderTextColor={colors.border}
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+                dir="ltr"
+                textAlign="right"
+              />
+              <View style={styles.prefixContainer}>
+                <Text style={styles.prefixText} dir="ltr">+970</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Area Dropdown */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>المنطقة</Text>
             <TouchableOpacity style={styles.areaSelector} onPress={openAreaSheet} activeOpacity={0.8}>
-              <MapPin size={18} color={areaId ? colors.primary : colors.textMuted} />
+              <View style={styles.inputIconRight}>
+                <MapPin size={18} color={areaId ? colors.primary : colors.textMuted} />
+              </View>
               <Text style={[styles.areaSelectorText, areaId ? styles.areaSelectorTextSelected : null]}>
-                {areaLabel || 'اختر منطقتك'}
+                {areaLabel || 'اختر مدينتك'}
               </Text>
-              <ChevronDown size={18} color={colors.textMuted} />
+              <View style={styles.areaChevron}>
+                <ChevronDown size={20} color={colors.textMuted} />
+              </View>
             </TouchableOpacity>
+          </View>
+
+          {/* Password */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>كلمة المرور</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIconRight}>
+                <Lock size={18} color={colors.textMuted} />
+              </View>
+              <TextInput
+                style={[styles.input, { paddingLeft: 48 }]}
+                placeholder="كلمة المرور"
+                placeholderTextColor={colors.border}
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                textAlign="right"
+              />
+              <Pressable
+                style={styles.eyeIconLeft}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} color={colors.textMuted} />
+                ) : (
+                  <Eye size={18} color={colors.textMuted} />
+                )}
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Confirm Password */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>تأكيد كلمة المرور</Text>
+            <View style={styles.inputContainer}>
+              <View style={styles.inputIconRight}>
+                <LockKeyhole size={18} color={colors.textMuted} />
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="أعد إدخال كلمة المرور"
+                placeholderTextColor={colors.border}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                textAlign="right"
+              />
+            </View>
           </View>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          {/* Terms checkbox */}
+          {/* Terms Checkbox */}
           <Pressable style={styles.checkRow} onPress={() => setAgreed((v) => !v)}>
             <View style={[styles.checkbox, agreed && styles.checkboxOn]}>
-              {agreed ? <Check size={13} color="#fff" strokeWidth={3} /> : null}
+              {agreed ? <Check size={14} color="#fff" strokeWidth={3} /> : null}
             </View>
-            <Text style={styles.muted}>أوافق على الشروط والأحكام</Text>
+            <Text style={styles.termsText}>
+              أوافق على <Text style={styles.termsBold}>الشروط والأحكام</Text> و <Text style={styles.termsBold}>سياسة الخصوصية</Text> الخاصة بشو عبالك.
+            </Text>
           </Pressable>
 
-          <Button
-            title="إنشاء حساب"
-            loading={loading}
-            disabled={!agreed || loading}
+          {/* Submit Button */}
+          <Pressable
+            style={[styles.submitBtn, (!agreed || loading) && styles.submitBtnDisabled]}
             onPress={handleRegister}
-          />
+            disabled={!agreed || loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#4e2200" />
+            ) : (
+              <Text style={styles.submitBtnText}>إنشاء حساب</Text>
+            )}
+          </Pressable>
         </View>
 
-        <View style={styles.bottom}>
-          <Text style={styles.muted}>عندك حساب؟ </Text>
-          <Link href="/(auth)/login">
-            <Text style={styles.link}>سجّل دخول</Text>
+        {/* Login Link */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>عندك حساب؟ </Text>
+          <Link href="/(auth)/login" asChild>
+            <Pressable>
+              <Text style={styles.footerLink}>سجّل دخول</Text>
+            </Pressable>
           </Link>
+        </View>
+
+        {/* Visual Decoration */}
+        <View style={styles.decorationWrap}>
+          <Image
+            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDlsqdL2okG3UAb0LNFcpDvuhV8FuenzbYSkaaHCQYbZtuKvPUXnJ5_fg16BZXFA26McnF9m2ZGvxJmPTX8w949vaFl_vjqlEAwXcSb2JdznUQqEETy2KpzDKzakaOzrdt0-czTBRsKRoa6b4MCdaXXEXORs-_XvkNgcIfITY6X1-rMnbfkw7fOMGUHmD0vcJlQlWB02OdqL-3O7tgFTv15DRyRAshRvFNtxRH3m6wFTlADUCxieOhLhg8mcNsfjr-YLep7XyGssdTj' }}
+            style={styles.decorationImage}
+            contentFit="contain"
+          />
         </View>
       </ScrollView>
 
@@ -165,7 +265,7 @@ export default function Register() {
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
       >
-        <Text style={styles.sheetTitle}>اختر منطقتك</Text>
+        <Text style={styles.sheetTitle}>اختر مدينتك</Text>
         <BottomSheetFlatList
           data={areas as Array<{ id: string; city: string; name: string }>}
           keyExtractor={(item) => item.id}
@@ -179,98 +279,282 @@ export default function Register() {
               <Text style={[styles.areaItemText, areaId === item.id && styles.areaItemTextActive]}>
                 {item.city} - {item.name}
               </Text>
-              {areaId === item.id && <Check size={16} color={colors.primary} strokeWidth={2.5} />}
+              {areaId === item.id && <Check size={18} color={colors.primary} strokeWidth={2.5} />}
             </TouchableOpacity>
           )}
         />
       </BottomSheet>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    paddingHorizontal: spacing[6],
-    paddingTop: spacing[8],
-    paddingBottom: spacing[8],
-    backgroundColor: colors.background,
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
   },
-  header: { alignItems: 'center', marginBottom: spacing[8] },
-  logo: { fontSize: fontSizes['3xl'], fontFamily: fontFamily.extrabold, textAlign: 'center' },
-  subtitle: {
-    fontSize: fontSizes.lg,
-    fontFamily: fontFamily.medium,
-    color: colors.textMuted,
-    marginTop: spacing[1],
-  },
-  form: { gap: spacing[6] },
-  fieldWrap: { gap: 6 },
-  fieldLabel: {
-    fontSize: fontSizes.sm,
-    color: colors.textPrimary,
-    fontFamily: fontFamily.medium,
-  },
-  areaSelector: {
-    height: 52,
-    backgroundColor: colors.surface,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 14,
-    paddingHorizontal: spacing[4],
-    flexDirection: 'row',
+
+  // App Bar
+  appBar: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: spacing[2],
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 1,
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[3],
+    backgroundColor: '#FCF3DC',
+    zIndex: 50,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }
+    }),
+  },
+  backBtn: {
+    padding: spacing[1],
+  },
+  appBarTitle: {
+    fontSize: 26, // headline-lg-mobile
+    fontFamily: fontFamily.bold, // headline-lg-mobile (Cairo)
+    color: colors.primary,
+  },
+  appBarIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ffdbc7', // primary-fixed
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[8],
+  },
+
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing[6],
+    textAlign: 'center'
+  },
+  heroTitle: {
+    fontSize: 24, // headline-md
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
+    marginBottom: spacing[2],
+  },
+  heroSubtitle: {
+    fontSize: 15,
+    fontFamily: fontFamily.regular,
+    color: '#564337', // on-surface-variant
+    textAlign: 'center',
+  },
+
+  // Form 
+  form: {
+    gap: spacing[5],
+  },
+  inputGroup: {
+    gap: spacing[1],
+  },
+  inputLabel: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: '#564337',
+    paddingHorizontal: 4,
+    textAlign: 'right',
+  },
+  inputContainer: {
+    position: 'relative',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+  },
+  inputIconRight: {
+    position: 'absolute',
+    right: 0,
+    height: '100%',
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  input: {
+    flex: 1,
+    height: 52,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderRadius: radius.xl,
+    paddingRight: 44,
+    paddingLeft: 16,
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    color: colors.textPrimary,
+  },
+  prefixContainer: {
+    position: 'absolute',
+    left: 0,
+    height: '100%',
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(229, 224, 213, 1)',
+  },
+  prefixText: {
+    color: colors.primary,
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+  },
+  eyeIconLeft: {
+    position: 'absolute',
+    left: 0,
+    height: '100%',
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+
+  // Area Selector
+  areaSelector: {
+    position: 'relative',
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    height: 52,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(229, 224, 213, 1)',
+    borderRadius: radius.xl,
   },
   areaSelectorText: {
     flex: 1,
-    fontSize: fontSizes.base,
+    paddingRight: 44,
+    fontSize: 15,
     color: colors.textMuted,
     fontFamily: fontFamily.regular,
     textAlign: 'right',
   },
-  areaSelectorTextSelected: { color: colors.textPrimary },
-  checkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
+  areaSelectorTextSelected: {
+    color: colors.textPrimary
+  },
+  areaChevron: {
+    paddingHorizontal: 16,
+  },
+
+  // Checkbox
+  checkRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'flex-start',
+    gap: spacing[3],
+    marginTop: spacing[2],
+  },
   checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
+    width: 20,
+    height: 20,
+    borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: colors.border,
+    borderColor: 'rgba(229, 224, 213, 1)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 2,
   },
-  checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  muted: { color: colors.textMuted, fontSize: fontSizes.base, fontFamily: fontFamily.regular },
-  link: { color: colors.primary, fontFamily: fontFamily.semibold, fontSize: fontSizes.base },
-  bottom: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing[6] },
+  checkboxOn: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
+  },
+  termsText: {
+    flex: 1,
+    color: '#564337',
+    fontSize: 13,
+    fontFamily: fontFamily.medium,
+    textAlign: 'right',
+    lineHeight: 20,
+  },
+  termsBold: {
+    color: colors.primary,
+    fontFamily: fontFamily.bold,
+  },
+
   errorText: {
     color: colors.error,
     fontSize: fontSizes.sm,
     textAlign: 'center',
     fontFamily: fontFamily.regular,
+    marginTop: spacing[1],
   },
+
+  // Submit Button
+  submitBtn: {
+    width: '100%',
+    height: 52,
+    backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
+    borderRadius: radius.xl,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing[4],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
+      android: { elevation: 4 },
+    }),
+  },
+  submitBtnDisabled: {
+    opacity: 0.7,
+  },
+  submitBtnText: {
+    color: '#4e2200', // on-primary-container
+    fontFamily: fontFamily.bold,
+    fontSize: 16,
+  },
+
+  // Footer
+  footer: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'center',
+    marginTop: spacing[8]
+  },
+  footerText: {
+    color: '#564337', // on-surface-variant 
+    fontSize: 15,
+    fontFamily: fontFamily.regular
+  },
+  footerLink: {
+    color: colors.primary,
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+    textDecorationLine: 'underline',
+    textDecorationColor: '#ffb688', // inverse-primary
+  },
+
+  // Visual Decoration
+  decorationWrap: {
+    marginTop: 'auto',
+    paddingTop: spacing[8],
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.15,
+  },
+  decorationImage: {
+    width: '100%',
+    height: 96,
+  },
+
   // Bottom sheet styles
-  sheetBg: { backgroundColor: colors.surface, borderRadius: radius.xl },
+  sheetBg: { backgroundColor: '#FFFFFF', borderRadius: radius.xl },
   sheetHandle: { backgroundColor: colors.border, width: 40 },
   sheetTitle: {
-    fontSize: fontSizes.lg,
+    fontSize: 17, // body-lg
     fontFamily: fontFamily.bold,
     color: colors.textPrimary,
     textAlign: 'center',
     paddingVertical: spacing[3],
     paddingHorizontal: spacing[6],
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: 'rgba(229, 224, 213, 1)',
   },
   sheetList: { paddingBottom: spacing[8] },
   areaItem: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing[4],
@@ -280,7 +564,7 @@ const styles = StyleSheet.create({
   },
   areaItemActive: { backgroundColor: '#FFF8F0' },
   areaItemText: {
-    fontSize: fontSizes.base,
+    fontSize: 15,
     color: colors.textPrimary,
     fontFamily: fontFamily.regular,
   },

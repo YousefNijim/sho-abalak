@@ -94,8 +94,14 @@ function DriverOrderCard({ o, formatDate }: any) {
           <Text style={styles.sectionTitle}>تفاصيل إضافية:</Text>
           <Text style={styles.detailText}>رقم الطلب: #{o.id.slice(-6).toUpperCase()}</Text>
           <Text style={styles.detailText}>العميل: {o.customer?.name} ({o.customer?.phone})</Text>
-          <Text style={styles.detailText}>العناصر: {itemsCount}</Text>
           <Text style={styles.detailText}>دفع العميل: {o.total} ₪ ({o.paymentMethod === 'CASH' ? 'نقدي' : 'إلكتروني'})</Text>
+          
+          <Text style={[styles.sectionTitle, { marginTop: spacing[3] }]}>العناصر ({itemsCount}):</Text>
+          {o.items?.map((it: any) => (
+            <Text key={it.id} style={styles.detailText}>
+              - {it.product?.name} (x{it.quantity})
+            </Text>
+          ))}
         </View>
       )}
     </Pressable>

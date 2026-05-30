@@ -53,8 +53,8 @@ export default function Analytics() {
   const periodOrders = filterOrdersByPeriod(orders, period);
   const completedOrders = periodOrders.filter((o: any) => o.status === 'DELIVERED');
 
-  const totalSales = completedOrders.reduce((acc: number, o: any) => acc + Number(o.total || 0), 0);
-  const avgOrder = completedOrders.length > 0 ? Math.round(totalSales / completedOrders.length) : 0;
+  const totalSales = Math.round(completedOrders.reduce((acc: number, o: any) => acc + Number(o.total || 0), 0) * 100) / 100;
+  const avgOrder = completedOrders.length > 0 ? Math.round((totalSales / completedOrders.length) * 100) / 100 : 0;
 
   // Compile top selling products
   const compileTopProducts = (arr: any[]) => {
@@ -160,6 +160,16 @@ export default function Analytics() {
                 </View>
                 <Text style={styles.historyMuted}>العميل: {o.customer?.name}</Text>
                 <Text style={styles.historyMuted}>السائق: {o.driver?.user?.name || 'غير متوفر'}</Text>
+                
+                {o.items && o.items.length > 0 && (
+                  <View style={{ marginTop: spacing[2], paddingTop: spacing[2], borderTopWidth: 1, borderTopColor: colors.border }}>
+                    {o.items.map((it: any) => (
+                      <Text key={it.id} style={[styles.historyMuted, { fontSize: 11 }]}>
+                        - {it.product?.name} (x{it.quantity})
+                      </Text>
+                    ))}
+                  </View>
+                )}
               </View>
             ))
           )}

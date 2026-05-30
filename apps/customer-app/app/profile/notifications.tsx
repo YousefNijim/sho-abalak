@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   Utensils,
 } from 'lucide-react-native';
-import { colors, fontSizes, fontFamily, spacing, radius } from '../../../src/theme';
+import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme';
 
 export default function NotificationsScreen() {
   const router = useRouter();

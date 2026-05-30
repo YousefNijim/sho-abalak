@@ -146,6 +146,17 @@ export default function Orders() {
                     </View>
                   </View>
 
+                  {/* List of items */}
+                  {o.items && o.items.length > 0 && (
+                    <View style={{ marginTop: spacing[3], marginBottom: spacing[1] }}>
+                      {o.items.map((it: any) => (
+                        <Text key={it.id} style={{ fontSize: 13, color: colors.textMuted, textAlign: 'right' }}>
+                          {it.product?.name} (x{it.quantity})
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+
                   <View style={styles.cardFooter}>
                     <View style={styles.footerInfo}>
                       <Text style={styles.itemsCountText}>{itemsCount} أصناف</Text>

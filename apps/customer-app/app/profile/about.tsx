@@ -11,7 +11,7 @@ import {
   Globe,
   Mail,
 } from 'lucide-react-native';
-import { colors, fontSizes, fontFamily, spacing, radius } from '../../../src/theme';
+import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme';
 
 export default function AboutScreen() {
   const router = useRouter();

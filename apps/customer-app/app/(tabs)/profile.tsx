@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
+import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
   MapPin,
@@ -99,6 +99,7 @@ export default function Profile() {
       <ScrollView 
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing[12] }]} 
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Profile Header Card */}
         <View style={styles.profileCard}>
@@ -159,10 +160,10 @@ export default function Profile() {
           ))}
 
           {/* Logout */}
-          <Pressable style={styles.logoutBtn} onPress={handleLogout}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
             <LogOut size={20} color="#EF4444" />
             <Text style={styles.logoutText}>تسجيل الخروج</Text>
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         {/* Version Info */}

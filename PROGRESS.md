@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-05-29
-**Current phase:** Phase 12 (Home screen redesign — real icons/images, gradient banner, depth, contrast, fixed bottom nav; all 3 apps typecheck clean)
+**Last updated:** 2026-05-30
+**Current phase:** Phase 15 (Application flow fixes, Math bug fixes, Google Stitch designs port)
 
 ---
 
@@ -165,6 +165,9 @@
 9. ~~**Feature Leftovers & Polish (Phase 8)**~~ ✅ **100% DONE** — Local/S3 Uploads REST module registered, SMS & Push alert interfaces injected, supertest E2E integration specs running, and atomic driver availability automation toggles configured.
 10. ~~**UI Polish (Phase 11 — branch `feat/ui-polish`)**~~ ✅ **100% DONE** — Cairo font loaded in all 3 app layouts (blocks splash until ready); `fontFamily` tokens added to `tokens.ts`; Button upgraded with Reanimated scale press animation; Input/Card polished; Lucide icons replace emoji tabs in all 3 apps; Register screen upgraded with `@gorhom/bottom-sheet` area picker; all screens use `fontFamily.*` tokens instead of raw `fontWeight` strings; `tsc --noEmit` clean on customer-app, business-app, driver-app.
 11. ~~**Home Screen Redesign (Phase 12 — branch `feat/ui-polish`)**~~ ✅ **DONE** — Full redesign of customer-app Home: Lucide icons (UtensilsCrossed/Store/Coffee) in colored circles replace emoji categories; expo-image for business card images with branded placeholder; expo-linear-gradient banner (#E6781E→#C96016) with decorative icon and CTA; real rating pill (star + score), Clock+Bike meta icons, open/closed badge on image with gradient overlay; search bar with filter button and shadow; bottom nav safe-area-aware (height = 64 + insets.bottom); FAB anchored above nav, clears card content. Button.tsx fixed for reanimated v4 (Animated.View wrapper instead of createAnimatedComponent(Pressable)). `components`/`shadows` added to customer-app `src/theme.ts` re-exports. Gotcha: `Animated.createAnimatedComponent(Pressable)` type-errors in reanimated v4 — wrap Pressable in `Animated.View` instead.
+12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
+13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
+14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
 
 ---
 

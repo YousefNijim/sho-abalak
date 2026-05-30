@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, TextInput, Pressable, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Input } from '@shu/ui-components/native';
-import { colors, fontSizes, fontFamily, spacing } from '../../src/theme';
+import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
+import { Image } from 'expo-image';
+import { Store, Eye, EyeOff, LogIn, Phone, Lock, Headset } from 'lucide-react-native';
 
 export default function Login() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Login() {
 
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,75 +39,338 @@ export default function Login() {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={[styles.container, { paddingTop: insets.top + spacing[10] }]}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
-        <Text style={styles.logo}>
-          <Text style={{ color: colors.primary }}>شو </Text>
-          <Text style={{ color: colors.secondary }}>عبالك؟</Text>
-        </Text>
-        <Text style={styles.welcome}>المنشأة التجارية</Text>
-        <Text style={styles.subtitle}>سجّل دخولك للمتابعة</Text>
-      </View>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4], paddingBottom: insets.bottom + spacing[4] }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Image 
+            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAXuQi8cCjNhInAckU6ZGfReeEVDE-QncUwFc5lZJSOYf-jECJM8oXTZhaSpmyd2mfJyg52li6yzXeHVGS2EPitywomRgSJJrqDKFFNPn6bfWLdnAx6R5AWKQpnb-qGp56VvEyDBzI9Ie_qKKVFo41rZ8xt2wjW7ezVX9AYf0W7P92N4vWDb58J2IzdMaB2utzswzJPkgSqKp_zmx2USg7KcRAtxEI4PzeN61gh8G83HFukREqRkS8z8_djgZKgAvq-kemaMGmNi4ot' }} 
+            style={styles.logo}
+            contentFit="contain"
+          />
+          <Text style={styles.headerText}>مرحباً بك، مدير المتجر</Text>
+        </View>
 
-      <View style={styles.form}>
-        <Input
-          label="رقم الهاتف"
-          placeholder="59X-XXX-XXX"
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
-        <Input
-          label="كلمة المرور"
-          placeholder="••••••••"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {/* Main Content Area */}
+        <View style={styles.main}>
+          <View style={styles.loginCard}>
+            
+            {/* Branding/Identity */}
+            <View style={styles.cardHeader}>
+              <View style={styles.iconCircle}>
+                <Store size={32} color={colors.primary} />
+              </View>
+              <Text style={styles.title}>تسجيل الدخول للمتجر</Text>
+              <Text style={styles.subtitle}>يرجى إدخال بياناتك للمتابعة</Text>
+            </View>
 
-        <Button
-          title="دخول"
-          onPress={handleLogin}
-          loading={loading}
-          disabled={loading}
-        />
-      </View>
-    </ScrollView>
+            <View style={styles.form}>
+              {/* Phone Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>رقم الهاتف</Text>
+                <View style={styles.inputWrapper}>
+                  <View style={styles.inputIconRight}>
+                    <Phone size={20} color="#6B7280" />
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="59XXXXXXX"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={setPhone}
+                    textAlign="left"
+                  />
+                  <View style={styles.phonePrefix}>
+                    <Text style={styles.prefixText}>+970</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Password Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>كلمة المرور</Text>
+                <View style={styles.inputWrapper}>
+                  <View style={styles.inputIconRight}>
+                    <Lock size={20} color="#6B7280" />
+                  </View>
+                  <TextInput
+                    style={[styles.input, { paddingLeft: 48 }]}
+                    placeholder="••••••••"
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    textAlign="right"
+                  />
+                  <Pressable 
+                    style={styles.inputIconLeft}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={20} color="#6B7280" /> : <Eye size={20} color="#6B7280" />}
+                  </Pressable>
+                </View>
+              </View>
+
+              <Pressable style={styles.forgotPassword}>
+                <Text style={styles.forgotText}>نسيت كلمة المرور؟</Text>
+              </Pressable>
+
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+              {/* Login Button */}
+              <Pressable 
+                style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <>
+                    <Text style={styles.loginBtnText}>دخول</Text>
+                    <LogIn size={20} color="#ffffff" />
+                  </>
+                )}
+              </Pressable>
+            </View>
+
+            {/* Secondary Actions */}
+            <View style={styles.secondaryActions}>
+              <Text style={styles.supportLabel}>تواجه مشكلة في الدخول؟</Text>
+              <Pressable style={styles.supportBtn}>
+                <Headset size={20} color={colors.primary} />
+                <Text style={styles.supportBtnText}>تواصل مع الدعم</Text>
+              </Pressable>
+            </View>
+
+          </View>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© 2024 شو عبالك - لوحة تحكم التجار</Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    paddingHorizontal: spacing[6],
-    paddingBottom: spacing[8],
-    backgroundColor: colors.background,
+    flex: 1,
+    backgroundColor: '#FCF3DC', // background-cream
   },
-  header: { alignItems: 'center', marginBottom: spacing[10] },
-  logo: { fontSize: fontSizes['3xl'], fontFamily: fontFamily.extrabold, textAlign: 'center' },
-  welcome: {
-    fontSize: fontSizes['2xl'],
+  
+  // Header
+  header: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing[4],
+    height: 64, // nav-height
+    zIndex: 50,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  headerText: {
+    fontSize: 20, // headline-sm
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
+  },
+
+  // Main Card
+  main: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[8],
+  },
+  loginCard: {
+    width: '100%',
+    maxWidth: 448, // max-w-md
+    backgroundColor: '#FFFFFF', // surface-white
+    borderRadius: radius.xl,
+    padding: spacing[8],
+    borderWidth: 1,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+    ...Platform.select({
+      ios: {
+        shadowColor: '#974800', // primary shadow tint
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.1,
+        shadowRadius: 25,
+      },
+      android: { elevation: 6 },
+    }),
+  },
+
+  // Card Header
+  cardHeader: {
+    alignItems: 'center',
+    marginBottom: spacing[6],
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#ffdbc7', // primary-fixed
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing[4],
+  },
+  title: {
+    fontSize: 24, // headline-md
     fontFamily: fontFamily.bold,
     color: colors.textPrimary,
-    textAlign: 'center',
-    marginTop: spacing[6],
   },
   subtitle: {
-    fontSize: fontSizes.base,
+    fontSize: 15, // body-base
     fontFamily: fontFamily.regular,
-    color: colors.textMuted,
-    marginTop: spacing[1],
+    color: '#6B7280', // muted-gray
+    marginTop: spacing[2],
   },
-  form: { gap: spacing[6] },
+
+  // Form
+  form: {
+    gap: spacing[6],
+  },
+  inputGroup: {
+    gap: spacing[1],
+  },
+  label: {
+    fontSize: 13, // label-md
+    fontFamily: fontFamily.medium,
+    color: '#564337', // on-surface-variant
+    marginRight: spacing[1],
+    textAlign: 'right',
+  },
+  inputWrapper: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  input: {
+    width: '100%',
+    height: 52,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderRadius: radius.lg,
+    paddingRight: 40,
+    fontFamily: fontFamily.regular,
+    fontSize: 15,
+    color: colors.textPrimary,
+  },
+  inputIconRight: {
+    position: 'absolute',
+    right: spacing[3],
+    zIndex: 10,
+  },
+  inputIconLeft: {
+    position: 'absolute',
+    left: spacing[3],
+    zIndex: 10,
+    padding: spacing[1],
+  },
+  phonePrefix: {
+    position: 'absolute',
+    left: 0,
+    height: '100%',
+    justifyContent: 'center',
+    paddingHorizontal: spacing[3],
+    borderRightWidth: 1,
+    borderRightColor: 'rgba(229, 224, 213, 1)',
+  },
+  prefixText: {
+    fontFamily: fontFamily.bold,
+    color: colors.primary,
+    fontSize: 13,
+  },
+
+  forgotPassword: {
+    alignItems: 'flex-start',
+  },
+  forgotText: {
+    fontSize: 13,
+    fontFamily: fontFamily.medium,
+    color: colors.primary,
+  },
   errorText: {
     color: colors.error,
-    fontSize: fontSizes.sm,
+    fontSize: 13,
     textAlign: 'center',
+    fontFamily: fontFamily.medium,
+  },
+
+  loginBtn: {
+    height: 52,
+    backgroundColor: '#e6781e', // primary-container
+    borderRadius: radius.lg,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+      android: { elevation: 2 },
+    }),
+  },
+  loginBtnDisabled: {
+    opacity: 0.7,
+  },
+  loginBtnText: {
+    color: '#ffffff', // on-secondary (white) per design
+    fontFamily: fontFamily.bold,
+    fontSize: 16,
+  },
+
+  // Secondary Actions
+  secondaryActions: {
+    marginTop: spacing[4],
+    paddingTop: spacing[6],
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(229, 224, 213, 1)',
+    alignItems: 'center',
+  },
+  supportLabel: {
+    fontSize: 15,
     fontFamily: fontFamily.regular,
+    color: '#564337',
+    marginBottom: spacing[4],
+  },
+  supportBtn: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[2],
+    paddingHorizontal: spacing[6],
+    paddingVertical: spacing[3],
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: radius.lg,
+  },
+  supportBtnText: {
+    color: colors.primary,
+    fontFamily: fontFamily.bold,
+    fontSize: 16,
+  },
+
+  // Footer
+  footer: {
+    paddingVertical: spacing[6],
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 11, // label-sm
+    fontFamily: fontFamily.medium,
+    color: '#6B7280',
   },
 });
