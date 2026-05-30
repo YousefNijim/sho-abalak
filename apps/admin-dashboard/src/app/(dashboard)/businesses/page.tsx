@@ -53,6 +53,19 @@ export default function BusinessesPage() {
     setTimeout(() => setToast(null), 4000);
   };
 
+  // Approve / set-password / reset-password modal: target a business + a mode
+  const [pwModal, setPwModal] = useState<{ business: Business; mode: 'approve' | 'reset' } | null>(null);
+  const [pwValue, setPwValue] = useState('');
+
+  // Reject confirmation
+  const [rejectTarget, setRejectTarget] = useState<Business | null>(null);
+
+  // Create-store modal
+  const [showCreate, setShowCreate] = useState(false);
+  const emptyCreate = { name: '', category: 'RESTAURANT', ownerName: '', phone: '', areaId: '', password: '', addressDetail: '' };
+  const [createForm, setCreateForm] = useState(emptyCreate);
+  const [createError, setCreateError] = useState('');
+
   // Queries
   const { data: businesses = [], isLoading: isBusinessesLoading } = useQuery({
     queryKey: ['businesses'],
@@ -101,6 +114,85 @@ export default function BusinessesPage() {
     },
   });
 
+  const refetchBusinesses = () => qc.invalidateQueries({ queryKey: ['businesses'] });
+
+  const approveMutation = useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      businessesApi.adminApprove(id, password),
+    onSuccess: () => {
+      refetchBusinesses();
+      showToast('success', 'تمت الموافقة على المتجر وتعيين كلمة المرور — يمكنه الآن تسجيل الدخول');
+      setPwModal(null);
+      setPwValue('');
+    },
+    onError: (err: any) => showToast('error', err.response?.data?.message || 'فشل الموافقة على المتجر'),
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ id, password }: { id: string; password: string }) =>
+      businessesApi.adminResetPassword(id, password),
+    onSuccess: () => {
+      showToast('success', 'تم إعادة تعيين كلمة مرور المتجر بنجاح');
+      setPwModal(null);
+      setPwValue('');
+    },
+    onError: (err: any) => showToast('error', err.response?.data?.message || 'فشل إعادة تعيين كلمة المرور'),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => businessesApi.adminReject(id),
+    onSuccess: () => {
+      refetchBusinesses();
+      showToast('success', 'تم رفض طلب التسجيل وحذفه');
+      setRejectTarget(null);
+    },
+    onError: (err: any) => showToast('error', err.response?.data?.message || 'فشل رفض الطلب'),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      businessesApi.adminCreate({
+        name: createForm.name.trim(),
+        category: createForm.category,
+        ownerName: createForm.ownerName.trim(),
+        phone: createForm.phone.trim(),
+        areaId: createForm.areaId,
+        password: createForm.password,
+        addressDetail: createForm.addressDetail.trim() || undefined,
+      }),
+    onSuccess: () => {
+      refetchBusinesses();
+      showToast('success', 'تم إنشاء المتجر وتفعيله — يمكنه تسجيل الدخول مباشرة');
+      setShowCreate(false);
+      setCreateForm(emptyCreate);
+      setCreateError('');
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'فشل إنشاء المتجر';
+      setCreateError(Array.isArray(msg) ? msg.join(' ، ') : String(msg));
+    },
+  });
+
+  const submitPassword = () => {
+    if (!pwModal) return;
+    if (pwValue.trim().length < 6) {
+      showToast('error', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+    if (pwModal.mode === 'approve') approveMutation.mutate({ id: pwModal.business.id, password: pwValue.trim() });
+    else resetPasswordMutation.mutate({ id: pwModal.business.id, password: pwValue.trim() });
+  };
+
+  const submitCreate = () => {
+    setCreateError('');
+    const f = createForm;
+    if (!f.name.trim() || !f.ownerName.trim() || !f.phone.trim() || !f.areaId || f.password.length < 6) {
+      setCreateError('يرجى تعبئة جميع الحقول (كلمة المرور 6 أحرف على الأقل)');
+      return;
+    }
+    createMutation.mutate();
+  };
+
   // Client side filtering
   const filteredBusinesses = useMemo(() => {
     return businesses.filter((b) => {
@@ -111,7 +203,9 @@ export default function BusinessesPage() {
       if (areaFilter !== 'ALL' && b.areaId !== areaFilter) return false;
 
       // 3. Status Filter
-      if (statusFilter !== 'ALL') {
+      if (statusFilter === 'PENDING') {
+        if (b.owner?.status !== 'PENDING') return false;
+      } else if (statusFilter === 'OPEN' || statusFilter === 'CLOSED') {
         const activeState = statusFilter === 'OPEN';
         if (b.isOpen !== activeState) return false;
       }
@@ -189,22 +283,64 @@ export default function BusinessesPage() {
           </div>
         ),
       }),
+      columnHelper.accessor((row) => row.owner?.status, {
+        id: 'approval',
+        header: 'حالة الاعتماد',
+        cell: (info) => {
+          const status = info.getValue();
+          const map: Record<string, { label: string; cls: string }> = {
+            PENDING: { label: 'بانتظار الموافقة', cls: 'bg-warning-amber/15 text-warning-amber border-warning-amber/30' },
+            ACTIVE: { label: 'معتمد', cls: 'bg-success/10 text-success border-success/20' },
+            SUSPENDED: { label: 'معلّق', cls: 'bg-error/10 text-error border-error/20' },
+            BANNED: { label: 'محظور', cls: 'bg-error/10 text-error border-error/20' },
+          };
+          const s = map[status ?? 'ACTIVE'] ?? map.ACTIVE;
+          return <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-bold border ${s.cls}`}>{s.label}</span>;
+        },
+      }),
       columnHelper.display({
         id: 'actions',
         header: () => <div className="text-left">إجراءات</div>,
-        cell: (info) => (
-          <div className="flex items-center justify-end gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedBusinessId(info.row.original.id);
-              }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors border border-primary/20"
-            >
-              <span className="material-symbols-outlined text-[18px]">visibility</span>
-            </button>
-          </div>
-        ),
+        cell: (info) => {
+          const b = info.row.original;
+          const isPending = b.owner?.status === 'PENDING';
+          return (
+            <div className="flex items-center justify-end gap-2">
+              {isPending ? (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setPwModal({ business: b, mode: 'approve' }); setPwValue(''); }}
+                    className="flex h-9 items-center gap-1 px-3 rounded-lg bg-success text-white text-[12px] font-bold hover:brightness-95 transition"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    موافقة
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setRejectTarget(b); }}
+                    className="flex h-9 items-center gap-1 px-3 rounded-lg bg-error/10 text-error text-[12px] font-bold hover:bg-error/20 transition border border-error/20"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">cancel</span>
+                    رفض
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPwModal({ business: b, mode: 'reset' }); setPwValue(''); }}
+                  title="إعادة تعيين كلمة المرور"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-secondary hover:bg-secondary/10 transition-colors border border-secondary/20"
+                >
+                  <span className="material-symbols-outlined text-[18px]">key</span>
+                </button>
+              )}
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedBusinessId(b.id); }}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-colors border border-primary/20"
+              >
+                <span className="material-symbols-outlined text-[18px]">visibility</span>
+              </button>
+            </div>
+          );
+        },
       }),
     ],
     []
@@ -273,12 +409,126 @@ export default function BusinessesPage() {
         </div>
       )}
 
+      {/* Password modal (approve / reset) */}
+      {pwModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface-white p-6 shadow-xl border border-border border-t-[6px] border-t-primary" dir="rtl">
+            <h3 className="text-lg font-bold text-on-surface mb-1">
+              {pwModal.mode === 'approve' ? 'الموافقة على المتجر وتعيين كلمة المرور' : 'إعادة تعيين كلمة المرور'}
+            </h3>
+            <p className="text-[13px] text-muted-gray mb-4">
+              {pwModal.business.name} — {pwModal.business.owner?.phone}
+            </p>
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray mb-2">كلمة المرور</label>
+            <input
+              type="text"
+              value={pwValue}
+              onChange={(e) => setPwValue(e.target.value)}
+              placeholder="6 أحرف على الأقل"
+              className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[14px]"
+            />
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => { setPwModal(null); setPwValue(''); }} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
+              <button
+                onClick={submitPassword}
+                disabled={approveMutation.isPending || resetPasswordMutation.isPending}
+                className="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50"
+              >
+                {pwModal.mode === 'approve' ? 'موافقة وتفعيل' : 'حفظ كلمة المرور'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reject confirmation */}
+      {rejectTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface-white p-6 shadow-xl border border-border border-t-[6px] border-t-error" dir="rtl">
+            <h3 className="text-lg font-bold text-on-surface mb-2">رفض طلب التسجيل</h3>
+            <p className="text-[14px] text-muted-gray mb-6 leading-relaxed">
+              سيتم حذف طلب تسجيل المتجر «{rejectTarget.name}» وحساب صاحبه نهائياً. لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setRejectTarget(null)} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
+              <button
+                onClick={() => rejectMutation.mutate(rejectTarget.id)}
+                disabled={rejectMutation.isPending}
+                className="h-11 px-6 rounded-xl bg-error text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50"
+              >
+                تأكيد الرفض والحذف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create store modal */}
+      {showCreate && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-surface-white p-6 shadow-xl border border-border border-t-[6px] border-t-primary max-h-[90vh] overflow-y-auto" dir="rtl">
+            <h3 className="text-lg font-bold text-on-surface mb-4">إضافة متجر جديد (مفعّل مباشرة)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">اسم المتجر</label>
+                <input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">التصنيف</label>
+                <select value={createForm.category} onChange={(e) => setCreateForm({ ...createForm, category: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary cursor-pointer">
+                  <option value="RESTAURANT">مطاعم</option>
+                  <option value="STORE">محلات</option>
+                  <option value="CAFE">كافيه</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">اسم صاحب المتجر</label>
+                <input value={createForm.ownerName} onChange={(e) => setCreateForm({ ...createForm, ownerName: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">رقم الهاتف</label>
+                <input value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} placeholder="0599XXXXXX" className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" dir="ltr" />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">المنطقة</label>
+                <select value={createForm.areaId} onChange={(e) => setCreateForm({ ...createForm, areaId: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary cursor-pointer">
+                  <option value="">اختر المنطقة</option>
+                  {areas.map((a: Area) => (<option key={a.id} value={a.id}>{a.city} - {a.name}</option>))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[12px] font-medium text-muted-gray">كلمة المرور</label>
+                <input type="text" value={createForm.password} onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })} placeholder="6 أحرف على الأقل" className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <label className="block text-[12px] font-medium text-muted-gray">العنوان بالتفصيل (اختياري)</label>
+                <input value={createForm.addressDetail} onChange={(e) => setCreateForm({ ...createForm, addressDetail: e.target.value })} className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl outline-none text-[14px] focus:border-primary" />
+              </div>
+            </div>
+            {createError && <p className="text-error text-[13px] font-semibold mt-3 text-center">{createError}</p>}
+            <div className="flex gap-3 justify-end mt-6">
+              <button onClick={() => setShowCreate(false)} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
+              <button onClick={submitCreate} disabled={createMutation.isPending} className="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50">
+                إنشاء وتفعيل
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-on-surface">إدارة المتاجر والمنشآت الشريكة</h2>
-          <p className="text-[13px] text-muted-gray mt-1">راجع المنتجات، عيّن العمولات، وتحكم بالفتح والإغلاق الإداري</p>
+          <p className="text-[13px] text-muted-gray mt-1">راجع الطلبات المعلّقة، اعتمد المتاجر، عيّن العمولات وأنشئ متاجر جديدة</p>
         </div>
+        <button
+          onClick={() => { setCreateForm(emptyCreate); setCreateError(''); setShowCreate(true); }}
+          className="flex h-11 items-center gap-2 px-5 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 transition"
+        >
+          <span className="material-symbols-outlined text-[20px]">add_business</span>
+          إضافة متجر جديد
+        </button>
       </div>
 
       {/* Filters */}
@@ -337,6 +587,7 @@ export default function BusinessesPage() {
               className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer"
             >
               <option value="ALL">الكل</option>
+              <option value="PENDING">بانتظار الموافقة</option>
               <option value="OPEN">مفتوح حالياً</option>
               <option value="CLOSED">مغلق</option>
             </select>

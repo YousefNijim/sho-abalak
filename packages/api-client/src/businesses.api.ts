@@ -17,7 +17,18 @@ export interface Business {
   isOpen: boolean;
   commissionRate?: number;
   area?: { city: string; name: string; deliveryFee: number };
+  owner?: { id: string; name: string; phone: string; status: string };
   products?: Product[];
+}
+
+export interface AdminCreateBusinessDto {
+  name: string;
+  category: string;
+  ownerName: string;
+  phone: string;
+  areaId: string;
+  password: string;
+  addressDetail?: string;
 }
 
 export interface Product {
@@ -61,4 +72,16 @@ export const businessesApi = {
 
   adminUpdateCommission: (id: string, commissionRate: number) =>
     http.patch<Business>(`/businesses/${id}/commission`, { commissionRate }).then((r) => r.data),
+
+  adminCreate: (dto: AdminCreateBusinessDto) =>
+    http.post<Business>('/businesses/admin', dto).then((r) => r.data),
+
+  adminApprove: (id: string, password: string) =>
+    http.patch<Business>(`/businesses/${id}/approve`, { password }).then((r) => r.data),
+
+  adminReject: (id: string) =>
+    http.delete<{ rejected: boolean }>(`/businesses/${id}/reject`).then((r) => r.data),
+
+  adminResetPassword: (id: string, password: string) =>
+    http.patch<{ reset: boolean }>(`/businesses/${id}/password`, { password }).then((r) => r.data),
 };

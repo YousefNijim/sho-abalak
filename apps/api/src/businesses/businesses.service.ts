@@ -1,9 +1,16 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
+import { UserRole, UserStatus } from '@shu/shared-types';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBusinessDto } from './dto/create-business.dto';
 import { UpdateBusinessDto } from './dto/update-business.dto';
+import { AdminCreateBusinessDto } from './dto/admin-create-business.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
 import { QueryBusinessDto } from './dto/query-business.dto';
+
+// Owner account fields the admin UI needs to show approval state (never the password hash).
+const OWNER_SELECT = { id: true, name: true, phone: true, status: true } satisfies Prisma.UserSelect;
 
 @Injectable()
 export class BusinessesService {
@@ -14,7 +21,11 @@ export class BusinessesService {
     if (query.category) where.category = query.category;
     if (query.areaId) where.areaId = query.areaId;
     if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
-    return this.prisma.business.findMany({ where, include: { area: true }, orderBy: { rating: 'desc' } });
+    return this.prisma.business.findMany({
+      where,
+      include: { area: true, owner: { select: OWNER_SELECT } },
+      orderBy: { rating: 'desc' },
+    });
   }
 
   async findOne(id: string) {
@@ -59,6 +70,87 @@ export class BusinessesService {
     const business = await this.prisma.business.findUnique({ where: { id } });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
     return this.prisma.business.update({ where: { id }, data: { commissionRate } });
+  }
+
+  /**
+   * Admin approves a pending store and sets its first password.
+   * Flips the owner User from PENDING → ACTIVE so it can log in.
+   */
+  async adminApprove(id: string, password: string) {
+    const business = await this.prisma.business.findUnique({ where: { id }, include: { owner: true } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    if (business.owner.role !== UserRole.BUSINESS) {
+      throw new ForbiddenException('الحساب المرتبط ليس حساب متجر');
+    }
+    const passwordHash = await bcrypt.hash(password, 10);
+    await this.prisma.user.update({
+      where: { id: business.ownerId },
+      data: { password: passwordHash, status: UserStatus.ACTIVE },
+    });
+    return this.prisma.business.findUnique({
+      where: { id },
+      include: { area: true, owner: { select: OWNER_SELECT } },
+    });
+  }
+
+  /** Admin rejects (deletes) a still-pending registration and its owner account. */
+  async adminReject(id: string) {
+    const business = await this.prisma.business.findUnique({ where: { id }, include: { owner: true } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    if (business.owner.status !== 'PENDING') {
+      throw new ForbiddenException('لا يمكن رفض متجر مفعّل — استخدم التعليق/الحظر بدلاً من ذلك');
+    }
+    await this.prisma.$transaction([
+      this.prisma.business.delete({ where: { id } }),
+      this.prisma.user.delete({ where: { id: business.ownerId } }),
+    ]);
+    return { rejected: true };
+  }
+
+  /** Admin resets an existing store's password. */
+  async adminResetPassword(id: string, password: string) {
+    const business = await this.prisma.business.findUnique({ where: { id } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+    const passwordHash = await bcrypt.hash(password, 10);
+    await this.prisma.user.update({
+      where: { id: business.ownerId },
+      data: { password: passwordHash },
+    });
+    return { reset: true };
+  }
+
+  /**
+   * Admin creates a complete, immediately-active store from scratch:
+   * owner User (ACTIVE + password) + Business, in one transaction.
+   */
+  async adminCreate(dto: AdminCreateBusinessDto) {
+    const existing = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+    if (existing) throw new ConflictException('رقم الهاتف مسجّل مسبقاً');
+
+    const passwordHash = await bcrypt.hash(dto.password, 10);
+    return this.prisma.$transaction(async (tx) => {
+      const owner = await tx.user.create({
+        data: {
+          name: dto.ownerName,
+          phone: dto.phone,
+          password: passwordHash,
+          role: UserRole.BUSINESS,
+          status: UserStatus.ACTIVE,
+          areaId: dto.areaId,
+        },
+      });
+      return tx.business.create({
+        data: {
+          ownerId: owner.id,
+          name: dto.name,
+          category: dto.category,
+          areaId: dto.areaId,
+          phone: dto.phone,
+          addressDetail: dto.addressDetail ?? null,
+        },
+        include: { area: true, owner: { select: OWNER_SELECT } },
+      });
+    });
   }
 
   private async assertOwner(id: string, ownerId: string) {
