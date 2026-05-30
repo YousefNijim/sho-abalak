@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ActivityIndicator, Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { ActivityIndicator, Alert, Modal, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
@@ -21,26 +21,46 @@ export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
+  // Ref guard: prevents two taps from firing two mutations in the same render cycle
+  const submitting = useRef(false);
 
-  // Fetch live order details
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
     queryFn: () => ordersApi.getById(id!),
     enabled: !!id,
   });
 
-  // Mutation to update order status
   const updateStatus = useMutation({
     mutationFn: (status: string) => ordersApi.updateStatus(id!, { status }),
     onSuccess: () => {
+      submitting.current = false;
       queryClient.invalidateQueries({ queryKey: ['order', id] });
       queryClient.invalidateQueries({ queryKey: ['business-orders'] });
     },
     onError: (err: any) => {
+      submitting.current = false;
       const msg = err.response?.data?.message || 'فشل تحديث حالة الطلب.';
       Alert.alert('خطأ', msg);
     },
   });
+
+  const handleStatusChange = (status: string) => {
+    if (submitting.current || updateStatus.isPending) return;
+    submitting.current = true;
+    updateStatus.mutate(status);
+  };
+
+  const handleReject = () => {
+    if (submitting.current || updateStatus.isPending) return;
+    Alert.alert('رفض الطلب', 'هل أنت متأكد من رفض الطلب؟', [
+      { text: 'تراجع', style: 'cancel' },
+      {
+        text: 'رفض',
+        style: 'destructive',
+        onPress: () => handleStatusChange('CANCELLED'),
+      },
+    ]);
+  };
 
   const socket = useSocket();
 
@@ -57,9 +77,9 @@ export default function OrderDetail() {
     const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
       if (payload.orderId === id) {
         if (Platform.OS === 'web') {
-           window.alert(`اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
+          window.alert(`اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
         } else {
-           Alert.alert('سائق غير متاح', `اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
+          Alert.alert('سائق غير متاح', `اعتذر السائق ${payload.driverName} عن توصيل الطلب. يرجى تعيين سائق آخر للطلب.`);
         }
         queryClient.invalidateQueries({ queryKey: ['order', id] });
         queryClient.invalidateQueries({ queryKey: ['business-orders'] });
@@ -96,6 +116,16 @@ export default function OrderDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Loading overlay while status update is in flight */}
+      <Modal visible={updateStatus.isPending} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <View style={styles.overlayCard}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.overlayText}>جاري التحديث...</Text>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 100, gap: spacing[4] }}>
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={styles.title}>طلب #{order.id.slice(-6).toUpperCase()}</Text>
@@ -145,40 +175,35 @@ export default function OrderDetail() {
         </View>
       </ScrollView>
 
-      {/* Footer transitions */}
+      {/* Footer — only ONE actionable transition per status, all guarded */}
       <View style={styles.footer}>
         {status === 'PENDING' ? (
           <View style={styles.btnRow}>
             <Button
-              title={updateStatus.isPending ? 'جاري...' : 'رفض'}
+              title="رفض"
               variant="danger"
               style={{ flex: 1 }}
               disabled={updateStatus.isPending}
-              onPress={() =>
-                Alert.alert('رفض الطلب', 'هل أنت متأكد من رفض الطلب؟', [
-                  { text: 'تراجع', style: 'cancel' },
-                  { text: 'رفض', style: 'destructive', onPress: () => updateStatus.mutate('CANCELLED') },
-                ])
-              }
+              onPress={handleReject}
             />
             <Button
-              title={updateStatus.isPending ? 'جاري القبول...' : 'قبول الطلب'}
+              title="قبول الطلب"
               style={{ flex: 1 }}
-              onPress={() => updateStatus.mutate('CONFIRMED')}
               disabled={updateStatus.isPending}
+              onPress={() => handleStatusChange('CONFIRMED')}
             />
           </View>
         ) : status === 'CONFIRMED' ? (
           <Button
-            title={updateStatus.isPending ? 'جاري التحديث...' : 'بدء التحضير'}
-            onPress={() => updateStatus.mutate('PREPARING')}
+            title="بدء التحضير"
             disabled={updateStatus.isPending}
+            onPress={() => handleStatusChange('PREPARING')}
           />
         ) : status === 'PREPARING' ? (
           <Button
-            title={updateStatus.isPending ? 'جاري التحديث...' : 'الطلب جاهز ✅'}
-            onPress={() => updateStatus.mutate('READY')}
+            title="الطلب جاهز ✅"
             disabled={updateStatus.isPending}
+            onPress={() => handleStatusChange('READY')}
           />
         ) : status === 'READY' ? (
           <Button
@@ -210,6 +235,9 @@ function Info({ label, value, bold }: { label: string; value: string; bold?: boo
 }
 
 const styles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' },
+  overlayCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[6], alignItems: 'center', gap: spacing[3], minWidth: 200 },
+  overlayText: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'center' },
   title: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   statusBanner: { backgroundColor: colors.primary + '10', borderLeftWidth: 4, borderLeftColor: colors.primary, padding: spacing[3], borderRadius: radius.sm },

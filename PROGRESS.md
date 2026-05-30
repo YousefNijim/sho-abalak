@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 19 (Delivery address flow — branch feat/ux-fixes)
+**Current phase:** Phase 20 (Driver status update reliability — branch feat/ux-fixes)
 
 ---
 
@@ -168,6 +168,14 @@
 12. ~~**Profile Pages & Core UI Updates (Phase 13)**~~ ✅ **DONE** — Hand-crafted pixel-perfect React Native implementations of 4 missing Profile screens (Saved Addresses, Notifications, Change Password, About Us) for Customer App.
 13. ~~**Stitch Designs Port (Phase 14)**~~ ✅ **DONE** — Fully ported all Customer App screens, as well as Business and Driver App Splash/Auth screens, to perfectly match the Google Stitch UI/UX design zip exports.
 14. ~~**Application Flow & Logic Fixes (Phase 15)**~~ ✅ **DONE** — Addressed logic flow issues: Fixed math floating-point/concatenation bugs in Customer Cart total, Business total sales, and Driver earnings. Fixed Customer App Logout button clickability by untrapping ScrollView events and applying `TouchableOpacity`. Synchronized WebSocket `order:status_update` listeners across Customer tracking screen. Enhanced Order History logs to explicitly display all inner items and quantities. Verified Driver Request assign/accept/reject end-to-end flows.
+19. ~~**Driver status update reliability + mis-tap guard (Phase 20 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Fixed driver active-delivery screen and business order-detail screen:
+    - **Root cause (driver):** Steps 0→1 ("استلمت الطلب" / "وصلت لموقع الزبون") were pure `setStep()` calls with no API call and no double-tap guard. A double-tap advanced `step` by 2 in a single render cycle, skipping straight to the delivery confirm. Only the final DELIVERED mutation actually called the API — intermediate steps are UX-only (correct, since `PICKED_UP → DELIVERED` is the only valid API transition for drivers).
+    - **Root cause (business):** PENDING state exposed two simultaneous buttons (reject + confirm). A double-tap could fire both `CANCELLED` and `CONFIRMED` before `isPending` flipped in the next render.
+    - **Fix A — ref guard:** Added `advancing` / `submitting` `useRef(false)` booleans. Handler checks and sets the ref synchronously before any async work; released in `onSuccess`/`onError`. Blocks second tap even if React hasn't re-rendered yet.
+    - **Fix B — render guard:** All footer buttons are `disabled={isPending}` so the UI also blocks taps visually once the mutation is in flight.
+    - **Fix C — single-button footer:** Driver footer now renders `{step === 0 && ...} {step === 1 && ...} {step === 2 && ...}` — only ONE button is ever in the DOM at a time, making it impossible to see two actionable buttons simultaneously.
+    - **Fix D — loading overlay:** Both screens show a `<Modal>` fullscreen dimmed overlay with `ActivityIndicator` + Arabic label while the mutation is pending. Blocks all underlying touch interaction during network flight.
+    - **Verified:** `tsc --noEmit` on driver-app + business-app ✅ (errors are all pre-existing in unchanged files). `nest build` ✅ clean.
 18. ~~**Delivery Address Flow (Phase 19 — branch `feat/ux-fixes`)**~~ ✅ **DONE** — Selected delivery address flows end-to-end from saved addresses → order → all three apps:
     - **Area required:** Saved-address form now requires area selection. Inline errors (`الرجاء اختيار المنطقة`, etc.) shown per-field without `Alert.alert`. "Clear area" option removed from picker. `FormErrors` type wired to `setFormErrors` with live clearing on field change.
     - **DB snapshot:** `deliveryAreaName String?` + `deliveryAddressDetail String?` added to `Order` model. Migration `20260530000003_order_delivery_address` applied. These are snapshot fields — preserved even if the user later edits/deletes their saved address.

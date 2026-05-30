@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
@@ -12,42 +12,75 @@ export default function ActiveDelivery() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
-  const [step, setStep] = useState(0);
 
-  // Fetch active order details dynamically
+  // Local step counter — pure UX (no API call for steps 0→1, only step 2 delivers)
+  const [step, setStep] = useState(0);
+  // Ref guard: blocks double-taps before React re-render flips state
+  const advancing = useRef(false);
+
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', orderId],
     queryFn: () => ordersApi.getById(orderId!),
     enabled: !!orderId,
-    refetchInterval: 5000, // Poll to stay synced
+    refetchInterval: 5000,
   });
 
-  // Mutation to transition to DELIVERED status
   const deliverMutation = useMutation({
     mutationFn: () => ordersApi.updateStatus(orderId!, { status: 'DELIVERED' }),
     onSuccess: () => {
+      advancing.current = false;
       queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       Alert.alert('نجاح', 'تم توصيل الطلب بنجاح وتأكيد التحصيل!');
       router.replace('/(tabs)');
     },
     onError: (err: any) => {
+      advancing.current = false;
       const msg = err.response?.data?.message || 'فشل تحديث حالة الطلب إلى تم التسليم.';
       Alert.alert('خطأ', msg);
     },
   });
 
+  const handleAdvanceStep = () => {
+    // Ref guard: if a tap is already being processed, ignore this one
+    if (advancing.current) return;
+    advancing.current = true;
+    setStep((s) => {
+      const next = s + 1;
+      // Release lock on next frame after state update settles
+      requestAnimationFrame(() => { advancing.current = false; });
+      return next;
+    });
+  };
+
+  const handleDeliver = () => {
+    if (advancing.current || deliverMutation.isPending) return;
+    advancing.current = true;
+    Alert.alert(
+      'تأكيد التسليم',
+      'هل أنت متأكد أن الطلب وصل للزبون؟',
+      [
+        {
+          text: 'إلغاء',
+          style: 'cancel',
+          onPress: () => { advancing.current = false; },
+        },
+        {
+          text: 'نعم، تم التسليم',
+          onPress: () => deliverMutation.mutate(),
+        },
+      ],
+    );
+  };
+
   const handleCall = (phone: string | undefined) => {
-    if (!phone) {
-      Alert.alert('خطأ', 'رقم الهاتف غير متوفر');
-      return;
-    }
+    if (!phone) { Alert.alert('خطأ', 'رقم الهاتف غير متوفر'); return; }
     Linking.openURL(`tel:${phone}`);
   };
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -55,9 +88,9 @@ export default function ActiveDelivery() {
 
   if (!order) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[4] }}>
+      <View style={styles.centered}>
         <Text style={{ fontSize: fontSizes.base, color: colors.textMuted, textAlign: 'center' }}>
-          لم يتم العثور على تفاصيل هذا الطلب. قد يكون قد تم تعديله أو حذفه.
+          لم يتم العثور على تفاصيل هذا الطلب.
         </Text>
         <Button title="العودة للرئيسية" style={{ marginTop: spacing[4] }} onPress={() => router.replace('/(tabs)')} />
       </View>
@@ -69,6 +102,16 @@ export default function ActiveDelivery() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Full-screen overlay while delivering — blocks all interaction */}
+      <Modal visible={deliverMutation.isPending} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <View style={styles.overlayCard}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.overlayText}>جاري تأكيد التسليم...</Text>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: 24 }}>
         {/* Stepper */}
         <View style={styles.stepper}>
@@ -124,7 +167,6 @@ export default function ActiveDelivery() {
             <Text style={styles.cardTitle}>👤 الزبون (نقطة التسليم)</Text>
           </View>
           <Text style={styles.nameText}>{order.customer?.name || 'زبون شو عبالك'}</Text>
-          {/* Delivery address — snapshot stored on order */}
           <View style={styles.deliveryAddressBlock}>
             <Text style={styles.deliveryAddressLabel}>عنوان التوصيل</Text>
             <Text style={styles.deliveryAreaName}>
@@ -152,28 +194,26 @@ export default function ActiveDelivery() {
         </View>
       </ScrollView>
 
-      {/* Footer Actions */}
+      {/* Footer — only ONE actionable button at a time */}
       <View style={styles.footer}>
-        {step < 2 ? (
+        {step === 0 && (
           <Button
-            title={step === 0 ? 'استلمت الطلب وبدء التحرك 🛵' : 'وصلت لموقع الزبون 📍'}
-            onPress={() => setStep((s) => s + 1)}
+            title="استلمت الطلب وبدء التحرك 🛵"
+            onPress={handleAdvanceStep}
           />
-        ) : (
+        )}
+        {step === 1 && (
           <Button
-            title={deliverMutation.isPending ? 'جاري تأكيد التسليم...' : 'تأكيد تسليم الطلب بنجاح ✅'}
+            title="وصلت لموقع الزبون 📍"
+            onPress={handleAdvanceStep}
+          />
+        )}
+        {step === 2 && (
+          <Button
+            title="تأكيد تسليم الطلب بنجاح ✅"
             variant="primary"
             disabled={deliverMutation.isPending}
-            onPress={() =>
-              Alert.alert(
-                'تأكيد التسليم',
-                'هل أنت متأكد أن الطلب وصل للزبون؟',
-                [
-                  { text: 'إلغاء', style: 'cancel' },
-                  { text: 'نعم، تم التسليم', onPress: () => deliverMutation.mutate() },
-                ],
-              )
-            }
+            onPress={handleDeliver}
           />
         )}
       </View>
@@ -182,6 +222,10 @@ export default function ActiveDelivery() {
 }
 
 const styles = StyleSheet.create({
+  centered: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[4] },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' },
+  overlayCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[6], alignItems: 'center', gap: spacing[3], minWidth: 200 },
+  overlayText: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'center' },
   stepper: { flexDirection: 'row-reverse', justifyContent: 'space-between', backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
   stepItem: { alignItems: 'center', flex: 1, gap: 6 },
   stepDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.border, alignItems: 'center', justifyContent: 'center' },
