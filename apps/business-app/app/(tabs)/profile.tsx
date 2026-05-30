@@ -29,6 +29,7 @@ import {
   Clock,
   Pencil,
   ArrowRight,
+  KeyRound,
   X,
 } from 'lucide-react-native';
 import { businessesApi } from '@shu/api-client';
@@ -349,6 +350,17 @@ export default function ProfileTab() {
                   <Text style={styles.listRowSub}>{phone.trim() || 'لم يتم الإدخال'}</Text>
                 </View>
                 <Phone size={20} color={colors.textMuted} />
+              </View>
+            </Pressable>
+            <View style={styles.listDivider} />
+            <Pressable style={styles.listRow} onPress={() => router.push('/change-password')}>
+              <ChevronLeft size={20} color={colors.textMuted} />
+              <View style={styles.listRowMain}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.listRowTitle}>تغيير كلمة المرور</Text>
+                  <Text style={styles.listRowSub}>تحديث كلمة مرور حسابك</Text>
+                </View>
+                <KeyRound size={20} color={colors.textMuted} />
               </View>
             </Pressable>
           </View>
