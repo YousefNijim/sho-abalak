@@ -9,8 +9,12 @@ export { ordersApi } from './orders.api';
 export { driversApi } from './drivers.api';
 export { reviewsApi } from './reviews.api';
 export { usersApi } from './users.api';
+export { settingsApi } from './settings.api';
+export { reportsApi } from './reports.api';
 
 // Re-export types
+export type { SystemSettings } from './settings.api';
+export type { FinanceSummary } from './reports.api';
 export type { AuthResponse, LoginDto, RegisterDto } from './auth.api';
 export type { Area } from './areas.api';
 export type { Business, BusinessListParams } from './businesses.api';
@@ -20,6 +24,7 @@ export type {
   OrderItem,
   CreateOrderDto,
   UpdateOrderStatusDto,
+  AdminInterventionDto,
 } from './orders.api';
 export type { Driver, UpdateDriverStatusDto } from './drivers.api';
 export type { Review, CreateReviewDto } from './reviews.api';

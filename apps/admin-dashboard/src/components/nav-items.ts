@@ -9,6 +9,9 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/orders', label: 'الطلبات', icon: 'local_shipping' },
   { href: '/businesses', label: 'المتاجر', icon: 'storefront' },
   { href: '/users', label: 'المستخدمين', icon: 'group' },
+  { href: '/drivers', label: 'السائقين', icon: 'delivery_dining' },
+  { href: '/areas', label: 'المناطق', icon: 'explore' },
+  { href: '/reviews', label: 'المراجعات', icon: 'rate_review' },
   { href: '/reports', label: 'التقارير', icon: 'analytics' },
   { href: '/settings', label: 'الإعدادات', icon: 'settings' },
 ];

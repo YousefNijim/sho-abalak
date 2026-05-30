@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-30
-**Current phase:** Phase 20 (Driver status update reliability — branch feat/ux-fixes)
+**Current phase:** Phase 21 (Admin Dashboard Control Center Transformation — Complete)
 
 ---
 
@@ -63,12 +63,22 @@
 - `.env.example`
 - **Verified:** `nest build` passes, Prisma client generates.
 
-### apps/admin-dashboard (`@shu/admin-dashboard`) — Next.js 14 — **6 pages, all from Stitch designs** — ✅ **FULLY WIRED TO LIVE API**
-- `(dashboard)` route group with shared shell: `Sidebar` (green, active-route highlight via `usePathname`), `TopBar`. Protected by Next.js middleware / layout auth guard reading cookies.
-- Pages: **Login** (new), **Dashboard** (stat cards, Recharts bar charts, TanStack recent-orders table), **Businesses** (filters + TanStack data table + pagination), **Users** (tabs + table), **Drivers** (table), **Reports/Finance** (period selector, 4 cards, transactions table). All RTL, brand-themed, dynamic backend queries!
-- Shared components: `stat-card`, `status-badge`, `data-table` (TableCard/StatusDot/RowActions with live suspend/unsuspend actions), `page-placeholder`, `nav-items`.
+### apps/admin-dashboard (`@shu/admin-dashboard`) — Next.js 14 — **10 pages, all from Stitch designs & spec** — ✅ **FULLY WIRED TO LIVE API**
+- `(dashboard)` route group with shared shell: `Sidebar` (green, active-route highlight via `usePathname`), `TopBar`. Protected by Next.js middleware / layout auth guard reading cookies. Updated sidebar navigation parameters to include all active modules.
+- Pages: 
+  - **Login:** secure administrator auth, session cookie storage, protected route middleware.
+  - **Dashboard:** overview with live stats, alert tickers for stuck orders/registrations, Recharts charts (weekly bar, monthly bar, and method split pie chart), recent transactions table.
+  - **Orders:** TanStack table with status filtering tabs, Left Drawer detailing address snapshots, items breakdown, status timelines, reassigning drivers, force status updates, and refund overrides.
+  - **Businesses:** approves/rejects registrations, manual isOpen override toggle, custom commission rate slider adjustments.
+  - **Users:** customer/business/driver tabs, suspend/unsuspend accounts, reset password triggers, live notifications push.
+  - **Drivers:** live tracking status grid, deliveries/earnings log drawer, regional default areas re-assignments.
+  - **Areas [NEW]:** complete delivery zones list (TanStack), edit default delivery fee modal, add new zone sliding modal, delete zone red overlay.
+  - **Reviews [NEW]:** moderator dashboard listing ratings and customer comments, business or driver filters, delete offensive comments (automates PostgreSQL ratings recomputations).
+  - **Reports/Finance:** TanStack table listing transactions, backend reports aggregated query per period ("today", "week", "month", "custom"), custom period range calendars, dynamic high-fidelity CSV data sheets exporter.
+  - **Settings:** form inputs for Default Commission rate, Default Base Delivery fee, and App toggles (Customer, Business, Driver) for emergency maintenance blocks.
+- Shared components: `stat-card`, `status-badge`, `data-table`, `page-placeholder`, `nav-items`.
 - `tailwind.config.ts` extended with the Stitch token set; `globals.css` loads Cairo/Montserrat + Material Symbols.
-- **Verified:** Wires live data queries using React Query and `@shu/api-client`. Next build compiles 10 routes cleanly.
+- **Verified:** Wires live data queries using React Query and `@shu/api-client`. Next build compiles all 10 routes dynamically with 0 TypeScript compilation errors!
 
 ### apps/customer-app — Expo SDK 51 — **12 screens, ported from Stitch** — ✅ **FULLY WIRED TO LIVE API**
 - Nav: root Stack + `(auth)` group (login/register/otp) + `(tabs)` group (Home/Orders/Profile) + stack screens `business/[id]`, `cart`, `tracking`.

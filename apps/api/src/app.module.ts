@@ -13,6 +13,8 @@ import { UsersModule } from './users/users.module';
 import { GatewayModule } from './gateway/gateway.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { SettingsModule } from './settings/settings.module';
+import { ReportsModule } from './reports/reports.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -31,6 +33,8 @@ import { HealthController } from './health.controller';
     GatewayModule,
     UploadsModule,
     AddressesModule,
+    SettingsModule,
+    ReportsModule,
   ],
   controllers: [HealthController],
 })
