@@ -8,6 +8,7 @@ export enum UserRole {
 
 /** حالة حساب المستخدم (يديرها الأدمن) */
 export enum UserStatus {
+  PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
   BANNED = 'BANNED',

@@ -12,6 +12,20 @@ export interface RegisterDto {
   areaId?: string;
 }
 
+export interface RegisterBusinessDto {
+  name: string;
+  category: string;
+  ownerName: string;
+  phone: string;
+  areaId: string;
+  addressDetail?: string;
+}
+
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   user: {
@@ -30,6 +44,14 @@ export const authApi = {
 
   register: (dto: RegisterDto) =>
     http.post<AuthResponse>('/auth/register', dto).then((r) => r.data),
+
+  registerBusiness: (dto: RegisterBusinessDto) =>
+    http
+      .post<{ submitted: boolean; status: string }>('/auth/register-business', dto)
+      .then((r) => r.data),
+
+  changePassword: (dto: ChangePasswordDto) =>
+    http.patch<{ changed: boolean }>('/auth/change-password', dto).then((r) => r.data),
 
   me: () =>
     http.get<AuthResponse['user']>('/auth/me').then((r) => r.data),

@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestOtpDto, VerifyOtpDto } from './dto/otp.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -16,6 +18,20 @@ export class AuthController {
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
+  }
+
+  /** Self-service store registration — creates a PENDING store awaiting admin approval. */
+  @Post('register-business')
+  registerBusiness(@Body() dto: RegisterBusinessDto) {
+    return this.auth.registerBusiness(dto);
+  }
+
+  /** Authenticated user changes their own password. */
+  @Patch('change-password')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  changePassword(@CurrentUser() user: AuthUser, @Body() dto: ChangePasswordDto) {
+    return this.auth.changePassword(user.id, dto.currentPassword, dto.newPassword);
   }
 
   @Post('login')

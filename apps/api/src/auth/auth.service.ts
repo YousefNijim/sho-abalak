@@ -4,6 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserRole, UserStatus } from '@shu/shared-types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { RegisterBusinessDto } from './dto/register-business.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtPayload } from './jwt.strategy';
 
@@ -33,15 +34,68 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
-    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+    // No password set yet (e.g. a store still pending admin approval) → treat as invalid creds.
+    if (!user || !user.password || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('رقم الهاتف أو كلمة المرور غير صحيحة');
     }
     if (user.status !== UserStatus.ACTIVE) {
-      throw new ForbiddenException(
-        user.status === UserStatus.BANNED ? 'تم حظر هذا الحساب' : 'تم تعليق هذا الحساب',
-      );
+      const message =
+        user.status === UserStatus.BANNED
+          ? 'تم حظر هذا الحساب'
+          : user.status === UserStatus.PENDING
+            ? 'حسابك قيد المراجعة من قبل الإدارة'
+            : 'تم تعليق هذا الحساب';
+      throw new ForbiddenException(message);
     }
     return this.sign(user.id, user.role as UserRole, user);
+  }
+
+  /**
+   * Self-service store registration from the business login screen.
+   * Creates a BUSINESS owner in PENDING status with NO password yet,
+   * plus the linked Business, in one transaction. The store cannot log in
+   * until an admin approves it and sets a password.
+   */
+  async registerBusiness(dto: RegisterBusinessDto) {
+    const existing = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+    if (existing) throw new ConflictException('رقم الهاتف مسجّل مسبقاً');
+
+    await this.prisma.$transaction(async (tx) => {
+      const owner = await tx.user.create({
+        data: {
+          name: dto.ownerName,
+          phone: dto.phone,
+          password: null,
+          role: UserRole.BUSINESS,
+          status: UserStatus.PENDING,
+          areaId: dto.areaId,
+        },
+      });
+      await tx.business.create({
+        data: {
+          ownerId: owner.id,
+          name: dto.name,
+          category: dto.category,
+          areaId: dto.areaId,
+          phone: dto.phone,
+          addressDetail: dto.addressDetail ?? null,
+        },
+      });
+    });
+
+    return { submitted: true, status: UserStatus.PENDING };
+  }
+
+  /** Authenticated user changes their own password (verifies the current one). */
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    if (!user.password || !(await bcrypt.compare(currentPassword, user.password))) {
+      throw new UnauthorizedException('كلمة المرور الحالية غير صحيحة');
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({ where: { id: userId }, data: { password: passwordHash } });
+    return { changed: true };
   }
 
   private sign(id: string, role: UserRole, user: { name: string; phone: string }) {

@@ -19,6 +19,7 @@ enum UserRole {
 
 // حالة حساب المستخدم (يديرها الأدمن)
 enum UserStatus {
+  PENDING
   ACTIVE
   SUSPENDED
   BANNED
@@ -83,7 +84,7 @@ model User {
   name      String
   phone     String     @unique
   email     String?    @unique
-  password  String
+  password  String?
   areaId    String?
   area      Area?      @relation(fields: [areaId], references: [id])
   business        Business?

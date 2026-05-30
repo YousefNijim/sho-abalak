@@ -15,9 +15,9 @@ export { reportsApi } from './reports.api';
 // Re-export types
 export type { SystemSettings } from './settings.api';
 export type { FinanceSummary } from './reports.api';
-export type { AuthResponse, LoginDto, RegisterDto } from './auth.api';
+export type { AuthResponse, LoginDto, RegisterDto, RegisterBusinessDto, ChangePasswordDto } from './auth.api';
 export type { Area } from './areas.api';
-export type { Business, BusinessListParams } from './businesses.api';
+export type { Business, BusinessListParams, AdminCreateBusinessDto } from './businesses.api';
 export type { Product, CreateProductDto } from './products.api';
 export type {
   Order,
