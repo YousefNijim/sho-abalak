@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FCF3DC; /* background-cream */
+        }
+        .heritage-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .input-heritage {
+            height: 52px;
+            background-color: #FFFFFF;
+            border: 1.5px solid #E5E0D5; /* border-beige */
+            border-radius: 8px;
+            padding: 0 16px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .input-heritage:focus {
+            outline: none;
+            border-color: #e6781e; /* primary-container */
+            box-shadow: 0 0 0 2px rgba(230, 120, 30, 0.1);
+        }
+        .toggle-switch {
+            width: 52px;
+            height: 28px;
+            background-color: #E5E0D5;
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-switch.active {
+            background-color: #22C55E;
+        }
+        .toggle-knob {
+            width: 22px;
+            height: 22px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            transition: transform 0.3s;
+        }
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(-24px);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-container": "#e6781e",
+                      "inverse-surface": "#303037",
+                      "border-beige": "#E5E0D5",
+                      "surface-container-lowest": "#ffffff",
+                      "on-tertiary-fixed-variant": "#004b71",
+                      "outline-variant": "#ddc1b1",
+                      "tertiary-fixed-dim": "#8fcdff",
+                      "on-surface-variant": "#564337",
+                      "tertiary-container": "#009ee8",
+                      "inverse-primary": "#ffb688",
+                      "secondary-fixed-dim": "#92d5a5",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#dbd9e2",
+                      "surface-bright": "#fbf8ff",
+                      "warning-amber": "#F59E0B",
+                      "on-secondary-container": "#2e6f47",
+                      "on-primary-fixed-variant": "#733600",
+                      "tertiary-fixed": "#cbe6ff",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#00210e",
+                      "secondary-container": "#abefbd",
+                      "surface-container-highest": "#e4e1eb",
+                      "background": "#fbf8ff",
+                      "error-red": "#EF4444",
+                      "on-primary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#f2eff9",
+                      "primary-fixed-dim": "#ffb688",
+                      "secondary-fixed": "#aef2bf",
+                      "muted-gray": "#6B7280",
+                      "success-green": "#22C55E",
+                      "on-primary-container": "#4e2200",
+                      "secondary": "#296a43",
+                      "outline": "#8a7265",
+                      "surface": "#fbf8ff",
+                      "error": "#ba1a1a",
+                      "on-secondary-fixed-variant": "#09522d",
+                      "tertiary": "#006495",
+                      "primary": "#974800",
+                      "on-tertiary-container": "#00314c",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#001e30",
+                      "background-cream": "#FCF3DC",
+                      "surface-container": "#efecf6",
+                      "surface-tint": "#974800",
+                      "surface-white": "#FFFFFF",
+                      "on-primary-fixed": "#311300",
+                      "on-surface": "#1b1b22",
+                      "primary-fixed": "#ffdbc7",
+                      "surface-container-high": "#eae7f1",
+                      "on-background": "#1b1b22",
+                      "surface-variant": "#e4e1eb",
+                      "surface-container-low": "#f5f2fc"
+              },
+              "spacing": {
+                      "gap-xs": "4px",
+                      "gap-sm": "8px",
+                      "margin-standard": "16px",
+                      "gap-lg": "20px",
+                      "gap-md": "12px",
+                      "nav-height": "64px",
+                      "section-md": "24px",
+                      "section-lg": "32px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "body-base": ["Montserrat"],
+                      "hero-lg": ["Cairo"],
+                      "headline-lg-mobile": ["Cairo"],
+                      "headline-lg": ["Cairo"],
+                      "headline-sm": ["Cairo"],
+                      "button-text": ["Montserrat"],
+                      "label-sm": ["Montserrat"],
+                      "label-md": ["Montserrat"],
+                      "headline-md": ["Cairo"],
+                      "body-lg": ["Montserrat"]
+              },
+              "fontSize": {
+                      "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream text-on-surface">
+<!-- Top AppBar -->
+<header class="w-full top-0 sticky bg-surface-white shadow-sm z-40 flex flex-row-reverse items-center justify-between px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<button class="active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary-container" data-icon="settings">settings</span>
+</button>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary-container font-extrabold">الحساب الشخصي</h1>
+<button class="active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary-container" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</header>
+<main class="pb-24">
+<!-- Hero Profile Header -->
+<div class="relative w-full h-48 bg-primary-container flex items-end justify-center mb-16">
+<div class="absolute -bottom-12 w-32 h-32 rounded-full border-4 border-surface-white shadow-lg overflow-hidden bg-white">
+<img alt="Profile Picture" class="w-full h-full object-cover" data-alt="A professional portrait of a friendly Middle Eastern delivery driver smiling warmly. He is outdoors in a sun-drenched urban environment with soft morning light illuminating his face. The background features a subtle blur of a traditional stone-walled Palestinian neighborhood with terracotta accents. The overall atmosphere is trustworthy, reliable, and grounded in a modern heritage aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfAC9c0uPU82bMFrErCAtqcqiVD-7fuj2VMZopfhBBJv5m1fZrNJ_JxMWBD8cL3GVjXbQwyszattNjpQvWxMwQ798-cMWGsaZz030j3Rp0-Xd_38Y1luEm2EwN2q9Q7rTE2XTsNnx-PVReUtCBjdJ39DwqMhJQq-d2LKR8zS9gghFFmTRI6wlfrj77SlyB4t-IyV1DD1JqlLyehOm4mE2NoWE1Iml8KbJZIVFx2bO8y1BA4S8FT2NxsvBUtdqCXs4k8oi0oYijvJKD"/>
+<div class="absolute bottom-0 right-0 bg-primary-container text-white p-1 rounded-full border-2 border-white cursor-pointer active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="edit" style="font-size: 18px;">edit</span>
+</div>
+</div>
+</div>
+<div class="px-margin-standard space-y-gap-lg">
+<!-- Availability Status Toggle -->
+<div class="heritage-card p-margin-standard flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-3 h-3 rounded-full bg-success-green" id="status-indicator"></div>
+<div>
+<p class="font-headline-sm text-headline-sm text-on-surface" id="status-text">متاح للعمل</p>
+<p class="font-label-sm text-label-sm text-muted-gray">يمكنك استقبال الطلبات الآن</p>
+</div>
+</div>
+<div class="toggle-switch active" id="availability-toggle">
+<div class="toggle-knob"></div>
+</div>
+</div>
+<!-- Profile Info Fields -->
+<section class="space-y-gap-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface-variant pr-2">المعلومات الشخصية</h2>
+<div class="heritage-card p-margin-standard space-y-margin-standard">
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-muted-gray px-2">الاسم الكامل</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray" data-icon="person">person</span>
+<input class="input-heritage pr-12 font-body-lg text-body-lg" type="text" value="أحمد محمد"/>
+</div>
+</div>
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-muted-gray px-2">رقم الهاتف</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray" data-icon="phone">phone</span>
+<input class="input-heritage pr-12 font-body-lg text-body-lg text-left" dir="ltr" type="tel" value="+970 59-xxxx-xxx"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Vehicle Info -->
+<section class="space-y-gap-md">
+<h2 class="font-headline-sm text-headline-sm text-on-surface-variant pr-2">بيانات المركبة</h2>
+<div class="heritage-card p-margin-standard space-y-margin-standard">
+<div class="grid grid-cols-2 gap-md">
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-muted-gray px-2">نوع المركبة</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray" data-icon="motorcycle">motorcycle</span>
+<input class="input-heritage pr-12 font-body-lg text-body-lg" type="text" value="دراجة نارية"/>
+</div>
+</div>
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-muted-gray px-2">رقم اللوحة</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray" data-icon="pin">pin</span>
+<input class="input-heritage pr-12 font-body-lg text-body-lg" type="text" value="7-2345-98"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Emergency Contact -->
+<section class="space-y-gap-md">
+<div class="flex items-center gap-sm pr-2">
+<span class="material-symbols-outlined text-error" data-icon="emergency">emergency</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface-variant">جهة اتصال للطوارئ</h2>
+</div>
+<div class="heritage-card p-margin-standard bg-error-container/20 border-r-4 border-error">
+<div class="space-y-gap-xs">
+<label class="font-label-md text-label-md text-muted-gray px-2">رقم الطوارئ</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-muted-gray" data-icon="contact_phone">contact_phone</span>
+<input class="input-heritage pr-12 font-body-lg text-body-lg text-left" dir="ltr" type="tel" value="+970 56-xxxx-xxx"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Save Button -->
+<button class="w-full h-[52px] bg-primary-container text-white font-button-text text-button-text rounded-xl shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-md">
+<span>حفظ التغييرات</span>
+<span class="material-symbols-outlined" data-icon="save">save</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl shadow-[0_-2px_10px_rgba(0,0,0,0.05)] bg-surface-white flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe">
+<a class="flex flex-col items-center justify-center text-muted-gray p-gap-sm hover:text-primary-container active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray p-gap-sm hover:text-primary-container active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="font-label-md text-label-md">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray p-gap-sm hover:text-primary-container active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label-md text-label-md">المحفظة</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-xl p-gap-sm min-w-[64px] active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md">الحساب</span>
+</a>
+</nav>
+<script>
+        const toggle = document.getElementById('availability-toggle');
+        const statusText = document.getElementById('status-text');
+        const statusIndicator = document.getElementById('status-indicator');
+
+        toggle.addEventListener('click', () => {
+            const isActive = toggle.classList.toggle('active');
+            if (isActive) {
+                statusText.innerText = 'متاح للعمل';
+                statusIndicator.className = 'w-3 h-3 rounded-full bg-success-green';
+            } else {
+                statusText.innerText = 'غير متاح';
+                statusIndicator.className = 'w-3 h-3 rounded-full bg-muted-gray';
+            }
+        });
+
+        // Simple button interaction
+        document.querySelector('button.bg-primary-container').addEventListener('click', function() {
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>';
+            setTimeout(() => {
+                this.innerHTML = '<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span> <span>تم الحفظ</span>';
+                setTimeout(() => {
+                    this.innerHTML = originalContent;
+                }, 2000);
+            }, 1000);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>إدارة القائمة - المشروبات</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@100..900&amp;family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dbd9e2",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#aef2bf",
+                    "on-secondary-fixed": "#00210e",
+                    "on-primary-fixed-variant": "#733600",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "background": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "on-surface-variant": "#564337",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#f2eff9",
+                    "error-red": "#EF4444",
+                    "warning-amber": "#F59E0B",
+                    "surface-container": "#efecf6",
+                    "error": "#ba1a1a",
+                    "primary": "#974800",
+                    "surface-container-low": "#f5f2fc",
+                    "outline": "#8a7265",
+                    "surface-container-highest": "#e4e1eb",
+                    "secondary-container": "#abefbd",
+                    "primary-fixed": "#ffdbc7",
+                    "surface-variant": "#e4e1eb",
+                    "on-background": "#1b1b22",
+                    "inverse-primary": "#ffb688",
+                    "success-green": "#22C55E",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "outline-variant": "#ddc1b1",
+                    "inverse-surface": "#303037",
+                    "secondary": "#296a43",
+                    "on-primary-fixed": "#311300",
+                    "surface-tint": "#974800",
+                    "muted-gray": "#6B7280",
+                    "surface-container-high": "#eae7f1",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#ffb688",
+                    "surface-bright": "#fbf8ff",
+                    "tertiary-container": "#009ee8",
+                    "tertiary": "#006495",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-tertiary-fixed": "#001e30",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "primary-container": "#e6781e",
+                    "on-surface": "#1b1b22",
+                    "border-beige": "#E5E0D5",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-white": "#FFFFFF",
+                    "on-primary-container": "#4e2200",
+                    "on-primary": "#ffffff",
+                    "background-cream": "#FCF3DC",
+                    "on-secondary-container": "#2e6f47",
+                    "on-tertiary-container": "#00314c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "gap-md": "12px",
+                    "gap-sm": "8px",
+                    "margin-standard": "16px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "button-text": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "hero-lg": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "label-sm-mobile": ["10px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #974800;
+            border-radius: 3px 3px 0 0;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #22C55E;
+        }
+        .toggle-checkbox:checked + .toggle-label::before {
+            transform: translateX(-100%);
+            left: calc(100% - 2px);
+        }
+        .toggle-label::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface min-h-screen flex flex-col">
+<!-- Top App Bar (Shared Component) -->
+<header class="bg-background-cream dark:bg-background shadow-sm docked full-width top-0 z-50 flex flex-row-reverse justify-between items-center w-full px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden border-2 border-primary-fixed">
+<img alt="صورة الملف الشخصي للمتجر" class="w-full h-full object-cover" data-alt="A professional close-up photograph of a friendly restaurant manager in their early 40s. The setting is a warm, brightly lit modern kitchen environment with soft cream walls and wooden accents. The manager is wearing a neat hospitality uniform. The lighting is high-key and inviting, matching a warm heritage brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCffS7YkFKRAvbmhE9ZSZ25AmFInt7GXtpHcTMEJn03dC6CR9RFwS_pVrvoIh7tItzYUgbeRu67wbSCpQYccV3DDbdRk8aYP1teLffBQa8nsDFz6Rq3v4zAYxOHT1cQ5_BY5wCp31vqGw__28qb8BcxLxvK94h4-6qnwrHtsful0fBbnmGnuF2ZoPjp0KYXTc7XzK7wevLXGnOYExkDwU805iQfp5yTZkSvlsf8S9Xx-uFeJMNmfCUpDekNcDQj1faRUOALkdQPXUAE"/>
+</div>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary dark:text-primary-container font-bold">مدير المتجر</h1>
+<button class="material-symbols-outlined text-primary dark:text-primary-container text-2xl hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-150">menu</button>
+</header>
+<!-- Content Canvas -->
+<main class="flex-1 px-4 py-6 mb-24 max-w-4xl mx-auto w-full">
+<!-- Screen Title & Action -->
+<div class="flex justify-between items-center mb-section-md">
+<h2 class="font-headline-md text-headline-md text-primary">إدارة قائمة الطعام</h2>
+<button class="bg-primary hover:bg-primary-container text-white px-4 py-2 rounded-xl flex items-center gap-sm transition-transform active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span class="font-button-text text-button-text">إضافة جديد</span>
+</button>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex items-center gap-lg border-b border-border-beige mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide pb-1">
+<a class="relative pb-3 font-label-md text-label-md text-muted-gray hover:text-primary transition-colors" href="#">الوجبات الرئيسية</a>
+<a class="relative pb-3 font-label-md text-label-md text-primary font-bold active-tab" href="#">المشروبات</a>
+<a class="relative pb-3 font-label-md text-label-md text-muted-gray hover:text-primary transition-colors" href="#">المقبلات</a>
+<a class="relative pb-3 font-label-md text-label-md text-muted-gray hover:text-primary transition-colors" href="#">الحلويات</a>
+</nav>
+<!-- Beverage Items List (Bento Grid Inspired Layout) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Item 1: Fresh Orange Juice -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex gap-4 items-center transition-transform hover:scale-[1.01]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="عصير برتقال فريش" class="w-full h-full object-cover" data-alt="A vibrant, close-up photograph of a tall glass of freshly squeezed orange juice. The glass is condensation-covered, sitting on a rustic wooden table in a sunlit Palestinian courtyard. The background is a soft-focus warm cream wall. The orange color is rich and saturated, lit by natural morning sunlight, evoking freshness and heritage hospitality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiykBhIbNayP937i2aC5GsEXLszVoTLGgOv5eV92ikDP-ZlLWcrA62PMc9p1l0-dk-PJYl-LvyxjxMWHSgLdlBjFnH15Vypd-SlNxbmKH5WIxsFbxnEewv-W4_vUI2JsQxXnvNfX_qBPTgum_SYEMXyw_riHpEsSdeX20Jj8Q4J6z5EaBJNmbVcsVHJutqMO1z4VSG1fi416lNHVWVY2__Oy0qkqXODi8DWvZLu1U-KoxYdz0pkpB7t3hAJSAdZ5Mf_zH0MPc1BRJP"/>
+</div>
+<div class="flex-1 flex flex-col justify-between h-24">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">عصير برتقال فريش</h3>
+<span class="text-primary font-bold text-lg">₪12.00</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">برتقال طبيعي 100% بدون إضافات</p>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-muted-gray hover:text-primary-container p-1 rounded-md transition-colors">edit_note</button>
+<button class="material-symbols-outlined text-muted-gray hover:text-error-red p-1 rounded-md transition-colors">delete</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-success-green">متوفر</span>
+<div class="relative inline-block w-10 h-5 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer invisible" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-muted-gray cursor-pointer relative transition-colors" for="toggle1"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2: Mint Lemonade -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex gap-4 items-center transition-transform hover:scale-[1.01]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="ليمون بالنعناع" class="w-full h-full object-cover" data-alt="A refreshing photograph of a frothy, green mint lemonade in a modern mason jar. The drink is topped with fresh green mint leaves and a yellow lemon slice. The lighting is bright and summery, set against a clean white and warm cream background that reflects the brand's 'Warm Heritage' aesthetic. The scene feels appetizing and cool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsEQt-JGxBvsek4W6bFLDaLbIiq7vwQLC80uQK4nHFCRQfOaa32DvZvlKLgUVjhHSlWnEeAjVwyWvgV5De3bajKJC91VVT0ZYrRnYndBTSE-6ku-wkONQRXEsVzf_JXs8jQqPYlAQQ6TseIRg7XvrgAZvqE_-e1pJ6fpsYYf-446dgUrC3ogthTNdXu0rkExNcNXN9qGHCDTXToA24E_c_zPPSoAVz74ZkFLCIKSqXa3Dlp3fvsRvPohuQtAXTZePLlwoCkN0IwoHM"/>
+</div>
+<div class="flex-1 flex flex-col justify-between h-24">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">ليمون بالنعناع</h3>
+<span class="text-primary font-bold text-lg">₪10.00</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">ليمون بلدي مع أوراق النعناع الطازجة</p>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-muted-gray hover:text-primary-container p-1 rounded-md transition-colors">edit_note</button>
+<button class="material-symbols-outlined text-muted-gray hover:text-error-red p-1 rounded-md transition-colors">delete</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-success-green">متوفر</span>
+<div class="relative inline-block w-10 h-5 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer invisible" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-muted-gray cursor-pointer relative transition-colors" for="toggle2"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 3: Mineral Water -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex gap-4 items-center transition-transform hover:scale-[1.01]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container flex items-center justify-center">
+<img alt="مياه معدنية" class="w-full h-full object-cover" data-alt="A professional product shot of a premium chilled glass water bottle with condensation droplets. The bottle is placed on a minimalist, light beige surface with soft shadows. The lighting is crisp and clean, creating a high-end, fresh atmosphere that aligns with the brand's corporate modern and tactile minimalist style. The color palette is predominantly cool whites and soft creams." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLd5MJiB8uaqgwSOWMifU_12wTqCU9F_TYRd4nm7JoddKVrh18chLaFxG9JbJnQQ-9CMknnX3dQQN2vnxHd1WyI99fXFQbPhHjNu3frjS4hZ1Aw88UpOf3RXMtm8a7bTGVgCPNHETgVnpCmjToo2d5AiWdNez7mXmdEnbTyjcqH7UZerBgJ6_jIoufvlTHwcI68g49-VwSo7XDVQlVn9JENjR4iAPTcdjiQiEx29y6rJYnZbryYZCHgzILAZTGvYlixKPiytj9cbf-"/>
+</div>
+<div class="flex-1 flex flex-col justify-between h-24">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">مياه معدنية</h3>
+<span class="text-primary font-bold text-lg">₪3.00</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">مياه معدنية طبيعية 500 مل</p>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-muted-gray hover:text-primary-container p-1 rounded-md transition-colors">edit_note</button>
+<button class="material-symbols-outlined text-muted-gray hover:text-error-red p-1 rounded-md transition-colors">delete</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-warning-amber">غير متوفر</span>
+<div class="relative inline-block w-10 h-5 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer invisible" id="toggle3" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-muted-gray cursor-pointer relative transition-colors" for="toggle3"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 4: Arabic Coffee -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex gap-4 items-center transition-transform hover:scale-[1.01]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="قهوة عربية" class="w-full h-full object-cover" data-alt="An atmospheric, close-up photograph of a small traditional Arabic coffee cup (finjan) being filled with rich, dark coffee from a brass pot (dallah). Steam rises softly from the cup. The background shows a blurry, warm-lit cafe setting with cream and saffron accents. The aesthetic is deeply rooted in Palestinian heritage, presenting a cozy and inviting mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3jR14N0daUsf_D1JbsmHVWuFtyXuZOFT0tKYkbGd90ktOw-F5w_pjPejhgdb2MdjGfR9P3ogrHN1ib0n20ab35bgQpBCVxLWzLisDsq9MIqy153BqGjJItIi_IQjX1N54zXmG02bgxRREMOZvJzdq60WPrFYP6HN2HDVg_bfc6uAkTXqH1EfI0LfefsyW92Yws5CuEIX8Oa6l586EttW4FWHKilBTFBF0geJCXUn9QwT3lLtv68QTiNui8c9wxwG1PX0JnJDJWQMn"/>
+</div>
+<div class="flex-1 flex flex-col justify-between h-24">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">قهوة عربية</h3>
+<span class="text-primary font-bold text-lg">₪5.00</span>
+</div>
+<p class="text-muted-gray font-label-sm text-label-sm mt-1">قهوة محمصة مع الهيل الفاخر</p>
+</div>
+<div class="flex justify-between items-center mt-2">
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-muted-gray hover:text-primary-container p-1 rounded-md transition-colors">edit_note</button>
+<button class="material-symbols-outlined text-muted-gray hover:text-error-red p-1 rounded-md transition-colors">delete</button>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-success-green">متوفر</span>
+<div class="relative inline-block w-10 h-5 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer invisible" id="toggle4" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-muted-gray cursor-pointer relative transition-colors" for="toggle4"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe bg-surface-white dark:bg-surface-container-lowest shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm-mobile">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm-mobile">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary dark:text-primary-container rounded-xl px-3 py-1 scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+<span class="font-label-sm text-label-sm-mobile">القائمة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container transition-all" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-sm text-label-sm-mobile">التقارير</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for toggle switches
+        document.querySelectorAll('.toggle-label').forEach(label => {
+            label.addEventListener('click', function(e) {
+                const input = this.previousElementSibling;
+                const statusSpan = this.parentElement.querySelector('span');
+                
+                // Set a small delay to allow checkbox state change
+                setTimeout(() => {
+                    if (input.checked) {
+                        statusSpan.textContent = 'متوفر';
+                        statusSpan.className = 'font-label-sm text-label-sm text-success-green';
+                    } else {
+                        statusSpan.textContent = 'غير متوفر';
+                        statusSpan.className = 'font-label-sm text-label-sm text-warning-amber';
+                    }
+                }, 50);
+            });
+        });
+
+        // Tab Switching Logic (Visual only for prototype)
+        document.querySelectorAll('nav a').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                if (this.closest('.fixed')) return; // Ignore bottom nav
+                e.preventDefault();
+                document.querySelectorAll('nav a').forEach(t => {
+                    t.classList.remove('active-tab', 'text-primary', 'font-bold');
+                    t.classList.add('text-muted-gray');
+                });
+                this.classList.add('active-tab', 'text-primary', 'font-bold');
+                this.classList.remove('text-muted-gray');
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dbd9e2",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#aef2bf",
+                    "on-secondary-fixed": "#00210e",
+                    "on-primary-fixed-variant": "#733600",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "background": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "on-surface-variant": "#564337",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#f2eff9",
+                    "error-red": "#EF4444",
+                    "warning-amber": "#F59E0B",
+                    "surface-container": "#efecf6",
+                    "error": "#ba1a1a",
+                    "primary": "#974800",
+                    "surface-container-low": "#f5f2fc",
+                    "outline": "#8a7265",
+                    "surface-container-highest": "#e4e1eb",
+                    "secondary-container": "#abefbd",
+                    "primary-fixed": "#ffdbc7",
+                    "surface-variant": "#e4e1eb",
+                    "on-background": "#1b1b22",
+                    "inverse-primary": "#ffb688",
+                    "success-green": "#22C55E",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "outline-variant": "#ddc1b1",
+                    "inverse-surface": "#303037",
+                    "secondary": "#296a43",
+                    "on-primary-fixed": "#311300",
+                    "surface-tint": "#974800",
+                    "muted-gray": "#6B7280",
+                    "surface-container-high": "#eae7f1",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#ffb688",
+                    "surface-bright": "#fbf8ff",
+                    "tertiary-container": "#009ee8",
+                    "tertiary": "#006495",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-tertiary-fixed": "#001e30",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "primary-container": "#e6781e",
+                    "on-surface": "#1b1b22",
+                    "border-beige": "#E5E0D5",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-white": "#FFFFFF",
+                    "on-primary-container": "#4e2200",
+                    "on-primary": "#ffffff",
+                    "background-cream": "#FCF3DC",
+                    "on-secondary-container": "#2e6f47",
+                    "on-tertiary-container": "#00314c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-lg": "32px",
+                    "base": "4px",
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "gap-md": "12px",
+                    "gap-sm": "8px",
+                    "margin-standard": "16px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "button-text": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "hero-lg": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            background-color: #FCF3DC;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .active-tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: #974800;
+            transition: all 0.3s ease;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- Top AppBar -->
+<header class="bg-background-cream shadow-sm docked full-width top-0 z-50 flex flex-row-reverse justify-between items-center w-full px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<button class="hover:bg-surface-container-low transition-colors p-2 rounded-full active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary text-headline-sm">menu</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold">مدير المتجر</h1>
+</div>
+<div class="flex items-center">
+<img alt="صورة الملف الشخصي للمتجر" class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional close-up portrait of a Middle Eastern restaurant manager in a warm, elegantly lit setting. The lighting is soft and golden, highlighting the warm cream tones of the background. The style is modern and corporate with a touch of Palestinian hospitality, emphasizing a clean and welcoming professional atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYEMuF4TACI0d-iJT81kBkQ2bySTBa_csbCSQ0QemEzOb1KSOvd6O2fcpAZL6Vdfziuh9OqjR132CMyQBjy6b9FKyldz8q24YEeZ0xQ1y7ihbLTVD6zgX_Mj-0Ki0ZIa4JcjBEvHKd5UUzdn3KRiWyVqw6hxuZqPoZd_PVwKAI2L4Ma8tJsYWZLz1ulaeX86ylpbqCrpN-2N_KTM4vJZqzccDgQFP9QoGV-0XItLbUjMnCjv2yaQdJjdXmkb3Ekwh9oCujRbky8yHD"/>
+</div>
+</header>
+<main class="max-w-4xl mx-auto px-4 pt-6">
+<!-- Tab Navigation -->
+<div class="relative mb-section-md border-b border-border-beige">
+<div class="flex flex-row-reverse overflow-x-auto hide-scrollbar gap-lg">
+<button class="pb-3 px-2 font-headline-sm text-on-surface-variant whitespace-nowrap transition-colors hover:text-primary" onclick="switchTab(this, 'main')">
+                    الوجبات الرئيسية
+                </button>
+<button class="pb-3 px-2 font-headline-sm text-primary font-bold border-b-2 border-primary whitespace-nowrap active-tab" onclick="switchTab(this, 'appetizers')">
+                    المقبلات
+                </button>
+<button class="pb-3 px-2 font-headline-sm text-on-surface-variant whitespace-nowrap transition-colors hover:text-primary" onclick="switchTab(this, 'beverages')">
+                    المشروبات
+                </button>
+</div>
+</div>
+<!-- Page Header -->
+<div class="flex flex-row-reverse justify-between items-center mb-6">
+<div class="text-right">
+<h2 class="font-headline-md text-headline-md text-primary">إدارة المقبلات</h2>
+<p class="font-body-base text-muted-gray">عرض وتعديل قائمة المقبلات الخاصة بك</p>
+</div>
+<button class="bg-primary hover:opacity-90 text-white font-button-text text-button-text px-6 py-3 rounded-xl flex items-center gap-sm transition-transform active:scale-95 shadow-md">
+<span class="material-symbols-outlined">add</span>
+                إضافة صنف
+            </button>
+</div>
+<!-- Menu Items List -->
+<div class="grid grid-cols-1 gap-md">
+<!-- Item: Hummus -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex flex-row-reverse items-center gap-md border border-transparent hover:border-primary-fixed transition-all">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Hummus" class="w-full h-full object-cover" data-alt="A top-down professional food photography shot of a smooth Hummus bowl topped with olive oil, chickpeas, and a sprinkle of paprika. The setting is a warm, rustic table with a modern ceramic bowl, presented in a clean, minimalist style with warm heritage lighting that evokes traditional Palestinian hospitality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUiyKaD4TWMSjsgl8_knj-e07NVoFe2Vg5xCB6l5TJqhuPQnU-_VJoVF7B1Wc5hKZ3lBlJsyjI6GhoKFQ_nrmpZ6W3cknAiBXTimkHGEhaGt5tCtcxqdPTpadWVtdTYONNQX39rWejY2WWpdFHNwIn5WfmsVn1L0_kHEyA29xUNU06l8Q6BtgrWsdq7_k5G1BrVsxb2P1uJBIwnswbZRBCuycdzxwOSlQhK8rGr9A5DlTHMCz5lADQOyV5ngub0tAZAkqebDrkiHno"/>
+</div>
+<div class="flex-grow text-right">
+<div class="flex flex-row-reverse justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">حمص بالطحينة</h3>
+<span class="text-primary font-bold font-label-md text-label-md">₪ 18.00</span>
+</div>
+<p class="font-body-base text-on-surface-variant text-sm mt-1">حمص كريمي مع زيت الزيتون البكر والبابريكا</p>
+<div class="flex flex-row-reverse items-center gap-lg mt-4">
+<div class="flex items-center gap-sm">
+<span class="font-label-sm text-label-sm text-muted-gray">متاح</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<div class="flex gap-md mr-auto">
+<button class="text-muted-gray hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="text-muted-gray hover:text-error-red transition-colors p-1">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item: Falafel Plate -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex flex-row-reverse items-center gap-md border border-transparent hover:border-primary-fixed transition-all">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Falafel Plate" class="w-full h-full object-cover" data-alt="A beautifully arranged plate of golden-brown, crispy Falafel balls served with a small side of tahini sauce and fresh pickles. The lighting is warm and natural, casting soft shadows on a clean white surface, capturing the appetising warmth and tactile minimalism of the brand's heritage style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB38e4mC9x3ogZO1B7r_lAEJCY4-k1SMZOFTb4UBGa68iNbBqSVT-G1zCxhLP_9ADe64PdOCJ5KNT3XfIW1XWZyjKuo7ah_TjKKO2InIPH6iFRoIfbNHRiIrkWKYMVpxFmJqLl3VIPd7OYrFc1xwKCG3isrBurVmcj5xroZzQ5hKsIBcFWlW_i1Emk5W7x02py4G4hH2vUADUc8Y7TwYZJd-LeqrQM4otGuBHjjcGCxrskDoSw_Jt5FqZa_y9SH3TCYjQHJvo8oZSu8"/>
+</div>
+<div class="flex-grow text-right">
+<div class="flex flex-row-reverse justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">طبق فلافل مشكل</h3>
+<span class="text-primary font-bold font-label-md text-label-md">₪ 12.00</span>
+</div>
+<p class="font-body-base text-on-surface-variant text-sm mt-1">6 حبات فلافل طازجة مع المخللات وصوص الطحينة</p>
+<div class="flex flex-row-reverse items-center gap-lg mt-4">
+<div class="flex items-center gap-sm">
+<span class="font-label-sm text-label-sm text-muted-gray">متاح</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<div class="flex gap-md mr-auto">
+<button class="text-muted-gray hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="text-muted-gray hover:text-error-red transition-colors p-1">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item: Fattoush -->
+<div class="bg-surface-white rounded-xl shadow-md p-4 flex flex-row-reverse items-center gap-md border border-transparent hover:border-primary-fixed transition-all">
+<div class="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container">
+<img alt="Fattoush" class="w-full h-full object-cover" data-alt="A vibrant and colorful Fattoush salad in a shallow wooden bowl. The salad features crisp vegetables, pomegranate seeds, and crunchy toasted pita bread. The bright, high-contrast colors of the greens and reds are set against a warm cream background, creating a fresh and appetizing communal atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMzfV4ev0JX95Tcyh2taAboMmXfqIPgF2kh7WFuDSRWacYP3r0j9YsTpH4wpYlYewJU5Jmxudj0n3My5wO3ukBiyIqNRBUWf8qriS_ksLbxzLDseDQdnZ6ErBCe06cqssFNmvCAbEqBI4wM3t-9bwyyCqLGJu7kuD4RPl64PQRah9g0euWJnqdf0dUF6A7VSQd2fFQzHX0iebaJq_idoiYnZV9X5hYHPoJR_tQ5vGsx73fHZWhkwyafvC30ATc3PgBQ0awH-ZMWsNm"/>
+</div>
+<div class="flex-grow text-right">
+<div class="flex flex-row-reverse justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">فتوش لبناني</h3>
+<span class="text-primary font-bold font-label-md text-label-md">₪ 15.00</span>
+</div>
+<p class="font-body-base text-on-surface-variant text-sm mt-1">خضار طازجة مع خبز محمص ودبس رمان</p>
+<div class="flex flex-row-reverse items-center gap-lg mt-4">
+<div class="flex items-center gap-sm">
+<span class="font-label-sm text-label-sm text-muted-gray">غير متاح</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-green"></div>
+</label>
+</div>
+<div class="flex gap-md mr-auto">
+<button class="text-muted-gray hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="text-muted-gray hover:text-error-red transition-colors p-1">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex flex-row-reverse justify-around items-center h-nav-height px-4 pb-safe bg-surface-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm-mobile">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm-mobile">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container/10 text-primary rounded-xl px-3 py-1 scale-90" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-label-sm text-label-sm-mobile">القائمة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-label-sm text-label-sm-mobile">التقارير</span>
+</a>
+</nav>
+<script>
+        function switchTab(element, tabId) {
+            // This is a micro-interaction for visual feedback
+            const buttons = element.parentElement.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.classList.remove('text-primary', 'font-bold', 'border-b-2', 'border-primary', 'active-tab');
+                btn.classList.add('text-on-surface-variant');
+            });
+            
+            element.classList.remove('text-on-surface-variant');
+            element.classList.add('text-primary', 'font-bold', 'border-b-2', 'border-primary', 'active-tab');
+            
+            // Log for prototype purposes
+            console.log(`Switched to tab: ${tabId}`);
+        }
+
+        // Simple scale interaction for cards
+        document.querySelectorAll('.bg-surface-white').forEach(card => {
+            card.addEventListener('mousedown', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('mouseup', () => {
+                card.style.transform = 'scale(1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>
