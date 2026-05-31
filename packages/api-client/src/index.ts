@@ -14,6 +14,7 @@ export { settingsApi } from './settings.api';
 export { reportsApi } from './reports.api';
 export { bannersApi } from './banners.api';
 export type { Banner } from './banners.api';
+export { uploadsApi } from './uploads.api';
 
 // Re-export types
 export type { SystemSettings } from './settings.api';

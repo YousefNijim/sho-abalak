@@ -1,10 +1,44 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { BannersService } from './banners.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserRole } from '@shu/shared-types';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
+
+class CreateBannerDto {
+  @ApiProperty()
+  @IsString()
+  imageUrl: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  linkUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+class UpdateBannerDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  linkUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
 
 @ApiTags('banners')
 @Controller('banners')
@@ -20,7 +54,7 @@ export class BannersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post()
-  create(@Body() data: { imageUrl: string; linkUrl?: string; isActive?: boolean }) {
+  create(@Body() data: CreateBannerDto) {
     return this.bannersService.create(data);
   }
 
@@ -30,7 +64,7 @@ export class BannersController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() data: { imageUrl?: string; linkUrl?: string; isActive?: boolean }
+    @Body() data: UpdateBannerDto
   ) {
     return this.bannersService.update(id, data);
   }

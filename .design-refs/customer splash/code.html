@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>شو عبالك؟ - Splash Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#1b1b22",
+                    "on-tertiary": "#ffffff",
+                    "background-cream": "#FCF3DC",
+                    "on-primary-fixed-variant": "#733600",
+                    "surface-container-low": "#f5f2fc",
+                    "primary": "#974800",
+                    "secondary": "#296a43",
+                    "warning-amber": "#F59E0B",
+                    "surface-container": "#efecf6",
+                    "success-green": "#22C55E",
+                    "secondary-fixed": "#aef2bf",
+                    "primary-fixed-dim": "#ffb688",
+                    "secondary-container": "#abefbd",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "on-tertiary-fixed": "#001e30",
+                    "on-tertiary-container": "#00314c",
+                    "surface-variant": "#e4e1eb",
+                    "surface-tint": "#974800",
+                    "inverse-primary": "#ffb688",
+                    "on-secondary-fixed": "#00210e",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "tertiary": "#006495",
+                    "outline-variant": "#ddc1b1",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "outline": "#8a7265",
+                    "on-primary-container": "#4e2200",
+                    "error-container": "#ffdad6",
+                    "on-primary": "#ffffff",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#311300",
+                    "border-beige": "#E5E0D5",
+                    "surface-dim": "#dbd9e2",
+                    "error-red": "#EF4444",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fbf8ff",
+                    "muted-gray": "#6B7280",
+                    "primary-container": "#e6781e",
+                    "on-surface": "#1b1b22",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#ffdbc7",
+                    "surface": "#fbf8ff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-surface-variant": "#564337",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-white": "#FFFFFF",
+                    "inverse-surface": "#303037",
+                    "surface-container-highest": "#e4e1eb",
+                    "tertiary-container": "#009ee8",
+                    "background": "#fbf8ff",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "surface-container-high": "#eae7f1",
+                    "on-secondary-container": "#2e6f47"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "margin-standard": "16px",
+                    "gap-xs": "4px",
+                    "nav-height": "64px",
+                    "gap-lg": "20px",
+                    "base": "4px",
+                    "gap-md": "12px",
+                    "gap-sm": "8px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "body-lg": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "label-sm": ["Montserrat"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes rotateSpinner {
+            to { transform: rotate(360deg); }
+        }
+        .animate-fade-in-scale {
+            animation: fadeInScale 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .animate-slide-up {
+            animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+            opacity: 0;
+        }
+        .loading-spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(230, 120, 30, 0.1);
+            border-top: 3px solid #E6781E;
+            border-radius: 50%;
+            animation: rotateSpinner 1s linear infinite;
+        }
+        .heritage-pattern {
+            background-color: transparent;
+            background-image:  radial-gradient(#E5E0D5 0.5px, transparent 0.5px), radial-gradient(#E5E0D5 0.5px, #FCF3DC 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-cream overflow-hidden h-screen w-full flex flex-col justify-between items-center relative">
+<!-- Decorative Top Background Element (Subtle Depth) -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed opacity-10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+<!-- Central Content Area -->
+<div class="flex-grow flex flex-col items-center justify-center z-10 px-margin-standard text-center">
+<!-- Main Brand Logo -->
+<div class="w-full max-w-[320px] mb-8 animate-fade-in-scale">
+<img alt="شو عبالك؟ Logo" class="w-full h-auto drop-shadow-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMXo_JCHeNJmYiqKJ34lLv2zlHPTjpcAIvN7F28V4BlT8MxDcVu_V1o4PGQYcov2qhRgpgLjAfbRGYlya2f36dSgxbRYTgQRHsLAzc0HMF6GagsNBhoRTNK6knKjLwVJx4glV8reeckk5o54TgGWHW762IlYnvfuLNDGQjUeuNQZ5OwASSaKuafLDLRK0P6bf3cMeD0q2M7KIMdft7RsOmh665KjdX-9K4z2gclSTfJ0uHKbkBU54soF61gWIsWVIeHRW2glnP_5vc"/>
+</div>
+<!-- Welcoming Tagline -->
+<div class="animate-slide-up">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-primary-container tracking-tight">
+                أهلاً بك في عالم النكهات
+            </h1>
+<p class="font-body-base text-body-base text-on-surface-variant mt-2 opacity-75">
+                تراثنا في كل لقمة
+            </p>
+</div>
+</div>
+<!-- Bottom Decorative & UI Section -->
+<div class="w-full relative h-[30vh] flex flex-col items-center justify-end pb-12 overflow-hidden">
+<!-- Palestinian Heritage Inspired Watermark Pattern -->
+<div class="heritage-pattern absolute bottom-0 left-0 w-full h-full opacity-30 pointer-events-none"></div>
+<!-- Refined Loading Indicator -->
+<div class="flex flex-col items-center gap-sm z-10">
+<div class="loading-spinner mb-2"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant tracking-widest opacity-60">
+                جاري التحميل...
+            </span>
+</div>
+</div>
+<!-- Micro-interaction overlay (Flash effect) -->
+<div class="fixed inset-0 bg-white opacity-0 pointer-events-none z-50 transition-opacity duration-700" id="flash-overlay"></div>
+<script>
+        // Subtle micro-interaction: slow reveal on page load
+        window.addEventListener('load', () => {
+            const overlay = document.getElementById('flash-overlay');
+            // Minimalist flash to transition into the app (simulated)
+            setTimeout(() => {
+                // This would be the hook for navigating to the next screen
+                console.log("Splash animation sequence complete.");
+            }, 3000);
+        });
+
+        // Add a subtle parallax effect based on device tilt or mouse
+        document.addEventListener('mousemove', (e) => {
+            const moveX = (e.clientX - window.innerWidth / 2) / 100;
+            const moveY = (e.clientY - window.innerHeight / 2) / 100;
+            const logo = document.querySelector('.animate-fade-in-scale');
+            if (logo) {
+                logo.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            }
+        });
+    </script>
+</body></html>

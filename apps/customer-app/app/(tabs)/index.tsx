@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -85,6 +85,9 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
+  
+  const bannerScrollRef = useRef<ScrollView>(null);
+  const bannerIndexRef = useRef(0);
 
   // FOOD-section tags drive the category chips (a business can match several tags).
   const { data: foodTags = [] } = useQuery({
@@ -121,6 +124,18 @@ export default function Home() {
     await queryClient.invalidateQueries({ queryKey: ['businesses'] });
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    if (activeBanners.length <= 1) return;
+    const interval = setInterval(() => {
+      bannerIndexRef.current = (bannerIndexRef.current + 1) % activeBanners.length;
+      bannerScrollRef.current?.scrollTo({
+        x: bannerIndexRef.current * (Dimensions.get('window').width - spacing[4]),
+        animated: true,
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [activeBanners]);
 
   const bottomInset = insets.bottom;
 
@@ -250,10 +265,16 @@ export default function Home() {
         {activeBanners.length > 0 && (
           <View style={styles.bannerSection}>
             <ScrollView
+              ref={bannerScrollRef}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               style={{ width: '100%', height: 160 }}
+              onMomentumScrollEnd={(e) => {
+                const contentOffset = e.nativeEvent.contentOffset.x;
+                const viewSize = e.nativeEvent.layoutMeasurement.width;
+                bannerIndexRef.current = Math.floor(contentOffset / viewSize);
+              }}
             >
               {activeBanners.map((banner: Banner) => (
                 <Pressable
@@ -266,7 +287,7 @@ export default function Home() {
                   <Image
                     source={{ uri: mediaUrl(banner.imageUrl) ?? '' }}
                     style={{ width: '100%', height: '100%', borderRadius: radius.xl }}
-                    contentFit="cover"
+                    contentFit="contain"
                   />
                 </Pressable>
               ))}

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiPropertyOptional, ApiBearerAuth } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { ApiTags, ApiPropertyOptional, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { BusinessType, UserRole } from '@shu/shared-types';
 import { TagsService } from './tags.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -12,6 +12,38 @@ class QueryTagsDto {
   @IsOptional()
   @IsEnum(BusinessType)
   type?: BusinessType;
+}
+
+class CreateTagDto {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty({ enum: BusinessType })
+  @IsEnum(BusinessType)
+  type: BusinessType;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+}
+
+class UpdateTagDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({ enum: BusinessType })
+  @IsOptional()
+  @IsEnum(BusinessType)
+  type?: BusinessType;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 }
 
 @ApiTags('tags')
@@ -29,7 +61,7 @@ export class TagsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post()
-  create(@Body() data: { name: string; type: BusinessType; imageUrl?: string }) {
+  create(@Body() data: CreateTagDto) {
     return this.tags.create(data);
   }
 
@@ -39,7 +71,7 @@ export class TagsController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() data: { name?: string; type?: BusinessType; imageUrl?: string }
+    @Body() data: UpdateTagDto
   ) {
     return this.tags.update(id, data);
   }
