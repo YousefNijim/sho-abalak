@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ export default function DriverHome() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const socket = useSocket();
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch driver profile
   const { data: driver, isLoading: loadingMe } = useQuery({
@@ -108,10 +109,22 @@ export default function DriverHome() {
     return acc + Number(o.business?.area?.deliveryFee ?? 5);
   }, 0) * 100) / 100;
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['driver-me'] }),
+      queryClient.invalidateQueries({ queryKey: ['driver-orders'] })
+    ]);
+    setRefreshing(false);
+  };
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingTop: insets.top + 8, padding: spacing[4], gap: spacing[5] }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+      }
     >
       <Text style={styles.greeting}>مرحباً {driver?.user?.name || 'كريم'} 👋</Text>
 

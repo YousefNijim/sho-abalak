@@ -24,6 +24,18 @@ function tagSet(tagIds?: string[]) {
   return { tags: { set: tagIds.map((id) => ({ id })) } };
 }
 
+/** Build a Prisma `deliveryAreas.connect` clause on create (skip when no deliveryAreaIds given). */
+function deliveryAreaConnect(areaIds?: string[]) {
+  if (!areaIds || areaIds.length === 0) return {};
+  return { deliveryAreas: { connect: areaIds.map((id) => ({ id })) } };
+}
+
+/** Build a Prisma `deliveryAreas.set` clause on update — only when deliveryAreaIds is provided. */
+function deliveryAreaSet(areaIds?: string[]) {
+  if (areaIds === undefined) return {};
+  return { deliveryAreas: { set: areaIds.map((id) => ({ id })) } };
+}
+
 @Injectable()
 export class BusinessesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -32,7 +44,20 @@ export class BusinessesService {
     const where: Prisma.BusinessWhereInput = {};
     if (query.type) where.type = query.type;
     if (query.tagId) where.tags = { some: { id: query.tagId } };
-    if (query.areaId) where.areaId = query.areaId;
+    
+    if (query.areaId) {
+      if (query.type === 'FOOD') {
+        // For restaurants, check if the area is in their delivery areas OR is their own area
+        where.OR = [
+          { deliveryAreas: { some: { id: query.areaId } } },
+          { areaId: query.areaId }
+        ];
+      } else {
+        // For markets, just check their location
+        where.areaId = query.areaId;
+      }
+    }
+    
     if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
     return this.prisma.business.findMany({
       where,
@@ -53,7 +78,7 @@ export class BusinessesService {
   async findByOwner(ownerId: string) {
     const business = await this.prisma.business.findUnique({
       where: { ownerId },
-      include: { area: true, tags: true },
+      include: { area: true, tags: true, deliveryAreas: true },
     });
     if (!business) throw new NotFoundException('لا توجد منشأة مرتبطة بحسابك');
     return business;
@@ -62,31 +87,31 @@ export class BusinessesService {
   async create(ownerId: string, dto: CreateBusinessDto) {
     const existing = await this.prisma.business.findUnique({ where: { ownerId } });
     if (existing) throw new ConflictException('لديك منشأة مسجّلة بالفعل');
-    const { tagIds, ...rest } = dto;
+    const { tagIds, deliveryAreaIds, ...rest } = dto;
     return this.prisma.business.create({
-      data: { ...rest, ownerId, ...tagConnect(tagIds) },
-      include: { area: true, tags: true },
+      data: { ...rest, ownerId, ...tagConnect(tagIds), ...deliveryAreaConnect(deliveryAreaIds) },
+      include: { area: true, tags: true, deliveryAreas: true },
     });
   }
 
   async update(id: string, ownerId: string, dto: UpdateBusinessDto) {
     await this.assertOwner(id, ownerId);
-    const { tagIds, ...rest } = dto;
+    const { tagIds, deliveryAreaIds, ...rest } = dto;
     return this.prisma.business.update({
       where: { id },
-      data: { ...rest, ...tagSet(tagIds) },
-      include: { area: true, tags: true },
+      data: { ...rest, ...tagSet(tagIds), ...deliveryAreaSet(deliveryAreaIds) },
+      include: { area: true, tags: true, deliveryAreas: true },
     });
   }
 
   async adminUpdate(id: string, dto: UpdateBusinessDto) {
     const business = await this.prisma.business.findUnique({ where: { id } });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
-    const { tagIds, ...rest } = dto;
+    const { tagIds, deliveryAreaIds, ...rest } = dto;
     return this.prisma.business.update({
       where: { id },
-      data: { ...rest, ...tagSet(tagIds) },
-      include: { area: true, tags: true },
+      data: { ...rest, ...tagSet(tagIds), ...deliveryAreaSet(deliveryAreaIds) },
+      include: { area: true, tags: true, deliveryAreas: true },
     });
   }
 
@@ -119,7 +144,7 @@ export class BusinessesService {
     });
     return this.prisma.business.findUnique({
       where: { id },
-      include: { area: true, owner: { select: OWNER_SELECT } },
+      include: { area: true, deliveryAreas: true, owner: { select: OWNER_SELECT } },
     });
   }
 
@@ -178,8 +203,9 @@ export class BusinessesService {
           phone: dto.phone,
           addressDetail: dto.addressDetail ?? null,
           ...tagConnect(dto.tagIds),
+          ...deliveryAreaConnect(dto.deliveryAreaIds),
         },
-        include: { area: true, tags: true, owner: { select: OWNER_SELECT } },
+        include: { area: true, tags: true, deliveryAreas: true, owner: { select: OWNER_SELECT } },
       });
     });
   }

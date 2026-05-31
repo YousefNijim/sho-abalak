@@ -44,6 +44,9 @@ export default function RegisterStore() {
   const [areaId, setAreaId] = useState<string | null>(null);
   const [addressDetail, setAddressDetail] = useState('');
 
+  const [showCity, setShowCity] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+
   const [showArea, setShowArea] = useState(false);
   const [areaSearch, setAreaSearch] = useState('');
   const [error, setError] = useState('');
@@ -93,10 +96,13 @@ export default function RegisterStore() {
   const isFormValid = !!(name.trim() && ownerName.trim() && phone.trim() && areaId);
 
   const selectedArea = areas.find((a) => a.id === areaId);
-  const areaLabel = selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة';
+  const areaLabel = selectedArea ? selectedArea.name : 'اختر القرية أو الحي';
 
-  const filteredAreas = areas.filter(
-    (a) => a.city.includes(areaSearch) || a.name.includes(areaSearch)
+  const uniqueCities = React.useMemo(() => Array.from(new Set(areas.map((a: any) => a.city))), [areas]);
+  const villagesForCity = React.useMemo(() => areas.filter((a: any) => a.city === selectedCity), [areas, selectedCity]);
+
+  const filteredVillages = villagesForCity.filter(
+    (a: any) => a.name.includes(areaSearch)
   );
 
   if (submitted) {
@@ -230,29 +236,66 @@ export default function RegisterStore() {
           </View>
         </Field>
 
-        {/* Area */}
-        <Field label="المنطقة">
-          <Pressable style={styles.inputRow} onPress={() => setShowArea((v) => !v)}>
+        {/* City */}
+        <Field label="المدينة">
+          <Pressable style={styles.inputRow} onPress={() => setShowCity((v) => !v)}>
+            <ChevronDown size={18} color={colors.textMuted} />
+            <Text style={[styles.inputValue, !selectedCity && { color: colors.textMuted }]}>
+              {selectedCity || 'اختر المدينة'}
+            </Text>
+            <MapPin size={18} color={colors.textMuted} />
+          </Pressable>
+          {showCity && (
+            <View style={styles.picker}>
+              <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+                {uniqueCities.map((city) => (
+                  <Pressable
+                    key={city as string}
+                    style={[styles.pickerItem, selectedCity === city && styles.pickerItemActive]}
+                    onPress={() => {
+                      setSelectedCity(city as string);
+                      setAreaId(null);
+                      setShowCity(false);
+                    }}
+                  >
+                    {selectedCity === city && <Check size={16} color={colors.primary} />}
+                    <Text style={[styles.pickerText, selectedCity === city && { color: colors.primary }]}>
+                      {city as string}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </Field>
+
+        {/* Village */}
+        <Field label="القرية أو الحي">
+          <Pressable 
+            style={[styles.inputRow, !selectedCity && { opacity: 0.6 }]} 
+            onPress={() => { if (selectedCity) setShowArea((v) => !v); }}
+            disabled={!selectedCity}
+          >
             <ChevronDown size={18} color={colors.textMuted} />
             <Text style={[styles.inputValue, !selectedArea && { color: colors.textMuted }]}>
               {areaLabel}
             </Text>
             <MapPin size={18} color={colors.textMuted} />
           </Pressable>
-          {showArea && (
+          {showArea && selectedCity && (
             <View style={styles.picker}>
               <View style={styles.searchRow}>
                 <TextInput
                   style={styles.searchInput}
                   value={areaSearch}
                   onChangeText={setAreaSearch}
-                  placeholder="ابحث عن منطقة..."
+                  placeholder="ابحث عن قرية أو حي..."
                   placeholderTextColor={colors.textMuted}
                   textAlign="right"
                 />
               </View>
               <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
-                {filteredAreas.map((a) => (
+                {filteredVillages.map((a: any) => (
                   <Pressable
                     key={a.id}
                     style={[styles.pickerItem, areaId === a.id && styles.pickerItemActive]}
@@ -264,11 +307,11 @@ export default function RegisterStore() {
                   >
                     {areaId === a.id && <Check size={16} color={colors.primary} />}
                     <Text style={[styles.pickerText, areaId === a.id && { color: colors.primary }]}>
-                      {a.city} — {a.name}
+                      {a.name}
                     </Text>
                   </Pressable>
                 ))}
-                {filteredAreas.length === 0 && (
+                {filteredVillages.length === 0 && (
                   <Text style={styles.noResultText}>لا توجد نتائج</Text>
                 )}
               </ScrollView>

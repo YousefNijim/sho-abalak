@@ -11,6 +11,7 @@ import {
   Text,
   TextInput,
   View,
+  RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -78,6 +79,7 @@ export default function MenuTab() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm());
   const [uploading, setUploading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // ── Data fetching ─────────────────────────────────────────────────────────────
   const { data: business } = useQuery({
@@ -213,6 +215,12 @@ export default function MenuTab() {
 
   const isSaving = createProduct.isPending || updateProduct.isPending || uploading;
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['my-products'] });
+    setRefreshing(false);
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────────
   const activeCategoryLabel = activeCategory
     ? `إدارة ${activeCategory}`
@@ -278,6 +286,9 @@ export default function MenuTab() {
         <ScrollView
           contentContainerStyle={{ padding: spacing[4], gap: spacing[3], paddingBottom: insets.bottom + spacing[4] }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+          }
         >
           {filtered.map((product: Product) => (
             <ProductCard
@@ -471,7 +482,7 @@ function ProductCard({
       {/* Info */}
       <View style={pStyles.info}>
         <View style={pStyles.topRow}>
-          <Text style={pStyles.price}>₪{Number(product.price).toFixed(2)}</Text>
+          <Text style={pStyles.price}>{Number(product.price).toFixed(2)} ₪</Text>
           <Text style={pStyles.name}>{product.name}</Text>
         </View>
         {product.description ? (
@@ -778,15 +789,16 @@ const pStyles = StyleSheet.create({
     borderColor: colors.border,
     overflow: 'hidden',
     gap: spacing[3],
+    minHeight: 110,
   },
   imgBox: {
-    width: 120,
+    width: 110,
     flexShrink: 0,
+    alignSelf: 'stretch',
   },
   img: {
-    width: 120,
-    height: '100%',
-    minHeight: 110,
+    flex: 1,
+    width: '100%',
   },
   imgPlaceholder: {
     backgroundColor: '#f5f0ea',

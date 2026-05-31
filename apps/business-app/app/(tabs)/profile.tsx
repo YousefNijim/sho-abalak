@@ -10,6 +10,7 @@ import {
   Text,
   TextInput,
   View,
+  RefreshControl,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -31,7 +32,7 @@ import {
   KeyRound,
   X,
 } from 'lucide-react-native';
-import { businessesApi, tagsApi } from '@shu/api-client';
+import { businessesApi, tagsApi, areasApi } from '@shu/api-client';
 import type { BusinessType, Tag } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../../src/theme';
 import { uploadImage, imageUrl } from '../../src/lib/upload';
@@ -78,6 +79,8 @@ export default function ProfileTab() {
   const [addressDetail, setAddressDetail] = useState('');
   const [openTime, setOpenTime] = useState(DEFAULT_OPEN);
   const [closeTime, setCloseTime] = useState(DEFAULT_CLOSE);
+  const [deliveryAreaIds, setDeliveryAreaIds] = useState<string[]>([]);
+  const [areaSearch, setAreaSearch] = useState('');
 
   // image picks (local uris pending upload)
   const [coverUri, setCoverUri] = useState<string | null>(null);
@@ -88,11 +91,27 @@ export default function ProfileTab() {
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { data: availableTags = [] } = useQuery({
     queryKey: ['tags', type],
     queryFn: () => tagsApi.list(type),
   });
+
+  const { data: allAreas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.list(),
+  });
+
+  const cityVillages = useMemo(() => {
+    if (!business?.area?.city) return [];
+    return allAreas.filter((a) => a.city === business.area.city);
+  }, [allAreas, business]);
+
+  const filteredVillages = useMemo(() => {
+    if (!areaSearch.trim()) return cityVillages;
+    return cityVillages.filter((v: any) => v.name.includes(areaSearch.trim()));
+  }, [cityVillages, areaSearch]);
 
   useEffect(() => {
     if (business) {
@@ -103,6 +122,8 @@ export default function ProfileTab() {
       setAddressDetail(business.addressDetail ?? '');
       setOpenTime(business.openTime ?? DEFAULT_OPEN);
       setCloseTime(business.closeTime ?? DEFAULT_CLOSE);
+      // @ts-ignore
+      setDeliveryAreaIds((business.deliveryAreas ?? []).map((a: any) => a.id));
       setCoverUri(null);
       setLogoLocalUri(null);
     }
@@ -121,14 +142,22 @@ export default function ProfileTab() {
     const currentTags = [...tagIds].sort().join(',');
     if (originalTags !== currentTags) return true;
 
+    // @ts-ignore
+    const originalDelivery = (business.deliveryAreas ?? []).map((a: any) => a.id).sort().join(',');
+    const currentDelivery = [...deliveryAreaIds].sort().join(',');
+    if (originalDelivery !== currentDelivery) return true;
+
     if (coverUri !== null) return true;
     if (logoLocalUri !== null) return true;
 
     return false;
-  }, [business, name, phone, type, tagIds, addressDetail, openTime, closeTime, coverUri, logoLocalUri]);
+  }, [business, name, phone, type, tagIds, addressDetail, openTime, closeTime, coverUri, logoLocalUri, deliveryAreaIds]);
 
   const toggleTag = (id: string) =>
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+
+  const toggleDeliveryArea = (id: string) =>
+    setDeliveryAreaIds((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
 
   const selectType = (t: BusinessType) => {
     setType(t);
@@ -187,6 +216,7 @@ export default function ProfileTab() {
       addressDetail: addressDetail.trim(),
       openTime,
       closeTime,
+      deliveryAreaIds,
     };
 
     if (coverUri || logoLocalUri) {
@@ -220,6 +250,12 @@ export default function ProfileTab() {
     ]);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['business-mine'] });
+    setRefreshing(false);
+  };
+
   const coverImage = coverUri ?? imageUrl(business?.imageUrl);
   const logoImage = logoLocalUri ?? imageUrl(business?.logoUrl);
 
@@ -246,6 +282,9 @@ export default function ProfileTab() {
         style={{ flex: 1, backgroundColor: colors.background }}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+        }
       >
         {/* Hero: cover + logo */}
         <View style={styles.hero}>
@@ -372,6 +411,73 @@ export default function ProfileTab() {
               </View>
             </View>
           </View>
+
+          {/* Delivery Areas */}
+          {type === 'FOOD' && (
+            <>
+              <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>
+                مناطق التوصيل
+              </Text>
+              <Text style={{ fontFamily: fontFamily.normal, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginBottom: spacing[2], paddingHorizontal: spacing[1] }}>
+                اختر القرى والأحياء التي يمكنك التوصيل إليها داخل مدينتك ({business?.area?.city ?? ''})
+              </Text>
+              <View style={[styles.card, { paddingVertical: spacing[0], overflow: 'hidden' }]}>
+                <View style={{ padding: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                  <TextInput
+                    style={[styles.input, { height: 40, backgroundColor: '#FCF3DC' }]}
+                    placeholder="بحث عن قرية أو حي..."
+                    placeholderTextColor={colors.textMuted}
+                    value={areaSearch}
+                    onChangeText={setAreaSearch}
+                    textAlign="right"
+                  />
+                </View>
+                {cityVillages.length === 0 ? (
+                  <Text style={{ fontFamily: fontFamily.normal, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center', padding: spacing[4] }}>
+                    لا توجد مناطق متاحة
+                  </Text>
+                ) : (
+                  <ScrollView style={{ maxHeight: 250 }} nestedScrollEnabled>
+                    {filteredVillages.map((area: any, idx: number) => {
+                      const isSelected = deliveryAreaIds.includes(area.id);
+                      return (
+                        <Pressable
+                          key={area.id}
+                          onPress={() => toggleDeliveryArea(area.id)}
+                          style={{
+                            flexDirection: 'row-reverse',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            paddingVertical: spacing[3],
+                            paddingHorizontal: spacing[4],
+                            borderBottomWidth: idx === filteredVillages.length - 1 ? 0 : 1,
+                            borderBottomColor: colors.border,
+                            backgroundColor: isSelected ? 'rgba(230, 120, 30, 0.05)' : 'transparent',
+                          }}
+                        >
+                          <Text style={{
+                            fontFamily: fontFamily.medium,
+                            fontSize: fontSizes.base,
+                            color: isSelected ? colors.primary : colors.textPrimary,
+                          }}>
+                            {area.name}
+                          </Text>
+                          <View style={{
+                            width: 20, height: 20, borderRadius: 4, borderWidth: 2,
+                            borderColor: isSelected ? colors.primary : colors.border,
+                            backgroundColor: isSelected ? colors.primary : 'transparent',
+                            alignItems: 'center', justifyContent: 'center'
+                          }}>
+                            {isSelected && <CheckCircle size={14} color="#FFF" />}
+                          </View>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                )}
+              </View>
+            </>
+          )}
 
           {/* Additional settings */}
           <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>إعدادات إضافية</Text>

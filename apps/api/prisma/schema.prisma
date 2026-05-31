@@ -69,10 +69,11 @@ model Area {
   city        String
   name        String
   deliveryFee Decimal    @db.Decimal(10, 2)
-  users           User[]
-  businesses      Business[]
-  drivers         Driver[]
-  savedAddresses  SavedAddress[]
+  users              User[]
+  businesses         Business[] @relation("BusinessLocation")
+  deliveryBusinesses Business[] @relation("BusinessDeliveryAreas")
+  drivers            Driver[]
+  savedAddresses     SavedAddress[]
 
   @@map("areas")
 }
@@ -104,7 +105,8 @@ model Business {
   type           BusinessType     @default(FOOD)
   tags           Tag[]            @relation("BusinessTags")
   areaId         String
-  area           Area             @relation(fields: [areaId], references: [id])
+  area           Area             @relation("BusinessLocation", fields: [areaId], references: [id])
+  deliveryAreas  Area[]           @relation("BusinessDeliveryAreas")
   deliveryType   DeliveryType     @default(PLATFORM)
   imageUrl       String?
   logoUrl        String?

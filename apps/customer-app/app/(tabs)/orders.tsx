@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -25,7 +26,9 @@ const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
 
 export default function Orders() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<'CURRENT' | 'PREVIOUS'>('CURRENT');
 
   const addItem = useCartStore((s) => s.addItem);
@@ -59,6 +62,12 @@ export default function Orders() {
       );
     });
     router.push('/cart');
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['orders'] });
+    setRefreshing(false);
   };
 
   const formatDate = (dateStr: string) => {
@@ -122,6 +131,9 @@ export default function Orders() {
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+            }
           >
             {list.map((o: any) => {
               const s = STATUS[o.status] || { label: o.status, bg: '#f5f2fc', fg: colors.textPrimary };

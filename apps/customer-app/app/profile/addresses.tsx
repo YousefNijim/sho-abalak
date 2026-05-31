@@ -47,7 +47,9 @@ export default function AddressesScreen() {
   const [editing, setEditing] = useState<SavedAddress | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [areaPicker, setAreaPicker] = useState(false);
+  const [cityPicker, setCityPicker] = useState(false);
+  const [villagePicker, setVillagePicker] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   // ── data ───────────────────────────────────────────────────────────
   const { data: addresses = [], isLoading, isError, refetch } = useQuery({
@@ -59,6 +61,9 @@ export default function AddressesScreen() {
     queryKey: ['areas'],
     queryFn: () => areasApi.list(),
   });
+
+  const uniqueCities = React.useMemo(() => Array.from(new Set(areas.map((a: any) => a.city))), [areas]);
+  const villagesForCity = React.useMemo(() => areas.filter((a: any) => a.city === selectedCity), [areas, selectedCity]);
 
   // ── mutations ──────────────────────────────────────────────────────
   const createMut = useMutation({
@@ -99,12 +104,14 @@ export default function AddressesScreen() {
   const openAdd = () => {
     setEditing(null);
     setForm(EMPTY_FORM);
+    setSelectedCity(null);
     setModalVisible(true);
   };
 
   const openEdit = (addr: SavedAddress) => {
     setEditing(addr);
     setForm({ label: addr.label, detail: addr.detail, areaId: addr.areaId ?? '' });
+    setSelectedCity(addr.area?.city ?? null);
     setModalVisible(true);
   };
 
@@ -113,6 +120,7 @@ export default function AddressesScreen() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setFormErrors({});
+    setSelectedCity(null);
   };
 
   const handleSubmit = () => {
@@ -283,15 +291,34 @@ export default function AddressesScreen() {
           />
           {!!formErrors.detail && <Text style={styles.fieldError}>{formErrors.detail}</Text>}
 
-          {/* Area picker — required */}
-          <Text style={styles.fieldLabel}>المنطقة * (مطلوبة للتوصيل)</Text>
+          {/* City picker */}
+          <Text style={styles.fieldLabel}>المدينة *</Text>
           <Pressable
-            style={[styles.selectRow, !!formErrors.areaId && styles.selectRowError]}
-            onPress={() => { setAreaPicker(true); setFormErrors((e) => ({ ...e, areaId: undefined })); }}
+            style={[styles.selectRow]}
+            onPress={() => { setCityPicker(true); }}
+          >
+            <ChevronDown size={16} color={colors.textMuted} />
+            <Text style={[styles.selectText, !selectedCity && styles.selectPlaceholder]}>
+              {selectedCity ? selectedCity : 'اختر المدينة'}
+            </Text>
+            <MapPin size={16} color={colors.textMuted} />
+          </Pressable>
+
+          {/* Village picker */}
+          <Text style={styles.fieldLabel}>القرية / الحي * (مطلوبة للتوصيل)</Text>
+          <Pressable
+            style={[styles.selectRow, !selectedCity && { opacity: 0.6 }, !!formErrors.areaId && styles.selectRowError]}
+            onPress={() => { 
+              if (selectedCity) {
+                setVillagePicker(true); 
+                setFormErrors((e) => ({ ...e, areaId: undefined })); 
+              }
+            }}
+            disabled={!selectedCity}
           >
             <ChevronDown size={16} color={formErrors.areaId ? colors.error : colors.textMuted} />
             <Text style={[styles.selectText, !selectedArea && styles.selectPlaceholder, !!formErrors.areaId && styles.selectTextError]}>
-              {selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة'}
+              {selectedArea ? selectedArea.name : 'اختر القرية أو الحي'}
             </Text>
             <MapPin size={16} color={formErrors.areaId ? colors.error : colors.textMuted} />
           </Pressable>
@@ -313,31 +340,69 @@ export default function AddressesScreen() {
           </Pressable>
         </View>
 
-        {/* Nested area picker modal */}
+        {/* City picker modal */}
         <Modal
-          visible={areaPicker}
+          visible={cityPicker}
           transparent
           animationType="slide"
-          onRequestClose={() => setAreaPicker(false)}
+          onRequestClose={() => setCityPicker(false)}
         >
-          <Pressable style={styles.modalOverlay} onPress={() => setAreaPicker(false)} />
+          <Pressable style={styles.modalOverlay} onPress={() => setCityPicker(false)} />
           <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
             <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>اختر المنطقة</Text>
+            <Text style={styles.modalTitle}>اختر المدينة</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
-              {areas.map((a) => {
-                const active = form.areaId === a.id;
+              {uniqueCities.map((city) => {
+                const active = selectedCity === city;
                 return (
                   <Pressable
-                    key={a.id}
+                    key={city as string}
                     style={[styles.areaRow, active && styles.areaRowActive]}
-                    onPress={() => { setForm((f) => ({ ...f, areaId: a.id })); setAreaPicker(false); }}
+                    onPress={() => { 
+                      setSelectedCity(city as string); 
+                      setForm((f) => ({ ...f, areaId: '' })); 
+                      setCityPicker(false); 
+                    }}
                   >
                     <View style={[styles.areaIconCircle, active && styles.areaIconCircleActive]}>
                       <MapPin size={16} color={active ? colors.primary : colors.textMuted} />
                     </View>
                     <Text style={[styles.areaRowText, active && styles.areaRowTextActive]}>
-                      {a.city} — {a.name}
+                      {city as string}
+                    </Text>
+                    {active && <Check size={16} color={colors.primary} />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </Modal>
+
+        {/* Village picker modal */}
+        <Modal
+          visible={villagePicker}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setVillagePicker(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setVillagePicker(false)} />
+          <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>اختر القرية أو الحي</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {villagesForCity.map((a: any) => {
+                const active = form.areaId === a.id;
+                return (
+                  <Pressable
+                    key={a.id}
+                    style={[styles.areaRow, active && styles.areaRowActive]}
+                    onPress={() => { setForm((f) => ({ ...f, areaId: a.id })); setVillagePicker(false); }}
+                  >
+                    <View style={[styles.areaIconCircle, active && styles.areaIconCircleActive]}>
+                      <MapPin size={16} color={active ? colors.primary : colors.textMuted} />
+                    </View>
+                    <Text style={[styles.areaRowText, active && styles.areaRowTextActive]}>
+                      {a.name}
                     </Text>
                     {active && <Check size={16} color={colors.primary} />}
                   </Pressable>

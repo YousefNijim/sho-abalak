@@ -30,7 +30,8 @@ export default function BusinessesPage() {
   // Search & Filter state
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [areaFilter, setAreaFilter] = useState('ALL');
+  const [cityFilter, setCityFilter] = useState('ALL');
+  const [villageFilter, setVillageFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Selected Business for Details Drawer
@@ -64,6 +65,7 @@ export default function BusinessesPage() {
     name: '',
     type: 'FOOD' as BusinessType,
     tagIds: [] as string[],
+    deliveryAreaIds: [] as string[],
     ownerName: '',
     phone: '',
     areaId: '',
@@ -77,6 +79,7 @@ export default function BusinessesPage() {
   const [editTarget, setEditTarget] = useState<Business | null>(null);
   const [editType, setEditType] = useState<BusinessType>('FOOD');
   const [editTagIds, setEditTagIds] = useState<string[]>([]);
+  const [editDeliveryAreaIds, setEditDeliveryAreaIds] = useState<string[]>([]);
 
   // Queries
   const { data: businesses = [], isLoading: isBusinessesLoading } = useQuery({
@@ -88,6 +91,9 @@ export default function BusinessesPage() {
     queryKey: ['areas'],
     queryFn: () => areasApi.list(),
   });
+
+  const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: Area) => a.city))), [areas]);
+  const villagesForCity = useMemo(() => areas.filter((a: Area) => a.city === cityFilter), [areas, cityFilter]);
 
   // Tags for the create modal (depends on the chosen type).
   const { data: createTags = [] } = useQuery({
@@ -185,6 +191,7 @@ export default function BusinessesPage() {
         areaId: createForm.areaId,
         password: createForm.password,
         addressDetail: createForm.addressDetail.trim() || undefined,
+        deliveryAreaIds: createForm.type === 'FOOD' ? createForm.deliveryAreaIds : undefined,
       }),
     onSuccess: () => {
       refetchBusinesses();
@@ -200,7 +207,11 @@ export default function BusinessesPage() {
   });
 
   const editMutation = useMutation({
-    mutationFn: () => businessesApi.adminUpdate(editTarget!.id, { type: editType, tagIds: editTagIds }),
+    mutationFn: () => businessesApi.adminUpdate(editTarget!.id, { 
+      type: editType, 
+      tagIds: editTagIds,
+      deliveryAreaIds: editType === 'FOOD' ? editDeliveryAreaIds : undefined
+    }),
     onSuccess: () => {
       refetchBusinesses();
       if (selectedBusinessId) qc.invalidateQueries({ queryKey: ['business', selectedBusinessId] });
@@ -214,14 +225,23 @@ export default function BusinessesPage() {
     setEditTarget(b);
     setEditType(b.type);
     setEditTagIds((b.tags ?? []).map((t) => t.id));
+    // @ts-ignore
+    setEditDeliveryAreaIds((b.deliveryAreas ?? []).map((a: any) => a.id));
   };
   const toggleCreateTag = (id: string) =>
     setCreateForm((f) => ({
       ...f,
       tagIds: f.tagIds.includes(id) ? f.tagIds.filter((t) => t !== id) : [...f.tagIds, id],
     }));
+  const toggleCreateDeliveryArea = (id: string) =>
+    setCreateForm((f) => ({
+      ...f,
+      deliveryAreaIds: f.deliveryAreaIds.includes(id) ? f.deliveryAreaIds.filter((a) => a !== id) : [...f.deliveryAreaIds, id],
+    }));
   const toggleEditTag = (id: string) =>
     setEditTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
+  const toggleEditDeliveryArea = (id: string) =>
+    setEditDeliveryAreaIds((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
 
   const submitPassword = () => {
     if (!pwModal) return;
@@ -250,7 +270,8 @@ export default function BusinessesPage() {
       if (typeFilter !== 'ALL' && b.type !== typeFilter) return false;
 
       // 2. Area Filter
-      if (areaFilter !== 'ALL' && b.areaId !== areaFilter) return false;
+      if (cityFilter !== 'ALL' && b.area?.city !== cityFilter) return false;
+      if (villageFilter !== 'ALL' && b.areaId !== villageFilter) return false;
 
       // 3. Status Filter
       if (statusFilter === 'PENDING') {
@@ -270,7 +291,7 @@ export default function BusinessesPage() {
 
       return true;
     });
-  }, [businesses, search, typeFilter, areaFilter, statusFilter]);
+  }, [businesses, search, typeFilter, cityFilter, villageFilter, statusFilter]);
 
   // TanStack columns
   const columns = useMemo(
@@ -596,6 +617,34 @@ export default function BusinessesPage() {
                   )}
                 </div>
               </div>
+              
+              {createForm.type === 'FOOD' && createForm.areaId && (
+                <div className="space-y-2 sm:col-span-2 mt-2 border-t border-border-beige pt-4">
+                  <label className="block text-[12px] font-medium text-muted-gray">
+                    مناطق التوصيل (القرى/الأحياء داخل مدينة {areas.find(a => a.id === createForm.areaId)?.city})
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {areas.filter(a => a.city === areas.find(x => x.id === createForm.areaId)?.city).length === 0 ? (
+                      <span className="text-[13px] text-muted-gray">لا توجد مناطق للتوصيل</span>
+                    ) : (
+                      areas.filter(a => a.city === areas.find(x => x.id === createForm.areaId)?.city).map((area: Area) => {
+                        const active = createForm.deliveryAreaIds.includes(area.id);
+                        return (
+                          <button
+                            type="button"
+                            key={area.id}
+                            onClick={() => toggleCreateDeliveryArea(area.id)}
+                            className={`rounded-full px-3 py-1.5 text-[12px] font-bold border transition ${active ? 'bg-primary text-white border-primary' : 'bg-background/30 text-on-surface border-border-beige hover:border-primary'}`}
+                          >
+                            {area.name}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+
             </div>
             {createError && <p className="text-error text-[13px] font-semibold mt-3 text-center">{createError}</p>}
             <div className="flex gap-3 justify-end mt-6">
@@ -645,6 +694,33 @@ export default function BusinessesPage() {
                 })
               )}
             </div>
+
+            {editType === 'FOOD' && editTarget?.area?.city && (
+              <>
+                <label className="block text-[12px] font-medium text-muted-gray mb-2 mt-4">
+                  مناطق التوصيل (القرى/الأحياء داخل مدينة {editTarget.area.city})
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {areas.filter(a => a.city === editTarget.area?.city).length === 0 ? (
+                    <span className="text-[13px] text-muted-gray">لا توجد مناطق للتوصيل</span>
+                  ) : (
+                    areas.filter(a => a.city === editTarget.area?.city).map((area: Area) => {
+                      const active = editDeliveryAreaIds.includes(area.id);
+                      return (
+                        <button
+                          type="button"
+                          key={area.id}
+                          onClick={() => toggleEditDeliveryArea(area.id)}
+                          className={`rounded-full px-3 py-1.5 text-[12px] font-bold border transition ${active ? 'bg-primary text-white border-primary' : 'bg-background/30 text-on-surface border-border-beige hover:border-primary'}`}
+                        >
+                          {area.name}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </>
+            )}
 
             <div className="flex gap-3 justify-end mt-6">
               <button onClick={() => setEditTarget(null)} className="h-11 px-5 rounded-xl border border-border hover:bg-surface-container font-semibold text-[14px]">إلغاء</button>
@@ -703,16 +779,33 @@ export default function BusinessesPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="mr-1 block text-[12px] font-medium text-muted-gray">المنطقة والمدينة</label>
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray">المدينة</label>
             <select
-              value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
+              value={cityFilter}
+              onChange={(e) => { setCityFilter(e.target.value); setVillageFilter('ALL'); }}
               className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer"
             >
-              <option value="ALL">كل المناطق</option>
-              {areas.map((a: Area) => (
+              <option value="ALL">كل المدن</option>
+              {uniqueCities.map((city: string) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray">القرية / الحي</label>
+            <select
+              value={villageFilter}
+              onChange={(e) => setVillageFilter(e.target.value)}
+              disabled={cityFilter === 'ALL'}
+              className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer disabled:opacity-50"
+            >
+              <option value="ALL">كل القرى والأحياء</option>
+              {villagesForCity.map((a: Area) => (
                 <option key={a.id} value={a.id}>
-                  {a.city} - {a.name}
+                  {a.name}
                 </option>
               ))}
             </select>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -19,6 +19,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const socket = useSocket();
   const [tab, setTab] = useState<'new' | 'active' | 'done'>('new');
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch business profile owned by the logged-in user
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -136,6 +137,15 @@ export default function Dashboard() {
 
   const isOpen = business?.isOpen ?? false;
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['business-mine'] }),
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] })
+    ]);
+    setRefreshing(false);
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
@@ -154,7 +164,12 @@ export default function Dashboard() {
         />
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 24 }}>
+      <ScrollView 
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+        }
+      >
         {/* Stats */}
         <View style={styles.statsGrid}>
           <Stat label="طلبات اليوم" value={String(todayOrders.length)} bg={colors.primary} />

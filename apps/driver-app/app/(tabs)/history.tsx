@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
 import { formatShekel } from '@shu/utils';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
 export default function History() {
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+
   // Query historical orders scoped to this driver
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['driver-orders-history'],
@@ -54,8 +57,20 @@ export default function History() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['driver-orders-history'] });
+    setRefreshing(false);
+  };
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}>
+    <ScrollView 
+      style={{ flex: 1, backgroundColor: colors.background }} 
+      contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+      }
+    >
       <View style={styles.summary}>
         <Text style={styles.summaryLabel}>إجمالي أرباح التوصيل هذا الشهر</Text>
         <Text style={styles.summaryValue}>{formatShekel(monthlyEarnings)}</Text>

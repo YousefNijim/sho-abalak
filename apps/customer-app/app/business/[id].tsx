@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -46,6 +46,8 @@ export default function BusinessDetail() {
   const cartQty    = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const [tab, setTab] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', id],
@@ -102,11 +104,20 @@ export default function BusinessDetail() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['business', id] });
+    setRefreshing(false);
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView 
         contentContainerStyle={{ paddingBottom: cartQty > 0 ? 100 : spacing[8] }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+        }
       >
 
         {/* ── Hero image ── */}
@@ -222,7 +233,11 @@ export default function BusinessDetail() {
             <Text style={styles.emptyText}>لا توجد منتجات متوفرة حالياً</Text>
           ) : (
             filteredProducts.map((p: any) => (
-              <View key={p.id} style={styles.productCard}>
+              <Pressable 
+                key={p.id} 
+                style={styles.productCard}
+                onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id, businessId: business.id } })}
+              >
                 <View style={styles.productImageWrap}>
                   {p.imageUrl ? (
                     <Image source={{ uri: mediaUrl(p.imageUrl)! }} style={styles.productImage} contentFit="cover" />
@@ -267,7 +282,7 @@ export default function BusinessDetail() {
                     )}
                   </View>
                 </View>
-              </View>
+              </Pressable>
             ))
           )}
         </View>

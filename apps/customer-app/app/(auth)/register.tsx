@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useMemo } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -24,32 +24,34 @@ export default function Register() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const register = useAuthStore((s) => s.register);
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const citySheetRef = useRef<BottomSheet>(null);
+  const villageSheetRef = useRef<BottomSheet>(null);
 
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [areaId, setAreaId] = useState<string | null>(null);
-  const [areaLabel, setAreaLabel] = useState('');
-  const [agreed, setAgreed] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
-  const { data: areas = [] } = useQuery({
-    queryKey: ['areas'],
-    queryFn: () => areasApi.list(),
-  });
+  const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: any) => a.city))), [areas]);
+  const villagesForCity = useMemo(() => areas.filter((a: any) => a.city === selectedCity), [areas, selectedCity]);
+  const selectedVillageLabel = useMemo(() => areas.find((a: any) => a.id === areaId)?.name || '', [areas, areaId]);
 
-  const openAreaSheet = useCallback(() => bottomSheetRef.current?.expand(), []);
-  const closeAreaSheet = useCallback(() => bottomSheetRef.current?.close(), []);
+  const openCitySheet = useCallback(() => citySheetRef.current?.expand(), []);
+  const closeCitySheet = useCallback(() => citySheetRef.current?.close(), []);
 
-  const selectArea = useCallback((area: { id: string; city: string; name: string }) => {
+  const openVillageSheet = useCallback(() => {
+    if (selectedCity) villageSheetRef.current?.expand();
+  }, [selectedCity]);
+  const closeVillageSheet = useCallback(() => villageSheetRef.current?.close(), []);
+
+  const selectCity = useCallback((city: string) => {
+    setSelectedCity(city);
+    setAreaId(null);
+    closeCitySheet();
+  }, [closeCitySheet]);
+
+  const selectVillage = useCallback((area: { id: string; name: string }) => {
     setAreaId(area.id);
-    setAreaLabel(`${area.city} - ${area.name}`);
-    closeAreaSheet();
-  }, [closeAreaSheet]);
+    closeVillageSheet();
+  }, [closeVillageSheet]);
 
   const handleRegister = async () => {
     setError('');
@@ -146,15 +148,36 @@ export default function Register() {
             </View>
           </View>
 
-          {/* Area Dropdown */}
+          {/* City Dropdown */}
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>المنطقة</Text>
-            <TouchableOpacity style={styles.areaSelector} onPress={openAreaSheet} activeOpacity={0.8}>
+            <Text style={styles.inputLabel}>المدينة</Text>
+            <TouchableOpacity style={styles.areaSelector} onPress={openCitySheet} activeOpacity={0.8}>
+              <View style={styles.inputIconRight}>
+                <MapPin size={18} color={selectedCity ? colors.primary : colors.textMuted} />
+              </View>
+              <Text style={[styles.areaSelectorText, selectedCity ? styles.areaSelectorTextSelected : null]}>
+                {selectedCity || 'اختر مدينتك'}
+              </Text>
+              <View style={styles.areaChevron}>
+                <ChevronDown size={20} color={colors.textMuted} />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Village Dropdown */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>القرية / الحي</Text>
+            <TouchableOpacity 
+              style={[styles.areaSelector, !selectedCity && { opacity: 0.6 }]} 
+              onPress={openVillageSheet} 
+              activeOpacity={0.8}
+              disabled={!selectedCity}
+            >
               <View style={styles.inputIconRight}>
                 <MapPin size={18} color={areaId ? colors.primary : colors.textMuted} />
               </View>
               <Text style={[styles.areaSelectorText, areaId ? styles.areaSelectorTextSelected : null]}>
-                {areaLabel || 'اختر مدينتك'}
+                {selectedVillageLabel || 'اختر قريتك أو حيك'}
               </Text>
               <View style={styles.areaChevron}>
                 <ChevronDown size={20} color={colors.textMuted} />
@@ -256,28 +279,57 @@ export default function Register() {
         </View>
       </ScrollView>
 
-      {/* Area bottom sheet */}
+      {/* City bottom sheet */}
       <BottomSheet
-        ref={bottomSheetRef}
+        ref={citySheetRef}
         index={-1}
-        snapPoints={['60%']}
+        snapPoints={['50%']}
         enablePanDownToClose
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
       >
         <Text style={styles.sheetTitle}>اختر مدينتك</Text>
         <BottomSheetFlatList
-          data={areas as Array<{ id: string; city: string; name: string }>}
-          keyExtractor={(item) => item.id}
+          data={uniqueCities}
+          keyExtractor={(item) => item as string}
           contentContainerStyle={styles.sheetList}
           renderItem={({ item }) => (
             <TouchableOpacity
+              style={[styles.areaItem, selectedCity === item && styles.areaItemActive]}
+              onPress={() => selectCity(item as string)}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.areaItemText, selectedCity === item && styles.areaItemTextActive]}>
+                {item as string}
+              </Text>
+              {selectedCity === item && <Check size={18} color={colors.primary} strokeWidth={2.5} />}
+            </TouchableOpacity>
+          )}
+        />
+      </BottomSheet>
+
+      {/* Village bottom sheet */}
+      <BottomSheet
+        ref={villageSheetRef}
+        index={-1}
+        snapPoints={['60%']}
+        enablePanDownToClose
+        backgroundStyle={styles.sheetBg}
+        handleIndicatorStyle={styles.sheetHandle}
+      >
+        <Text style={styles.sheetTitle}>اختر قريتك أو حيك</Text>
+        <BottomSheetFlatList
+          data={villagesForCity}
+          keyExtractor={(item: any) => item.id}
+          contentContainerStyle={styles.sheetList}
+          renderItem={({ item }: any) => (
+            <TouchableOpacity
               style={[styles.areaItem, areaId === item.id && styles.areaItemActive]}
-              onPress={() => selectArea(item)}
+              onPress={() => selectVillage(item)}
               activeOpacity={0.7}
             >
               <Text style={[styles.areaItemText, areaId === item.id && styles.areaItemTextActive]}>
-                {item.city} - {item.name}
+                {item.name}
               </Text>
               {areaId === item.id && <Check size={18} color={colors.primary} strokeWidth={2.5} />}
             </TouchableOpacity>

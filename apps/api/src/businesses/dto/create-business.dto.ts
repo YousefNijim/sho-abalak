@@ -22,6 +22,12 @@ export class CreateBusinessDto {
   @IsString()
   areaId!: string;
 
+  @ApiPropertyOptional({ type: [String], description: 'معرّفات مناطق التوصيل' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  deliveryAreaIds?: string[];
+
   @ApiPropertyOptional({ enum: DeliveryType, default: DeliveryType.PLATFORM })
   @IsOptional()
   @IsEnum(DeliveryType)

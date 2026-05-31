@@ -22,6 +22,12 @@ export class AdminCreateBusinessDto {
   @IsString({ each: true })
   tagIds?: string[];
 
+  @ApiPropertyOptional({ type: [String], description: 'معرّفات مناطق التوصيل' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  deliveryAreaIds?: string[];
+
   @ApiProperty({ example: 'أحمد محمد', description: 'اسم صاحب المتجر' })
   @IsString()
   @MinLength(2)

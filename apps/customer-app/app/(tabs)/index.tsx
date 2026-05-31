@@ -37,7 +37,7 @@ import {
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, tagsApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, tagsApi, areasApi, BASE_URL } from '@shu/api-client';
 import type { Tag } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
@@ -83,6 +83,14 @@ export default function Home() {
     queryKey: ['tags', 'FOOD'],
     queryFn: () => tagsApi.list('FOOD'),
   });
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.list(),
+  });
+
+  const currentArea = areas.find((a: any) => a.id === selectedAddress?.areaId);
+  const locationTagText = currentArea ? `${currentArea.city}، ${currentArea.name}` : 'نابلس، المركز';
 
   const { data: businesses = [], isLoading } = useQuery({
     queryKey: ['businesses', 'FOOD', selectedTagId, search, selectedAddress?.areaId],
@@ -280,7 +288,7 @@ export default function Home() {
           <Text style={styles.sectionTitle}>المنشآت القريبة</Text>
           <View style={styles.locationTag}>
             <MapPin size={16} color={colors.textMuted} />
-            <Text style={styles.locationTagText}>نابلس، المركز</Text>
+            <Text style={styles.locationTagText}>{locationTagText}</Text>
           </View>
         </View>
 
@@ -515,7 +523,7 @@ const styles = StyleSheet.create({
   categoriesScroll: {
     paddingBottom: spacing[2],
     gap: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
   },
   categoryItem: {
     flexDirection: 'column',

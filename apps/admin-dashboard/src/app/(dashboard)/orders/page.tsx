@@ -64,7 +64,8 @@ export default function OrdersPage() {
   // Search & Filter state
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const [areaFilter, setAreaFilter] = useState('ALL');
+  const [cityFilter, setCityFilter] = useState('ALL');
+  const [villageFilter, setVillageFilter] = useState('ALL');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -130,6 +131,9 @@ export default function OrdersPage() {
     queryFn: () => areasApi.list(),
   });
 
+  const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: Area) => a.city))), [areas]);
+  const villagesForCity = useMemo(() => areas.filter((a: Area) => a.city === cityFilter), [areas, cityFilter]);
+
   const { data: selectedOrder, isLoading: isOrderDetailLoading } = useQuery({
     queryKey: ['order', selectedOrderId],
     queryFn: () => ordersApi.getById(selectedOrderId!),
@@ -176,7 +180,13 @@ export default function OrdersPage() {
       if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
 
       // 2. Area/City Filter
-      if (areaFilter !== 'ALL' && o.customer?.area?.id !== areaFilter && o.business?.area?.id !== areaFilter) return false;
+      if (cityFilter !== 'ALL') {
+        const orderCity = o.customer?.area?.city || o.business?.area?.city;
+        if (orderCity !== cityFilter) return false;
+      }
+      if (villageFilter !== 'ALL') {
+        if (o.customer?.area?.id !== villageFilter && o.business?.area?.id !== villageFilter) return false;
+      }
 
       // 3. Date Range Filter
       if (startDate) {
@@ -210,7 +220,7 @@ export default function OrdersPage() {
 
       return true;
     });
-  }, [allOrders, search, statusFilter, areaFilter, startDate, endDate]);
+  }, [allOrders, search, statusFilter, cityFilter, villageFilter, startDate, endDate]);
 
   // TanStack columns
   const columns = useMemo(
@@ -423,16 +433,33 @@ export default function OrdersPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="mr-1 block text-[12px] font-medium text-muted-gray">فلترة بالمدينة / المنطقة</label>
+              <label className="mr-1 block text-[12px] font-medium text-muted-gray">المدينة</label>
               <select
-                value={areaFilter}
-                onChange={(e) => setAreaFilter(e.target.value)}
+                value={cityFilter}
+                onChange={(e) => { setCityFilter(e.target.value); setVillageFilter('ALL'); }}
                 className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer"
               >
-                <option value="ALL">كل المناطق</option>
-                {areas.map((a: Area) => (
+                <option value="ALL">كل المدن</option>
+                {uniqueCities.map((city: string) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="mr-1 block text-[12px] font-medium text-muted-gray">القرية / الحي</label>
+              <select
+                value={villageFilter}
+                onChange={(e) => setVillageFilter(e.target.value)}
+                disabled={cityFilter === 'ALL'}
+                className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer disabled:opacity-50"
+              >
+                <option value="ALL">كل القرى والأحياء</option>
+                {villagesForCity.map((a: Area) => (
                   <option key={a.id} value={a.id}>
-                    {a.city} - {a.name}
+                    {a.name}
                   </option>
                 ))}
               </select>

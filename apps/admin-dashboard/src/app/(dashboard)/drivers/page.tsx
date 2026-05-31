@@ -31,7 +31,8 @@ export default function DriversPage() {
 
   // Search & Filters state
   const [search, setSearch] = useState('');
-  const [areaFilter, setAreaFilter] = useState('ALL');
+  const [cityFilter, setCityFilter] = useState('ALL');
+  const [villageFilter, setVillageFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
   // Selected Driver for Details Drawer
@@ -62,6 +63,9 @@ export default function DriversPage() {
     queryKey: ['areas'],
     queryFn: () => areasApi.list(),
   });
+
+  const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: Area) => a.city))), [areas]);
+  const villagesForCity = useMemo(() => areas.filter((a: Area) => a.city === cityFilter), [areas, cityFilter]);
 
   const { data: allOrders = [] } = useQuery({
     queryKey: ['orders'],
@@ -109,7 +113,8 @@ export default function DriversPage() {
   const filteredDrivers = useMemo(() => {
     return drivers.filter((d) => {
       // 1. Area Filter
-      if (areaFilter !== 'ALL' && d.areaId !== areaFilter) return false;
+      if (cityFilter !== 'ALL' && d.area?.city !== cityFilter) return false;
+      if (villageFilter !== 'ALL' && d.areaId !== villageFilter) return false;
 
       // 2. Status Filter
       if (statusFilter !== 'ALL' && d.status !== statusFilter) return false;
@@ -124,7 +129,7 @@ export default function DriversPage() {
 
       return true;
     });
-  }, [drivers, search, areaFilter, statusFilter]);
+  }, [drivers, search, cityFilter, villageFilter, statusFilter]);
 
   // TanStack columns
   const columns = useMemo(
@@ -280,16 +285,33 @@ export default function DriversPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="mr-1 block text-[12px] font-medium text-muted-gray">المنطقة والمدينة</label>
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray">المدينة</label>
             <select
-              value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
+              value={cityFilter}
+              onChange={(e) => { setCityFilter(e.target.value); setVillageFilter('ALL'); }}
               className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer"
             >
-              <option value="ALL">كل المناطق</option>
-              {areas.map((a: Area) => (
+              <option value="ALL">كل المدن</option>
+              {uniqueCities.map((city: string) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="mr-1 block text-[12px] font-medium text-muted-gray">القرية / الحي</label>
+            <select
+              value={villageFilter}
+              onChange={(e) => setVillageFilter(e.target.value)}
+              disabled={cityFilter === 'ALL'}
+              className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] cursor-pointer disabled:opacity-50"
+            >
+              <option value="ALL">كل القرى والأحياء</option>
+              {villagesForCity.map((a: Area) => (
                 <option key={a.id} value={a.id}>
-                  {a.city} - {a.name}
+                  {a.name}
                 </option>
               ))}
             </select>
