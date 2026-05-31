@@ -8,11 +8,6 @@ module.exports = {
     "userInterfaceStyle": "light",
     "backgroundColor": "#FCF3DC",
     "icon": "./assets/images/icon.png",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "backgroundColor": "#FCF3DC",
-      "resizeMode": "contain"
-    },
     "ios": {
       "supportsTablet": false
     },
@@ -28,6 +23,15 @@ module.exports = {
       "expo-router",
       "expo-font",
       [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FCF3DC"
+        }
+      ],
+      [
         "expo-notifications",
         {
           "color": "#E6781E"
@@ -35,7 +39,10 @@ module.exports = {
       ]
     ],
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "eas": {
+        "projectId": "5f92873e-10a5-458d-aa01-78921fd2d17b"
+      }
     },
     "experiments": {
       "typedRoutes": true
