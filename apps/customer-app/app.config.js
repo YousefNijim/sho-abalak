@@ -11,7 +11,7 @@ module.exports = {
     scheme: 'shu-customer',
     userInterfaceStyle: 'light',
     backgroundColor: '#FCF3DC',
-    icon: './assets/images/splash.png',
+    icon: './assets/images/icon.png',
     ios: {
       supportsTablet: false,
     },
@@ -19,6 +19,7 @@ module.exports = {
       package: 'com.shoabalak.customer',
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
       adaptiveIcon: {
+        foregroundImage: './assets/images/adaptive-icon.png',
         backgroundColor: '#FCF3DC',
       },
       usesCleartextTraffic: true,

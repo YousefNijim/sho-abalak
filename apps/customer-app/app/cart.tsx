@@ -33,6 +33,7 @@ export default function Cart() {
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
   const [notes, setNotes] = useState('');
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
+  const [addressError, setAddressError] = useState(false);
 
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
@@ -82,10 +83,13 @@ export default function Cart() {
     if (!businessId) return;
     // Use selected saved address areaId for delivery fee calc; fall back to cart's areaId
     const deliveryAreaId = selectedAddress?.areaId ?? areaId ?? '';
-    if (!deliveryAreaId) {
-      Alert.alert('تنبيه', 'الرجاء اختيار عنوان توصيل أولاً');
+    // Delivery address is mandatory — block submission and prompt inline.
+    if (!selectedAddress || !deliveryAreaId) {
+      setAddressError(true);
+      setAddressPickerVisible(true);
       return;
     }
+    setAddressError(false);
     const areaLabel = selectedAddress?.area
       ? `${selectedAddress.area.city} — ${selectedAddress.area.name}`
       : undefined;
@@ -105,8 +109,8 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <View style={[styles.emptyContainer, { paddingTop: insets.top }]}>
-        <View style={styles.header}>
+      <View style={styles.emptyContainer}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
             <ArrowRight size={28} color={colors.primary} />
           </Pressable>
@@ -127,7 +131,7 @@ export default function Cart() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <Text style={styles.headerTitle}>سلّتك</Text>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowRight size={28} color={colors.primary} />
@@ -135,7 +139,7 @@ export default function Cart() {
       </View>
 
       {/* Address bar */}
-      <Pressable style={styles.addressBar} onPress={() => setAddressPickerVisible(true)}>
+      <Pressable style={[styles.addressBar, addressError && styles.addressBarError]} onPress={() => setAddressPickerVisible(true)}>
         <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
         <View style={styles.addressBarText}>
           <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
@@ -147,6 +151,9 @@ export default function Cart() {
           <MapPin size={18} color={colors.primary} />
         </View>
       </Pressable>
+      {addressError && (
+        <Text style={styles.addressErrorText}>الرجاء اختيار عنوان التوصيل لإتمام الطلب</Text>
+      )}
 
       <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
@@ -168,7 +175,7 @@ export default function Cart() {
                   <Pressable
                     key={a.id}
                     style={[styles.addrRow, isActive && styles.addrRowActive]}
-                    onPress={() => { selectAddress(a.id); setAddressPickerVisible(false); }}
+                    onPress={() => { selectAddress(a.id); setAddressError(false); setAddressPickerVisible(false); }}
                   >
                     <View style={[styles.addrIconCircle, isActive && styles.addrIconCircleActive]}>
                       <HomeIcon size={18} color={isActive ? colors.primary : colors.textMuted} />
@@ -319,7 +326,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
     backgroundColor: '#FCF3DC',
     zIndex: 50,
     shadowColor: '#000',
@@ -617,6 +624,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     gap: spacing[3],
+  },
+  addressBarError: {
+    borderWidth: 1.5,
+    borderColor: colors.error,
+    borderBottomColor: colors.error,
+  },
+  addressErrorText: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.sm,
+    color: colors.error,
+    textAlign: 'right',
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[2],
+    backgroundColor: colors.surface,
   },
   addressBarIconWrap: {
     width: 36,

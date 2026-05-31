@@ -23,7 +23,6 @@ import {
   Store,
   Coffee,
   SlidersHorizontal,
-  Bell,
   Star,
   Clock,
   Bike,
@@ -49,6 +48,7 @@ import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 import { addressesApi } from '@shu/api-client';
 import { getCategoryImage } from '../../src/constants/CategoryImages';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
@@ -140,14 +140,13 @@ export default function Home() {
   return (
     <View style={styles.container}>
       {/* TopAppBar */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top + spacing[4] : spacing[6] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[3] }]}>
         <View style={styles.headerRight}>
           <Pressable style={styles.iconBtn} onPress={() => router.replace('/sections')}>
             <LayoutGrid size={26} color={colors.primary} />
           </Pressable>
-          <Pressable style={styles.iconBtn}>
-            <Bell size={28} color={colors.primary} />
-          </Pressable>
+          <NotificationBell size={28} />
+
           <Pressable style={styles.avatarWrap} onPress={() => router.push('/(tabs)/profile')}>
             <Image
               source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBiqR61W2ihUH0rTwN34VvJJq9ZSJBrj2Ozc882b_wtsjH9HPbZnvIKgKI_qQ8eGIebHVNrJLwn0Z5MffcYjDhc-ZWFsSVsdcjZprmW3vF8eSbyqjmYVbhfx-iNnUTeBwsV2bOumOaQi72fW9x6vJGe26PZCM51zkDtAJakjt4PG9RNmWUO48FBtPDGXPzuGEBGt_6w-Dz7K7iKDFENHmiAscsOo1aK19VMVQr8rBWJdcQU_PxxSp-SyYjpsAtmpcM-4qpO4Mt5byvA' }}
@@ -409,7 +408,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
     backgroundColor: '#FCF3DC',
     zIndex: 50,
   },

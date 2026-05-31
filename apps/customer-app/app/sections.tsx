@@ -2,9 +2,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View, Platform } from 'react-n
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { UtensilsCrossed, Store, ChevronLeft, Bell } from 'lucide-react-native';
+import { UtensilsCrossed, Store, ChevronLeft, User } from 'lucide-react-native';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../src/theme';
 import { useAuthStore } from '../src/stores/auth.store';
+import { NotificationBell } from '../src/components/NotificationBell';
 
 export default function Sections() {
   const router = useRouter();
@@ -14,11 +15,11 @@ export default function Sections() {
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
-        <Pressable style={styles.iconBtn}>
-          <Bell size={26} color={colors.primary} />
-        </Pressable>
+        <NotificationBell size={26} />
         <Text style={styles.headerTitle}>شو عبالك؟</Text>
-        <View style={styles.iconBtn} />
+        <Pressable style={styles.accountBtn} onPress={() => router.push('/(tabs)/profile')}>
+          <User size={24} color={colors.primary} />
+        </Pressable>
       </View>
 
       <ScrollView
@@ -94,6 +95,14 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[3],
   },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  accountBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary + '15',
+  },
   headerTitle: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.bold, color: colors.primary },
   greeting: {
     fontSize: fontSizes.lg,

@@ -114,7 +114,7 @@ export default function ProductDetail() {
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       {/* Top AppBar */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <Pressable style={styles.iconBtn} onPress={() => router.back()}>
           <ArrowRight size={24} color={colors.primary} />
         </Pressable>
@@ -124,8 +124,8 @@ export default function ProductDetail() {
         </Pressable>
       </View>
 
-      <ScrollView 
-        contentContainerStyle={{ paddingBottom: 120 }}
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 140 + insets.bottom }}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Section */}
@@ -214,7 +214,7 @@ export default function ProductDetail() {
       </ScrollView>
 
       {/* Fixed Bottom Action Bar */}
-      <View style={[styles.footer, { paddingBottom: Platform.OS === 'ios' ? insets.bottom || spacing[4] : spacing[4] }]}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing[3]) + spacing[2] }]}>
         <View style={styles.footerContent}>
           <View style={styles.totalWrap}>
             <Text style={styles.totalLabel}>المجموع الكلي</Text>
@@ -255,7 +255,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
+    backgroundColor: 'rgba(252, 243, 220, 0.55)', // faint cream tint — legible but doesn't hide the image
     zIndex: 50,
   },
   headerTitle: {

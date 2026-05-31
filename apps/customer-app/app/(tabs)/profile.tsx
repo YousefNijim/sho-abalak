@@ -18,6 +18,7 @@ import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme'
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 const GROUPS = [
   [
@@ -80,12 +81,11 @@ export default function Profile() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <Text style={styles.headerTitle}>شو عبالك؟</Text>
+        <Text style={styles.headerCenterTitle}>الحساب الشخصي</Text>
         <View style={styles.headerRight}>
-          <Pressable style={styles.iconBtn}>
-            <Bell size={24} color={colors.primary} />
-          </Pressable>
+          <NotificationBell size={24} />
           <View style={styles.avatarWrapSmall}>
             <Image
               source={{ uri: smallAvatar }}
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
     backgroundColor: '#FCF3DC',
     zIndex: 40,
     ...Platform.select({
@@ -199,6 +199,16 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.semibold, // headline-sm
     fontSize: 20,
     color: colors.primary,
+  },
+  headerCenterTitle: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: spacing[3],
+    textAlign: 'center',
+    fontFamily: fontFamily.bold,
+    fontSize: 18,
+    color: colors.textPrimary,
   },
   headerRight: {
     flexDirection: 'row-reverse',

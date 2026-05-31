@@ -1,6 +1,6 @@
 module.exports = {
   expo: {
-    "name": "شو عبالك؟ — السائق",
+    "name": "كابتن شو عبالك",
     "slug": "shu-driver",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,6 +15,7 @@ module.exports = {
       "package": "com.shoabalak.driver",
       "googleServicesFile": process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FCF3DC"
       },
       "usesCleartextTraffic": true

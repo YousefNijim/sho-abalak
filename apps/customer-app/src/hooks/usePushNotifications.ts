@@ -95,22 +95,33 @@ export function usePushNotifications() {
 
   // Foreground capture + tap handling.
   useEffect(() => {
-    const recvSub = Notifications.addNotificationReceivedListener((n) => {
-      const c = n.request.content;
+    // Record a notification into the in-app list (dedupes by request id / recent content).
+    const record = (req: Notifications.NotificationRequest) => {
+      const c = req.content;
       addNotification({
+        id: req.identifier,
         title: c.title ?? 'إشعار',
         body: c.body ?? '',
         data: (c.data ?? {}) as Record<string, string>,
       });
+    };
+
+    const recvSub = Notifications.addNotificationReceivedListener((n) => {
+      record(n.request);
     });
 
     const tapSub = Notifications.addNotificationResponseReceivedListener((resp) => {
+      // Background-delivered notifications never hit the foreground listener — record on tap too.
+      record(resp.notification.request);
       routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
     });
 
     // Cold start: app opened by tapping a notification.
     Notifications.getLastNotificationResponseAsync().then((resp) => {
-      if (resp) routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
+      if (resp) {
+        record(resp.notification.request);
+        routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
+      }
     });
 
     return () => {

@@ -76,7 +76,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="business/[id]" options={{ title: '' }} />
             <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="cart" options={{ title: 'سلّتك' }} />
+            <Stack.Screen name="cart" options={{ headerShown: false }} />
             <Stack.Screen name="tracking" options={{ title: 'تتبع الطلب' }} />
             <Stack.Screen name="profile/addresses" options={{ headerShown: false }} />
             <Stack.Screen name="profile/notifications" options={{ headerShown: false }} />

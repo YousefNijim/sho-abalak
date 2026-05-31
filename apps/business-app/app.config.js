@@ -1,6 +1,6 @@
 module.exports = {
   expo: {
-    "name": "شو عبالك؟ — المنشأة",
+    "name": "تاجر شو عبالك",
     "slug": "shu-business",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,6 +15,7 @@ module.exports = {
       "package": "com.shoabalak.business",
       "googleServicesFile": process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FCF3DC"
       },
       "usesCleartextTraffic": true

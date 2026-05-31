@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-05-31
-**Current phase:** Phase 27 (Push Notifications / FCM — Complete)
+**Last updated:** 2026-06-01
+**Current phase:** Phase 28 (Customer-app fixes — group (a) header/nav + safe-area + icons & names)
 
 ---
 
@@ -282,6 +282,17 @@
     - **Files (gitignored):** service-account key → `apps/api/secrets/firebase-service-account.json`; `google-services.json` → each app root. `.gitignore` updated. Renamed the mis-named `business-app/google-services (1).json` → `google-services.json`.
     - **Verified:** ✅ `firebase-admin` init with the real `shoabalak` key + live FCM send reachable (bogus token → `invalid-argument`, proving auth). ✅ Live-DB E2E: token upsert (idempotent), `send()` lookup+dispatch, stale-prune, cleanup. ✅ `tsc --noEmit` on all 3 apps — **zero new errors** in any touched file (only pre-existing noise remains). ⚠️ `nest build` blocked by **pre-existing** errors in `banners.controller.ts`/`tags.controller.ts` (`strictPropertyInitialization` on inline DTOs — fail identically without my changes); the notifications code itself compiles clean.
     - **Gotcha for next agent:** real device delivery needs a **native dev build** (Expo Go ignores `google-services.json`) on a **physical device**. Verify each app's `google-services.json` `package_name` matches its `android.package` — the **driver app's file currently contains `com.shoabalak.business`** (wrong copy) and must be re-downloaded from Firebase before driver push works.
+
+26. **Customer-app Fixes — Group (a): Header/Nav + Safe-areas + Icons/Names (Phase 28 — branch `Yousef2`)** ✅ **DONE** — first of four fix groups; usability + branding pass across the customer app:
+    - **Notifications bell now functional everywhere (item 1):** new shared `src/components/NotificationBell.tsx` (Bell + unread badge) wired into the section-landing header, Home header, and Profile header. Tapping opens the existing in-app notifications screen (`/profile/notifications`, backed by `notifications.store`). Badge shows the live unread count (red dot/`9+`) and re-renders as notifications arrive. Background/cold-start FCM notifications are now also **recorded into the in-app list** (previously only foreground): `usePushNotifications` records on the tap + cold-start handlers too, deduped by FCM request identifier (+ a 10s identical-content guard) in the store.
+    - **Account icon on the section landing (item 2):** added a profile/account icon to the top-LEFT of the section-picker header (next to the logo). Taps `router.push('/(tabs)/profile')` — opens the customer account screen directly without entering a section first.
+    - **Cart in bottom tab bar (item 3):** confirmed already implemented — السلة tab in `(tabs)/_layout.tsx` with item-count badge (no floating button). No change needed.
+    - **Safe areas (item 4):** switched the platform-hardcoded `Platform.OS === 'ios' ? insets.top : <fixed>` headers to `insets.top + spacing` on **all** platforms (Home, Profile, Cart, Product) so the top bar clears the Android status bar too; removed the conflicting fixed header heights. **Product page:** top bar gets a faint semi-transparent cream tint (`rgba(252,243,220,0.55)`) so it stays legible over the hero without hiding it; the sticky add-to-cart footer is lifted above the gesture/nav bar via `Math.max(insets.bottom, spacing[3]) + spacing[2]` and the scroll bottom-padding accounts for it.
+    - **Profile duplicate top bar (item 7):** the "حسابي"-only bar was the **Tabs navigator header** — set `headerShown: false` on the profile tab. Kept the main bar (logo + bell + avatar) and added the centered title **"الحساب الشخصي"**.
+    - **Cart duplicate bar + mandatory address (item 5, started here):** the cart's second bar was the **Stack header** (`title: 'سلّتك'`) — set `headerShown: false` for `cart`, leaving the single clean custom header. Delivery address is now enforced **inline**: if none selected, `handleConfirm` blocks submission, flags the address bar red with an inline error ("الرجاء اختيار عنوان التوصيل لإتمام الطلب"), and opens the address picker (replaced the old `Alert`). Error clears on selection.
+    - **App icons + names (item 9):** generated 1024×1024 `icon.png` + `adaptive-icon.png` for each app from `.design-refs/*app icon.png` (centered on cream `#FCF3DC`, 78% safe-zone, via `jimp-compact`). Updated each `app.config.js`: customer `icon` → real icon + `adaptiveIcon.foregroundImage`; names set to **شو عبالك** (customer), **تاجر شو عبالك** (business), **كابتن شو عبالك** (driver); added `adaptiveIcon.foregroundImage` to business + driver.
+    - **Verified:** `tsc --noEmit` on customer-app ✅ **0 errors** (down from ~21 pre-existing). Device screenshots not produced — no emulator/device available from this environment (per Key facts).
+    - **Next:** group (b) cart [remaining item 5 polish], group (c) notifications + order-status transitions [item 6], group (d) edit-profile [item 8].
 
 ## 🗂️ How to use this file (for AI agents)
 
