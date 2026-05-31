@@ -26,6 +26,7 @@ module.exports = {
       adaptiveIcon: {
         backgroundColor: '#FCF3DC',
       },
+      usesCleartextTraffic: true,
     },
     plugins: [
       'expo-router',

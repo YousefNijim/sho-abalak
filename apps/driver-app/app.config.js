@@ -21,7 +21,8 @@ module.exports = {
       "googleServicesFile": process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FCF3DC"
-      }
+      },
+      "usesCleartextTraffic": true
     },
     "plugins": [
       "expo-router",
