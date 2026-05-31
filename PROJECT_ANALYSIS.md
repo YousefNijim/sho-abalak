@@ -223,7 +223,7 @@ Legend: ✅ working E2E · 🟡 built, not runtime-verified on device · 🔶 pa
 | `(tabs)/profile` | Live profile, logout | ✅ |
 | `profile/addresses` | **Full CRUD** via `addressesApi` (list/add/edit/delete) | ✅ |
 | `profile/change-password` | **FAKE** — shows success Alert, **never calls `authApi.changePassword`** | ❌ |
-| `profile/notifications` | **Static UI**, hardcoded — no API, no data source; has live tsc error (`colors.info`) | ❌ |
+| `profile/notifications` | ✅ Wired to a real `notifications.store` — shows received FCM pushes, mark-all-read, empty state (Phase 27) | ✅ |
 | `profile/about` | Static content | 🟡 |
 | `stores-coming-soon` | "قريباً" placeholder for the entire Stores vertical | 🔶 (intentional placeholder) |
 
@@ -316,7 +316,7 @@ Cross-checked against `PROJECT_HANDOFF.md` tech table + `FRONTEND_DESIGN.md`:
 
 | Planned (spec) | Status | Notes |
 |---|---|---|
-| **Firebase FCM push** | ❌ stub | `push.service.ts` logs only; `firebase-admin` not installed |
+| **Firebase FCM push** | ✅ **DONE (Phase 27)** | `firebase-admin` `NotificationsModule`, `DeviceToken` table, register/unregister endpoints, triggers on order/driver events, wired into all 3 apps via `expo-notifications`. Verified: FCM init + send pipeline + token storage E2E. Real-device delivery needs a native dev build. See `NOTIFICATIONS_SETUP.md`. |
 | **SMS provider (Twilio)** | ❌ stub | `sms.service.ts` logs only |
 | **AWS S3 / Cloudinary** | ❌ | Only local disk implemented |
 | **Real online / split payment** | ❌ | Spec mentions split-payment; only mock cash/online exists |
@@ -366,7 +366,7 @@ Effort: **S** ≈ <1 day · **M** ≈ 1–3 days · **L** ≈ 1–2+ weeks.
 | Wire customer `change-password` to `authApi.changePassword` | S | Currently fake; security/trust bug |
 | Real OTP/SMS (Twilio or local SMS gateway) + remove `0000` | M | Phone verification is core to signup integrity |
 | Durable image storage (S3/Cloudinary) + migrate upload service | M | Local disk loses images on deploy |
-| Real push notifications (FCM) for order/driver events | M–L | Delivery apps are unusable without push |
+| ~~Real push notifications (FCM)~~ ✅ **DONE (Phase 27)** — remaining: native dev builds + on-device delivery test | S | Code complete & server-verified; just needs device QA |
 | Real online payment gateway (or **launch cash-only** and disable electronic) | M (cash-only) / L (gateway) | Decide scope; cash-only is a valid MVP |
 | Lock down socket CORS + add auth rate limiting | S | Basic prod hardening |
 | Deploy: build + run Docker images, real DB, Nginx, env secrets, staging URL | L | Nothing is deployed yet |

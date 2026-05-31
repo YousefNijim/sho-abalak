@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-31
-**Current phase:** Phase 26 (Dynamic Home Screen & Admin Control — Complete)
+**Current phase:** Phase 27 (Push Notifications / FCM — Complete)
 
 ---
 
@@ -141,11 +141,11 @@
 - ✅ **Reviews** (`src/reviews/`): `POST /reviews` (CUSTOMER, own order, only after DELIVERED, once) — creating a review recomputes the business's avg rating and (if rated) the driver's avg rating in one transaction. `GET /reviews/business?businessId=` and `GET /reviews/driver?driverId=` (public). Schema gained `comment`, `createdAt`. **Verified:** review set business→5, driver→4; duplicate 409; pre-delivery review 400.
 - ✅ **Users** (`src/users/`, ADMIN-only): `GET /users` (filter role/status/search), `GET /users/:id`, `PATCH /users/:id/status` (ACTIVE/SUSPENDED/BANNED). Never returns password hashes (explicit `select`). Admin accounts protected from status changes. Added `UserStatus` enum + `User.status` (migration `20260529122029_users_status_and_review_fields`). **Suspended/banned users are blocked both at login AND on existing tokens** (check in `AuthService.login` + `JwtStrategy.validate`). **Verified:** non-admin 403; password not leaked; suspend → login 403 + existing token 403; admin status-change 403.
 - **Verified end-to-end against live DB — FULL lifecycle:** business→product→order; total = items + delivery fee; customer-confirm 403; illegal PENDING→READY 400; business CONFIRMED→PREPARING→READY; driver registers (OFFLINE) → not in `available` → goes AVAILABLE → appears in `available`; assign without `driverId` 400; **business assigns READY→PICKED_UP**; **driver completes PICKED_UP→DELIVERED** (6 history rows); driver sees only assigned orders; customer blocked from `/drivers/register` 403; duplicate driver 409. All confirmed in Postgres.
-- **All domain modules are now built** (auth, areas, businesses, products, orders, drivers, payments, reviews, users). Not yet built: image uploads (S3/Cloudinary), FCM push.
+- **All domain modules are now built** (auth, areas, businesses, products, orders, drivers, payments, reviews, users). ✅ **FCM push notifications now built & wired** (see Phase 27). Not yet built: durable image uploads (S3/Cloudinary — local-disk today).
 - ✅ **Socket.io Gateway is fully operational & wired.**
 - No **Redis** integration (ioredis is installed, not wired).
 - DTOs + class-validator + role guards are in place for the built modules; **comprehensive E2E order lifecycle integration tests successfully implemented and passing** (Jest supertest running under `pnpm --filter @shu/api test`).
-- Firebase FCM, S3/Cloudinary uploads: not started.
+- ✅ **Firebase FCM: DONE** (Phase 27). S3/Cloudinary uploads: not started (local-disk only).
 
 ### Frontend ↔ data wiring — ✅ **100% CONNECTED**
 - ✅ **Admin Dashboard (Next.js)**: Fully connected to `@shu/api-client` and React Query. Handles dynamic dashboard stats, businesses filters/tables, users list & suspend actions, active drivers list, orders table, and reports data calculations.
@@ -270,6 +270,18 @@
     - **Database/API:** Created new `Banner` model and added `imageUrl` to `Tag`. Implemented `BannersModule` for full CRUD, and added CRUD + image upload capabilities to `TagsModule`. Updated `@shu/api-client` accordingly.
     - **Admin Dashboard:** Created `/banners` page to upload, toggle visibility, and delete promotional slider images. Created `/tags` page to manage categories, their types (FOOD/STORE), and upload custom icons. Added shortcuts to the Sidebar.
     - **Customer App:** Replaced the static promo box with a dynamic, auto-playing image slider (`ScrollView` with `pagingEnabled`) fetching active banners from the API. Updated category tag rendering to use the dynamic `imageUrl` from the backend instead of static local images. Increased `paddingTop` of the home screen to add more spacing from the top bar.
+
+25. **Push Notifications / FCM (Phase 27)** ✅ **DONE** — Real FCM push end-to-end across backend + 3 mobile apps, **additive to the existing sockets** (both fire). Full setup in [NOTIFICATIONS_SETUP.md](./NOTIFICATIONS_SETUP.md).
+    - **Audit:** the old `common/providers/push.service.ts` was a dead log-only stub (never imported/called); `firebase-admin` was not installed; no token table, no endpoints, no `expo-notifications`. Genuinely "not started" — built fresh.
+    - **Schema:** new `DeviceToken` model (`userId, token unique, platform?, app?`) + `User.deviceTokens[]`. Migration `20260531120000_device_tokens` applied via the diff→deploy→generate flow (stopped the node holding :3001 first to avoid the Prisma DLL lock).
+    - **Backend:** `NotificationsModule` (`@Global`) using `firebase-admin`. Credential loaded from `FIREBASE_SERVICE_ACCOUNT_PATH` (default `./secrets/firebase-service-account.json`) — **never hardcoded**; if missing, API still boots and pushes are skipped ("FCM disabled"). `NotificationsService.send(userId, {title,body,data})` looks up tokens, sends an FCM multicast, never throws, and **auto-prunes stale/invalid tokens**. Endpoints: `POST /notifications/register-token`, `DELETE /notifications/token` (both JWT).
+    - **Triggers (in `OrdersService`, alongside socket emits):** order create → business ("طلب جديد"); status changes → customer ("تم تأكيد طلبك" / "جاري التحضير" / "طلبك في الطريق" / "تم التسليم" …); driver request (dispatch + PICKED_UP) → driver ("طلب توصيل جديد"). Every push carries `data:{type,orderId,role}` for deep-linking.
+    - **api-client:** `notificationsApi.registerToken/unregisterToken` + `RegisterTokenDto`.
+    - **Mobile (all 3 apps):** installed `expo-notifications` + `expo-device` + `expo-constants` (Expo SDK **54**). Added the `expo-notifications` config plugin + `googleServicesFile` to each `app.json`, and **fixed the Android package names from `com.shu.*` → `com.shoabalak.*`** to match the registered Firebase apps / `google-services.json`. Each app has `src/hooks/usePushNotifications.ts`: requests permission, gets the **native FCM device token** (`getDevicePushTokenAsync` — no EAS projectId needed since sending is server-side), registers it on login / unregisters on logout, shows foreground notifications, and deep-links on tap (customer→tracking, business→order/[id], driver→request-alert). Hook mounted via a `PushNotificationsBridge` in each `_layout.tsx` (driver folds it into the existing `GlobalSocketListener`).
+    - **Customer notifications screen:** rewired from hardcoded mock cards to a real `notifications.store` (Zustand+persist) — shows received pushes, mark-all-read, empty state. This also **removed the pre-existing `colors.info`/`success`/`warning` tsc errors** in that file.
+    - **Files (gitignored):** service-account key → `apps/api/secrets/firebase-service-account.json`; `google-services.json` → each app root. `.gitignore` updated. Renamed the mis-named `business-app/google-services (1).json` → `google-services.json`.
+    - **Verified:** ✅ `firebase-admin` init with the real `shoabalak` key + live FCM send reachable (bogus token → `invalid-argument`, proving auth). ✅ Live-DB E2E: token upsert (idempotent), `send()` lookup+dispatch, stale-prune, cleanup. ✅ `tsc --noEmit` on all 3 apps — **zero new errors** in any touched file (only pre-existing noise remains). ⚠️ `nest build` blocked by **pre-existing** errors in `banners.controller.ts`/`tags.controller.ts` (`strictPropertyInitialization` on inline DTOs — fail identically without my changes); the notifications code itself compiles clean.
+    - **Gotcha for next agent:** real device delivery needs a **native dev build** (Expo Go ignores `google-services.json`) on a **physical device**. Verify each app's `google-services.json` `package_name` matches its `android.package` — the **driver app's file currently contains `com.shoabalak.business`** (wrong copy) and must be re-downloaded from Firebase before driver push works.
 
 ## 🗂️ How to use this file (for AI agents)
 
