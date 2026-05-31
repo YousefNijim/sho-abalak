@@ -32,7 +32,11 @@
       ]
     ],
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "router": {},
+      "eas": {
+        "projectId": "6df81a2e-aece-42e7-b24c-bcaed3e37add"
+      }
     },
     "experiments": {
       "typedRoutes": true
