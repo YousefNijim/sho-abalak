@@ -6,6 +6,7 @@ export interface Tag {
   id: string;
   name: string;
   type: BusinessType;
+  imageUrl?: string | null;
 }
 
 export interface Business {
@@ -33,12 +34,13 @@ export interface Business {
 /** Write payload for create/update — Business minus server-managed fields, plus tagIds. */
 export type BusinessWriteDto = Partial<
   Omit<Business, 'id' | 'ownerId' | 'tags' | 'area' | 'owner' | 'products' | 'rating'>
-> & { tagIds?: string[] };
+> & { tagIds?: string[]; deliveryAreaIds?: string[] };
 
 export interface AdminCreateBusinessDto {
   name: string;
   type: BusinessType;
   tagIds?: string[];
+  deliveryAreaIds?: string[];
   ownerName: string;
   phone: string;
   areaId: string;

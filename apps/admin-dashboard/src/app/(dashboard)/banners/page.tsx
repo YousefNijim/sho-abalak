@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { bannersApi, uploadsApi } from '@shu/api-client';
 import type { Banner } from '@shu/api-client';
