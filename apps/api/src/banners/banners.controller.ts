@@ -10,7 +10,7 @@ import { IsString, IsOptional, IsBoolean } from 'class-validator';
 class CreateBannerDto {
   @ApiProperty()
   @IsString()
-  imageUrl: string;
+  imageUrl!: string;
 
   @ApiPropertyOptional()
   @IsOptional()

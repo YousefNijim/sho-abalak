@@ -17,11 +17,11 @@ class QueryTagsDto {
 class CreateTagDto {
   @ApiProperty()
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({ enum: BusinessType })
   @IsEnum(BusinessType)
-  type: BusinessType;
+  type!: BusinessType;
 
   @ApiPropertyOptional()
   @IsOptional()
