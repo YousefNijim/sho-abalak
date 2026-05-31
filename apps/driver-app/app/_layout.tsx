@@ -21,10 +21,14 @@ import { colors } from '../src/theme';
 import { getQueryClient } from '../src/lib/query-client';
 import { useAuthStore } from '../src/stores/auth.store';
 import { useSocket } from '../src/hooks/useSocket';
+import { usePushNotifications } from '../src/hooks/usePushNotifications';
 
 function GlobalSocketListener() {
   const router = useRouter();
   const socket = useSocket();
+
+  // Register for FCM push + handle notification taps (additive to the live socket below).
+  usePushNotifications();
 
   useEffect(() => {
     if (!socket) return;

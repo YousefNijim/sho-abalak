@@ -15,14 +15,21 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "com.shu.driver",
+      "package": "com.shoabalak.driver",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FCF3DC"
       }
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#E6781E"
+        }
+      ]
     ],
     "extra": {
       "supportsRTL": true
