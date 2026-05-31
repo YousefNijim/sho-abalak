@@ -88,6 +88,7 @@ export default function RootLayout() {
             <Stack.Screen name="tracking" options={{ title: 'تتبع الطلب' }} />
             <Stack.Screen name="profile/addresses" options={{ headerShown: false }} />
             <Stack.Screen name="profile/notifications" options={{ headerShown: false }} />
+            <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
             <Stack.Screen name="profile/change-password" options={{ headerShown: false }} />
             <Stack.Screen name="profile/about" options={{ headerShown: false }} />
           </Stack>

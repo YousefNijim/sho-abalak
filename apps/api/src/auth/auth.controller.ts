@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { RegisterBusinessDto } from './dto/register-business.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestOtpDto, VerifyOtpDto } from './dto/otp.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -53,6 +54,14 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: AuthUser) {
-    return user;
+    return this.auth.getMe(user.id);
+  }
+
+  /** Update the authenticated user's profile (name/email/photo, or phone with OTP). */
+  @Patch('profile')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  updateProfile(@CurrentUser() user: AuthUser, @Body() dto: UpdateProfileDto) {
+    return this.auth.updateProfile(user.id, dto);
   }
 }

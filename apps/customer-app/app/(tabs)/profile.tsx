@@ -1,5 +1,6 @@
+import { useCallback } from 'react';
 import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import {
   MapPin,
   Bell,
@@ -19,6 +20,7 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { NotificationBell } from '../../src/components/NotificationBell';
+import { imageUrl } from '../../src/lib/upload';
 
 const GROUPS = [
   [
@@ -40,7 +42,15 @@ export default function Profile() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const refreshUser = useAuthStore((s) => s.refreshUser);
   const insets = useSafeAreaInsets();
+
+  // Pull the latest profile (email/imageUrl) whenever the account screen gains focus.
+  useFocusEffect(
+    useCallback(() => {
+      refreshUser().catch(() => {});
+    }, [refreshUser]),
+  );
 
   const handleLogout = () => {
     if (Platform.OS === 'web') {
@@ -75,8 +85,9 @@ export default function Profile() {
     }
   };
 
-  const userImage = (user as any)?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUSZfCM-tLbRtzPFjdltok_AvJFIYQYCOPLdPX3NXaaHNm0KCEco5A-ZZNR_Z_lWA2hlTnpqeUjmJUmz65hX4mYw5FBHXmVbs7zsCBEyzilWML6gn7DafAdoxKKzkToFelHt5_G23OFo5r9CC3SElLF_KoaB8U_7ReJsfkoSALty4a9cQSkEzEtIUcNtJFue5y-Vbye8IUG7uCkCBstYJZoHAipmEhePvayLQBPhgO7I6GIaPTIlv2aKhaPfLJBREvaDwccwXANlib';
-  const smallAvatar = (user as any)?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDa1He8yho8BE00MM1pAWfA2YsyLWRy6k5mUf7ByERqjZuFWFMfwd_qx2l9d5jtT6iiZcZ6cYH_zCy_nIQcUdnRrkqUy7Oz2T2sLARn4STyOZcoFBKewag5w9k3cmRJkn7PXHw4Jyo1nlX_VTtuHoTUINjt4JAHkcwzNOCA_I7_Th8Y4i__ZJCebT1ki_O_etwlQE1rXbaViSVVOh-SZ3uDnYXHu-u5o_DC3V9SlLrImoF_rlxAO9V3ZH-2JxetDLSvBvDx3h1LPSOY';
+  const resolvedAvatar = imageUrl((user as any)?.imageUrl);
+  const userImage = resolvedAvatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUSZfCM-tLbRtzPFjdltok_AvJFIYQYCOPLdPX3NXaaHNm0KCEco5A-ZZNR_Z_lWA2hlTnpqeUjmJUmz65hX4mYw5FBHXmVbs7zsCBEyzilWML6gn7DafAdoxKKzkToFelHt5_G23OFo5r9CC3SElLF_KoaB8U_7ReJsfkoSALty4a9cQSkEzEtIUcNtJFue5y-Vbye8IUG7uCkCBstYJZoHAipmEhePvayLQBPhgO7I6GIaPTIlv2aKhaPfLJBREvaDwccwXANlib';
+  const smallAvatar = resolvedAvatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDa1He8yho8BE00MM1pAWfA2YsyLWRy6k5mUf7ByERqjZuFWFMfwd_qx2l9d5jtT6iiZcZ6cYH_zCy_nIQcUdnRrkqUy7Oz2T2sLARn4STyOZcoFBKewag5w9k3cmRJkn7PXHw4Jyo1nlX_VTtuHoTUINjt4JAHkcwzNOCA_I7_Th8Y4i__ZJCebT1ki_O_etwlQE1rXbaViSVVOh-SZ3uDnYXHu-u5o_DC3V9SlLrImoF_rlxAO9V3ZH-2JxetDLSvBvDx3h1LPSOY';
 
   return (
     <View style={styles.container}>
@@ -111,7 +122,7 @@ export default function Profile() {
                 contentFit="cover"
               />
             </View>
-            <Pressable style={styles.editAvatarBtn}>
+            <Pressable style={styles.editAvatarBtn} onPress={() => router.push('/profile/edit' as any)}>
               <Edit2 size={14} color="#FFF" />
             </Pressable>
           </View>
@@ -119,9 +130,9 @@ export default function Profile() {
           <Text style={styles.userName}>{user?.name || 'أحمد محمود'}</Text>
           <Text style={styles.userPhone}>{user?.phone || '+970 59-xxxx-xxx'}</Text>
 
-          <Pressable 
+          <Pressable
             style={styles.editProfileBtn}
-            onPress={() => navigateTo(null, 'تعديل الملف الشخصي')}
+            onPress={() => router.push('/profile/edit' as any)}
           >
             <User size={18} color="#FFF" />
             <Text style={styles.editProfileText}>تعديل الملف الشخصي</Text>

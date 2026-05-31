@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-01
-**Current phase:** Phase 29 (Customer-app fixes — group (c) order-status notifications + cancellation handling)
+**Current phase:** Phase 30 (Customer-app fixes — group (d) edit-profile complete)
 
 ---
 
@@ -301,6 +301,16 @@
     - **Incidental (group-a consistency):** fixed the remaining platform-hardcoded safe-area headers on `orders.tsx` + `tracking.tsx` (now `insets.top` on all platforms, removed fixed iOS heights) and replaced the inert bell on the Orders header with the shared `NotificationBell`.
     - **Verified:** `tsc --noEmit` on customer-app ✅ 0 errors. Device test pending (no emulator here).
     - **Remaining:** group (d) — edit-profile (item 8).
+
+28. **Customer-app Fixes — Group (d): Edit Profile (Phase 30 — branch `Yousef2`)** ✅ **DONE** — item 8; the customer can now fully edit their profile, all persisted to the API.
+    - **Schema:** added `User.imageUrl String?` (migration `20260601000000_user_image_url`, applied via deploy→generate; `email` already existed unique-optional). Started Docker Postgres for the migration; stopped API + Postgres afterward to release the Prisma DLL lock.
+    - **API (`auth`):** `GET /auth/me` now returns the **full** profile (`email`+`imageUrl`, via new `AuthService.getMe` — JWT payload alone omitted them). New `PATCH /auth/profile` (JWT) updates name/email/imageUrl, and **phone only with a verified OTP**: the DTO carries `phone`+`otpCode`, and the service re-verifies the code server-side (`verifyOtp`) so it can't be bypassed; email + phone uniqueness enforced with friendly Arabic conflicts; `publicUser()` never leaks the hash. Reuses the existing `POST /uploads/image` for the photo (no new upload endpoint needed).
+    - **api-client:** `authApi.updateProfile` + `AuthUserProfile` type; `me()` now typed to the richer shape; `otpRequest`/`otpVerify` typed (`devCode`, `verified`).
+    - **Customer app:** added `expo-image-picker@~17.0.11` (+ config plugin with Arabic photos-permission string) and copied the RN-safe `src/lib/upload.ts` (web blob vs native `{uri,name,type}` FormData). New **`app/profile/edit.tsx`**: avatar with camera button (pick → upload → preview), name, email, and phone fields; when the phone changes, a **"يجب التحقق من الرقم الجديد"** box appears — "إرسال رمز التحقق" → 4-digit OTP input → "تأكيد الرمز"; save is blocked until verified. Sticky safe-area save button; success/error feedback; no dead buttons. Auth store gained `email`/`imageUrl`, `refreshUser()` (re-pulls `/auth/me`), and `setUser()`.
+    - **Profile screen wiring:** the "تعديل الملف الشخصي" button and the avatar pencil now route to `/profile/edit` (were "coming soon"); the screen `refreshUser()`s on focus and resolves the stored `imageUrl` path through `BASE_URL`.
+    - **Verified:** `nest build` ✅ (also cleared the previously-noted banners/tags pre-existing errors — they were collateral of unbuilt `@shu/shared-types`, now built). `tsc --noEmit` customer-app ✅ 0 errors. **Live-API E2E (all pass):** `GET /me` shows email/imageUrl; PATCH name+email (email lowercased) + imageUrl persists; phone change **without** OTP → 400, **wrong** OTP → 400, **correct** `0000` → 200 and phone updated; test user cleaned up.
+    - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
+    - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
 
 ## 🗂️ How to use this file (for AI agents)
 

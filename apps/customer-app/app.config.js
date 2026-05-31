@@ -42,6 +42,12 @@ module.exports = {
           color: '#E6781E',
         },
       ],
+      [
+        'expo-image-picker',
+        {
+          photosPermission: 'يستخدم التطبيق الصور لتحديث صورة ملفك الشخصي.',
+        },
+      ],
     ],
     extra: {
       supportsRTL: true,

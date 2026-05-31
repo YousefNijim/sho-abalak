@@ -1,4 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserRole, UserStatus } from '@shu/shared-types';
@@ -99,6 +105,81 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await this.prisma.user.update({ where: { id: userId }, data: { password: passwordHash } });
     return { changed: true };
+  }
+
+  /** Full profile for the authenticated user (includes email/imageUrl the JWT payload omits). */
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+    return this.publicUser(user);
+  }
+
+  /**
+   * Update the authenticated user's profile.
+   * Changing the phone requires a valid OTP for the NEW number (re-verified here so it
+   * cannot be bypassed). Email/phone uniqueness is enforced with a friendly message.
+   */
+  async updateProfile(
+    userId: string,
+    dto: { name?: string; email?: string; imageUrl?: string; phone?: string; otpCode?: string },
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+
+    const data: {
+      name?: string;
+      email?: string | null;
+      imageUrl?: string | null;
+      phone?: string;
+    } = {};
+
+    if (dto.name !== undefined) data.name = dto.name;
+    if (dto.imageUrl !== undefined) data.imageUrl = dto.imageUrl || null;
+
+    if (dto.email !== undefined) {
+      const email = dto.email.trim().toLowerCase() || null;
+      if (email && email !== user.email) {
+        const taken = await this.prisma.user.findUnique({ where: { email } });
+        if (taken && taken.id !== userId) throw new ConflictException('البريد الإلكتروني مستخدم مسبقاً');
+      }
+      data.email = email;
+    }
+
+    // Phone change — only when it actually differs, and only with a verified OTP.
+    if (dto.phone !== undefined && dto.phone !== user.phone) {
+      if (!dto.otpCode || !this.verifyOtp(dto.phone, dto.otpCode).verified) {
+        throw new BadRequestException('يجب التحقق من رقم الهاتف الجديد عبر رمز التحقق');
+      }
+      const taken = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+      if (taken && taken.id !== userId) throw new ConflictException('رقم الهاتف مسجّل مسبقاً');
+      data.phone = dto.phone;
+    }
+
+    const updated = await this.prisma.user.update({ where: { id: userId }, data });
+    return this.publicUser(updated);
+  }
+
+  /** Shape a user row for client consumption (never leaks the password hash). */
+  private publicUser(user: {
+    id: string;
+    role: string;
+    name: string;
+    phone: string;
+    email: string | null;
+    imageUrl: string | null;
+    areaId: string | null;
+    status: string;
+  }) {
+    return {
+      id: user.id,
+      role: user.role,
+      name: user.name,
+      phone: user.phone,
+      email: user.email,
+      imageUrl: user.imageUrl,
+      areaId: user.areaId,
+      status: user.status,
+    };
   }
 
   private sign(id: string, role: UserRole, user: { name: string; phone: string }) {

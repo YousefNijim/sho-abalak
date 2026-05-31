@@ -27,6 +27,25 @@ export interface ChangePasswordDto {
   newPassword: string;
 }
 
+export interface UpdateProfileDto {
+  name?: string;
+  email?: string;
+  imageUrl?: string;
+  phone?: string;
+  otpCode?: string;
+}
+
+export interface AuthUserProfile {
+  id: string;
+  name: string;
+  phone: string;
+  role: string;
+  status: string;
+  areaId: string | null;
+  email: string | null;
+  imageUrl: string | null;
+}
+
 export interface AuthResponse {
   accessToken: string;
   user: {
@@ -55,11 +74,14 @@ export const authApi = {
     http.patch<{ changed: boolean }>('/auth/change-password', dto).then((r) => r.data),
 
   me: () =>
-    http.get<AuthResponse['user']>('/auth/me').then((r) => r.data),
+    http.get<AuthUserProfile>('/auth/me').then((r) => r.data),
+
+  updateProfile: (dto: UpdateProfileDto) =>
+    http.patch<AuthUserProfile>('/auth/profile', dto).then((r) => r.data),
 
   otpRequest: (phone: string) =>
-    http.post('/auth/otp/request', { phone }).then((r) => r.data),
+    http.post<{ phone: string; sent: boolean; devCode?: string }>('/auth/otp/request', { phone }).then((r) => r.data),
 
   otpVerify: (phone: string, code: string) =>
-    http.post('/auth/otp/verify', { phone, code }).then((r) => r.data),
+    http.post<{ phone: string; verified: boolean }>('/auth/otp/verify', { phone, code }).then((r) => r.data),
 };

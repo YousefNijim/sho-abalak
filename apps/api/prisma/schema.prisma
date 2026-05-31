@@ -30,6 +30,7 @@ model User {
   name           String
   phone          String         @unique
   email          String?        @unique
+  imageUrl       String?
   password       String?
   areaId         String?
   createdAt      DateTime       @default(now())

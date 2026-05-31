@@ -11,6 +11,8 @@ interface AuthUser {
   role: string;
   status: string;
   areaId: string | null;
+  email?: string | null;
+  imageUrl?: string | null;
 }
 
 interface AuthState {
@@ -20,6 +22,10 @@ interface AuthState {
   register: (dto: RegisterDto) => Promise<void>;
   logout: () => void;
   hydrate: () => void;
+  /** Refresh the cached profile from /auth/me (e.g. after editing it). */
+  refreshUser: () => Promise<void>;
+  /** Merge fresh profile fields into the cached user. */
+  setUser: (user: AuthUser) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -49,6 +55,14 @@ export const useAuthStore = create<AuthState>()(
         const { token } = get();
         if (token) setAuthToken(token);
       },
+
+      refreshUser: async () => {
+        if (!get().token) return;
+        const me = await authApi.me();
+        set({ user: me as AuthUser });
+      },
+
+      setUser: (user) => set({ user }),
     }),
     {
       name: 'shu-customer-auth',
