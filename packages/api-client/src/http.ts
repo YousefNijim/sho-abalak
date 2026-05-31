@@ -4,11 +4,14 @@ import axios from 'axios';
 export const BASE_URL =
   (typeof process !== 'undefined' &&
     (process.env['NEXT_PUBLIC_API_URL'] ?? process.env['EXPO_PUBLIC_API_URL'])) ||
-  'http://192.168.1.162:3001';
+  'https://shu-api-test.loca.lt';
 
 export const http = axios.create({
   baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true'
+  },
 });
 
 /** Call this once on app init / after login to attach the bearer token. */
