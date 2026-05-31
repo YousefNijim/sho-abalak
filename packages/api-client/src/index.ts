@@ -15,6 +15,8 @@ export { reportsApi } from './reports.api';
 export { bannersApi } from './banners.api';
 export type { Banner } from './banners.api';
 export { uploadsApi } from './uploads.api';
+export { notificationsApi } from './notifications.api';
+export type { RegisterTokenDto } from './notifications.api';
 
 // Re-export types
 export type { SystemSettings } from './settings.api';
