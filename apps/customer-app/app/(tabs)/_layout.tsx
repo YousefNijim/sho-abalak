@@ -1,10 +1,14 @@
 import { Tabs } from 'expo-router';
-import { Home, Package, User } from 'lucide-react-native';
+import { Home, Package, User, ShoppingCart } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors, fontFamily, components, spacing } from '../../src/theme';
+import { useCartStore } from '../../src/stores/cart.store';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const cartItems = useCartStore((s) => s.items);
+  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <Tabs
@@ -50,6 +54,23 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="cart"
+        options={{
+          title: 'السلة',
+          href: '/cart',
+          tabBarIcon: ({ color, size }) => (
+            <View>
+              <ShoppingCart size={size} color={color} />
+              {cartQty > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartQty}</Text>
+                </View>
+              )}
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'حسابي',
@@ -59,3 +80,25 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.surface,
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontFamily: fontFamily.bold,
+  },
+});

@@ -65,8 +65,6 @@ export default function Home() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
-  const cartItems = useCartStore((s) => s.items);
-  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const activeOrder = useActiveOrderStore((s) => s.order);
 
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
@@ -396,20 +394,7 @@ export default function Home() {
         )}
       </ScrollView>
 
-      {/* Cart FAB */}
-      <View style={[styles.fabContainer, { bottom: bottomInset + 80 }]}>
-        <Pressable
-          style={styles.fab}
-          onPress={() => router.push('/cart')}
-        >
-          <ShoppingCart size={28} color={colors.white} />
-          {cartQty > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>{cartQty}</Text>
-            </View>
-          )}
-        </Pressable>
-      </View>
+
     </View>
   );
 }
@@ -714,42 +699,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     textAlign: 'center',
   },
-  fabContainer: {
-    position: 'absolute',
-    left: spacing[4],
-    zIndex: 40,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({
-      ios: { shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
-      android: { elevation: 6 },
-      web: { boxShadow: `0 4px 12px ${colors.primary}40` },
-    }),
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: colors.error,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.surface,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontFamily: fontFamily.bold,
-  },
+
   // Address bar
   addressBarSection: {
     paddingHorizontal: spacing[4],
