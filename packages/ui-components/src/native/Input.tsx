@@ -25,8 +25,10 @@ export function Input({ label, error, leftIcon, rightIcon, style, ...rest }: Pro
             styles.input,
             focused && styles.focused,
             !!error && styles.errored,
-            rightIcon && { paddingRight: 40 },
-            leftIcon && { paddingLeft: 40 },
+            {
+              paddingRight: rightIcon ? 40 : 16,
+              paddingLeft: leftIcon ? 40 : 16,
+            },
             style,
           ]}
           {...rest}

@@ -178,9 +178,9 @@ export default function Tracking() {
                 const isActive = currentIdx === idx;
                 const isPending = currentIdx < idx;
                 
-                let iconBg = 'rgba(229, 224, 213, 1)'; // border-beige
-                let iconColor = colors.textMuted;
-                let titleColor = colors.textMuted;
+                let iconBg: string = 'rgba(229, 224, 213, 1)'; // border-beige
+                let iconColor: string = colors.textMuted;
+                let titleColor: string = colors.textMuted;
 
                 if (isDone) {
                   iconBg = '#22C55E'; // success-green
@@ -229,7 +229,7 @@ export default function Tracking() {
             <View style={styles.driverHeader}>
               <View style={styles.driverAvatarContainer}>
                 <Image
-                  source={{ uri: order.driver?.user?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB7RWnmp356XctRFq8IaDwf9mZFD2CI8vQU6irfySg76nVBQM-osy8mC_4tZ46PR1w6UrSogFcqK4SW8C-SgcA9QuhNSLZb-qAKOUsG729Px1PaGcG2agF-gYdbgE-lKimworGyaYr9xwwOn0WbQOUG-P26uHlqYHPnqA2elcFWLq62OzHz1XDE2tiixg1MYxFnEK2FHAz8Ddj7b-nEV5yDNCjm81DRpX2IxfyS0e4MuKUTdwTAKvd01zfva_9mbQDUwOlngJD2hYkM' }}
+                  source={{ uri: (order.driver?.user as any)?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB7RWnmp356XctRFq8IaDwf9mZFD2CI8vQU6irfySg76nVBQM-osy8mC_4tZ46PR1w6UrSogFcqK4SW8C-SgcA9QuhNSLZb-qAKOUsG729Px1PaGcG2agF-gYdbgE-lKimworGyaYr9xwwOn0WbQOUG-P26uHlqYHPnqA2elcFWLq62OzHz1XDE2tiixg1MYxFnEK2FHAz8Ddj7b-nEV5yDNCjm81DRpX2IxfyS0e4MuKUTdwTAKvd01zfva_9mbQDUwOlngJD2hYkM' }}
                   style={styles.driverAvatar}
                   contentFit="cover"
                 />

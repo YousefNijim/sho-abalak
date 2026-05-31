@@ -74,8 +74,8 @@ export default function Profile() {
     }
   };
 
-  const userImage = user?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUSZfCM-tLbRtzPFjdltok_AvJFIYQYCOPLdPX3NXaaHNm0KCEco5A-ZZNR_Z_lWA2hlTnpqeUjmJUmz65hX4mYw5FBHXmVbs7zsCBEyzilWML6gn7DafAdoxKKzkToFelHt5_G23OFo5r9CC3SElLF_KoaB8U_7ReJsfkoSALty4a9cQSkEzEtIUcNtJFue5y-Vbye8IUG7uCkCBstYJZoHAipmEhePvayLQBPhgO7I6GIaPTIlv2aKhaPfLJBREvaDwccwXANlib';
-  const smallAvatar = user?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDa1He8yho8BE00MM1pAWfA2YsyLWRy6k5mUf7ByERqjZuFWFMfwd_qx2l9d5jtT6iiZcZ6cYH_zCy_nIQcUdnRrkqUy7Oz2T2sLARn4STyOZcoFBKewag5w9k3cmRJkn7PXHw4Jyo1nlX_VTtuHoTUINjt4JAHkcwzNOCA_I7_Th8Y4i__ZJCebT1ki_O_etwlQE1rXbaViSVVOh-SZ3uDnYXHu-u5o_DC3V9SlLrImoF_rlxAO9V3ZH-2JxetDLSvBvDx3h1LPSOY';
+  const userImage = (user as any)?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBUSZfCM-tLbRtzPFjdltok_AvJFIYQYCOPLdPX3NXaaHNm0KCEco5A-ZZNR_Z_lWA2hlTnpqeUjmJUmz65hX4mYw5FBHXmVbs7zsCBEyzilWML6gn7DafAdoxKKzkToFelHt5_G23OFo5r9CC3SElLF_KoaB8U_7ReJsfkoSALty4a9cQSkEzEtIUcNtJFue5y-Vbye8IUG7uCkCBstYJZoHAipmEhePvayLQBPhgO7I6GIaPTIlv2aKhaPfLJBREvaDwccwXANlib';
+  const smallAvatar = (user as any)?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDa1He8yho8BE00MM1pAWfA2YsyLWRy6k5mUf7ByERqjZuFWFMfwd_qx2l9d5jtT6iiZcZ6cYH_zCy_nIQcUdnRrkqUy7Oz2T2sLARn4STyOZcoFBKewag5w9k3cmRJkn7PXHw4Jyo1nlX_VTtuHoTUINjt4JAHkcwzNOCA_I7_Th8Y4i__ZJCebT1ki_O_etwlQE1rXbaViSVVOh-SZ3uDnYXHu-u5o_DC3V9SlLrImoF_rlxAO9V3ZH-2JxetDLSvBvDx3h1LPSOY';
 
   return (
     <View style={styles.container}>
@@ -117,7 +117,7 @@ export default function Profile() {
           </View>
 
           <Text style={styles.userName}>{user?.name || 'أحمد محمود'}</Text>
-          <Text style={styles.userPhone} dir="ltr">{user?.phone || '+970 59-xxxx-xxx'}</Text>
+          <Text style={styles.userPhone}>{user?.phone || '+970 59-xxxx-xxx'}</Text>
 
           <Pressable 
             style={styles.editProfileBtn}
@@ -146,8 +146,8 @@ export default function Profile() {
                       </View>
                       
                       <View style={styles.menuItemRight}>
-                        {item.trailing && (
-                          <Text style={styles.menuItemTrailing}>{item.trailing}</Text>
+                        {(item as any).trailing && (
+                          <Text style={styles.menuItemTrailing}>{(item as any).trailing}</Text>
                         )}
                         <ChevronLeft size={20} color={colors.textMuted} />
                       </View>

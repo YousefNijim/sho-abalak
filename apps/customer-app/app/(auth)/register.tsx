@@ -41,7 +41,7 @@ export default function Register() {
 
   const { data: areas = [] } = useQuery({
     queryKey: ['areas'],
-    queryFn: () => areasApi.getAll(),
+    queryFn: () => areasApi.list(),
   });
 
   const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: any) => a.city))), [areas]);
@@ -153,11 +153,10 @@ export default function Register() {
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={setPhone}
-                dir="ltr"
                 textAlign="right"
               />
               <View style={styles.prefixContainer}>
-                <Text style={styles.prefixText} dir="ltr">+970</Text>
+                <Text style={styles.prefixText}>+970</Text>
               </View>
             </View>
           </View>

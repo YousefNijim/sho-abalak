@@ -78,11 +78,10 @@ export default function Login() {
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={setPhone}
-                dir="ltr"
                 textAlign="right"
               />
               <View style={styles.prefixContainer}>
-                <Text style={styles.prefixText} dir="ltr">+970</Text>
+                <Text style={styles.prefixText}>+970</Text>
               </View>
             </View>
           </View>

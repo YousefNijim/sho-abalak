@@ -316,8 +316,8 @@ export default function Home() {
                 onPress={() => setSelectedTagId(isActive ? null : tag.id)}
               >
                 <View style={[styles.categoryBox, isActive && styles.categoryBoxActive]}>
-                  {tag.imageUrl ? (
-                    <Image source={{ uri: mediaUrl(tag.imageUrl) ?? '' }} style={styles.categoryImage} contentFit="contain" />
+                  {(tag as any).imageUrl ? (
+                    <Image source={{ uri: mediaUrl((tag as any).imageUrl) ?? '' }} style={styles.categoryImage} contentFit="contain" />
                   ) : (
                     <UtensilsCrossed size={32} color={isActive ? colors.white : colors.primary} />
                   )}

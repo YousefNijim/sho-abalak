@@ -4,13 +4,14 @@
 // the env var is unset and we fall back to the on-disk ./google-services.json.
 module.exports = {
   expo: {
-    name: 'شو عبالك؟ — الزبون',
+    name: 'شو عبالك',
     slug: 'shu-customer',
     version: '1.0.0',
     orientation: 'portrait',
     scheme: 'shu-customer',
     userInterfaceStyle: 'light',
     backgroundColor: '#FCF3DC',
+    icon: './assets/images/splash.png',
     splash: {
       image: './assets/images/splash.png',
       backgroundColor: '#FCF3DC',

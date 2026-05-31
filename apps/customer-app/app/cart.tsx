@@ -202,8 +202,8 @@ export default function Cart() {
           {items.map((it) => (
             <View key={it.productId} style={styles.itemCard}>
               <View style={styles.itemImageWrap}>
-                {it.imageUrl ? (
-                  <Image source={{ uri: mediaUrl(it.imageUrl)! }} style={styles.itemImage} contentFit="cover" />
+                {(it as any).imageUrl ? (
+                  <Image source={{ uri: mediaUrl((it as any).imageUrl)! }} style={styles.itemImage} contentFit="cover" />
                 ) : (
                   <View style={styles.itemImagePlaceholder}>
                     <Text style={{ fontSize: 32 }}>🍽️</Text>

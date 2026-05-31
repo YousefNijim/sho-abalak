@@ -73,13 +73,13 @@ export default function Otp() {
           <Text style={styles.title}>تحقق من هاتفك</Text>
           <Text style={styles.subtitle}>
             أرسلنا كوداً مكوّناً من 4 أرقام إلى{'\n'}
-            <Text style={styles.phoneHighlight} dir="ltr">{user?.phone || 'رقمك'}</Text>
+            <Text style={styles.phoneHighlight}>{user?.phone || 'رقمك'}</Text>
           </Text>
         </View>
 
         {/* Verification Card */}
         <View style={styles.card}>
-          <View style={styles.otpRow} dir="ltr">
+          <View style={styles.otpRow}>
             {digits.map((d, i) => (
               <TextInput
                 key={i}
