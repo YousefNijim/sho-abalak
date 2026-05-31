@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { authApi } from '@shu/api-client';
+import { authApi, setAuthToken } from '@shu/api-client';
 import { setToken } from '../../lib/auth';
 
 export default function LoginPage() {
@@ -24,6 +24,9 @@ export default function LoginPage() {
         return;
       }
       setToken(res.accessToken);
+      // Attach the token to axios immediately — client-side navigation does NOT
+      // remount Providers, so we can't rely on its mount-effect to set it.
+      setAuthToken(res.accessToken);
       // Wait for cookie to be set, then reload/redirect
       setTimeout(() => {
         router.push('/');
