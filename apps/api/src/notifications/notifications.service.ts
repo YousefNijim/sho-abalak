@@ -33,6 +33,19 @@ export class NotificationsService implements OnModuleInit {
       return;
     }
 
+    if (process.env['FIREBASE_SERVICE_ACCOUNT_JSON']) {
+      try {
+        const serviceAccount = JSON.parse(process.env['FIREBASE_SERVICE_ACCOUNT_JSON']);
+        this.app = admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+        });
+        this.logger.log(`FCM initialized via ENV (project: ${serviceAccount.project_id ?? 'unknown'})`);
+        return;
+      } catch (err) {
+        this.logger.error(`FCM init from ENV failed: ${(err as Error).message}`);
+      }
+    }
+
     const credPath = path.resolve(
       process.cwd(),
       process.env['FIREBASE_SERVICE_ACCOUNT_PATH'] ?? './secrets/firebase-service-account.json',
@@ -40,8 +53,8 @@ export class NotificationsService implements OnModuleInit {
 
     if (!fs.existsSync(credPath)) {
       this.logger.warn(
-        `FCM disabled — service-account key not found at ${credPath}. ` +
-          `Set FIREBASE_SERVICE_ACCOUNT_PATH or drop the key file to enable push notifications.`,
+        `FCM disabled — service-account key not found at ${credPath} and FIREBASE_SERVICE_ACCOUNT_JSON is not set. ` +
+          `Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH to enable push notifications.`,
       );
       return;
     }
