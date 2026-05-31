@@ -43,6 +43,8 @@ async function getPushToken(): Promise<string | null> {
       name: 'الإشعارات',
       importance: Notifications.AndroidImportance.HIGH,
       lightColor: '#E6781E',
+      sound: 'default',
+      vibrationPattern: [0, 250, 250, 250],
     });
   }
 

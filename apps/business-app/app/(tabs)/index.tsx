@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, ordersApi } from '@shu/api-client';
 import { useSocket } from '../../src/hooks/useSocket';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 const TABS = [
   { key: 'new', label: 'جديد' },
@@ -156,12 +157,15 @@ export default function Dashboard() {
             {isOpen ? '🟢 مفتوح حالياً' : '🔴 مغلق حالياً'}
           </Text>
         </View>
-        <Switch
-          value={isOpen}
-          onValueChange={handleToggle}
-          trackColor={{ true: colors.primary }}
-          disabled={toggleOpen.isPending}
-        />
+        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] }}>
+          <NotificationBell size={24} />
+          <Switch
+            value={isOpen}
+            onValueChange={handleToggle}
+            trackColor={{ true: colors.primary }}
+            disabled={toggleOpen.isPending}
+          />
+        </View>
       </View>
 
       <ScrollView 

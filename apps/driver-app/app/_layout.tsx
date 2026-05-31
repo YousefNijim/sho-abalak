@@ -99,6 +99,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="request-alert" options={{ presentation: 'modal', title: 'طلب جديد' }} />
             <Stack.Screen name="active-delivery" options={{ title: 'التوصيل النشط' }} />
+            <Stack.Screen name="notifications" options={{ headerShown: false }} />
           </Stack>
         </SafeAreaProvider>
       </QueryClientProvider>

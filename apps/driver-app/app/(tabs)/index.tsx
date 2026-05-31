@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { driversApi, ordersApi } from '@shu/api-client';
 import { useSocket } from '../../src/hooks/useSocket';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 export default function DriverHome() {
   const router = useRouter();
@@ -126,7 +127,10 @@ export default function DriverHome() {
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
       }
     >
-      <Text style={styles.greeting}>مرحباً {driver?.user?.name || 'كريم'} 👋</Text>
+      <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={styles.greeting}>مرحباً {driver?.user?.name || 'كريم'} 👋</Text>
+        <NotificationBell size={24} />
+      </View>
 
       {/* Availability */}
       <View style={styles.availCard}>

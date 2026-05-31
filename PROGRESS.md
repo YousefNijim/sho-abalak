@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-01
-**Current phase:** Phase 30 (Customer-app fixes — group (d) edit-profile complete)
+**Current phase:** Phase 31 (In-app notifications parity for business + driver + sound)
 
 ---
 
@@ -311,6 +311,13 @@
     - **Verified:** `nest build` ✅ (also cleared the previously-noted banners/tags pre-existing errors — they were collateral of unbuilt `@shu/shared-types`, now built). `tsc --noEmit` customer-app ✅ 0 errors. **Live-API E2E (all pass):** `GET /me` shows email/imageUrl; PATCH name+email (email lowercased) + imageUrl persists; phone change **without** OTP → 400, **wrong** OTP → 400, **correct** `0000` → 200 and phone updated; test user cleaned up.
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
+
+29. **In-app notifications parity (business + driver) + push sound (Phase 31 — branch `Yousef2`)** ✅ **DONE** — brought the customer-app notification UX to the other two apps and made pushes audible.
+    - **Sound (all apps):** FCM payload in `NotificationsService.send` now requests sound explicitly — `android.notification {{ sound:'default', channelId:'default', defaultSound:true }}` + `apns.payload.aps.sound:'default'`. Each app's Android channel (`usePushNotifications`) now sets `sound:'default'` + a `vibrationPattern` (HIGH importance alone wasn't guaranteeing a tone). So a delivered push rings + vibrates like any normal push, foreground (handler already had `shouldPlaySound:true`) and background.
+    - **Business app:** added `notifications.store` (Zustand+persist, key `shu-business-notifications`), a `NotificationBell` (unread badge) placed in the Dashboard header next to the open/closed switch, and `app/notifications.tsx` (list + mark-all-read + empty state; taps open `/order/[id]`). The push hook now records foreground + tap + cold-start notifications into the store (deduped by FCM request id), so merchants get an in-app history, not just transient banners.
+    - **Driver app:** same treatment — `notifications.store` (key `shu-driver-notifications`), `NotificationBell` in the Home greeting row, `app/notifications.tsx` (taps open `/request-alert`), and the push hook records into the store. Created `apps/driver-app/src/components/` (didn't exist).
+    - **Backend triggers unchanged** — business already gets `order_new`, driver gets `driver_request`, customer gets every status incl. CANCELLED; all now carry sound.
+    - **Verified:** `nest build` ✅. `tsc --noEmit`: customer ✅ 0 errors; business/driver — **0 new errors** in any touched file (the 6 business + 1 driver remaining errors are all pre-existing in `register.tsx`/`profile.tsx`/`login.tsx`, untouched here). Real push delivery still needs a native dev build on a physical device (Expo Go ignores `google-services.json`).
 
 ## 🗂️ How to use this file (for AI agents)
 

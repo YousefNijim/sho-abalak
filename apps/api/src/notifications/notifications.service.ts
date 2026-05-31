@@ -116,7 +116,18 @@ export class NotificationsService implements OnModuleInit {
         tokens: tokens.map((t) => t.token),
         notification: { title: payload.title, body: payload.body },
         data: payload.data ?? {},
-        android: { priority: 'high' },
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            // Must match the client-side channel that has sound enabled (HIGH importance).
+            channelId: 'default',
+            defaultSound: true,
+          },
+        },
+        apns: {
+          payload: { aps: { sound: 'default' } },
+        },
       });
 
       this.logger.log(

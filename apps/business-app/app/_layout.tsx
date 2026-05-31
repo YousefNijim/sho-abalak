@@ -71,6 +71,7 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="change-password" options={{ headerShown: false }} />
+            <Stack.Screen name="notifications" options={{ headerShown: false }} />
             <Stack.Screen name="order/[id]" options={{ title: 'تفاصيل الطلب' }} />
             <Stack.Screen name="driver-selection" options={{ title: 'اختر عامل التوصيل' }} />
           </Stack>

@@ -5,6 +5,7 @@ import * as Device from 'expo-device';
 import { useRouter } from 'expo-router';
 import { notificationsApi } from '@shu/api-client';
 import { useAuthStore } from '../stores/auth.store';
+import { useNotificationsStore } from '../stores/notifications.store';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -38,6 +39,8 @@ async function getPushToken(): Promise<string | null> {
       name: 'الإشعارات',
       importance: Notifications.AndroidImportance.HIGH,
       lightColor: '#E6781E',
+      sound: 'default',
+      vibrationPattern: [0, 250, 250, 250],
     });
   }
 
@@ -49,6 +52,7 @@ async function getPushToken(): Promise<string | null> {
 export function usePushNotifications() {
   const token = useAuthStore((s) => s.token);
   const router = useRouter();
+  const addNotification = useNotificationsStore((s) => s.add);
   const deviceTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -82,14 +86,36 @@ export function usePushNotifications() {
   }, [token]);
 
   useEffect(() => {
+    // Record a notification into the in-app list (deduped by request id in the store).
+    const record = (req: Notifications.NotificationRequest) => {
+      const c = req.content;
+      addNotification({
+        id: req.identifier,
+        title: c.title ?? 'إشعار',
+        body: c.body ?? '',
+        data: (c.data ?? {}) as Record<string, string>,
+      });
+    };
+
+    const recvSub = Notifications.addNotificationReceivedListener((n) => {
+      record(n.request);
+    });
+
     const tapSub = Notifications.addNotificationResponseReceivedListener((resp) => {
+      record(resp.notification.request);
       routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
     });
+
     Notifications.getLastNotificationResponseAsync().then((resp) => {
-      if (resp) routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
+      if (resp) {
+        record(resp.notification.request);
+        routeForData(router, resp.notification.request.content.data as Record<string, unknown>);
+      }
     });
+
     return () => {
+      recvSub.remove();
       tapSub.remove();
     };
-  }, [router]);
+  }, [router, addNotification]);
 }
