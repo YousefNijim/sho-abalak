@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 import { I18nManager } from 'react-native';
+
+I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -63,10 +66,6 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (!I18nManager.isRTL) {
-      I18nManager.allowRTL(true);
-      I18nManager.forceRTL(true);
-    }
     hydrate();
   }, [hydrate]);
 

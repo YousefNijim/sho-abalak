@@ -27,6 +27,7 @@ import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme'
 import { addressesApi, areasApi } from '@shu/api-client';
 import type { SavedAddress, CreateAddressDtoClient } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
+import { useAuthStore } from '../../src/stores/auth.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type FormState = { label: string; detail: string; areaId: string };
@@ -37,6 +38,7 @@ export default function AddressesScreen() {
   const router = useRouter();
   const qc = useQueryClient();
   const insets = useSafeAreaInsets();
+  const user = useAuthStore((s) => s.user);
 
   // Zustand store — keep in sync so Home/Cart picker reflects API state
   const storeAdd = useSavedAddressesStore((s) => s.add);
@@ -55,6 +57,7 @@ export default function AddressesScreen() {
   const { data: addresses = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
+    enabled: !!user,
   });
 
   const { data: areas = [] } = useQuery({
@@ -162,6 +165,29 @@ export default function AddressesScreen() {
 
   const selectedArea = areas.find((a) => a.id === form.areaId);
   const isPending = createMut.isPending || updateMut.isPending;
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : 0 }]}>
+          <View style={styles.headerLeft}>
+            <Pressable onPress={() => router.back()} style={styles.iconBtn}>
+              <ArrowRight size={24} color={colors.primary} />
+            </Pressable>
+            <Text style={styles.headerTitle}>عناويني المحفوظة</Text>
+          </View>
+        </View>
+        <View style={styles.centerState}>
+          <MapPin size={56} color={colors.border} />
+          <Text style={styles.emptyTitle}>يجب تسجيل الدخول</Text>
+          <Text style={styles.emptyHint}>قم بتسجيل الدخول لإضافة وحفظ عناوين التوصيل الخاصة بك</Text>
+          <Pressable style={styles.retryBtn} onPress={() => router.push('/(auth)/login')}>
+            <Text style={styles.retryText}>تسجيل الدخول</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   // ── render ─────────────────────────────────────────────────────────
   return (

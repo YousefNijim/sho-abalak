@@ -16,6 +16,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { SettingsModule } from './settings/settings.module';
 import { ReportsModule } from './reports/reports.module';
 import { TagsModule } from './tags/tags.module';
+import { BannersModule } from './banners/banners.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -37,6 +38,7 @@ import { HealthController } from './health.controller';
     SettingsModule,
     ReportsModule,
     TagsModule,
+    BannersModule,
   ],
   controllers: [HealthController],
 })

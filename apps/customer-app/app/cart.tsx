@@ -34,18 +34,16 @@ export default function Cart() {
   const [notes, setNotes] = useState('');
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
 
-  const storeAddresses = useSavedAddressesStore((s) => s.addresses);
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
-  const selectedStoreAddress = storeAddresses.find((a) => a.id === selectedAddressId) ?? storeAddresses[0] ?? null;
 
   // Fetch full addresses (with area object) from API for area name snapshot
-  const { data: apiAddresses = [] } = useQuery({
+  const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
   });
-  const selectedAddress = apiAddresses.find((a) => a.id === selectedStoreAddress?.id ||
-    (storeAddresses[0] && a.label === storeAddresses[0]?.label)) ?? apiAddresses[0] ?? null;
+  
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
   // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -156,16 +154,16 @@ export default function Cart() {
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
           <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
-            {apiAddresses.length === 0 ? (
+            {addresses.length === 0 ? (
               <View style={styles.emptyAddresses}>
                 <MapPin size={40} color={colors.border} />
                 <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
                 <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
               </View>
             ) : (
-              apiAddresses.map((a) => {
+              addresses.map((a) => {
                 const isActive = (selectedAddress?.id ?? null) === a.id ||
-                  (selectedAddressId === null && apiAddresses[0]?.id === a.id);
+                  (selectedAddressId === null && addresses[0]?.id === a.id);
                 return (
                   <Pressable
                     key={a.id}

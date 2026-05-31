@@ -13,4 +13,16 @@ export class TagsService {
       orderBy: { name: 'asc' },
     });
   }
+
+  async create(data: { name: string; type: BusinessType; imageUrl?: string }) {
+    return this.prisma.tag.create({ data });
+  }
+
+  async update(id: string, data: { name?: string; type?: BusinessType; imageUrl?: string }) {
+    return this.prisma.tag.update({ where: { id }, data });
+  }
+
+  async remove(id: string) {
+    return this.prisma.tag.delete({ where: { id } });
+  }
 }

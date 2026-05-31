@@ -12,6 +12,8 @@ export { reviewsApi } from './reviews.api';
 export { usersApi } from './users.api';
 export { settingsApi } from './settings.api';
 export { reportsApi } from './reports.api';
+export { bannersApi } from './banners.api';
+export type { Banner } from './banners.api';
 
 // Re-export types
 export type { SystemSettings } from './settings.api';

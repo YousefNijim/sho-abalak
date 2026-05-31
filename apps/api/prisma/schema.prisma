@@ -130,10 +130,21 @@ model Tag {
   id         String       @id @default(uuid())
   name       String
   type       BusinessType
+  imageUrl   String?
   businesses Business[]   @relation("BusinessTags")
 
   @@unique([name, type])
   @@map("tags")
+}
+
+model Banner {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  linkUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@map("banners")
 }
 
 model Product {

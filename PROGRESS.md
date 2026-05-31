@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-31
-**Current phase:** Phase 25 (Business App Onboarding & Splash Screens — Complete)
+**Current phase:** Phase 26 (Dynamic Home Screen & Admin Control — Complete)
 
 ---
 
@@ -265,6 +265,11 @@
     - **Onboarding (`app/onboarding.tsx`):** Mirroring the structure of the customer app onboarding, created a Carousel format. Slide 1 features the chef/owner image with "+24% مبيعات" and "طلب جديد" stat chips overlaid, using the brand tokens. "تخطي" skips to login, persisting `businessOnboardingSeen` flag in `auth.store.ts`.
     - **Wiring:** Modified `auth.store.ts` to include `businessOnboardingSeen: boolean` synced via AsyncStorage. Modified Splash to properly redirect based on this new flag.
     - **Verified:** `tsc --noEmit` on business-app ✅ (only the pre-existing `Input.tsx` overload error remains).
+
+24. **Dynamic Home Screen & Admin Control (Phase 26)** ✅ **DONE** — Added dynamic banner slider and category image management from Admin Dashboard:
+    - **Database/API:** Created new `Banner` model and added `imageUrl` to `Tag`. Implemented `BannersModule` for full CRUD, and added CRUD + image upload capabilities to `TagsModule`. Updated `@shu/api-client` accordingly.
+    - **Admin Dashboard:** Created `/banners` page to upload, toggle visibility, and delete promotional slider images. Created `/tags` page to manage categories, their types (FOOD/STORE), and upload custom icons. Added shortcuts to the Sidebar.
+    - **Customer App:** Replaced the static promo box with a dynamic, auto-playing image slider (`ScrollView` with `pagingEnabled`) fetching active banners from the API. Updated category tag rendering to use the dynamic `imageUrl` from the backend instead of static local images. Increased `paddingTop` of the home screen to add more spacing from the top bar.
 
 ## 🗂️ How to use this file (for AI agents)
 

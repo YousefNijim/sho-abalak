@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -37,8 +38,8 @@ import {
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, tagsApi, areasApi, BASE_URL } from '@shu/api-client';
-import type { Tag } from '@shu/api-client';
+import { businessesApi, tagsApi, areasApi, bannersApi, BASE_URL } from '@shu/api-client';
+import type { Tag, Banner } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
@@ -46,6 +47,7 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
+import { addressesApi } from '@shu/api-client';
 import { getCategoryImage } from '../../src/constants/CategoryImages';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -67,9 +69,15 @@ export default function Home() {
   const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const activeOrder = useActiveOrderStore((s) => s.order);
 
-  const addresses = useSavedAddressesStore((s) => s.addresses);
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
+
+  // Fetch addresses from server instead of local store to ensure consistency
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: () => addressesApi.list(),
+    enabled: !!user,
+  });
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
@@ -82,6 +90,11 @@ export default function Home() {
   const { data: foodTags = [] } = useQuery({
     queryKey: ['tags', 'FOOD'],
     queryFn: () => tagsApi.list('FOOD'),
+  });
+
+  const { data: activeBanners = [] } = useQuery({
+    queryKey: ['banners', 'active'],
+    queryFn: () => bannersApi.list(true),
   });
 
   const { data: areas = [] } = useQuery({
@@ -114,7 +127,7 @@ export default function Home() {
   return (
     <View style={styles.container}>
       {/* TopAppBar */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top + spacing[4] : spacing[6] }]}>
         <View style={styles.headerRight}>
           <Pressable style={styles.iconBtn} onPress={() => router.replace('/sections')}>
             <LayoutGrid size={26} color={colors.primary} />
@@ -233,21 +246,33 @@ export default function Home() {
           </View>
         </View>
 
-        {/* Promo Banner */}
-        <View style={styles.bannerSection}>
-          <View style={styles.banner}>
-            <View style={styles.bannerContent}>
-              <Text style={styles.bannerTitle}>خصم 20% على طلبك الأول</Text>
-              <Text style={styles.bannerSub}>استمتع بأشهى المأكولات المحلية بخصومات حصرية</Text>
-              <Pressable style={styles.bannerBtn}>
-                <Text style={styles.bannerBtnText}>اطلب الآن</Text>
-              </Pressable>
-            </View>
-            <View style={styles.bannerIconBg}>
-              <UtensilsCrossed size={120} color="#FFFFFF" opacity={0.1} />
-            </View>
+        {/* Promo Banners Slider */}
+        {activeBanners.length > 0 && (
+          <View style={styles.bannerSection}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={{ width: '100%', height: 160 }}
+            >
+              {activeBanners.map((banner: Banner) => (
+                <Pressable
+                  key={banner.id}
+                  style={{ width: Dimensions.get('window').width - spacing[4] * 2, height: 160, marginEnd: spacing[4] }}
+                  onPress={() => {
+                    // if banner.linkUrl is a valid deep link or URL, it can be handled here.
+                  }}
+                >
+                  <Image
+                    source={{ uri: mediaUrl(banner.imageUrl) ?? '' }}
+                    style={{ width: '100%', height: '100%', borderRadius: radius.xl }}
+                    contentFit="cover"
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
-        </View>
+        )}
 
         {/* Tag chips (FOOD section — Categories) */}
         <View style={styles.sectionHeader}>
@@ -263,7 +288,6 @@ export default function Home() {
         >
           {foodTags.map((tag: Tag) => {
             const isActive = selectedTagId === tag.id;
-            const catImage = getCategoryImage(tag.name);
             return (
               <Pressable
                 key={tag.id}
@@ -271,8 +295,8 @@ export default function Home() {
                 onPress={() => setSelectedTagId(isActive ? null : tag.id)}
               >
                 <View style={[styles.categoryBox, isActive && styles.categoryBoxActive]}>
-                  {catImage ? (
-                    <Image source={catImage} style={styles.categoryImage} contentFit="contain" />
+                  {tag.imageUrl ? (
+                    <Image source={{ uri: mediaUrl(tag.imageUrl) ?? '' }} style={styles.categoryImage} contentFit="contain" />
                   ) : (
                     <UtensilsCrossed size={32} color={isActive ? colors.white : colors.primary} />
                   )}
