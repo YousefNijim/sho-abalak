@@ -92,9 +92,25 @@ model User {
   driver          Driver?
   orders          Order[]         @relation("CustomerOrders")
   savedAddresses  SavedAddress[]
+  deviceTokens    DeviceToken[]
   createdAt       DateTime        @default(now())
 
   @@map("users")
+}
+
+// رموز أجهزة الدفع (FCM/Expo) لكل مستخدم — لإرسال الإشعارات حتى والتطبيق مغلق
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  platform  String?  // ios | android | web
+  app       String?  // customer | business | driver
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("device_tokens")
 }
 
 model Business {

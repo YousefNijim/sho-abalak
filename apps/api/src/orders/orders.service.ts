@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuthUser } from '../auth/jwt.strategy';
 import { PaymentsService } from '../payments/payments.service';
 import { SocketGateway } from '../gateway/socket.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AdminInterventionDto } from './dto/admin-intervention.dto';
@@ -20,12 +21,23 @@ const ORDER_INCLUDE = {
   payment: true,
 } satisfies Prisma.OrderInclude;
 
+/** Customer-facing Arabic push copy for each order status (only statuses we notify on). */
+const STATUS_PUSH_BODY: Partial<Record<OrderStatus, string>> = {
+  [OrderStatus.CONFIRMED]: 'تم تأكيد طلبك ✅',
+  [OrderStatus.PREPARING]: 'جاري تحضير طلبك 👨‍🍳',
+  [OrderStatus.READY]: 'طلبك جاهز 🛍️',
+  [OrderStatus.PICKED_UP]: 'طلبك في الطريق إليك 🛵',
+  [OrderStatus.DELIVERED]: 'تم تسليم طلبك، بالهنا والشفا 🎉',
+  [OrderStatus.CANCELLED]: 'تم إلغاء طلبك',
+};
+
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly payments: PaymentsService,
     private readonly socketGateway: SocketGateway,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
@@ -81,6 +93,12 @@ export class OrdersService {
     // Emit new order socket event to the business owner
     if (order.business?.ownerId) {
       this.socketGateway.emitOrderNew(order.business.ownerId, order);
+      // Push (additive to socket): notify the business that a new order arrived.
+      void this.notifications.send(order.business.ownerId, {
+        title: 'طلب جديد 🛎️',
+        body: `لديك طلب جديد بقيمة ${Number(order.total)} ₪`,
+        data: { type: 'order_new', orderId: order.id, role: 'business' },
+      });
     }
 
     // For electronic orders the client needs the gateway checkout URL; cash returns null.
@@ -147,6 +165,9 @@ export class OrdersService {
     // Emit order status update to customer tracking room
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
 
+    // Push (additive): notify the customer of the new status.
+    this.pushOrderStatusToCustomer(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+
     // Also emit order status update to the business owner so their app reflects changes (e.g. DELIVERED)
     if (updatedOrder.business?.ownerId) {
       this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
@@ -161,6 +182,7 @@ export class OrdersService {
         addressDetail: updatedOrder.deliveryAddressDetail || '',
         total: Number(updatedOrder.total),
       });
+      this.pushDriverRequest(updatedOrder.driver.user.id, updatedOrder.id, updatedOrder.business?.name);
     }
 
     return updatedOrder;
@@ -204,6 +226,8 @@ export class OrdersService {
       addressDetail: order.deliveryAddressDetail || '',
       total: Number(order.total),
     });
+    // Push (additive): wake the selected driver even if their app is closed.
+    this.pushDriverRequest(driver.user.id, order.id, order.business?.name);
 
     return { message: 'تم إرسال الطلب للسائق، بانتظار القبول' };
   }
@@ -252,11 +276,34 @@ export class OrdersService {
 
     // Notify customer and business
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.PICKED_UP);
+    this.pushOrderStatusToCustomer(updatedOrder.customerId, updatedOrder.id, OrderStatus.PICKED_UP);
     if (updatedOrder.business?.ownerId) {
       this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, OrderStatus.PICKED_UP);
     }
 
     return updatedOrder;
+  }
+
+  // --- push helpers (additive to socket emits; never throw) ---
+
+  /** Notify the customer of an order status change via FCM (if we have copy for it). */
+  private pushOrderStatusToCustomer(customerId: string, orderId: string, status: OrderStatus) {
+    const body = STATUS_PUSH_BODY[status];
+    if (!body) return;
+    void this.notifications.send(customerId, {
+      title: 'تحديث طلبك',
+      body,
+      data: { type: 'order_status', orderId, status, role: 'customer' },
+    });
+  }
+
+  /** Notify a driver that they have a new delivery request. */
+  private pushDriverRequest(driverUserId: string, orderId: string, businessName?: string | null) {
+    void this.notifications.send(driverUserId, {
+      title: 'طلب توصيل جديد 🛵',
+      body: businessName ? `طلب توصيل جديد من ${businessName}` : 'لديك طلب توصيل جديد',
+      data: { type: 'driver_request', orderId, role: 'driver' },
+    });
   }
 
   async rejectDriver(id: string, user: AuthUser) {
@@ -445,6 +492,11 @@ export class OrdersService {
     // 5. Emit socket events to keep clients updated in real time
     this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
 
+    // Push (additive): notify the customer if the admin changed the status.
+    if (dto.status !== undefined) {
+      this.pushOrderStatusToCustomer(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+    }
+
     if (updatedOrder.business?.ownerId) {
       this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
     }
@@ -457,6 +509,7 @@ export class OrdersService {
         addressDetail: updatedOrder.deliveryAddressDetail || '',
         total: Number(updatedOrder.total),
       });
+      this.pushDriverRequest(updatedOrder.driver.user.id, updatedOrder.id, updatedOrder.business?.name);
     }
 
     return updatedOrder;

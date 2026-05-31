@@ -45,3 +45,9 @@ coverage/
 *.orig.*
 web-build/
 shoabalak-firebase-adminsdk-fbsvc-ddc139508d.json
+
+# Firebase / FCM secrets (never commit)
+apps/api/secrets/*.json
+google-services.json
+apps/*/google-services.json
+GoogleService-Info.plist
