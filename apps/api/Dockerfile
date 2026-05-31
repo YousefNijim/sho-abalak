@@ -48,7 +48,13 @@ COPY --from=builder /app/packages /app/packages
 COPY --from=builder /app/apps/api /app/apps/api
 COPY --from=builder /app/node_modules /app/node_modules
 
+# Railway provides $PORT at runtime; main.ts listens on it (falls back to 3000).
 EXPOSE 3001
 
 WORKDIR /app/apps/api
-CMD ["node", "dist/main"]
+
+# Entrypoint runs migrations + seed, then starts the API.
+COPY --from=builder /app/apps/api/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
+CMD ["./docker-entrypoint.sh"]
