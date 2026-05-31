@@ -12,7 +12,8 @@ const mediaUrl = (path: string | null | undefined): string | null =>
 import { useCartStore } from '../../src/stores/cart.store';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, MapPin, Navigation, RefreshCcw } from 'lucide-react-native';
+import { Navigation, RefreshCcw } from 'lucide-react-native';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   PENDING: { label: 'بانتظار التأكيد', bg: '#ffedd5', fg: '#F59E0B' }, // warning-amber
@@ -87,11 +88,9 @@ export default function Orders() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <View style={styles.headerRight}>
-          <Pressable style={styles.iconBtn}>
-            <Bell size={24} color={colors.primary} />
-          </Pressable>
+          <NotificationBell size={24} />
           <View style={styles.avatarWrap}>
             <Image
               source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDh93PwDaqVIlUIoTlscPh4woOwQpD7y_Mrs8EiM2sWRt2NN3H18sugX2vvmYNigGR_lw1EA-NDuSPgKx4xKLSBPZ0W9vbN4v9fWK2DSK3wOENLWyRTnm3urIBlTMXd9wdrHZMlglmqzonhHg-Qq_1imfh-5AzD9NS5tl53qdh7zrKVocjAW0tZTLLKQaL8wbu5Tx-H3jCvRJkFd7IjCpWhnR2FCfrEWqHBiTDCcOfFa9hmbq3R_1w79sWTXkOwmQ5l2qWrmqTJYG3e' }}
@@ -222,7 +221,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
     backgroundColor: '#FCF3DC',
     zIndex: 40,
     ...Platform.select({

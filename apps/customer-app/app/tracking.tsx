@@ -140,7 +140,7 @@ export default function Tracking() {
   return (
     <View style={styles.container}>
       {/* TopAppBar */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <View style={styles.headerRight}>
           <View style={styles.storeIconWrap}>
             <Text style={{ fontSize: 20 }}>🏪</Text>
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
-    height: 64 + (Platform.OS === 'ios' ? 44 : 0),
+    paddingBottom: spacing[3],
     backgroundColor: '#FCF3DC',
     zIndex: 50,
     ...Platform.select({

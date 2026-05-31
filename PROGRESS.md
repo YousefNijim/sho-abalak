@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-01
-**Current phase:** Phase 28 (Customer-app fixes — group (a) header/nav + safe-area + icons & names)
+**Current phase:** Phase 29 (Customer-app fixes — group (c) order-status notifications + cancellation handling)
 
 ---
 
@@ -293,6 +293,14 @@
     - **App icons + names (item 9):** generated 1024×1024 `icon.png` + `adaptive-icon.png` for each app from `.design-refs/*app icon.png` (centered on cream `#FCF3DC`, 78% safe-zone, via `jimp-compact`). Updated each `app.config.js`: customer `icon` → real icon + `adaptiveIcon.foregroundImage`; names set to **شو عبالك** (customer), **تاجر شو عبالك** (business), **كابتن شو عبالك** (driver); added `adaptiveIcon.foregroundImage` to business + driver.
     - **Verified:** `tsc --noEmit` on customer-app ✅ **0 errors** (down from ~21 pre-existing). Device screenshots not produced — no emulator/device available from this environment (per Key facts).
     - **Next:** group (b) cart [remaining item 5 polish], group (c) notifications + order-status transitions [item 6], group (d) edit-profile [item 8].
+
+27. **Customer-app Fixes — Group (c): Order-status notifications + cancellation handling (Phase 29 — branch `Yousef2`)** ✅ **DONE** — item 6.
+    - **Backend already complete (verified, no change):** `OrdersService` pushes a customer FCM notification on **every** transition via `pushOrderStatusToCustomer` (called from `updateStatus`, `acceptDriver`, and admin `adminIntervention`). `STATUS_PUSH_BODY` covers CONFIRMED/PREPARING/READY/PICKED_UP/DELIVERED **and CANCELLED** ("تم إلغاء طلبك"). Every push carries `data:{type:'order_status',orderId,status,role}`, and the device records it into the in-app list (group a) so it also appears on the notifications page. Socket `order:status_update` fires alongside each push. Business-cancel and customer-cancel (PENDING-only) both route through `updateStatus` → push.
+    - **Client gap fixed (the real work):** active-order card on Home was only cleared by `tracking.tsx`'s effect — so a cancellation pushed while the user was NOT on the tracking screen left a stale "active order" banner. Added `src/hooks/useGlobalOrderSync.ts`, mounted app-wide via an `OrderSyncBridge` in `_layout.tsx`: it listens to `order:status_update` regardless of the current screen, invalidates `['orders']` + `['order',id]`, and — when the change is for the stored active order — **clears the active-order card on terminal status (DELIVERED/CANCELLED)** or syncs its status otherwise.
+    - **Past orders (verified, no change):** `(tabs)/orders.tsx` already buckets CANCELLED into "السابقة" with a red "ملغى" badge; once the global listener refetches, a cancelled order leaves "الحالية" and lands in "السابقة" automatically.
+    - **Incidental (group-a consistency):** fixed the remaining platform-hardcoded safe-area headers on `orders.tsx` + `tracking.tsx` (now `insets.top` on all platforms, removed fixed iOS heights) and replaced the inert bell on the Orders header with the shared `NotificationBell`.
+    - **Verified:** `tsc --noEmit` on customer-app ✅ 0 errors. Device test pending (no emulator here).
+    - **Remaining:** group (d) — edit-profile (item 8).
 
 ## 🗂️ How to use this file (for AI agents)
 

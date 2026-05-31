@@ -21,12 +21,19 @@ import { colors } from '../src/theme';
 import { getQueryClient } from '../src/lib/query-client';
 import { useAuthStore } from '../src/stores/auth.store';
 import { usePushNotifications } from '../src/hooks/usePushNotifications';
+import { useGlobalOrderSync } from '../src/hooks/useGlobalOrderSync';
 
 SplashScreen.preventAutoHideAsync();
 
 /** Mounts push-notification registration + listeners inside the providers. */
 function PushNotificationsBridge() {
   usePushNotifications();
+  return null;
+}
+
+/** App-wide order-status reconciliation (clears stale active-order card on cancel/deliver). */
+function OrderSyncBridge() {
+  useGlobalOrderSync();
   return null;
 }
 
@@ -59,6 +66,7 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <StatusBar style="dark" />
           <PushNotificationsBridge />
+          <OrderSyncBridge />
           <Stack
             screenOptions={{
               headerStyle: { backgroundColor: colors.background },
