@@ -120,7 +120,7 @@ export default function Login() {
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
-                    textAlign="right"
+                    textAlign="left"
                   />
                   <Pressable 
                     style={styles.inputIconLeft}
@@ -213,14 +213,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[8],
+    paddingVertical: spacing[4],
   },
   loginCard: {
     width: '100%',
     maxWidth: 448, // max-w-md
     backgroundColor: '#FFFFFF', // surface-white
     borderRadius: radius.xl,
-    padding: spacing[8],
+    padding: spacing[6],
     borderWidth: 1,
     borderColor: 'rgba(229, 224, 213, 1)', // border-beige
     ...Platform.select({
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   // Card Header
   cardHeader: {
     alignItems: 'center',
-    marginBottom: spacing[6],
+    marginBottom: spacing[4],
   },
   iconCircle: {
     width: 64,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
 
   // Form
   form: {
-    gap: spacing[6],
+    gap: spacing[4],
   },
   inputGroup: {
     gap: spacing[1],

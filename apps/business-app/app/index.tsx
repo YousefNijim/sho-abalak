@@ -4,16 +4,16 @@ import { useRouter } from 'expo-router';
 import { colors, fontSizes, fontFamily, spacing } from '../src/theme';
 import { useAuthStore } from '../src/stores/auth.store';
 import { Image } from 'expo-image';
-import { Store } from 'lucide-react-native';
+import { Utensils, Truck, Store } from 'lucide-react-native';
 
 export default function Splash() {
   const router = useRouter();
   const token = useAuthStore((s) => s.token);
+  const businessOnboardingSeen = useAuthStore((s) => s.businessOnboardingSeen);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const loadingAnim = useRef(new Animated.Value(-100)).current;
 
   useEffect(() => {
     // Initial fade & slide in
@@ -50,30 +50,17 @@ export default function Splash() {
       ])
     ).start();
 
-    // Loading bar animation
-    Animated.loop(
-      Animated.timing(loadingAnim, {
-        toValue: 100,
-        duration: 2000,
-        easing: Easing.inOut(Easing.ease),
-        useNativeDriver: true,
-      })
-    ).start();
-
     const t = setTimeout(() => {
-      if (token) {
+      if (!businessOnboardingSeen) {
+        router.replace('/onboarding');
+      } else if (token) {
         router.replace('/(tabs)');
       } else {
         router.replace('/(auth)/login');
       }
     }, 2500); // 2.5s to show splash
     return () => clearTimeout(t);
-  }, [router, token]);
-
-  const loadingTranslate = loadingAnim.interpolate({
-    inputRange: [-100, 100],
-    outputRange: [200, -200], // Adjust based on width
-  });
+  }, [router, token, businessOnboardingSeen]);
 
   return (
     <View style={styles.container}>
@@ -81,31 +68,32 @@ export default function Splash() {
       <View style={styles.patternOverlay} />
 
       <Animated.View style={[styles.main, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        {/* App Icon */}
+        {/* App Logo */}
         <Animated.View style={[styles.iconContainer, { transform: [{ scale: pulseAnim }] }]}>
           <View style={styles.iconGlow} />
           <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDorCEh8Gd_NN-_1qvEJDu2mtI3_DmOTLKPe4aQK3-lZ4Udr-sHBmpveuRn-V_q55CW2YVR1ao9OwmsjGUZmgRr6GS1W1BoLbOynB-W7HJBVBDz3ylG18tX9PBrrFc_RLKztx7oqFU2VEBWCGZUgR65NhHqCxmH0a96cZuXrMzUv2WeXXgqch0P1FvvLh3FfCci56WNvutgcQ8gHNldli3Z6jTvib2OBVtJY_uz6H8izOvDlvaDbY6qREPNSepA7qsH-b8du5Zaki2U' }}
-            style={styles.iconImage}
-            contentFit="cover"
+            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCReVcNoRjS0B6nk0hsqR-CH-Cfefir82XPGQo1KiJivG8p-C3oKdetZWXVsKsqtSXMJSmrWeybvcxuNBOaV3JDvE3xtuSZHsbr7KVLN4Zz0g5wt_chRpnldsZxbYlYGO7XFqTP8dqfBfnpsI1xAOL79h8yakYonhsuSXXDBqDML73MekzbPeVktA1pSTgVpo1O4gMrwKIy8poUbG_Gaa5G4xv6j6kpLUilmqmwYRfLJ485-HuRhFac8xWcCmjS06n-nJhKr5whIZNP' }}
+            style={styles.logoImage}
+            contentFit="contain"
           />
         </Animated.View>
-
-        {/* Identity Text */}
-        <View style={styles.textContainer}>
-          <Text style={styles.title}>شو عبالك؟</Text>
-          <View style={styles.badge}>
-            <Store size={18} color={colors.primary} />
-            <Text style={styles.badgeText}>مدير المتجر</Text>
-          </View>
-        </View>
       </Animated.View>
 
       <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
-        <Text style={styles.footerText}>أدر تجارتك بكل سهولة</Text>
-        <View style={styles.decorativeLine} />
-        <View style={styles.loadingTrack}>
-          <Animated.View style={[styles.loadingBar, { transform: [{ translateX: loadingTranslate }] }]} />
+        <View style={styles.textContainer}>
+          <Text style={styles.subtitleText}>تطبيق المنشأة التجارية</Text>
+          
+          <View style={styles.qualityIndicator}>
+            <View style={styles.line} />
+            <Text style={styles.premiumText}>PREMIUM HOSPITALITY</Text>
+            <View style={styles.line} />
+          </View>
+        </View>
+
+        <View style={styles.iconsRow}>
+          <Utensils size={24} color={colors.primary} />
+          <Truck size={24} color={colors.primary} />
+          <Store size={24} color={colors.primary} />
         </View>
       </Animated.View>
     </View>
@@ -122,8 +110,6 @@ const styles = StyleSheet.create({
   patternOverlay: {
     ...StyleSheet.absoluteFillObject,
     opacity: 0.05,
-    // Note: React Native doesn't support radial gradients natively without libraries like expo-linear-gradient,
-    // but opacity over the cream background achieves the general effect.
   },
   main: {
     flex: 1,
@@ -133,87 +119,63 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   iconContainer: {
-    width: 160,
-    height: 160,
-    marginBottom: spacing[8],
+    width: 256,
+    height: 256,
     position: 'relative',
   },
   iconGlow: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(230, 120, 30, 0.1)', // primary/10
-    borderRadius: 32,
-    transform: [{ scale: 1.1 }],
+    backgroundColor: 'rgba(230, 120, 30, 0.05)', // primary/5
+    borderRadius: 128,
+    transform: [{ scale: 1.5 }],
     ...Platform.select({
-      ios: { shadowColor: '#e6781e', shadowOpacity: 0.3, shadowRadius: 20 },
-      web: { filter: 'blur(20px)' },
+      ios: { shadowColor: '#e6781e', shadowOpacity: 0.2, shadowRadius: 30 },
     }),
   },
-  iconImage: {
+  logoImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 32,
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 15 },
-      android: { elevation: 10 },
-    }),
-  },
-  textContainer: {
-    alignItems: 'center',
-    gap: spacing[2],
-  },
-  title: {
-    fontSize: 30, // headline-lg
-    fontFamily: fontFamily.bold,
-    color: '#564337', // on-surface-variant
-  },
-  badge: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
-    gap: spacing[2],
-    backgroundColor: 'rgba(151, 72, 0, 0.05)', // primary/5
-    paddingHorizontal: spacing[4],
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(151, 72, 0, 0.1)', // primary/10
-  },
-  badgeText: {
-    fontSize: 20, // headline-sm
-    fontFamily: fontFamily.bold,
-    color: colors.primary,
+    zIndex: 10,
   },
   footer: {
     position: 'absolute',
     bottom: 48,
     width: '100%',
     alignItems: 'center',
-    gap: spacing[3],
+    gap: spacing[6],
     zIndex: 10,
   },
-  footerText: {
-    fontSize: 15, // body-base
-    fontFamily: fontFamily.regular,
-    color: 'rgba(86, 67, 55, 0.7)', // on-surface-variant/70
-    textAlign: 'center',
+  textContainer: {
+    alignItems: 'center',
+    gap: spacing[2],
   },
-  decorativeLine: {
-    width: 48,
-    height: 4,
-    backgroundColor: 'rgba(151, 72, 0, 0.2)', // primary/20
-    borderRadius: 2,
-    marginBottom: spacing[2],
+  subtitleText: {
+    fontSize: 24, // headline-md
+    fontFamily: fontFamily.bold,
+    color: colors.secondary, // deep green
+    letterSpacing: -0.5,
   },
-  loadingTrack: {
-    width: 192,
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)', // surface-white/50
-    borderRadius: 2,
-    overflow: 'hidden',
+  qualityIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[2],
   },
-  loadingBar: {
-    height: '100%',
-    width: '33%',
-    backgroundColor: colors.primary,
-    borderRadius: 2,
+  line: {
+    width: 32,
+    height: 1,
+    backgroundColor: '#ddc1b1', // outline-variant
+  },
+  premiumText: {
+    fontSize: 11, // label-sm
+    fontFamily: fontFamily.medium,
+    color: '#6B7280', // muted-gray
+    letterSpacing: 2,
+  },
+  iconsRow: {
+    flexDirection: 'row',
+    gap: spacing[2],
+    opacity: 0.2,
+    marginTop: spacing[4],
   },
 });
+

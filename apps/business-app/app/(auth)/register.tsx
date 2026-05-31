@@ -89,6 +89,8 @@ export default function RegisterStore() {
     register.mutate();
   };
 
+  const isFormValid = !!(name.trim() && ownerName.trim() && phone.trim() && areaId);
+
   const selectedArea = areas.find((a) => a.id === areaId);
   const areaLabel = selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة';
 
@@ -125,7 +127,7 @@ export default function RegisterStore() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[4] }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -269,11 +271,16 @@ export default function RegisterStore() {
         </Field>
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      </ScrollView>
 
+      <View style={[styles.stickyFooter, { paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, spacing[4]) : spacing[4] }]}>
         <Pressable
-          style={[styles.primaryBtn, register.isPending && { opacity: 0.7 }]}
+          style={[
+            styles.primaryBtn,
+            (!isFormValid || register.isPending) && styles.primaryBtnDisabled
+          ]}
           onPress={handleSubmit}
-          disabled={register.isPending}
+          disabled={!isFormValid || register.isPending}
         >
           {register.isPending ? (
             <ActivityIndicator color="#fff" />
@@ -281,7 +288,7 @@ export default function RegisterStore() {
             <Text style={styles.primaryBtnText}>إرسال طلب التسجيل</Text>
           )}
         </Pressable>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -447,9 +454,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing[2],
+  },
+  primaryBtnDisabled: {
+    opacity: 0.5,
   },
   primaryBtnText: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: '#fff' },
+  stickyFooter: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[3],
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.05, shadowRadius: 3 },
+      android: { elevation: 10 },
+    }),
+  },
   successWrap: { alignItems: 'center', justifyContent: 'center', padding: spacing[6] },
   successIcon: { marginBottom: spacing[5] },
   successTitle: {

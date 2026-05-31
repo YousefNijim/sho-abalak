@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>شو عبالك؟ - تطبيق المنشأة</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@100..900&amp;family=Montserrat:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#cbe6ff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-container": "#00314c",
+                    "secondary-fixed": "#aef2bf",
+                    "on-background": "#1b1b22",
+                    "error-red": "#EF4444",
+                    "on-surface-variant": "#564337",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "outline": "#8a7265",
+                    "outline-variant": "#ddc1b1",
+                    "background-cream": "#FCF3DC",
+                    "on-error": "#ffffff",
+                    "background": "#fbf8ff",
+                    "border-beige": "#E5E0D5",
+                    "primary": "#974800",
+                    "surface-container-high": "#eae7f1",
+                    "tertiary": "#006495",
+                    "surface-variant": "#e4e1eb",
+                    "on-tertiary-fixed": "#001e30",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "secondary": "#296a43",
+                    "tertiary-container": "#009ee8",
+                    "surface-tint": "#974800",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-tertiary": "#ffffff",
+                    "inverse-surface": "#303037",
+                    "muted-gray": "#6B7280",
+                    "error": "#ba1a1a",
+                    "primary-container": "#e6781e",
+                    "warning-amber": "#F59E0B",
+                    "surface": "#fbf8ff",
+                    "on-primary-fixed": "#311300",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#ffdbc7",
+                    "on-secondary-container": "#2e6f47",
+                    "success-green": "#22C55E",
+                    "inverse-on-surface": "#f2eff9",
+                    "surface-container-low": "#f5f2fc",
+                    "on-primary-container": "#4e2200",
+                    "surface-container": "#efecf6",
+                    "surface-bright": "#fbf8ff",
+                    "inverse-primary": "#ffb688",
+                    "surface-dim": "#dbd9e2",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-surface": "#1b1b22",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "error-container": "#ffdad6",
+                    "surface-white": "#FFFFFF",
+                    "on-primary-fixed-variant": "#733600",
+                    "secondary-container": "#abefbd",
+                    "on-secondary-fixed": "#00210e",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gap-md": "12px",
+                    "margin-standard": "16px",
+                    "gap-sm": "8px",
+                    "gap-xs": "4px",
+                    "gap-lg": "20px",
+                    "nav-height": "64px",
+                    "section-md": "24px",
+                    "base": "4px",
+                    "section-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "body-base": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "headline-md": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "label-md": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(0.98); }
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 3s ease-in-out infinite;
+        }
+
+        .gradient-mesh {
+            background-color: #FCF3DC;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(38, 88%, 90%, 1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(38, 88%, 85%, 1) 0, transparent 50%);
+        }
+    </style>
+</head>
+<body class="gradient-mesh flex flex-col items-center justify-between min-h-screen p-margin-standard overflow-hidden">
+<!-- Top spacer for layout balance -->
+<div class="h-nav-height w-full"></div>
+<!-- Center Content: Brand Identity -->
+<main class="flex flex-col items-center justify-center flex-grow space-y-gap-lg">
+<div class="relative group">
+<!-- Subtle glow effect behind logo -->
+<div class="absolute inset-0 bg-primary opacity-5 blur-3xl rounded-full scale-150"></div>
+<div class="animate-pulse-soft">
+<img alt="شو عبالك؟" class="w-64 md:w-80 h-auto object-contain relative z-10 transition-transform duration-700 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCReVcNoRjS0B6nk0hsqR-CH-Cfefir82XPGQo1KiJivG8p-C3oKdetZWXVsKsqtSXMJSmrWeybvcxuNBOaV3JDvE3xtuSZHsbr7KVLN4Zz0g5wt_chRpnldsZxbYlYGO7XFqTP8dqfBfnpsI1xAOL79h8yakYonhsuSXXDBqDML73MekzbPeVktA1pSTgVpo1O4gMrwKIy8poUbG_Gaa5G4xv6j6kpLUilmqmwYRfLJ485-HuRhFac8xWcCmjS06n-nJhKr5whIZNP"/>
+</div>
+</div>
+<!-- Hidden desktop navigation is suppressed per Splash Screen mandate -->
+</main>
+<!-- Bottom Content: App Specification & Identity -->
+<footer class="w-full flex flex-col items-center justify-end pb-section-lg animate-fade-in-up">
+<div class="flex flex-col items-center space-y-gap-sm">
+<!-- Subtitle in Deep Green (Secondary color mapping for business apps) -->
+<h1 class="font-headline-md text-headline-md text-secondary tracking-tight">
+                تطبيق المنشأة التجارية
+            </h1>
+<!-- Quality Indicator -->
+<div class="flex items-center gap-xs text-muted-gray">
+<span class="w-8 h-[1px] bg-outline-variant"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-widest px-gap-sm">Premium Hospitality</span>
+<span class="w-8 h-[1px] bg-outline-variant"></span>
+</div>
+</div>
+<!-- Decorative element hinting at heritage -->
+<div class="mt-section-md opacity-20 select-none pointer-events-none">
+<div class="flex gap-gap-sm">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">storefront</span>
+</div>
+</div>
+</footer>
+<!-- Micro-interaction Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Optional: Auto-redirect or transition after splash duration
+            // setTimeout(() => { console.log('Transition to Login/Dashboard'); }, 3000);
+            
+            // Visual feedback on logo tap
+            const logo = document.querySelector('img');
+            if (logo) {
+                logo.addEventListener('click', () => {
+                    logo.classList.add('scale-95');
+                    setTimeout(() => logo.classList.remove('scale-95'), 150);
+                });
+            }
+        });
+    </script>
+</body></html>

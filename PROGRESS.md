@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-05-31
-**Current phase:** Phase 24 (Two-Section Restructure: BusinessType FOOD/STORE + Tags — Complete)
+**Current phase:** Phase 25 (Business App Onboarding & Splash Screens — Complete)
 
 ---
 
@@ -259,6 +259,12 @@
     - **Token fix:** added `white: '#FFFFFF'` to `ui-components/tokens.ts` (cleared ~20 pre-existing `colors.white` TS errors across customer-app).
     - **Verified:** `nest build` ✅, admin `next build` ✅ (13 routes), admin `tsc` ✅, business-app `tsc` ✅ (only pre-existing Input.tsx), customer-app 42→**21** errors (all pre-existing noise; the change *removed* 21, added 0 net). **Migration applied + seed loaded with tags.** **Live-API E2E:** (a) full order lifecycle PENDING→DELIVERED still works on a FOOD business; (b) `GET /tags?type=FOOD|STORE`, `/businesses?type=`, `/businesses?tagId=` all correct; (c) admin-create STORE+tag → appears under type=STORE + filterable by tag. Test records cleaned up.
     - **Gotcha for next agent:** the seed's `upsertUser` does NOT re-hash passwords on update (no-op), so once a password is changed via the admin/owner endpoints, re-seeding won't reset it — reset via `PATCH /businesses/:id/password` if needed. Seed business logins: `0599000002`/`0599000004` = `test1234` (unless changed since).
+
+23. **Business App Splash & Onboarding (Phase 25)** ✅ **DONE** — Added a Splash/Welcome screen and an Onboarding screen at the START of the business-app:
+    - **Splash (`app/index.tsx`):** Cream background, centered "شو عبالك؟" logo, subtitle "تطبيق المنشأة التجارية", PREMIUM HOSPITALITY label, and Lucide icons (Utensils, Truck, Store). Auto-redirects to onboarding on first launch, else dashboard/login.
+    - **Onboarding (`app/onboarding.tsx`):** Mirroring the structure of the customer app onboarding, created a Carousel format. Slide 1 features the chef/owner image with "+24% مبيعات" and "طلب جديد" stat chips overlaid, using the brand tokens. "تخطي" skips to login, persisting `businessOnboardingSeen` flag in `auth.store.ts`.
+    - **Wiring:** Modified `auth.store.ts` to include `businessOnboardingSeen: boolean` synced via AsyncStorage. Modified Splash to properly redirect based on this new flag.
+    - **Verified:** `tsc --noEmit` on business-app ✅ (only the pre-existing `Input.tsx` overload error remains).
 
 ## 🗂️ How to use this file (for AI agents)
 

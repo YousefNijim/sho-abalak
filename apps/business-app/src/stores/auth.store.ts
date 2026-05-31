@@ -16,10 +16,12 @@ interface AuthUser {
 interface AuthState {
   user: AuthUser | null;
   token: string | null;
+  businessOnboardingSeen: boolean;
   login: (dto: LoginDto) => Promise<void>;
   register: (dto: RegisterDto) => Promise<void>;
   logout: () => void;
   hydrate: () => void;
+  setBusinessOnboardingSeen: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +29,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
+      businessOnboardingSeen: false,
 
       login: async (dto) => {
         const res = await authApi.login(dto);
@@ -49,6 +52,7 @@ export const useAuthStore = create<AuthState>()(
         const { token } = get();
         if (token) setAuthToken(token);
       },
+      setBusinessOnboardingSeen: () => set({ businessOnboardingSeen: true }),
     }),
     {
       name: 'shu-business-auth',
