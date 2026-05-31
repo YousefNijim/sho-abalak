@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Prisma needs openssl + glibc-compat on Alpine (musl) to build/load its engines.
+RUN apk add --no-cache openssl libc6-compat
+
 # Install pnpm globally
 RUN npm install -g pnpm@10
 
@@ -37,6 +40,9 @@ RUN pnpm --filter @shu/api build
 FROM node:20-alpine AS runner
 
 WORKDIR /app
+
+# Prisma's query/schema engine needs openssl + glibc-compat at runtime on Alpine.
+RUN apk add --no-cache openssl libc6-compat
 
 RUN npm install -g pnpm@10
 
