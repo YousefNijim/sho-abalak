@@ -12,11 +12,6 @@ module.exports = {
     userInterfaceStyle: 'light',
     backgroundColor: '#FCF3DC',
     icon: './assets/images/splash.png',
-    splash: {
-      image: './assets/images/splash.png',
-      backgroundColor: '#FCF3DC',
-      resizeMode: 'contain',
-    },
     ios: {
       supportsTablet: false,
     },
@@ -31,6 +26,15 @@ module.exports = {
     plugins: [
       'expo-router',
       'expo-font',
+      [
+        'expo-splash-screen',
+        {
+          image: './assets/images/splash.png',
+          imageWidth: 200,
+          resizeMode: 'contain',
+          backgroundColor: '#FCF3DC',
+        },
+      ],
       [
         'expo-notifications',
         {
