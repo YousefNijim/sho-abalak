@@ -7,9 +7,12 @@ import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
-import { businessesApi, ordersApi, addressesApi } from '@shu/api-client';
+import { businessesApi, ordersApi, addressesApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
 import type { CreateOrderDto } from '@shu/api-client';
+
+const mediaUrl = (path: string | null | undefined): string | null =>
+  !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -202,7 +205,7 @@ export default function Cart() {
             <View key={it.productId} style={styles.itemCard}>
               <View style={styles.itemImageWrap}>
                 {it.imageUrl ? (
-                  <Image source={{ uri: it.imageUrl }} style={styles.itemImage} contentFit="cover" />
+                  <Image source={{ uri: mediaUrl(it.imageUrl)! }} style={styles.itemImage} contentFit="cover" />
                 ) : (
                   <View style={styles.itemImagePlaceholder}>
                     <Text style={{ fontSize: 32 }}>🍽️</Text>

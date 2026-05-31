@@ -225,7 +225,7 @@ export default function BusinessDetail() {
               <View key={p.id} style={styles.productCard}>
                 <View style={styles.productImageWrap}>
                   {p.imageUrl ? (
-                    <Image source={{ uri: p.imageUrl }} style={styles.productImage} contentFit="cover" />
+                    <Image source={{ uri: mediaUrl(p.imageUrl)! }} style={styles.productImage} contentFit="cover" />
                   ) : (
                     <View style={[styles.productImage, styles.productImagePlaceholder]}>
                       <ChefHat size={24} color={colors.border} />

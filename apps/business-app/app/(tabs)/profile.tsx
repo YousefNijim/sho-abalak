@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -107,6 +107,25 @@ export default function ProfileTab() {
       setLogoLocalUri(null);
     }
   }, [business]);
+
+  const isDirty = useMemo(() => {
+    if (!business) return false;
+    if (name !== (business.name ?? '')) return true;
+    if (phone !== (business.phone ?? '')) return true;
+    if (type !== (business.type ?? 'FOOD')) return true;
+    if (addressDetail !== (business.addressDetail ?? '')) return true;
+    if (openTime !== (business.openTime ?? DEFAULT_OPEN)) return true;
+    if (closeTime !== (business.closeTime ?? DEFAULT_CLOSE)) return true;
+    
+    const originalTags = (business.tags ?? []).map((t) => t.id).sort().join(',');
+    const currentTags = [...tagIds].sort().join(',');
+    if (originalTags !== currentTags) return true;
+
+    if (coverUri !== null) return true;
+    if (logoLocalUri !== null) return true;
+
+    return false;
+  }, [business, name, phone, type, tagIds, addressDetail, openTime, closeTime, coverUri, logoLocalUri]);
 
   const toggleTag = (id: string) =>
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -393,6 +412,33 @@ export default function ProfileTab() {
             </Pressable>
           </View>
 
+          {/* Save Button */}
+          <View style={[styles.fabWrap, { marginTop: spacing[6], marginBottom: spacing[2] }]}>
+            <Pressable
+              style={[
+                styles.saveBtn,
+                (!isDirty || busy) && styles.saveBtnDisabled,
+                saved && styles.saveBtnSuccess,
+              ]}
+              onPress={handleSave}
+              disabled={!isDirty || busy}
+            >
+              {busy ? (
+                <ActivityIndicator color="#fff" />
+              ) : saved ? (
+                <>
+                  <CheckCircle size={20} color="#fff" />
+                  <Text style={styles.saveBtnText}>تم الحفظ بنجاح</Text>
+                </>
+              ) : (
+                <>
+                  <Save size={20} color="#fff" />
+                  <Text style={styles.saveBtnText}>حفظ التغييرات</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+
           {/* Logout */}
           <Pressable style={styles.logoutBtn} onPress={handleLogout}>
             <Text style={styles.logoutText}>تسجيل الخروج</Text>
@@ -400,28 +446,7 @@ export default function ProfileTab() {
         </View>
       </ScrollView>
 
-      {/* Save FAB */}
-      <View style={[styles.fabWrap, { bottom: insets.bottom + 16 }]} pointerEvents="box-none">
-        <Pressable
-          style={[styles.saveBtn, busy && styles.saveBtnDisabled, saved && styles.saveBtnSuccess]}
-          onPress={handleSave}
-          disabled={busy}
-        >
-          {busy ? (
-            <ActivityIndicator color="#fff" />
-          ) : saved ? (
-            <>
-              <CheckCircle size={20} color="#fff" />
-              <Text style={styles.saveBtnText}>تم الحفظ بنجاح</Text>
-            </>
-          ) : (
-            <>
-              <Save size={20} color="#fff" />
-              <Text style={styles.saveBtnText}>حفظ التغييرات</Text>
-            </>
-          )}
-        </Pressable>
-      </View>
+      {/* Save FAB removed from here */}
 
       {/* Working hours modal */}
       <TimeRangeModal
@@ -837,7 +862,7 @@ const styles = StyleSheet.create({
   logoutBtn: { alignItems: 'center', justifyContent: 'center', paddingVertical: spacing[5], marginTop: spacing[2] },
   logoutText: { fontSize: fontSizes.base, fontFamily: fontFamily.semibold, color: colors.error },
 
-  fabWrap: { position: 'absolute', left: spacing[4], right: spacing[4] },
+  fabWrap: { paddingHorizontal: 0 },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',

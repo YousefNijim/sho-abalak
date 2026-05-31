@@ -37,8 +37,11 @@ import {
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, tagsApi } from '@shu/api-client';
+import { businessesApi, tagsApi, BASE_URL } from '@shu/api-client';
 import type { Tag } from '@shu/api-client';
+
+const mediaUrl = (path: string | null | undefined): string | null =>
+  !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
@@ -298,7 +301,7 @@ export default function Home() {
               >
                 <View style={styles.cardImageWrap}>
                   {b.imageUrl ? (
-                    <Image source={{ uri: b.imageUrl }} style={styles.cardImage} contentFit="cover" />
+                    <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={styles.cardImage} contentFit="cover" />
                   ) : (
                     <View style={[styles.cardImage, styles.cardImagePlaceholder]}>
                       <ImageIcon size={40} color={colors.border} />

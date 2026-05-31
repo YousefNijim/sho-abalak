@@ -7,7 +7,9 @@
     "scheme": "shu-business",
     "userInterfaceStyle": "light",
     "backgroundColor": "#FCF3DC",
+    "icon": "./assets/images/icon.png",
     "splash": {
+      "image": "./assets/images/splash.png",
       "backgroundColor": "#FCF3DC",
       "resizeMode": "contain"
     },

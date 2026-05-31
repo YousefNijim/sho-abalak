@@ -45,6 +45,7 @@ export default function RegisterStore() {
   const [addressDetail, setAddressDetail] = useState('');
 
   const [showArea, setShowArea] = useState(false);
+  const [areaSearch, setAreaSearch] = useState('');
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -93,6 +94,10 @@ export default function RegisterStore() {
 
   const selectedArea = areas.find((a) => a.id === areaId);
   const areaLabel = selectedArea ? `${selectedArea.city} — ${selectedArea.name}` : 'اختر المنطقة';
+
+  const filteredAreas = areas.filter(
+    (a) => a.city.includes(areaSearch) || a.name.includes(areaSearch)
+  );
 
   if (submitted) {
     return (
@@ -236,21 +241,37 @@ export default function RegisterStore() {
           </Pressable>
           {showArea && (
             <View style={styles.picker}>
-              {areas.map((a) => (
-                <Pressable
-                  key={a.id}
-                  style={[styles.pickerItem, areaId === a.id && styles.pickerItemActive]}
-                  onPress={() => {
-                    setAreaId(a.id);
-                    setShowArea(false);
-                  }}
-                >
-                  {areaId === a.id && <Check size={16} color={colors.primary} />}
-                  <Text style={[styles.pickerText, areaId === a.id && { color: colors.primary }]}>
-                    {a.city} — {a.name}
-                  </Text>
-                </Pressable>
-              ))}
+              <View style={styles.searchRow}>
+                <TextInput
+                  style={styles.searchInput}
+                  value={areaSearch}
+                  onChangeText={setAreaSearch}
+                  placeholder="ابحث عن منطقة..."
+                  placeholderTextColor={colors.textMuted}
+                  textAlign="right"
+                />
+              </View>
+              <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+                {filteredAreas.map((a) => (
+                  <Pressable
+                    key={a.id}
+                    style={[styles.pickerItem, areaId === a.id && styles.pickerItemActive]}
+                    onPress={() => {
+                      setAreaId(a.id);
+                      setShowArea(false);
+                      setAreaSearch('');
+                    }}
+                  >
+                    {areaId === a.id && <Check size={16} color={colors.primary} />}
+                    <Text style={[styles.pickerText, areaId === a.id && { color: colors.primary }]}>
+                      {a.city} — {a.name}
+                    </Text>
+                  </Pressable>
+                ))}
+                {filteredAreas.length === 0 && (
+                  <Text style={styles.noResultText}>لا توجد نتائج</Text>
+                )}
+              </ScrollView>
             </View>
           )}
         </Field>
@@ -391,6 +412,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
+  },
+  searchRow: {
+    padding: spacing[2],
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  searchInput: {
+    height: 40,
+    backgroundColor: '#f3f4f6',
+    borderRadius: radius.md,
+    paddingHorizontal: spacing[3],
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  noResultText: {
+    padding: spacing[4],
+    textAlign: 'center',
+    fontFamily: fontFamily.regular,
+    color: colors.textMuted,
   },
   pickerItem: {
     flexDirection: 'row-reverse',

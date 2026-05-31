@@ -3,8 +3,11 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, Platf
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { ordersApi } from '@shu/api-client';
+import { ordersApi, BASE_URL } from '@shu/api-client';
 import type { Order } from '@shu/api-client';
+
+const mediaUrl = (path: string | null | undefined): string | null =>
+  !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
 import { useCartStore } from '../../src/stores/cart.store';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -139,7 +142,7 @@ export default function Orders() {
                     </View>
                     <View style={styles.imageWrap}>
                       <Image
-                        source={{ uri: o.items?.[0]?.product?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4' }}
+                        source={{ uri: mediaUrl(o.items?.[0]?.product?.imageUrl) || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4' }}
                         style={styles.cardImage}
                         contentFit="cover"
                       />

@@ -62,7 +62,7 @@ export default function ChangePassword() {
         <CheckCircle2 size={64} color={colors.success} />
         <Text style={styles.successTitle}>تم تغيير كلمة المرور</Text>
         <Text style={styles.successDesc}>يمكنك الآن استخدام كلمة المرور الجديدة لتسجيل الدخول.</Text>
-        <Pressable style={styles.submitBtn} onPress={() => router.back()}>
+        <Pressable style={[styles.submitBtn, { width: '100%', marginTop: spacing[4] }]} onPress={() => router.back()}>
           <Text style={styles.submitBtnText}>تم</Text>
         </Pressable>
       </View>
@@ -286,6 +286,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginTop: spacing[4],
     marginBottom: spacing[2],
+    textAlign: 'center',
   },
   successDesc: {
     fontSize: fontSizes.base,
