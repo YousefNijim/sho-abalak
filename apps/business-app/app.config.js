@@ -1,5 +1,5 @@
-{
-  "expo": {
+module.exports = {
+  expo: {
     "name": "شو عبالك؟ — المنشأة",
     "slug": "shu-business",
     "version": "1.0.0",
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.shoabalak.business",
-      "googleServicesFile": "./google-services.json",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FCF3DC"
       }
@@ -40,4 +40,4 @@
       "typedRoutes": true
     }
   }
-}
+};

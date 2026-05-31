@@ -26,7 +26,8 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await login({ phone, password });
+      const formattedPhone = phone.startsWith('5') ? `0${phone}` : phone;
+      await login({ phone: formattedPhone, password });
       router.replace('/sections');
     } catch (e: unknown) {
       const msg =

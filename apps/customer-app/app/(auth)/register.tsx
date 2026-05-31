@@ -30,6 +30,20 @@ export default function Register() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [areaId, setAreaId] = useState<string | null>(null);
 
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const { data: areas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.getAll(),
+  });
+
   const uniqueCities = useMemo(() => Array.from(new Set(areas.map((a: any) => a.city))), [areas]);
   const villagesForCity = useMemo(() => areas.filter((a: any) => a.city === selectedCity), [areas, selectedCity]);
   const selectedVillageLabel = useMemo(() => areas.find((a: any) => a.id === areaId)?.name || '', [areas, areaId]);

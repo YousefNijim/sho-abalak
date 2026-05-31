@@ -1,5 +1,5 @@
-{
-  "expo": {
+module.exports = {
+  expo: {
     "name": "شو عبالك؟ — السائق",
     "slug": "shu-driver",
     "version": "1.0.0",
@@ -7,7 +7,9 @@
     "scheme": "shu-driver",
     "userInterfaceStyle": "light",
     "backgroundColor": "#FCF3DC",
+    "icon": "./assets/images/icon.png",
     "splash": {
+      "image": "./assets/images/splash.png",
       "backgroundColor": "#FCF3DC",
       "resizeMode": "contain"
     },
@@ -16,7 +18,7 @@
     },
     "android": {
       "package": "com.shoabalak.driver",
-      "googleServicesFile": "./google-services.json",
+      "googleServicesFile": process.env.GOOGLE_SERVICES_JSON ?? "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FCF3DC"
       }
@@ -38,4 +40,4 @@
       "typedRoutes": true
     }
   }
-}
+};
