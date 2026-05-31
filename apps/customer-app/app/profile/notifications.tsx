@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Pressable, Platform } from 'react-native';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
-import {
-  ArrowRight,
-  MoreVertical,
-  ShoppingBag,
-  Tag,
-  ShieldCheck,
-  CheckCircle2,
-  Utensils,
-} from 'lucide-react-native';
+import { ArrowRight, BellOff, ShoppingBag, CheckCheck } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme';
+import { useNotificationsStore, AppNotification } from '../../src/stores/notifications.store';
+
+function timeAgo(ts: number): string {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'الآن';
+  if (diff < 3600) return `منذ ${Math.floor(diff / 60)} دقيقة`;
+  if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} ساعة`;
+  return `منذ ${Math.floor(diff / 86400)} يوم`;
+}
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const [filter, setFilter] = useState('الكل');
+  const items = useNotificationsStore((s) => s.items);
+  const markAllRead = useNotificationsStore((s) => s.markAllRead);
 
-  const filters = ['الكل', 'الطلبات', 'العروض', 'النظام'];
+  // Mark everything read once the user opens this screen.
+  useEffect(() => {
+    markAllRead();
+  }, [markAllRead]);
+
+  const openNotification = (n: AppNotification) => {
+    const orderId = n.data?.['orderId'];
+    if (orderId) router.push({ pathname: '/tracking', params: { orderId } });
+  };
 
   return (
     <View style={styles.container}>
@@ -29,127 +38,45 @@ export default function NotificationsScreen() {
           </Pressable>
           <Text style={styles.headerTitle}>الإشعارات</Text>
         </View>
-        <Pressable style={styles.iconBtn}>
-          <MoreVertical size={24} color={colors.primary} />
-        </Pressable>
+        {items.length > 0 && (
+          <Pressable style={styles.iconBtn} onPress={markAllRead}>
+            <CheckCheck size={24} color={colors.primary} />
+          </Pressable>
+        )}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Filters */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtersScroll} contentContainerStyle={styles.filtersContent}>
-          {filters.map((f) => {
-            const isActive = filter === f;
-            return (
-              <Pressable
-                key={f}
-                style={[styles.filterPill, isActive && styles.filterPillActive]}
-                onPress={() => setFilter(f)}
-              >
-                <Text style={[styles.filterText, isActive && styles.filterTextActive]}>{f}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.list}>
-          {/* Section: Today */}
-          <Text style={styles.sectionTitle}>اليوم</Text>
-
-          {/* Order Update (Unread) */}
-          <View style={[styles.card, styles.cardUnread]}>
-            <View style={styles.unreadIndicator} />
-            <View style={[styles.iconWrap, { backgroundColor: colors.primary + '15' }]}>
-              <ShoppingBag size={24} color={colors.primary} />
-            </View>
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>تم تحديث حالة طلبك</Text>
-                <Text style={styles.timeText}>منذ دقيقتين</Text>
-              </View>
-              <Text style={styles.cardBody}>طلبك رقم #123456 غادر المطعم وهو في طريقه إليك الآن.</Text>
-              <Pressable>
-                <Text style={styles.linkText}>تتبع الطلب</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Promotion */}
-          <View style={styles.card}>
-            <View style={[styles.iconWrap, { backgroundColor: colors.secondary + '20' }]}>
-              <Tag size={24} color={colors.secondary} />
-            </View>
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>خصم خاص بمناسبة العيد!</Text>
-                <Text style={styles.timeText}>١ ساعة</Text>
-              </View>
-              <Text style={styles.cardBody}>استخدم الكود EID20 واحصل على خصم 20% على طلبك القادم من حلوياتنا التقليدية.</Text>
-            </View>
-          </View>
-
-          {/* Section: Yesterday */}
-          <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>أمس</Text>
-
-          {/* System Alert */}
-          <View style={styles.card}>
-            <View style={[styles.iconWrap, { backgroundColor: colors.info + '20' }]}>
-              <ShieldCheck size={24} color={colors.info} />
-            </View>
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>تم تسجيل دخول جديد</Text>
-                <Text style={styles.timeText}>أمس، ٩:٠٠ م</Text>
-              </View>
-              <Text style={styles.cardBody}>تم رصد عملية تسجيل دخول لحسابك من متصفح جديد في مدينة رام الله.</Text>
-            </View>
-          </View>
-
-          {/* Delivery Success */}
-          <View style={styles.card}>
-            <View style={[styles.iconWrap, { backgroundColor: colors.success + '20' }]}>
-              <CheckCircle2 size={24} color={colors.success} />
-            </View>
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>تم التوصيل بنجاح</Text>
-                <Text style={styles.timeText}>أمس، ٨:٣٠ م</Text>
-              </View>
-              <Text style={styles.cardBody}>نأمل أنك استمتعت بوجبتك! شاركنا تقييمك لمساعدتنا على التحسن.</Text>
-              <Pressable style={styles.btnSmall}>
-                <Text style={styles.btnSmallText}>تقييم الطلب</Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Promotion Image Notification */}
-          <View style={styles.imageCard}>
-            <View style={styles.imageHeader}>
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB9TEJU96A19oaf389I4sMbO5n0fBdrsTbsTvV2_F_4ulANfyJUoFvkTi_RwfA8rkxibv2JclYpaXVhHWdZH70Dy7Dd6msdqwwZNHYcxaCZDALWNxbvwvmmNrdd-AFc5VC47vrG8cTlE2zwDIu7SHGRSBlqPtQY6_cozuTwGH-mqiW4Ez0CNhVDtBktrqTRAKFj-0TxdKDOBkO6PO72dkveHYfTVgxov0HMOnD_f-_8u1-IOKBevctBlqcIbEGkQptcuj_Xp_B05WY_' }}
-                style={styles.promoImg}
-                contentFit="cover"
-              />
-              <View style={styles.imgOverlay}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>عرض حصري</Text>
-                </View>
-              </View>
-            </View>
-            <View style={styles.imageCardBody}>
-              <View style={[styles.iconWrap, { backgroundColor: colors.primary + '15' }]}>
-                <Utensils size={24} color={colors.primary} />
-              </View>
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>جديد في منطقتك!</Text>
-                  <Text style={styles.timeText}>أمس، ٦:١٥ م</Text>
-                </View>
-                <Text style={styles.cardBody}>مطعم "النكهة الأصيلة" انضم إلينا مؤخراً. جرب أطباقهم المميزة الآن.</Text>
-              </View>
-            </View>
-          </View>
+      {items.length === 0 ? (
+        <View style={styles.empty}>
+          <BellOff size={56} color={colors.textMuted} />
+          <Text style={styles.emptyTitle}>لا توجد إشعارات بعد</Text>
+          <Text style={styles.emptyHint}>ستظهر هنا تحديثات طلباتك والعروض.</Text>
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.list}>
+            {items.map((n) => (
+              <Pressable
+                key={n.id}
+                style={[styles.card, !n.read && styles.cardUnread]}
+                onPress={() => openNotification(n)}
+              >
+                {!n.read && <View style={styles.unreadIndicator} />}
+                <View style={[styles.iconWrap, { backgroundColor: colors.primary + '15' }]}>
+                  <ShoppingBag size={24} color={colors.primary} />
+                </View>
+                <View style={styles.cardContent}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>{n.title}</Text>
+                    <Text style={styles.timeText}>{timeAgo(n.receivedAt)}</Text>
+                  </View>
+                  <Text style={styles.cardBody}>{n.body}</Text>
+                  {n.data?.['orderId'] ? <Text style={styles.linkText}>تتبع الطلب</Text> : null}
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -185,6 +112,24 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingVertical: spacing[6],
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing[3],
+    paddingHorizontal: spacing[8],
+  },
+  emptyTitle: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.lg,
+    color: colors.textPrimary,
+  },
+  emptyHint: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
   },
   filtersScroll: {
     marginBottom: spacing[6],

@@ -20,8 +20,15 @@ import {
 import { colors } from '../src/theme';
 import { getQueryClient } from '../src/lib/query-client';
 import { useAuthStore } from '../src/stores/auth.store';
+import { usePushNotifications } from '../src/hooks/usePushNotifications';
 
 SplashScreen.preventAutoHideAsync();
+
+/** Mounts push-notification registration + listeners inside the providers. */
+function PushNotificationsBridge() {
+  usePushNotifications();
+  return null;
+}
 
 export default function RootLayout() {
   const hydrate = useAuthStore((s) => s.hydrate);
@@ -51,6 +58,7 @@ export default function RootLayout() {
       <QueryClientProvider client={getQueryClient()}>
         <SafeAreaProvider>
           <StatusBar style="dark" />
+          <PushNotificationsBridge />
           <Stack
             screenOptions={{
               headerStyle: { backgroundColor: colors.background },
