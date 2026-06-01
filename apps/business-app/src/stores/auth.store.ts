@@ -33,6 +33,9 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (dto) => {
         const res = await authApi.login(dto);
+        if (res.user.role !== 'BUSINESS') {
+          throw new Error('هذا الحساب غير مصرّح له بالدخول لتطبيق المتجر. هذا التطبيق مخصص لأصحاب المتاجر فقط.');
+        }
         setAuthToken(res.accessToken);
         set({ user: res.user as AuthUser, token: res.accessToken });
       },
