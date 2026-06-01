@@ -20,7 +20,7 @@ export class OrdersController {
 
   @Post()
   @UseGuards(RolesGuard)
-  @Roles(UserRole.CUSTOMER)
+  @Roles(UserRole.CUSTOMER, UserRole.BUSINESS)
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
     return this.orders.create(user.id, dto);
   }

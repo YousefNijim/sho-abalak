@@ -18,7 +18,7 @@ export class ReviewsController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.CUSTOMER)
+  @Roles(UserRole.CUSTOMER, UserRole.BUSINESS)
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateReviewDto) {
     return this.reviews.create(user.id, dto);
   }
