@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-01
-**Current phase:** Phase 31 (In-app notifications parity for business + driver + sound)
+**Current phase:** Phase 32 (Bug-fix batch: B1-B4 business-app, C2/C4/C5 customer-app)
 
 ---
 
@@ -311,6 +311,18 @@
     - **Verified:** `nest build` ✅ (also cleared the previously-noted banners/tags pre-existing errors — they were collateral of unbuilt `@shu/shared-types`, now built). `tsc --noEmit` customer-app ✅ 0 errors. **Live-API E2E (all pass):** `GET /me` shows email/imageUrl; PATCH name+email (email lowercased) + imageUrl persists; phone change **without** OTP → 400, **wrong** OTP → 400, **correct** `0000` → 200 and phone updated; test user cleaned up.
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
+
+30. **Bug-fix batch — Business & Customer apps (Phase 32 — branch `Yousef2`)** ✅ **DONE**
+    - **B1 — register crash:** `register.tsx` used `React.useMemo` without the default `React` import. Added `import React` — crash fixed.
+    - **B2 — driver-acceptance stuck:** `driver-selection.tsx` pending spinner only reacted to `PICKED_UP`. Now any non-READY `order:status_update` navigates to the order detail. Added an `AppState` `change` listener that re-polls the order on foreground resume to catch missed socket events.
+    - **B3 — footer year:** Business login footer updated from "2024" → "2026".
+    - **B4 — forgot-password WhatsApp:** "نسيت كلمة المرور؟" and "تواصل مع الدعم" now show an Alert with a functional `wa.me/970569703134` WhatsApp deep link.
+    - **C1 — PATCH /auth/profile:** endpoint was correctly added in Phase 30; needs `nest build` + API restart to be live (no code change needed).
+    - **C2 — categories RTL:** `categoriesScroll` contentContainerStyle changed to `flexDirection: 'row-reverse'` so category chips start from the right.
+    - **C3 — cart tab:** already present with item-count badge (no change needed).
+    - **C4 — profile truncation + contact-us:** `menuItemLeft` → `flex: 1`; `menuItemLabel` → `flexShrink: 1`. "اتصل بنا" now opens Alert with a working WhatsApp deep link (+970 569 703 134).
+    - **C5 — orders duplicate header:** set `headerShown: false` on the orders tab in `_layout.tsx`; single custom header remains.
+    - **Verified:** `tsc --noEmit` customer-app ✅ 0 errors; business-app ✅ 0 new errors (4 pre-existing in untouched `profile.tsx`); driver-app ✅ 0 new errors (1 pre-existing in untouched `login.tsx`).
 
 29. **In-app notifications parity (business + driver) + push sound (Phase 31 — branch `Yousef2`)** ✅ **DONE** — brought the customer-app notification UX to the other two apps and made pushes audible.
     - **Sound (all apps):** FCM payload in `NotificationsService.send` now requests sound explicitly — `android.notification {{ sound:'default', channelId:'default', defaultSound:true }}` + `apns.payload.aps.sound:'default'`. Each app's Android channel (`usePushNotifications`) now sets `sound:'default'` + a `vibrationPattern` (HIGH importance alone wasn't guaranteeing a tone). So a delivered push rings + vibrates like any normal push, foreground (handler already had `shouldPlaySound:true`) and background.
