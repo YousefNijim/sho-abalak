@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { ActivityIndicator, Alert, AppState, AppStateStatus, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
@@ -42,16 +42,38 @@ export default function DriverSelection() {
   });
 
   const socket = useSocket();
+  const appStateRef = useRef(AppState.currentState);
+
+  // Refetch order when app returns to foreground — catches missed socket events
+  useEffect(() => {
+    if (!orderId || !pendingDriverId) return;
+    const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
+      if (appStateRef.current.match(/inactive|background/) && next === 'active') {
+        ordersApi.getById(orderId).then((order) => {
+          if (order.status !== 'READY') {
+            queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+            queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+            router.replace(`/order/${orderId}`);
+          }
+        }).catch(() => {});
+      }
+      appStateRef.current = next;
+    });
+    return () => sub.remove();
+  }, [orderId, pendingDriverId, queryClient, router]);
 
   useEffect(() => {
     if (!socket || !orderId) return;
 
-    // Driver accepted → order is now PICKED_UP, go back to order detail
+    // Any status change while waiting for driver → navigate back to order detail.
+    // Covers: PICKED_UP (driver accepted), DELIVERED, CANCELLED (missed PICKED_UP).
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
-      if (payload.orderId === orderId && payload.status === 'PICKED_UP') {
+      if (payload.orderId === orderId) {
         queryClient.invalidateQueries({ queryKey: ['order', orderId] });
         queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-        router.replace(`/order/${orderId}`);
+        if (payload.status !== 'READY') {
+          router.replace(`/order/${orderId}`);
+        }
       }
     };
 

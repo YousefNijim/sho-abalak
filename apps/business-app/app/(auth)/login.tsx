@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View, TextInput, Pressable, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { Alert, Linking, ScrollView, StyleSheet, Text, View, TextInput, Pressable, Platform, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -27,11 +27,27 @@ export default function Login() {
     }
   };
 
-  const SUPPORT_MSG =
-    'لإعادة تعيين كلمة المرور، يرجى التواصل مع إدارة المنصة وسيتم تعيين كلمة مرور جديدة لمتجرك.\n\nالدعم: 0599-000-000';
+  const WHATSAPP_NUMBER = '970569703134';
+  const SUPPORT_MSG = 'لإعادة تعيين كلمة المرور، يرجى التواصل مع إدارة المنصة عبر واتساب.';
 
-  const handleForgotPassword = () => notify('نسيت كلمة المرور؟', SUPPORT_MSG);
-  const handleSupport = () => notify('تواصل مع الدعم', SUPPORT_MSG);
+  const openWhatsApp = () => {
+    Linking.openURL(`https://wa.me/${WHATSAPP_NUMBER}`).catch(() =>
+      notify('خطأ', 'تعذّر فتح واتساب، يرجى تثبيت التطبيق أو التواصل على الرقم: +970 569 703 134'),
+    );
+  };
+
+  const handleForgotPassword = () => {
+    Alert.alert('نسيت كلمة المرور؟', SUPPORT_MSG, [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'فتح واتساب', onPress: openWhatsApp },
+    ]);
+  };
+  const handleSupport = () => {
+    Alert.alert('تواصل مع الدعم', SUPPORT_MSG, [
+      { text: 'إلغاء', style: 'cancel' },
+      { text: 'فتح واتساب', onPress: openWhatsApp },
+    ]);
+  };
 
   const handleLogin = async () => {
     setError('');
@@ -176,7 +192,7 @@ export default function Login() {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2024 شو عبالك - لوحة تحكم التجار</Text>
+          <Text style={styles.footerText}>© 2026 شو على بالك - لوحة تحكم التجار</Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
