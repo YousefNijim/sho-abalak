@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-01
-**Current phase:** Phase 32 (Bug-fix batch: B1-B4 business-app, C2/C4/C5 customer-app)
+**Current phase:** Phase 33 (Security + crash fixes — Batch 1 of BUG_AUDIT.md)
 
 ---
 
@@ -311,6 +311,14 @@
     - **Verified:** `nest build` ✅ (also cleared the previously-noted banners/tags pre-existing errors — they were collateral of unbuilt `@shu/shared-types`, now built). `tsc --noEmit` customer-app ✅ 0 errors. **Live-API E2E (all pass):** `GET /me` shows email/imageUrl; PATCH name+email (email lowercased) + imageUrl persists; phone change **without** OTP → 400, **wrong** OTP → 400, **correct** `0000` → 200 and phone updated; test user cleaned up.
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
+
+31. **Security + Crash fixes — Batch 1 of BUG_AUDIT.md (Phase 33 — branch `Yousef2`)** ✅ **DONE**
+    - **#8 — SECURITY (critical):** `POST /auth/register` accepted a `role` field via `RegisterDto` (validated only by `@IsEnum(UserRole)`, not restricted to CUSTOMER). The service used `dto.role ?? UserRole.CUSTOMER`, so `{ role: 'ADMIN' }` created an admin account. **Confirmed exploitable on live prod** (a test ADMIN was created during audit — delete user `fb0bab3c-ff93-47c3-988b-461a5e7ff8ce`). Fix: removed `role` field from `RegisterDto` entirely; `AuthService.register` hardcodes `UserRole.CUSTOMER`.
+    - **#3 — SECURITY:** `otp.tsx` discarded the `otpVerify` response — `verified: false` (HTTP 200) navigated to `/sections` just like a success. Fixed: check `result.verified === true` before navigating; show Arabic error otherwise.
+    - **#2 — CRASH:** `otp.tsx:12` called `useRouter()` via `require('expo-router')` inside the component body (Rules of Hooks violation, shadowed the correct top-level import). Fixed: removed the `require()` line; uses the top-level `useRouter()` already imported.
+    - **#5 — BROKEN in prod:** `banners/page.tsx:84` and `tags/page.tsx:109` in admin built media URLs with hardcoded `http://127.0.0.1:3001`. Fixed: both now import `BASE_URL` from `@shu/api-client` (reads `NEXT_PUBLIC_API_URL`).
+    - **Bonus:** cleared all pre-existing tsc errors in business-app (`fontFamily.normal` → `.regular`, `spacing[0]` → `0`, `business.area?.city`) and driver-app (`dir` prop on RN Text → `writingDirection` style).
+    - **tsc status:** customer-app ✅ 0 | business-app ✅ 0 | driver-app ✅ 0 | API ✅ 0.
 
 30. **Bug-fix batch — Business & Customer apps (Phase 32 — branch `Yousef2`)** ✅ **DONE**
     - **B1 — register crash:** `register.tsx` used `React.useMemo` without the default `React` import. Added `import React` — crash fixed.
