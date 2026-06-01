@@ -312,6 +312,13 @@
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
 
+33. **RTL fix — #1 of BUG_AUDIT.md (Phase 35 — branch `Yousef2`)** ✅ **DONE — ⚠️ device testing required**
+    - **Root cause:** Commit `47c24535` (Phase 26, 2026-05-31) accidentally replaced `forceRTL(true)` with `forceRTL(false)` in all three `_layout.tsx` files as collateral damage in a 25-file feature commit. No comment, no rationale — confirmed accidental regression, not a deliberate workaround.
+    - **Fix:** Restored `I18nManager.allowRTL(true); I18nManager.forceRTL(true);` at module level (before component mount) in all three apps: customer, business, driver.
+    - **Layout scan:** All 93+ StyleSheet entries already use explicit `flexDirection:'row-reverse'` / `textAlign:'right'` — none depend on the OS RTL direction. The only absolute-position items affected were the `NotificationBell` unread badge in all three apps: `left: -2` → `right: -2` (badge at top-right of icon, universal convention). Decorative blobs in driver splash flip sides under RTL — visually neutral.
+    - **⚠️ Device testing required:** `forceRTL` takes effect on the NEXT full app launch. Kill app → relaunch on a real device. Check: text inputs (phone/OTP/search), native pickers, ScrollView swipe direction, bottom tab order, modal presentation on Android.
+    - **tsc:** customer ✅ 0 | business ✅ 0 | driver ✅ 0.
+
 32. **Driver-flow socket fixes — Batch 2 of BUG_AUDIT.md (Phase 34 — branch `Yousef2`)** ✅ **DONE**
     - **#4 — addressDetail missing:** `GlobalSocketListener` in `driver-app/_layout.tsx` typed the `driver:request` payload without `addressDetail` and didn't forward it to `router.push` params. Fixed: added `addressDetail?: string` to the type and passed it (`?? ''`) so the delivery address now reaches `request-alert`.
     - **#6 — double navigation:** `driver:request` was listened to in both `_layout.tsx` (GlobalSocketListener, always mounted) and `(tabs)/index.tsx` (Home tab). Both called `router.push('/request-alert')`, pushing the modal twice per incoming request. Removed the listener from `index.tsx` entirely; `_layout.tsx` is the sole authoritative handler. The `order:status_update` listener in `index.tsx` (orders list refresh) is kept.

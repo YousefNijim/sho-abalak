@@ -17,7 +17,8 @@
 | #4 — addressDetail missing from GlobalSocketListener | ✅ Fixed | `ab08401` |
 | #6 — duplicate driver:request listener in index.tsx | ✅ Fixed | `ab08401` |
 | #7 — spurious driver:request from updateStatus + adminIntervention | ✅ Fixed | `1b5c258` |
-| All others | 🔲 Pending (Batch 3+) | — |
+| #1 — forceRTL(false) in all 3 apps (accidental regression) | ✅ Fixed | `fadd8a2` |
+| All others | 🔲 Pending | — |
 
 ⚠️ **ACTION REQUIRED:** Delete test ADMIN account `fb0bab3c-ff93-47c3-988b-461a5e7ff8ce` (phone `0591234567`, name "test hacker") created during audit confirmation of #8.
 
