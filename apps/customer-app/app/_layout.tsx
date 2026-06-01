@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
 import { I18nManager } from 'react-native';
 
-I18nManager.allowRTL(false);
-I18nManager.forceRTL(false);
+// Force RTL at the module level — runs before any component mounts.
+// NOTE: forceRTL takes effect on the NEXT app launch after the JS bundle runs
+// for the first time (React Native caches the direction). A fresh install or
+// full kill-and-relaunch is required to see the change on a real device.
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
