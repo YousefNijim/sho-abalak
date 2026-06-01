@@ -14,6 +14,7 @@ const PUBLIC_USER_SELECT = {
   email: true,
   areaId: true,
   createdAt: true,
+  business: { select: { id: true, name: true } },
 } satisfies Prisma.UserSelect;
 
 @Injectable()

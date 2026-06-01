@@ -140,6 +140,23 @@ export default function UsersPage() {
           </span>
         ),
       }),
+      columnHelper.display({
+        id: 'business',
+        header: 'المنشأة المرتبطة',
+        cell: (info) => {
+          const b = info.row.original.business;
+          if (!b) return <span className="text-muted-gray text-[13px]">—</span>;
+          return (
+            <a
+              href={`/businesses?highlight=${b.id}`}
+              className="text-[13px] font-semibold text-primary underline-offset-2 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {b.name}
+            </a>
+          );
+        },
+      }),
       columnHelper.accessor('status', {
         header: 'حالة الحساب',
         cell: (info) => (
@@ -555,6 +572,24 @@ export default function UsersPage() {
                       {STATUS_LABEL[selectedUser.status]}
                     </p>
                   </div>
+                  {selectedUser.role === 'BUSINESS' && (
+                    <div className="col-span-2">
+                      <span className="text-muted-gray">المنشأة المرتبطة:</span>
+                      {selectedUser.business ? (
+                        <a
+                          href={`/businesses?highlight=${selectedUser.business.id}`}
+                          className="block font-bold text-primary underline-offset-2 hover:underline"
+                        >
+                          {selectedUser.business.name}
+                          <span className="text-[11px] text-muted-gray font-normal mr-2">
+                            #{selectedUser.business.id.slice(0, 8)}
+                          </span>
+                        </a>
+                      ) : (
+                        <p className="font-bold text-warning">لا توجد منشأة مرتبطة بعد</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

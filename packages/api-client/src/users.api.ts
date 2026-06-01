@@ -10,6 +10,7 @@ export interface AdminUser {
   areaId: string | null;
   createdAt: string;
   area?: { city: string; name: string };
+  business?: { id: string; name: string } | null;
 }
 
 export interface UserListParams {
