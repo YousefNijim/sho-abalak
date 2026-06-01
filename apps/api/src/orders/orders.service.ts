@@ -173,17 +173,10 @@ export class OrdersService {
       this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
     }
 
-    // If order was assigned to a driver, emit request alert directly to the driver's user account
-    if (dto.status === OrderStatus.PICKED_UP && updatedOrder.driver?.user?.id) {
-      this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
-        orderId: updatedOrder.id,
-        businessName: updatedOrder.business?.name || 'منشأة تجارية',
-        areaName: updatedOrder.deliveryAreaName || updatedOrder.customer?.area?.name || 'العنوان المسجل',
-        addressDetail: updatedOrder.deliveryAddressDetail || '',
-        total: Number(updatedOrder.total),
-      });
-      this.pushDriverRequest(updatedOrder.driver.user.id, updatedOrder.id, updatedOrder.business?.name);
-    }
+    // driver:request is intentionally NOT emitted here.
+    // The two-step dispatch flow is: sendDriverRequest (emits the alert) → driver accepts via
+    // acceptDriver (READY→PICKED_UP). updateStatus is for business status transitions
+    // (CONFIRMED/PREPARING/READY) only; it does not dispatch drivers.
 
     return updatedOrder;
   }
@@ -501,7 +494,11 @@ export class OrdersService {
       this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, updatedOrder.status as OrderStatus);
     }
 
-    if (updatedOrder.driver?.user?.id) {
+    // Only dispatch a driver:request alert when the admin is explicitly assigning
+    // the order to a driver (setting status to PICKED_UP). Any other admin action
+    // (adjusting payment, reassigning driver without a status change, etc.) must
+    // NOT send the driver a spurious new-request alert.
+    if (dto.status === OrderStatus.PICKED_UP && updatedOrder.driver?.user?.id) {
       this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
         orderId: updatedOrder.id,
         businessName: updatedOrder.business?.name || 'منشأة تجارية',
