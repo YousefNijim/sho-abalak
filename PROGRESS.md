@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-06-01
-**Current phase:** Phase 33 (Security + crash fixes — Batch 1 of BUG_AUDIT.md)
+**Last updated:** 2026-06-02
+**Current phase:** Phase 36 (P1 cross-cutting layout fixes — RTL, safe-area, keyboard)
 
 ---
 
@@ -312,7 +312,14 @@
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
 
-33. **RTL fix — #1 of BUG_AUDIT.md (Phase 35 — branch `Yousef2`)** ✅ **DONE — ⚠️ device testing required**
+34. **P1 Cross-Cutting Layout Fixes (Phase 36 — branch `Yousef2`)** ✅ **DONE — ⚠️ device testing required**
+    - **P1.1 — RTL double-flip fixed (root cause identified + strategy applied):** `forceRTL(true)` was already present in all 3 `_layout.tsx` files. The bug was that 200+ explicit `flexDirection:'row-reverse'` entries across all screens were double-flipping under `forceRTL` — `row-reverse` + OS RTL mirror = effectively LTR again. **Strategy chosen: keep `forceRTL(true)`, change all `'row-reverse'` → `'row'`** across 36 screen files (customer, business, driver apps) + `Button.tsx` in ui-components. The OS RTL mirror now handles all flex direction. `NotificationBell` badge positions (`right: -2`) confirmed correct.
+    - **P1.2 — Bottom content above system nav bar:** Added/fixed `useSafeAreaInsets` on 8 screens that were missing it or using platform-conditional hacks: customer `change-password`, `about`; driver `request-alert` (actions bar), `active-delivery` (footer + scroll), `history` (scroll); business `index` (hardcoded 24 → insets.bottom + spacing[4]); business `register` + `login` (removed iOS-only guards → `Math.max(insets.bottom, spacing[4])` on all platforms).
+    - **P1.3 — Keyboard covers input fixed:** Added `KeyboardAvoidingView` with `'padding'` on iOS / `'height'` on Android to all forms that were missing it: customer `login`, `register` (wraps ScrollView only, BottomSheet stays outside), `addresses` modal, `change-password`, `edit`; driver `login`; business `profile`, `menu` modal, `change-password` (updated from `undefined` → `'height'` on Android).
+    - **tsc:** customer ✅ 0 | business ✅ 0 | driver ✅ 0 (all 3 commits).
+    - **⚠️ Device testing required:** Kill each app → relaunch on a real device. Check: (1) all elements right-to-left; (2) no buttons hidden behind nav bar; (3) typing in any form keeps the field visible above keyboard. Test login, OTP, register, cart, profile-edit, add-address forms specifically.
+
+33. **RTL fix — #1 of BUG_AUDIT.md (Phase 35 — branch `Yousef2`)** ✅ **DONE — superseded by P1.1 in Phase 36**
     - **Root cause:** Commit `47c24535` (Phase 26, 2026-05-31) accidentally replaced `forceRTL(true)` with `forceRTL(false)` in all three `_layout.tsx` files as collateral damage in a 25-file feature commit. No comment, no rationale — confirmed accidental regression, not a deliberate workaround.
     - **Fix:** Restored `I18nManager.allowRTL(true); I18nManager.forceRTL(true);` at module level (before component mount) in all three apps: customer, business, driver.
     - **Layout scan:** All 93+ StyleSheet entries already use explicit `flexDirection:'row-reverse'` / `textAlign:'right'` — none depend on the OS RTL direction. The only absolute-position items affected were the `NotificationBell` unread badge in all three apps: `left: -2` → `right: -2` (badge at top-right of icon, universal convention). Decorative blobs in driver splash flip sides under RTL — visually neutral.
