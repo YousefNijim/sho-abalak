@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-02
-**Current phase:** Phase 36 (P1 cross-cutting layout fixes — RTL, safe-area, keyboard)
+**Current phase:** Phase 37 (P2 access-control — role gates, business-as-customer, admin user↔business link)
 
 ---
 
@@ -311,6 +311,26 @@
     - **Verified:** `nest build` ✅ (also cleared the previously-noted banners/tags pre-existing errors — they were collateral of unbuilt `@shu/shared-types`, now built). `tsc --noEmit` customer-app ✅ 0 errors. **Live-API E2E (all pass):** `GET /me` shows email/imageUrl; PATCH name+email (email lowercased) + imageUrl persists; phone change **without** OTP → 400, **wrong** OTP → 400, **correct** `0000` → 200 and phone updated; test user cleaned up.
     - **Note:** OTP is still the dev stub (fixed code `0000`, no SMS provider) — the verification *flow* is fully wired end-to-end; swapping in a real SMS gateway is a backend-only change to `requestOtp`/`verifyOtp`.
     - **All four fix groups (a/b/c/d) for this round are complete.** Device screenshots still pending (no emulator in this environment).
+
+35. **P2 Access Control — Roles & Business-as-Customer (Phase 37 — branch `Yousef2`)** ✅ **DONE**
+    - **P2.1 — Role gates per app (SECURITY):** Added role check in `auth.store.login()` in each app, before token is written to AsyncStorage (no session leakage on mismatch).
+      - **customer-app:** CUSTOMER + BUSINESS allowed; DRIVER/ADMIN rejected with Arabic error.
+      - **business-app:** BUSINESS only; all others rejected.
+      - **driver-app:** Already correctly gated (`role !== 'DRIVER'` throw) — no change.
+      - Gate is intentionally client-side: the shared `/auth/login` API endpoint must stay role-agnostic so a BUSINESS user can log into both the business app and the customer app.
+    - **P2.2 — Business accounts get customer privileges:** Chose same-account model — a BUSINESS user logs into the customer app with their existing credentials (no duplicate account needed). Two API endpoints that were `@Roles(CUSTOMER)` blocked BUSINESS users: `POST /orders` and `POST /reviews`. Added `UserRole.BUSINESS` to both `@Roles()` decorators. Service layer is already role-agnostic (uses `userId` as `customerId`). Addresses CRUD has no role restriction — already works. No schema change.
+    - **P2.3 — User↔business link in admin dashboard:** The `Business.ownerId → User` relation already existed in schema (one-to-one, unique) — no migration needed. Extended `PUBLIC_USER_SELECT` in `users.service.ts` to include `business: { select: { id, name } }`. Added `business?` to `AdminUser` type in api-client. Admin users page: new "المنشأة المرتبطة" column (deeplinks to `/businesses?highlight=<id>`) and matching detail-drawer row showing business name + ID prefix; shown only for BUSINESS-role users.
+    - **Verification matrix (code-level — live API test pending device):**
+      - ✅ DRIVER logs into driver-app (existing gate)
+      - ✅ CUSTOMER rejected by driver-app (existing gate)
+      - ✅ DRIVER/ADMIN rejected by customer-app (new gate)
+      - ✅ DRIVER/ADMIN/CUSTOMER rejected by business-app (new gate)
+      - ✅ BUSINESS accepted by customer-app (new gate allows BUSINESS)
+      - ✅ BUSINESS can place orders in customer-app (BUSINESS added to POST /orders)
+      - ✅ BUSINESS can write reviews in customer-app (BUSINESS added to POST /reviews)
+      - ✅ Admin sees linked business for BUSINESS-role users in Users page
+    - **tsc:** customer ✅ 0 | business ✅ 0 | driver ✅ 0. **nest build ✅ | next build ✅** (14 routes).
+    - **⚠️ Live API verify required:** Test with real accounts — log a CUSTOMER into the business-app (expect rejection), log a BUSINESS into the customer-app (expect success + can place order), verify admin users page shows business name for BUSINESS rows.
 
 34. **P1 Cross-Cutting Layout Fixes (Phase 36 — branch `Yousef2`)** ✅ **DONE — ⚠️ device testing required**
     - **P1.1 — RTL double-flip fixed (root cause identified + strategy applied):** `forceRTL(true)` was already present in all 3 `_layout.tsx` files. The bug was that 200+ explicit `flexDirection:'row-reverse'` entries across all screens were double-flipping under `forceRTL` — `row-reverse` + OS RTL mirror = effectively LTR again. **Strategy chosen: keep `forceRTL(true)`, change all `'row-reverse'` → `'row'`** across 36 screen files (customer, business, driver apps) + `Button.tsx` in ui-components. The OS RTL mirror now handles all flex direction. `NotificationBell` badge positions (`right: -2`) confirmed correct.

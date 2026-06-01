@@ -4,7 +4,7 @@
 **Branch:** Yousef2  
 **Auditor:** Claude Code (automated static analysis — no code modified)
 
-## Fix Status (Phase 33)
+## Fix Status (Phase 37)
 
 | Issue | Status | Commit |
 |---|---|---|
@@ -18,6 +18,12 @@
 | #6 — duplicate driver:request listener in index.tsx | ✅ Fixed | `ab08401` |
 | #7 — spurious driver:request from updateStatus + adminIntervention | ✅ Fixed | `1b5c258` |
 | #1 — forceRTL(false) in all 3 apps (accidental regression) | ✅ Fixed | `fadd8a2` |
+| P1.1 RTL double-flip (row-reverse + forceRTL) | ✅ Fixed | `2353565` |
+| P1.2 Bottom content behind nav bar (8 screens) | ✅ Fixed | `8e497a9` |
+| P1.3 Keyboard covers inputs (9 form screens) | ✅ Fixed | `a8d13b8` |
+| P2.1 No role gate on customer/business app login (SECURITY) | ✅ Fixed | `f744d3b` |
+| P2.2 BUSINESS users blocked from placing orders + reviews | ✅ Fixed | `932296a` |
+| P2.3 User↔business link missing from admin users page | ✅ Fixed | `f63c5ce` |
 | All others | 🔲 Pending | — |
 
 ⚠️ **ACTION REQUIRED:** Delete test ADMIN account `fb0bab3c-ff93-47c3-988b-461a5e7ff8ce` (phone `0591234567`, name "test hacker") created during audit confirmation of #8.
