@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 
 const STEPS = ['استلام من المنشأة', 'في الطريق', 'تسليم للزبون'];
@@ -12,6 +13,7 @@ export default function ActiveDelivery() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { orderId } = useLocalSearchParams<{ orderId: string }>();
+  const insets = useSafeAreaInsets();
 
   // Local step counter — pure UX (no API call for steps 0→1, only step 2 delivers)
   const [step, setStep] = useState(0);
@@ -120,7 +122,7 @@ export default function ActiveDelivery() {
         </View>
       </Modal>
 
-      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: 24 }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: spacing[4] }}>
         {/* Stepper */}
         <View style={styles.stepper}>
           {STEPS.map((s, i) => (
@@ -203,7 +205,7 @@ export default function ActiveDelivery() {
       </ScrollView>
 
       {/* Footer — only ONE actionable button at a time */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing[4]) }]}>
         {step === 0 && (
           <Button
             title="استلمت الطلب وبدء التحرك 🛵"

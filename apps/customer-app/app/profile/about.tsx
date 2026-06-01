@@ -11,10 +11,12 @@ import {
   Globe,
   Mail,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme';
 
 export default function AboutScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleLink = (url: string) => {
     Linking.openURL(url).catch(() => {});
@@ -33,7 +35,7 @@ export default function AboutScreen() {
         <Text style={styles.headerAppTitle}>شو عبالك؟</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing[10] }]} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.hero}>
           <View style={styles.logoContainer}>
@@ -163,7 +165,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing[4],
-    paddingBottom: spacing[10],
   },
   hero: {
     alignItems: 'center',

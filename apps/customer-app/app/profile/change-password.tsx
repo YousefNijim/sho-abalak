@@ -9,10 +9,12 @@ import {
   CheckCircle2,
   LockKeyhole,
 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, spacing, radius } from '../../src/theme';
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -56,7 +58,7 @@ export default function ChangePasswordScreen() {
         style={{ flex: 1 }} 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing[10] }]} showsVerticalScrollIndicator={false}>
           
           {/* Illustration Section */}
           <View style={styles.hero}>
@@ -182,7 +184,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing[4],
-    paddingBottom: spacing[10],
   },
   hero: {
     alignItems: 'center',

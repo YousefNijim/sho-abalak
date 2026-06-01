@@ -337,7 +337,7 @@ export default function RegisterStore() {
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </ScrollView>
 
-      <View style={[styles.stickyFooter, { paddingBottom: Platform.OS === 'ios' ? Math.max(insets.bottom, spacing[4]) : spacing[4] }]}>
+      <View style={[styles.stickyFooter, { paddingBottom: Math.max(insets.bottom, spacing[4]) }]}>
         <Pressable
           style={[
             styles.primaryBtn,

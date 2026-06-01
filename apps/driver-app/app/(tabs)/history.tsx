@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ordersApi } from '@shu/api-client';
 import { formatShekel } from '@shu/utils';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
 export default function History() {
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
 
   // Query historical orders scoped to this driver
@@ -66,7 +68,7 @@ export default function History() {
   return (
     <ScrollView 
       style={{ flex: 1, backgroundColor: colors.background }} 
-      contentContainerStyle={{ padding: spacing[4], gap: spacing[3] }}
+      contentContainerStyle={{ padding: spacing[4], gap: spacing[3], paddingBottom: insets.bottom + spacing[4] }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
       }

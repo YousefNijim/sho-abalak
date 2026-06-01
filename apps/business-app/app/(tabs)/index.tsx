@@ -169,7 +169,7 @@ export default function Dashboard() {
       </View>
 
       <ScrollView 
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: 24 }}
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[4] }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
         }

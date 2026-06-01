@@ -76,7 +76,7 @@ export default function Login() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4], paddingBottom: insets.bottom + spacing[4] }}
+        contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top + spacing[4], paddingBottom: insets.bottom + spacing[4] }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >

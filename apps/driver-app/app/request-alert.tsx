@@ -4,11 +4,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { MapPin } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { ordersApi } from '@shu/api-client';
 
 export default function RequestAlert() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { orderId, businessName, areaName, addressDetail, total } = useLocalSearchParams<{
     orderId: string;
     businessName: string;
@@ -100,7 +102,7 @@ export default function RequestAlert() {
 
       <Text style={styles.timer}>{mm}:{ss}</Text>
 
-      <View style={styles.actions}>
+      <View style={[styles.actions, { paddingBottom: insets.bottom + spacing[2] }]}>
         <Button
           title={rejectMutation.isPending ? 'جاري الرفض...' : '❌ رفض'}
           variant="danger"
