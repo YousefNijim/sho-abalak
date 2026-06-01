@@ -9,7 +9,7 @@ import { ArrowRight, MessageSquareCode, CheckCircle2 } from 'lucide-react-native
 import { Image } from 'expo-image';
 
 export default function Otp() {
-  const router = require('expo-router').useRouter();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
   
@@ -39,7 +39,11 @@ export default function Otp() {
     setError('');
     setLoading(true);
     try {
-      await authApi.otpVerify(user?.phone ?? '', code);
+      const result = await authApi.otpVerify(user?.phone ?? '', code);
+      if (!result.verified) {
+        setError('الكود غير صحيح، يرجى المحاولة مرة أخرى');
+        return;
+      }
       router.replace('/sections');
     } catch {
       setError('الكود غير صحيح');
