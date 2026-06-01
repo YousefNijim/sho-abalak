@@ -312,7 +312,7 @@ export default function MenuTab() {
       >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
           <View style={[styles.modalContainer, { paddingBottom: insets.bottom + spacing[4] }]}>
             {/* Modal Header */}

@@ -268,7 +268,7 @@ export default function ProfileTab() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 6 }]}>
         <Pressable style={styles.headerBtn} onPress={handleLogout} hitSlop={8}>

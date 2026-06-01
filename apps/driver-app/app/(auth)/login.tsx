@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable, Platform } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, Platform, KeyboardAvoidingView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Input } from '@shu/ui-components/native';
@@ -41,13 +41,13 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* Background Shapes */}
       <View style={styles.bgBlobRight} />
       <View style={styles.bgBlobLeft} />
 
       {/* Top AppBar */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'ios' ? insets.top : spacing[4] }]}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <Image
           source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuABdyES4rRxiMO8pR8TzWPXCSE8vbRZptSrzrxBXrXzwo4wGPMI80g0h5g62fwYCBXUBJ8xL6dB_xvxW0TXf4PlvaOTr0lz54kMiYUQqbfqm3qxRN1RqQZhylSZ6xWpbnq79xSHomiDqHHXUL25C5hhnhHp3NAJiOi3dO_ZiML71eCR3QMrsEtaaKQxH8wqTWZc0NFTXLIkFFiCXPRPulFOz3PlurONuy9aiBwpocrMEGS8B54Sxzu0AEtUanfWuHRzCxOxcVpijkLY' }}
           style={styles.logo}
@@ -162,7 +162,7 @@ export default function Login() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

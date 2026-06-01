@@ -10,6 +10,7 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -284,6 +285,7 @@ export default function AddressesScreen() {
         onRequestClose={closeModal}
       >
         <Pressable style={styles.modalOverlay} onPress={closeModal} />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>
@@ -365,6 +367,7 @@ export default function AddressesScreen() {
             )}
           </Pressable>
         </View>
+        </KeyboardAvoidingView>
 
         {/* City picker modal */}
         <Modal

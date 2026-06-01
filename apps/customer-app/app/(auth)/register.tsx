@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState, useMemo } from 'react';
 import {
+  KeyboardAvoidingView,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -108,6 +109,7 @@ export default function Register() {
         </View>
       </View>
 
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing[8] }]}
         keyboardShouldPersistTaps="handled"
@@ -291,6 +293,7 @@ export default function Register() {
           />
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* City bottom sheet */}
       <BottomSheet

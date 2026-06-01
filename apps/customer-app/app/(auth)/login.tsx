@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Pressable, TextInput, Platform, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, Pressable, TextInput, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* Decorative Background Elements */}
       <View style={styles.blob1} />
       <View style={styles.blob2} />
@@ -149,7 +149,7 @@ export default function Login() {
           </Link>
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

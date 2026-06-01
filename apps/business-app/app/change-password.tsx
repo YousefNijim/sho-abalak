@@ -79,7 +79,7 @@ export default function ChangePassword() {
         <View style={styles.iconBtn} />
       </View>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + 40 }}
           keyboardShouldPersistTaps="handled"
