@@ -28,36 +28,22 @@ export default function DriverHome() {
     refetchInterval: 30000,
   });
 
+  // driver:request is handled globally in _layout.tsx (GlobalSocketListener) to ensure
+  // it fires regardless of which tab is active. Only listen here for order status changes
+  // that need to refresh the home screen's order list.
   useEffect(() => {
     if (!socket) return;
 
-    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) => {
-      console.log('WS instant driver request received:', payload.orderId);
-      router.push({
-        pathname: '/request-alert',
-        params: {
-          orderId: payload.orderId,
-          businessName: payload.businessName,
-          areaName: payload.areaName,
-          addressDetail: payload.addressDetail ?? '',
-          total: String(payload.total),
-        },
-      });
-    };
-
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
-      console.log('WS order status update received:', payload.orderId, payload.status);
       queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
     };
 
-    socket.on('driver:request', handleDriverRequest);
     socket.on('order:status_update', handleStatusUpdate);
 
     return () => {
-      socket.off('driver:request', handleDriverRequest);
       socket.off('order:status_update', handleStatusUpdate);
     };
-  }, [socket, router, queryClient]);
+  }, [socket, queryClient]);
 
   // Mutation to toggle availability
   const toggleAvailable = useMutation({

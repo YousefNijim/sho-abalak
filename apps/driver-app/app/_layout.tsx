@@ -33,14 +33,14 @@ function GlobalSocketListener() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; total: number }) => {
-      console.log('WS instant driver request received globally:', payload.orderId);
+    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) => {
       router.push({
         pathname: '/request-alert',
         params: {
           orderId: payload.orderId,
           businessName: payload.businessName,
           areaName: payload.areaName,
+          addressDetail: payload.addressDetail ?? '',
           total: String(payload.total),
         },
       });
