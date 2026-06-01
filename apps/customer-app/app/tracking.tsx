@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC', // background-cream
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
     }),
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     }),
   },
   statusHeaderRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing[6],
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   stepItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[4],
     minHeight: 60,
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(151, 72, 0, 0.05)',
   },
   driverHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[4],
   },
@@ -482,7 +482,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   ratingRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: 4,
@@ -509,12 +509,12 @@ const styles = StyleSheet.create({
     paddingTop: spacing[4],
     borderTopWidth: 1,
     borderTopColor: 'rgba(229, 224, 213, 1)',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   vehicleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   msgBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
@@ -556,10 +556,10 @@ const styles = StyleSheet.create({
     height: 100,
     justifyContent: 'flex-end',
     padding: spacing[4],
-    flexDirection: 'row-reverse', // Align badge to right? Actually the design shows it just in the bottom.
+    flexDirection: 'row', // Align badge to right? Actually the design shows it just in the bottom.
   },
   mapBadge: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: radius.lg,
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   summaryRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   summaryTotalRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing[3],
@@ -678,7 +678,7 @@ const styles = StyleSheet.create({
     }),
   },
   deliveryCardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
     marginBottom: spacing[1],

@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: spacing[3], width: '100%' },
   divider: { height: 1, backgroundColor: colors.border },
   addressTitle: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right' },
-  addressBlock: { flexDirection: 'row-reverse', alignItems: 'flex-start', gap: spacing[2] },
+  addressBlock: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing[2] },
   addressAreaName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
   addressDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
 });

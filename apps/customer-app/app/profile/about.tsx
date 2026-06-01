@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { position: 'sticky', top: 0, zIndex: 10 } : {}),
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
     marginBottom: spacing[3],
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   statsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
     marginBottom: spacing[4],
   },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: colors.primary,
     borderRadius: radius.md,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

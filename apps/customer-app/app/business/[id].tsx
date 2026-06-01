@@ -356,13 +356,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing[4],
     right: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 10,
   },
   heroActionsRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[2],
   },
   heroBtn: {
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
     }),
   },
   infoHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: spacing[2],
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   addressRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     marginTop: spacing[1],
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   tagsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing[1],
     marginTop: spacing[2],
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   ratingBadge: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#ffdbc7', // primary-fixed
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     color: '#4e2200', // on-primary-container
   },
   infoDetailsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[5],
     paddingTop: spacing[3],
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[3],
   },
   detailItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   tabsScrollContent: {
     paddingHorizontal: spacing[4],
     gap: spacing[2],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
   },
   tabBtn: {
     paddingHorizontal: 24,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[4],
   },
   productCard: { 
-    flexDirection: 'row-reverse', 
+    flexDirection: 'row', 
     alignItems: 'stretch', 
     gap: spacing[3], 
     backgroundColor: '#FFFFFF', 
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
   },
   productFooter: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     height: 56, 
     borderRadius: radius.xl, 
     backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center', 
     justifyContent: 'space-between', 
     paddingHorizontal: spacing[6],
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
     }),
   },
   cartBarLeft: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular
   },
   stepperWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: colors.primary,

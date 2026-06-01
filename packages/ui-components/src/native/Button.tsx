@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   base: {
     height: 52, // From design spec
     borderRadius: radius.md, // 12px
-    flexDirection: 'row-reverse', // RTL
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,

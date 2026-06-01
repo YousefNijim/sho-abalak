@@ -535,7 +535,7 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
 // ─── Styles ──────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     paddingHorizontal: spacing[4],
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   addBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: colors.primary,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   tabsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     gap: spacing[2],
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   modalHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -689,7 +689,7 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
   twoCol: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
   },
   textInput: {
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing[3],
   },
   priceRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   availRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     backgroundColor: colors.surface,
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   modalFooter: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
     paddingHorizontal: spacing[4],
     paddingTop: spacing[3],
@@ -782,7 +782,7 @@ const styles = StyleSheet.create({
 
 const pStyles = StyleSheet.create({
   card: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
@@ -812,7 +812,7 @@ const pStyles = StyleSheet.create({
     paddingLeft: 0,
   },
   topRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
@@ -837,13 +837,13 @@ const pStyles = StyleSheet.create({
     lineHeight: 20,
   },
   actionsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing[2],
   },
   toggleGroup: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },

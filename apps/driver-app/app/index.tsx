@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   badge: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
     backgroundColor: 'rgba(230, 120, 30, 0.1)', // primary-container/10

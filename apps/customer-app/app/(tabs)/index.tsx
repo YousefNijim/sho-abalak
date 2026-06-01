@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC', // background-cream
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[2],
   },
   searchBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.white,
     borderWidth: 0,
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     bottom: -40,
   },
   sectionHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing[6],
@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
   categoriesScroll: {
     paddingBottom: spacing[2],
     gap: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
   },
   categoryItem: {
     flexDirection: 'column',
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
     color: colors.primary,
   },
   locationTag: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   ratingWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
   },
@@ -672,13 +672,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   cardMeta: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     marginTop: spacing[3],
   },
   metaItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
     marginBottom: 0, // margin is handled by scroll
   },
   addressBarRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   addressBarLabelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   addrRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     paddingVertical: spacing[3],
@@ -830,7 +830,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addAddressBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   },
   // Fix 1 — active order banner
   activeOrderBanner: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.secondary,
     borderRadius: radius.md,

@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     gap: spacing[8],
   },
   dotsContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing[2],
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: colors.primary,
     borderRadius: radius.xl,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     ...Platform.select({

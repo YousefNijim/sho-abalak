@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
 
   // App Bar
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     position: 'relative',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   inputIconRight: {
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   // Area Selector
   areaSelector: {
     position: 'relative',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     height: 52,
     backgroundColor: '#FFFFFF',
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
 
   // Checkbox
   checkRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
     marginTop: spacing[2],
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
     borderRadius: radius.xl,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing[4],
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing[8]
   },
@@ -619,7 +619,7 @@ const styles = StyleSheet.create({
   },
   sheetList: { paddingBottom: spacing[8] },
   areaItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing[4],

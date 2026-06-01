@@ -445,7 +445,7 @@ export default function ProfileTab() {
                           key={area.id}
                           onPress={() => toggleDeliveryArea(area.id)}
                           style={{
-                            flexDirection: 'row-reverse',
+                            flexDirection: 'row',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             paddingVertical: spacing[3],
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   typeSeg: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1.5,
@@ -895,10 +895,10 @@ const styles = StyleSheet.create({
   typeSegItemActive: { backgroundColor: colors.primary },
   typeSegText: { fontSize: fontSizes.base, fontFamily: fontFamily.semibold, color: colors.textMuted },
   typeSegTextActive: { color: '#fff' },
-  tagsWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[2] },
+  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
   tagsEmpty: { fontSize: fontSizes.sm, fontFamily: fontFamily.regular, color: colors.textMuted },
   tagChip: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     paddingHorizontal: spacing[4],

@@ -172,13 +172,13 @@ export default function DriverSelection() {
 }
 
 const styles = StyleSheet.create({
-  filters: { flexDirection: 'row-reverse', gap: spacing[2], padding: spacing[4] },
+  filters: { flexDirection: 'row', gap: spacing[2], padding: spacing[4] },
   filter: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   filterActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   filterText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   filterTextActive: { color: '#fff' },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
-  row: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
   avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   name: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },

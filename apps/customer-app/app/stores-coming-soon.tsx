@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   badge: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: 'rgba(22,90,52,0.12)',

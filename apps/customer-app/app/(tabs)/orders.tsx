@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC', // background-cream
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     }),
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing[6],
   },
   tabsContainer: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     backgroundColor: '#FFFFFF', // surface-white
     borderRadius: radius.xl,
     overflow: 'hidden',
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
     marginBottom: spacing[4],
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   cardTitleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   cardFooter: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: spacing[4],
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1.5,
     borderColor: colors.primary,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },

@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC', // background-cream
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     height: 48,
     backgroundColor: colors.primary,
     borderRadius: radius.md,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
@@ -345,14 +345,14 @@ const styles = StyleSheet.create({
     }),
   },
   menuItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: spacing[4],
     backgroundColor: '#FFFFFF',
   },
   menuItemLeft: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     flex: 1,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   menuItemRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(229, 224, 213, 1)', // border-beige
   },
   logoutBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
     gap: spacing[3],

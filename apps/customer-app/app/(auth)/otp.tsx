@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
 
   // App Bar
   appBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[4],
     zIndex: 50,
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
     borderRadius: radius.lg,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

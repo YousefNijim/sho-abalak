@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   
   // Header
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   // Phone field: a single RTL row — [Phone icon] [970+ prefix] [number, LTR]
   phoneField: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     height: 52,
     backgroundColor: '#FFFFFF',
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     height: 52,
     backgroundColor: '#e6781e', // primary-container
     borderRadius: radius.lg,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   supportBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

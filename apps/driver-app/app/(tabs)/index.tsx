@@ -113,7 +113,7 @@ export default function DriverHome() {
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
       }
     >
-      <View style={{ flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={styles.greeting}>مرحباً {driver?.user?.name || 'كريم'} 👋</Text>
         <NotificationBell size={24} />
       </View>
@@ -188,16 +188,16 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   greeting: { fontSize: fontSizes['2xl'], fontFamily: fontFamily.extrabold, color: colors.primary, textAlign: 'right' },
-  availCard: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
+  availCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border },
   availStatus: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, marginTop: 2 },
-  stats: { flexDirection: 'row-reverse', gap: spacing[3] },
+  stats: { flexDirection: 'row', gap: spacing[3] },
   stat: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
   statValue: { fontSize: fontSizes.xl, fontFamily: fontFamily.extrabold, color: colors.textPrimary },
   statLabel: { color: colors.textMuted, fontSize: fontSizes.xs, marginTop: 2 },
   sectionTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[3], textAlign: 'right' },
   orderCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
-  orderRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+  orderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   amount: { color: colors.primary, fontFamily: fontFamily.bold },
   deliverBtn: { backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: spacing[3], alignItems: 'center', marginTop: spacing[3] },

@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     }),
   },
   productHeaderRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: spacing[4],
@@ -331,12 +331,12 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   productTagsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
   },
   ratingBadge: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'rgba(41, 106, 67, 0.1)', // secondary/10
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   priceCol: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-end',
     marginLeft: spacing[4],
   },
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   quantityRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: spacing[6],
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   stepperWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[5],
     backgroundColor: '#FCF3DC',
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
     maxWidth: 600,
     width: '100%',
     alignSelf: 'center',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[5],
   },
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     height: 56,
     backgroundColor: colors.primary,
     borderRadius: radius.xl,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[3],

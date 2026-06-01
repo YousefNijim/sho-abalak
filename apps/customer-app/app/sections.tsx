@@ -88,7 +88,7 @@ export default function Sections() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   cardCta: {
     alignSelf: 'flex-end',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     backgroundColor: '#fff',

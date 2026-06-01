@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     marginRight: spacing[1],
   },
   inputWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     marginRight: spacing[1],
   },
   securityHint: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
     backgroundColor: colors.surface,

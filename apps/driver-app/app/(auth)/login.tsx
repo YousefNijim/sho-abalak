@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     gap: spacing[1],
   },
   labelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[1],
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     color: colors.secondary,
   },
   inputWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   phonePrefix: {
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e6781e', // primary-container
   },
   btnContent: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

@@ -157,7 +157,7 @@ export default function Dashboard() {
             {isOpen ? '🟢 مفتوح حالياً' : '🔴 مغلق حالياً'}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
           <NotificationBell size={24} />
           <Switch
             value={isOpen}
@@ -227,21 +227,21 @@ function Stat({ label, value, bg }: { label: string; value: string; bg: string }
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', padding: spacing[4], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing[4], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   storeName: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, textAlign: 'right' },
   status: { fontSize: fontSizes.sm, marginTop: 2, fontFamily: fontFamily.semibold, textAlign: 'right' },
-  statsGrid: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[3], marginBottom: spacing[5] },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3], marginBottom: spacing[5] },
   stat: { width: '47%', borderRadius: radius.lg, padding: spacing[4], flexGrow: 1, alignItems: 'flex-end' },
   statValue: { color: '#fff', fontSize: 24, fontFamily: fontFamily.extrabold },
   statLabel: { color: '#fff', fontSize: fontSizes.sm, opacity: 0.9, marginTop: 2 },
-  tabs: { flexDirection: 'row-reverse', gap: spacing[2], marginBottom: spacing[4] },
+  tabs: { flexDirection: 'row', gap: spacing[2], marginBottom: spacing[4] },
   tab: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   tabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   tabText: { color: colors.textMuted, fontFamily: fontFamily.semibold },
   tabTextActive: { color: '#fff' },
   redDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.error },
   orderCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
-  orderRow: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+  orderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderId: { fontFamily: fontFamily.bold, color: colors.textPrimary, fontSize: fontSizes.base },
   customer: { color: colors.textPrimary, fontSize: fontSizes.base, textAlign: 'right' },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm },

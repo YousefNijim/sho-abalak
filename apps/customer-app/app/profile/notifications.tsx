@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { position: 'sticky', top: 0, zIndex: 10 } : {}),
   },
   headerRight: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   },
   filtersContent: {
     paddingHorizontal: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[2],
   },
   filterPill: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 },
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: spacing[1],
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   imageCardBody: {
     padding: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
   },
 });

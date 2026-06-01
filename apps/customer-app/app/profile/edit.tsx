@@ -292,7 +292,7 @@ export default function EditProfile() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: spacing[4],
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
   },
   inputRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     backgroundColor: colors.surface,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     padding: spacing[4],
     gap: spacing[3],
   },
-  verifyHeader: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[2] },
+  verifyHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
   verifyTitle: {
     fontFamily: fontFamily.semibold,
     fontSize: fontSizes.sm,
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     letterSpacing: 6,
   },
-  otpActions: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[3] },
+  otpActions: { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
   resendBtn: { paddingHorizontal: spacing[3], paddingVertical: spacing[2] },
   resendText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.primary },
   footer: {
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     height: 54,
     backgroundColor: colors.primary,
     borderRadius: radius.md,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

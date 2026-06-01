@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
     paddingHorizontal: spacing[4],
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   headerLeft: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
   },
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing[4],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
     ...Platform.select({
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   },
   cardLeft: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
     alignItems: 'flex-start',
   },
@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   areaTag: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginTop: spacing[1],
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   cardActions: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[1],
     alignItems: 'center',
   },
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     }),
   },
   addBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   selectRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background,
     borderWidth: 1.5,
@@ -682,7 +682,7 @@ const styles = StyleSheet.create({
 
   // Area rows inside nested picker
   areaRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     paddingVertical: spacing[3],

@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     marginRight: spacing[1],
   },
   inputRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   phoneRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   pickerItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
     paddingHorizontal: spacing[4],
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   segment: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     backgroundColor: colors.surface,
     borderRadius: radius.md,
     borderWidth: 1.5,
@@ -510,10 +510,10 @@ const styles = StyleSheet.create({
   segmentItemActive: { backgroundColor: colors.primary },
   segmentText: { fontSize: fontSizes.base, fontFamily: fontFamily.semibold, color: colors.textMuted },
   segmentTextActive: { color: '#fff' },
-  tagsWrap: { flexDirection: 'row-reverse', flexWrap: 'wrap', gap: spacing[2] },
+  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] },
   tagsEmpty: { fontSize: fontSizes.sm, fontFamily: fontFamily.regular, color: colors.textMuted },
   tagChip: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[1],
     paddingHorizontal: spacing[4],

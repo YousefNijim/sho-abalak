@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCF3DC', // background-cream
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF', // surface-white
     borderRadius: radius.lg, // 12px or 16px
     padding: spacing[3],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     ...Platform.select({
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   itemHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
@@ -407,12 +407,12 @@ const styles = StyleSheet.create({
   },
   itemFooter: {
     marginTop: spacing[2],
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   qtyWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#efecf6', // surface-container
     borderRadius: radius.full,
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   paymentGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing[3],
   },
   paymentCard: {
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
     }),
   },
   summaryRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   confirmBtnContent: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[8],
   },
   addressBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   addrRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[3],
     paddingVertical: spacing[3],
@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   addAddressBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[2],

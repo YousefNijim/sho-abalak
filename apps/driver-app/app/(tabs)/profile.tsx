@@ -209,13 +209,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   availRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: spacing[3],
   },
   availLabelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
@@ -237,12 +237,12 @@ const styles = StyleSheet.create({
     marginVertical: spacing[3],
   },
   infoRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   infoLabelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   logoutBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing[3],

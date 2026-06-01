@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   summaryLabel: { color: '#fff', opacity: 0.9 },
   summaryValue: { color: '#fff', fontSize: 32, fontFamily: fontFamily.extrabold, marginTop: 4 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
-  row: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center' },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   business: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   amount: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
