@@ -50,6 +50,7 @@ export default function TabsLayout() {
         name="orders"
         options={{
           title: 'طلباتي',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Package size={size} color={color} />,
         }}
       />

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
+import { Linking, Pressable, TouchableOpacity, ScrollView, StyleSheet, Text, View, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import {
   MapPin,
@@ -73,7 +73,17 @@ export default function Profile() {
     ]);
   };
 
+  const openWhatsApp = () =>
+    Linking.openURL('https://wa.me/970569703134').catch(() => {});
+
   const navigateTo = (route: string | null, label: string) => {
+    if (label === 'اتصل بنا') {
+      Alert.alert('اتصل بنا', 'تواصل معنا عبر واتساب على الرقم:\n+970 569 703 134', [
+        { text: 'إلغاء', style: 'cancel' },
+        { text: 'فتح واتساب', onPress: openWhatsApp },
+      ]);
+      return;
+    }
     if (route) {
       router.push(route as any);
     } else {
@@ -345,11 +355,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: spacing[3],
+    flex: 1,
   },
   menuItemLabel: {
     fontFamily: fontFamily.regular,
     fontSize: 17, // body-lg
     color: colors.textPrimary,
+    flexShrink: 1,
   },
   menuItemRight: {
     flexDirection: 'row-reverse',

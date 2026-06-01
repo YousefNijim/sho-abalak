@@ -552,7 +552,7 @@ const styles = StyleSheet.create({
   categoriesScroll: {
     paddingBottom: spacing[2],
     gap: spacing[4],
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
   },
   categoryItem: {
     flexDirection: 'column',
