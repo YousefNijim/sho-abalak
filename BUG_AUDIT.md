@@ -14,7 +14,10 @@
 | #5 — hardcoded 127.0.0.1:3001 in admin | ✅ Fixed | `0493232` |
 | B-2/B-3 — business-app profile.tsx tsc errors | ✅ Fixed | `3436299` |
 | D-3 — driver-app login dir prop tsc error | ✅ Fixed | `3436299` |
-| All others | 🔲 Pending (Batch 2+) | — |
+| #4 — addressDetail missing from GlobalSocketListener | ✅ Fixed | `ab08401` |
+| #6 — duplicate driver:request listener in index.tsx | ✅ Fixed | `ab08401` |
+| #7 — spurious driver:request from updateStatus + adminIntervention | ✅ Fixed | `1b5c258` |
+| All others | 🔲 Pending (Batch 3+) | — |
 
 ⚠️ **ACTION REQUIRED:** Delete test ADMIN account `fb0bab3c-ff93-47c3-988b-461a5e7ff8ce` (phone `0591234567`, name "test hacker") created during audit confirmation of #8.
 
