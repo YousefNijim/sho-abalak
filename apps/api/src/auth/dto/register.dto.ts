@@ -1,7 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, Matches, MinLength } from 'class-validator';
-import { UserRole } from '@shu/shared-types';
+import { IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
+/**
+ * Public customer self-registration.
+ * Role is NOT accepted from the client — always hardcoded to CUSTOMER in AuthService.
+ * Business registration uses RegisterBusinessDto; admin/driver accounts are created
+ * by an admin only.
+ */
 export class RegisterDto {
   @ApiProperty({ example: 'أحمد محمد' })
   @IsString()
@@ -16,11 +21,6 @@ export class RegisterDto {
   @IsString()
   @MinLength(6)
   password!: string;
-
-  @ApiPropertyOptional({ enum: UserRole, default: UserRole.CUSTOMER })
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
 
   @ApiPropertyOptional({ description: 'معرّف المنطقة' })
   @IsOptional()

@@ -31,7 +31,7 @@ export class AuthService {
         name: dto.name,
         phone: dto.phone,
         password: passwordHash,
-        role: dto.role ?? UserRole.CUSTOMER,
+        role: UserRole.CUSTOMER, // always CUSTOMER — role is not accepted from client
         areaId: dto.areaId ?? null,
       },
     });
