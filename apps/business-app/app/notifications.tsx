@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   iconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   cardContent: { flex: 1 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing[1] },
-  cardTitle: { fontFamily: fontFamily.semibold, fontSize: fontSizes.base, color: colors.textPrimary, flex: 1, textAlign: 'right', marginLeft: spacing[2] },
+  cardTitle: { fontFamily: fontFamily.semibold, fontSize: fontSizes.base, color: colors.textPrimary, flex: 1, textAlign: 'right', marginEnd: spacing[2] },
   timeText: { fontFamily: fontFamily.medium, fontSize: fontSizes.xs, color: colors.textMuted },
   cardBody: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', lineHeight: 20, marginBottom: spacing[2] },
   linkText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.primary, textDecorationLine: 'underline', textAlign: 'right' },

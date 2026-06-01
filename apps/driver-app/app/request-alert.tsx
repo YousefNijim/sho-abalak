@@ -90,7 +90,7 @@ export default function RequestAlert() {
         <View style={styles.divider} />
         <Text style={styles.addressTitle}>عنوان التوصيل</Text>
         <View style={styles.addressBlock}>
-          <MapPin size={16} color={colors.primary} style={{ marginLeft: spacing[2] }} />
+          <MapPin size={16} color={colors.primary} style={{ marginEnd: spacing[2] }} />
           <View style={{ flex: 1 }}>
             <Text style={styles.addressAreaName}>{areaName || 'منطقة التوصيل'}</Text>
             {!!addressDetail && (

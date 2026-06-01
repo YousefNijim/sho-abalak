@@ -27,7 +27,7 @@ import {
   Clock,
   Bike,
   ImageIcon,
-  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Package,
   Home as HomeIcon,
@@ -236,7 +236,7 @@ export default function Home() {
               <Text style={styles.activeOrderTitle}>{activeOrder.businessName}</Text>
               <Text style={styles.activeOrderStatus}>{STATUS_LABELS[activeOrder.status] ?? activeOrder.status}</Text>
             </View>
-            <ChevronLeft size={20} color="#fff" />
+            <ChevronRight size={20} color="#fff" />
           </Pressable>
         )}
 
@@ -294,10 +294,10 @@ export default function Home() {
 
         {/* Tag chips (FOOD section — Categories) */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>الأقسام</Text>
           <Pressable onPress={() => setSelectedTagId(null)}>
             <Text style={styles.sectionLink}>عرض الكل</Text>
           </Pressable>
+          <Text style={styles.sectionTitle}>الأقسام</Text>
         </View>
         <ScrollView
           horizontal
@@ -327,11 +327,11 @@ export default function Home() {
 
         {/* Near Establishments */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>المنشآت القريبة</Text>
           <View style={styles.locationTag}>
             <MapPin size={16} color={colors.textMuted} />
             <Text style={styles.locationTagText}>{locationTagText}</Text>
           </View>
+          <Text style={styles.sectionTitle}>المنشآت القريبة</Text>
         </View>
 
         {isLoading ? (
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   statusBadge: {
     position: 'absolute',
     top: spacing[3],
-    left: spacing[3],
+    right: spacing[3],
     backgroundColor: 'rgba(34, 197, 94, 0.9)', // success-green
     paddingHorizontal: spacing[3],
     paddingVertical: 4,

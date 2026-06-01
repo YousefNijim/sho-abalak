@@ -142,6 +142,13 @@ export default function Orders() {
               return (
                 <View key={o.id} style={styles.orderCard}>
                   <View style={styles.cardHeader}>
+                    <View style={styles.imageWrap}>
+                      <Image
+                        source={{ uri: mediaUrl(o.items?.[0]?.product?.imageUrl) || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4' }}
+                        style={styles.cardImage}
+                        contentFit="cover"
+                      />
+                    </View>
                     <View style={styles.cardHeaderInfo}>
                       <View style={styles.cardTitleRow}>
                         <Text style={styles.businessName} numberOfLines={1}>{o.business?.name || 'منشأة شو عبالك'}</Text>
@@ -150,13 +157,6 @@ export default function Orders() {
                         </View>
                       </View>
                       <Text style={styles.dateText}>{formatDate(o.createdAt)}</Text>
-                    </View>
-                    <View style={styles.imageWrap}>
-                      <Image
-                        source={{ uri: mediaUrl(o.items?.[0]?.product?.imageUrl) || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAk6EFQ9tFTf-fSVtxgqPRtMcZMtI0n85_zZeE3MGUrOSboQ4HbNb8zzqe5x5HKTprRX3V6plSTrpmrehgmwjfLMLdhi9yNyc_bZq05olKaLEqM3siOyTkqQrZYj8_Z6Sl_mq5U4kxTNWT1WwXupD0-5AurOUz_yLb2qdY9s31lI8BET-Mu4QC3U23X2C7cTw5xb32X5hzjOZLyyKikqRKlit1zHT8yEhEPydomSjKSJJGPE0onJegyY1vmlPRq5jWTp3HNQ-nQK_x4' }}
-                        style={styles.cardImage}
-                        contentFit="cover"
-                      />
                     </View>
                   </View>
 
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[3],
     paddingVertical: 4,
     borderRadius: radius.full,
-    marginLeft: spacing[2],
+    marginStart: spacing[2],
   },
   badgeText: {
     fontFamily: fontFamily.medium, // label-md

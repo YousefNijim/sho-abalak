@@ -9,7 +9,7 @@ import {
   Star,
   Phone,
   Info,
-  ChevronLeft,
+  ChevronRight,
   LogOut,
   User,
   Edit2,
@@ -170,7 +170,7 @@ export default function Profile() {
                         {(item as any).trailing && (
                           <Text style={styles.menuItemTrailing}>{(item as any).trailing}</Text>
                         )}
-                        <ChevronLeft size={20} color={colors.textMuted} />
+                        <ChevronRight size={20} color={colors.textMuted} />
                       </View>
                     </Pressable>
                     {iIdx < group.length - 1 && <View style={styles.menuDivider} />}
