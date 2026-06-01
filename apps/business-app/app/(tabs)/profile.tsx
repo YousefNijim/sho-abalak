@@ -105,7 +105,7 @@ export default function ProfileTab() {
 
   const cityVillages = useMemo(() => {
     if (!business?.area?.city) return [];
-    return allAreas.filter((a) => a.city === business.area.city);
+    return allAreas.filter((a) => a.city === business.area?.city);
   }, [allAreas, business]);
 
   const filteredVillages = useMemo(() => {
@@ -418,10 +418,10 @@ export default function ProfileTab() {
               <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>
                 مناطق التوصيل
               </Text>
-              <Text style={{ fontFamily: fontFamily.normal, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginBottom: spacing[2], paddingHorizontal: spacing[1] }}>
+              <Text style={{ fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginBottom: spacing[2], paddingHorizontal: spacing[1] }}>
                 اختر القرى والأحياء التي يمكنك التوصيل إليها داخل مدينتك ({business?.area?.city ?? ''})
               </Text>
-              <View style={[styles.card, { paddingVertical: spacing[0], overflow: 'hidden' }]}>
+              <View style={[styles.card, { paddingVertical: 0, overflow: 'hidden' }]}>
                 <View style={{ padding: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border }}>
                   <TextInput
                     style={[styles.input, { height: 40, backgroundColor: '#FCF3DC' }]}
@@ -433,7 +433,7 @@ export default function ProfileTab() {
                   />
                 </View>
                 {cityVillages.length === 0 ? (
-                  <Text style={{ fontFamily: fontFamily.normal, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center', padding: spacing[4] }}>
+                  <Text style={{ fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center', padding: spacing[4] }}>
                     لا توجد مناطق متاحة
                   </Text>
                 ) : (

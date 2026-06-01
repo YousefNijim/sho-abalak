@@ -74,7 +74,7 @@ export default function Login() {
               <Text style={styles.label}>رقم الهاتف المحمول</Text>
               <View style={styles.inputWrap}>
                 <View style={styles.phonePrefix}>
-                  <Text style={styles.phonePrefixText} dir="ltr">+970</Text>
+                  <Text style={[styles.phonePrefixText, { writingDirection: 'ltr' }]}>+970</Text>
                 </View>
                 <Input
                   placeholder="59x xxx xxxx"
