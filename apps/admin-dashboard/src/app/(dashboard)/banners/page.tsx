@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { bannersApi, uploadsApi } from '@shu/api-client';
+import { bannersApi, uploadsApi, BASE_URL } from '@shu/api-client';
 import type { Banner } from '@shu/api-client';
 
 export default function BannersPage() {
@@ -81,7 +81,7 @@ export default function BannersPage() {
     }
   };
 
-  const getMediaUrl = (path: string) => (path.startsWith('http') ? path : `http://127.0.0.1:3001${path}`);
+  const getMediaUrl = (path: string) => (path.startsWith('http') ? path : `${BASE_URL}${path}`);
 
   return (
     <>
