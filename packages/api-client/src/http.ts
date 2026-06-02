@@ -4,7 +4,7 @@ import axios from 'axios';
 export const BASE_URL =
   (typeof process !== 'undefined' &&
     (process.env['NEXT_PUBLIC_API_URL'] ?? process.env['EXPO_PUBLIC_API_URL'])) ||
-  'https://shu-abalak-production.up.railway.app';
+  'https://shu-abalak-stagging.up.railway.app';
 
 export const http = axios.create({
   baseURL: BASE_URL,
