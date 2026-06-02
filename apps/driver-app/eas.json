@@ -15,7 +15,8 @@
       "distribution": "internal",
       "autoIncrement": true,
       "env": {
-        "APP_VARIANT": "staging"
+        "APP_VARIANT": "staging",
+        "EXPO_PUBLIC_API_URL": "https://shu-abalak-stagging.up.railway.app"
       }
     },
     "production": {
