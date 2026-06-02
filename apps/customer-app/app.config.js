@@ -5,6 +5,12 @@ module.exports = {
     name: IS_STAGING ? 'شو عبالك [S]' : 'شو عبالك',
     slug: 'shu-customer',
     version: '1.0.0',
+    updates: {
+      url: "https://u.expo.dev/6df81a2e-aece-42e7-b24c-bcaed3e37add"
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
     orientation: 'portrait',
     scheme: IS_STAGING ? 'shu-customer-staging' : 'shu-customer',
     userInterfaceStyle: 'light',
