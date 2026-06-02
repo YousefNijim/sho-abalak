@@ -5,6 +5,12 @@ module.exports = {
     name: IS_STAGING ? 'كابتن شو عبالك [S]' : 'كابتن شو عبالك',
     slug: 'shu-driver',
     version: '1.0.0',
+    updates: {
+      url: "https://u.expo.dev/d12c42f8-3d02-4dc6-be8e-9c4f1bff62f6"
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
     orientation: 'portrait',
     scheme: IS_STAGING ? 'shu-driver-staging' : 'shu-driver',
     userInterfaceStyle: 'light',
