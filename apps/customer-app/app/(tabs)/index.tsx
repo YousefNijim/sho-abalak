@@ -616,8 +616,8 @@ export default function Home() {
                   {(tag as any).imageUrl ? (
                     <Image
                       source={{ uri: mediaUrl((tag as any).imageUrl) || undefined }}
-                      style={{ width: 32, height: 32 }}
-                      contentFit="contain"
+                      style={{ width: '100%', height: '100%', borderRadius: 18 }}
+                      contentFit="cover"
                     />
                   ) : (
                     getCategoryIcon(tag.name, isActive, 28)
