@@ -44,7 +44,11 @@
         "react-native-reanimated",
         "axios"
       ]
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "@firebase/util",
+      "protobufjs"
+    ]
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
