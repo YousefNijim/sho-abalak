@@ -18,6 +18,9 @@
       "env": {
         "APP_VARIANT": "staging",
         "EXPO_PUBLIC_API_URL": "https://shu-abalak-staging.up.railway.app"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
