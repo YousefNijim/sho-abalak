@@ -1,14 +1,12 @@
-// Converted from app.json so googleServicesFile can come from an EAS *file*
-// environment variable (GOOGLE_SERVICES_JSON) on EAS Build — the file is
-// gitignored and never uploaded with the git tree. Locally (expo run:android),
-// the env var is unset and we fall back to the on-disk ./google-services.json.
+const IS_STAGING = process.env.APP_VARIANT === 'staging';
+
 module.exports = {
   expo: {
-    name: 'شو عبالك',
+    name: IS_STAGING ? 'شو عبالك [S]' : 'شو عبالك',
     slug: 'shu-customer',
     version: '1.0.0',
     orientation: 'portrait',
-    scheme: 'shu-customer',
+    scheme: IS_STAGING ? 'shu-customer-staging' : 'shu-customer',
     userInterfaceStyle: 'light',
     backgroundColor: '#FCF3DC',
     icon: './assets/images/icon.png',
@@ -16,11 +14,11 @@ module.exports = {
       supportsTablet: false,
     },
     android: {
-      package: 'com.shoabalak.customer',
+      package: IS_STAGING ? 'com.shoabalak.customer.staging' : 'com.shoabalak.customer',
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON ?? './google-services.json',
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
-        backgroundColor: '#FCF3DC',
+        backgroundColor: IS_STAGING ? '#E6781E' : '#FCF3DC',
       },
       usesCleartextTraffic: true,
     },

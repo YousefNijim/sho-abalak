@@ -57,3 +57,7 @@ firebase-adminsdk*.json
 google-services.json
 apps/*/google-services.json
 GoogleService-Info.plist
+
+# Dev/tooling scripts that may contain API keys — never commit
+fetch-stitch.mjs
+*.mjs
