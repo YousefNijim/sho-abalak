@@ -613,7 +613,15 @@ export default function Home() {
                 onPress={() => setSelectedTagId(isActive ? null : tag.id)}
               >
                 <View style={[styles.newCategoryBox, isActive && styles.newCategoryBoxActive]}>
-                  {getCategoryIcon(tag.name, isActive, 28)}
+                  {(tag as any).imageUrl ? (
+                    <Image
+                      source={{ uri: mediaUrl((tag as any).imageUrl) || undefined }}
+                      style={{ width: 32, height: 32 }}
+                      contentFit="contain"
+                    />
+                  ) : (
+                    getCategoryIcon(tag.name, isActive, 28)
+                  )}
                 </View>
                 <Text style={[styles.newCategoryText, isActive && styles.newCategoryTextActive]}>
                   {tag.name}
