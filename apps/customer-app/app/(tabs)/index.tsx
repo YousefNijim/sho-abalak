@@ -45,8 +45,13 @@ import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme'
 import { businessesApi, tagsApi, areasApi, bannersApi, BASE_URL } from '@shu/api-client';
 import type { Tag, Banner } from '@shu/api-client';
 
-const mediaUrl = (path: string | null | undefined): string | null =>
-  !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
+const mediaUrl = (path: string | null | undefined): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  const base = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${p}`;
+};
 import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
@@ -137,7 +142,7 @@ export default function Home() {
       setActiveBannerIndex((prev) => {
         const next = (prev + 1) % activeBanners.length;
         bannerScrollRef.current?.scrollTo({
-          x: next * (Dimensions.get('window').width - spacing[4] * 2),
+          x: next * (Dimensions.get('window').width - spacing[4]),
           animated: true,
         });
         return next;
@@ -559,7 +564,7 @@ export default function Home() {
                   onPress={() => {}}
                 >
                   <Image
-                    source={{ uri: mediaUrl(banner.imageUrl) ?? '' }}
+                    source={{ uri: mediaUrl(banner.imageUrl) || undefined }}
                     style={{ width: '100%', height: '100%', borderRadius: 24 }}
                     contentFit="cover"
                   />
