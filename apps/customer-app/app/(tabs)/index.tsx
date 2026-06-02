@@ -142,7 +142,7 @@ export default function Home() {
       setActiveBannerIndex((prev) => {
         const next = (prev + 1) % activeBanners.length;
         bannerScrollRef.current?.scrollTo({
-          x: next * (Dimensions.get('window').width - spacing[4]),
+          x: next * (Dimensions.get('window').width - spacing[4] * 2),
           animated: true,
         });
         return next;
@@ -560,13 +560,13 @@ export default function Home() {
               {activeBanners.map((banner: Banner) => (
                 <Pressable
                   key={banner.id}
-                  style={{ width: Dimensions.get('window').width - spacing[4] * 2, height: 160, marginEnd: spacing[4] }}
+                  style={{ width: Dimensions.get('window').width - spacing[4] * 2, height: 160 }}
                   onPress={() => {}}
                 >
                   <Image
                     source={{ uri: mediaUrl(banner.imageUrl) || undefined }}
                     style={{ width: '100%', height: '100%', borderRadius: 24 }}
-                    contentFit="cover"
+                    contentFit="contain"
                   />
                 </Pressable>
               ))}
