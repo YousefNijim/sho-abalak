@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { BASE_URL } from '@shu/api-client';
 import { useAuthStore } from '../stores/auth.store';
@@ -7,6 +7,7 @@ let socketInstance: Socket | null = null;
 
 export function useSocket(): Socket | null {
   const token = useAuthStore((s) => s.token);
+  const [, forceUpdate] = useState(0);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -14,6 +15,8 @@ export function useSocket(): Socket | null {
       if (socketInstance) {
         socketInstance.disconnect();
         socketInstance = null;
+        socketRef.current = null;
+        forceUpdate((n) => n + 1);
       }
       return;
     }
@@ -28,6 +31,8 @@ export function useSocket(): Socket | null {
 
       socketInstance.on('connect', () => {
         console.log('Business App WS connected successfully');
+        socketRef.current = socketInstance;
+        forceUpdate((n) => n + 1);
       });
 
       socketInstance.on('connect_error', (err) => {
