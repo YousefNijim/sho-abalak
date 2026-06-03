@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Platform, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronDown, Home as HomeIcon, Check } from 'lucide-react-native';
+import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronDown, Home as HomeIcon, Check, Tag, X } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
-import { businessesApi, ordersApi, addressesApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, ordersApi, addressesApi, couponsApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
-import type { CreateOrderDto } from '@shu/api-client';
+import type { CreateOrderDto, CouponApplyResult } from '@shu/api-client';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
-import { Image } from 'expo-image';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Cart() {
   const router = useRouter();
@@ -35,18 +35,21 @@ export default function Cart() {
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
   const [addressError, setAddressError] = useState(false);
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponApplyResult | null>(null);
+  const [couponError, setCouponError] = useState('');
+
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
 
-  // Fetch full addresses (with area object) from API for area name snapshot
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
   });
-  
+
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
-  // Fetch business details to get the delivery fee
   const { data: business, isLoading: loadingBusiness } = useQuery({
     queryKey: ['business', businessId],
     queryFn: () => businessesApi.getById(businessId!),
@@ -54,9 +57,30 @@ export default function Cart() {
   });
 
   const fee = Number(business?.area?.deliveryFee ?? 0);
-  const total = Number(subtotal) + fee;
+  const minimumOrder = Number(business?.minimumOrder ?? 0);
+  const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const subtotalAfterCoupon = Math.max(0, Number(subtotal) - discount);
+  const total = subtotalAfterCoupon + fee;
+  const belowMinimum = minimumOrder > 0 && Number(subtotal) < minimumOrder;
 
-  // Mutation to create order
+  const applyCoupon = useMutation({
+    mutationFn: () => couponsApi.apply(couponInput.trim(), Number(subtotal)),
+    onSuccess: (data) => {
+      setAppliedCoupon(data);
+      setCouponError('');
+    },
+    onError: (err: any) => {
+      setCouponError(err?.response?.data?.message || 'كود الكوبون غير صحيح');
+      setAppliedCoupon(null);
+    },
+  });
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+  };
+
   const createOrder = useMutation({
     mutationFn: (dto: CreateOrderDto) => ordersApi.create(dto),
     onSuccess: (data: any) => {
@@ -68,10 +92,7 @@ export default function Cart() {
       });
       clearCart();
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      router.replace({
-        pathname: '/tracking',
-        params: { id: data.id },
-      });
+      router.replace({ pathname: '/tracking', params: { id: data.id } });
     },
     onError: (err: any) => {
       const msg = err.response?.data?.message || 'فشل إرسال الطلب. يرجى المحاولة لاحقاً.';
@@ -81,9 +102,11 @@ export default function Cart() {
 
   const handleConfirm = () => {
     if (!businessId) return;
-    // Use selected saved address areaId for delivery fee calc; fall back to cart's areaId
+    if (belowMinimum) {
+      Alert.alert('الحد الأدنى للطلب', `الحد الأدنى للطلب من هذه المنشأة هو ${minimumOrder} ₪. أضف المزيد من المنتجات للمتابعة.`);
+      return;
+    }
     const deliveryAreaId = selectedAddress?.areaId ?? areaId ?? '';
-    // Delivery address is mandatory — block submission and prompt inline.
     if (!selectedAddress || !deliveryAreaId) {
       setAddressError(true);
       setAddressPickerVisible(true);
@@ -97,13 +120,11 @@ export default function Cart() {
       businessId,
       areaId: deliveryAreaId,
       paymentMethod: payment,
-      items: items.map((it) => ({
-        productId: it.productId,
-        quantity: it.quantity,
-      })),
+      items: items.map((it) => ({ productId: it.productId, quantity: it.quantity })),
       note: notes.trim() || undefined,
       deliveryAreaName: areaLabel,
       deliveryAddressDetail: selectedAddress?.detail,
+      couponCode: appliedCoupon?.code,
     } as CreateOrderDto);
   };
 
@@ -130,7 +151,6 @@ export default function Cart() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <Text style={styles.headerTitle}>سلّتك</Text>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
@@ -138,7 +158,15 @@ export default function Cart() {
         </Pressable>
       </View>
 
-      {/* Address bar */}
+      {/* Minimum order warning banner */}
+      {belowMinimum && (
+        <View style={styles.minimumBanner}>
+          <Text style={styles.minimumBannerText}>
+            الحد الأدنى للطلب {minimumOrder} ₪ — أضف {(minimumOrder - Number(subtotal)).toFixed(2)} ₪ أكثر
+          </Text>
+        </View>
+      )}
+
       <Pressable style={[styles.addressBar, addressError && styles.addressBarError]} onPress={() => setAddressPickerVisible(true)}>
         <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
         <View style={styles.addressBarText}>
@@ -217,7 +245,6 @@ export default function Cart() {
                   </View>
                 )}
               </View>
-              
               <View style={styles.itemContent}>
                 <View style={styles.itemHeader}>
                   <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
@@ -226,7 +253,6 @@ export default function Cart() {
                   </Pressable>
                 </View>
                 <Text style={styles.itemPrice}>{it.price} ₪</Text>
-                
                 <View style={styles.itemFooter}>
                   <View style={styles.qtyWrap}>
                     <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1)}>
@@ -243,7 +269,46 @@ export default function Cart() {
           ))}
         </View>
 
-        {/* Restaurant Notes */}
+        {/* Coupon Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>كوبون الخصم</Text>
+          {appliedCoupon ? (
+            <View style={styles.appliedCoupon}>
+              <Pressable onPress={removeCoupon} style={styles.removeCouponBtn}>
+                <X size={16} color={colors.error} />
+              </Pressable>
+              <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                <Text style={styles.appliedCouponCode}>{appliedCoupon.code}</Text>
+                <Text style={styles.appliedCouponDiscount}>خصم -{appliedCoupon.discountAmount} ₪</Text>
+              </View>
+              <Tag size={20} color={colors.secondary} />
+            </View>
+          ) : (
+            <View style={styles.couponRow}>
+              <Pressable
+                style={[styles.couponApplyBtn, applyCoupon.isPending && { opacity: 0.6 }]}
+                onPress={() => couponInput.trim() && applyCoupon.mutate()}
+                disabled={applyCoupon.isPending || !couponInput.trim()}
+              >
+                {applyCoupon.isPending
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={styles.couponApplyText}>تطبيق</Text>}
+              </Pressable>
+              <TextInput
+                style={[styles.couponInput, couponError ? styles.couponInputError : null]}
+                placeholder="أدخل كود الكوبون"
+                placeholderTextColor={colors.textMuted}
+                value={couponInput}
+                onChangeText={(t) => { setCouponInput(t); setCouponError(''); }}
+                autoCapitalize="characters"
+                textAlign="right"
+              />
+            </View>
+          )}
+          {couponError ? <Text style={styles.couponErrorText}>{couponError}</Text> : null}
+        </View>
+
+        {/* Notes */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ملاحظات للمطعم</Text>
           <TextInput
@@ -257,21 +322,15 @@ export default function Cart() {
           />
         </View>
 
-        {/* Payment Selection */}
+        {/* Payment */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>طريقة الدفع</Text>
           <View style={styles.paymentGrid}>
-            <Pressable
-              style={[styles.paymentCard, payment === 'CASH' && styles.paymentCardActive]}
-              onPress={() => setPayment('CASH')}
-            >
+            <Pressable style={[styles.paymentCard, payment === 'CASH' && styles.paymentCardActive]} onPress={() => setPayment('CASH')}>
               <Banknote size={32} color={payment === 'CASH' ? colors.primary : colors.textMuted} style={styles.paymentIcon} />
               <Text style={[styles.paymentText, payment === 'CASH' && styles.paymentTextActive]}>نقد عند الاستلام</Text>
             </Pressable>
-            <Pressable
-              style={[styles.paymentCard, payment === 'ELECTRONIC' && styles.paymentCardActive]}
-              onPress={() => setPayment('ELECTRONIC')}
-            >
+            <Pressable style={[styles.paymentCard, payment === 'ELECTRONIC' && styles.paymentCardActive]} onPress={() => setPayment('ELECTRONIC')}>
               <CreditCard size={32} color={payment === 'ELECTRONIC' ? colors.primary : colors.textMuted} style={styles.paymentIcon} />
               <Text style={[styles.paymentText, payment === 'ELECTRONIC' && styles.paymentTextActive]}>دفع إلكتروني</Text>
             </Pressable>
@@ -282,8 +341,20 @@ export default function Cart() {
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>المجموع الفرعي</Text>
-            <Text style={styles.summaryValueBold}>{subtotal} ₪</Text>
+            <Text style={styles.summaryValueBold}>{Number(subtotal).toFixed(2)} ₪</Text>
           </View>
+          {appliedCoupon && (
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colors.secondary }]}>خصم الكوبون ({appliedCoupon.code})</Text>
+              <Text style={[styles.summaryValueBold, { color: colors.secondary }]}>-{discount.toFixed(2)} ₪</Text>
+            </View>
+          )}
+          {appliedCoupon && (
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>المجموع بعد الخصم</Text>
+              <Text style={styles.summaryValueBold}>{subtotalAfterCoupon.toFixed(2)} ₪</Text>
+            </View>
+          )}
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>رسوم التوصيل</Text>
             <Text style={styles.summaryValueBold}>{loadingBusiness ? '...' : `${fee} ₪`}</Text>
@@ -291,19 +362,23 @@ export default function Cart() {
           <View style={styles.dashedDivider} />
           <View style={styles.summaryRow}>
             <Text style={styles.summaryTotalLabel}>الإجمالي</Text>
-            <Text style={styles.summaryTotalValue}>{loadingBusiness ? '...' : `${total} ₪`}</Text>
+            <Text style={styles.summaryTotalValue}>{loadingBusiness ? '...' : `${total.toFixed(2)} ₪`}</Text>
           </View>
         </View>
       </ScrollView>
 
-      {/* Sticky Bottom Action Bar */}
       <View style={[styles.footer, { paddingBottom: insets.bottom || spacing[4] }]}>
+        {belowMinimum && (
+          <Text style={styles.minimumFooterText}>
+            أضف {(minimumOrder - Number(subtotal)).toFixed(2)} ₪ للوصول للحد الأدنى ({minimumOrder} ₪)
+          </Text>
+        )}
         <View style={styles.footerContent}>
           <Button
             onPress={handleConfirm}
             loading={createOrder.isPending}
-            disabled={createOrder.isPending || loadingBusiness}
-            style={styles.confirmBtn}
+            disabled={createOrder.isPending || loadingBusiness || belowMinimum}
+            style={[styles.confirmBtn, belowMinimum && { opacity: 0.5 }]}
           >
             <View style={styles.confirmBtnContent}>
               <Text style={styles.confirmBtnText}>تأكيد الطلب</Text>
@@ -317,457 +392,96 @@ export default function Cart() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FCF3DC', // background-cream
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    paddingBottom: spacing[3],
-    backgroundColor: '#FCF3DC',
-    zIndex: 50,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-  headerTitle: {
-    fontFamily: fontFamily.bold, // headline-sm equivalent
-    fontSize: 20,
-    color: colors.primary,
-  },
-  backBtn: {
-    padding: spacing[2],
-  },
-  scrollContent: {
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[6],
-    gap: spacing[6],
-  },
-  itemsSection: {
-    gap: spacing[3],
-  },
-  itemCard: {
-    backgroundColor: '#FFFFFF', // surface-white
-    borderRadius: radius.lg, // 12px or 16px
-    padding: spacing[3],
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
-      android: { elevation: 2 },
-      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
-    }),
-  },
-  itemImageWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: radius.md,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(229, 224, 213, 1)', // border-beige
-  },
-  itemImage: {
-    width: '100%',
-    height: '100%',
-  },
-  itemImagePlaceholder: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  itemContent: {
-    flex: 1,
-    minWidth: 0,
-  },
-  itemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  itemName: {
-    fontFamily: fontFamily.semibold, // headline-sm
-    fontSize: 16,
-    color: colors.textPrimary,
-    flex: 1,
-    textAlign: 'right',
-  },
-  deleteBtn: {
-    padding: 2,
-  },
-  itemPrice: {
-    fontFamily: fontFamily.bold,
-    color: colors.primary,
-    marginTop: 4,
-    textAlign: 'right',
-  },
-  itemFooter: {
-    marginTop: spacing[2],
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  qtyWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#efecf6', // surface-container
-    borderRadius: radius.full,
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    gap: spacing[3],
-  },
-  qtyBtnPlus: {
-    width: 32,
-    height: 32,
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  qtyText: {
-    fontFamily: fontFamily.bold, // body-base
-    fontSize: 15,
-    color: colors.textPrimary,
-  },
-  qtyBtnMinus: {
-    width: 32,
-    height: 32,
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: 'rgba(138, 114, 101, 1)', // outline
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  section: {
-    gap: spacing[2],
-  },
-  sectionTitle: {
-    fontFamily: fontFamily.semibold,
-    fontSize: 16,
-    color: colors.textPrimary,
-    paddingHorizontal: 4,
-    textAlign: 'right',
-  },
-  notesInput: {
-    height: 96,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
-    borderRadius: radius.lg,
-    padding: spacing[4],
-    fontFamily: fontFamily.regular,
-    fontSize: 15,
-    textAlignVertical: 'top',
-  },
-  paymentGrid: {
-    flexDirection: 'row',
-    gap: spacing[3],
-  },
-  paymentCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: 'transparent',
-    borderRadius: radius.lg,
-    padding: spacing[4],
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
-      android: { elevation: 2 },
-      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
-    }),
-  },
-  paymentCardActive: {
-    borderColor: colors.primary,
-    backgroundColor: '#ffdbc7', // primary-fixed
-  },
-  paymentIcon: {
-    marginBottom: 4,
-  },
-  paymentText: {
-    fontFamily: fontFamily.medium,
-    fontSize: 13,
-    color: colors.textMuted, // on-surface-variant
-  },
-  paymentTextActive: {
-    color: colors.primary,
-  },
-  summaryCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: radius.lg,
-    padding: spacing[4],
-    gap: spacing[3],
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
-      android: { elevation: 2 },
-      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
-    }),
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontFamily: fontFamily.regular,
-    fontSize: 15, // body-base
-    color: colors.textMuted, // on-surface-variant
-  },
-  summaryValueBold: {
-    fontFamily: fontFamily.bold,
-    fontSize: 15,
-    color: colors.textPrimary,
-  },
-  dashedDivider: {
-    height: 1,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(229, 224, 213, 1)', // border-beige
-    borderStyle: 'dashed',
-    marginVertical: spacing[2],
-  },
-  summaryTotalLabel: {
-    fontFamily: fontFamily.semibold,
-    fontSize: 20, // headline-sm
-    color: colors.textPrimary,
-  },
-  summaryTotalValue: {
-    fontFamily: fontFamily.semibold,
-    fontSize: 20, // headline-sm
-    color: colors.primary,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[4],
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 10 },
-      android: { elevation: 10 },
-      web: { boxShadow: '0 -4px 10px rgba(0,0,0,0.05)' },
-    }),
-    zIndex: 50,
-  },
-  footerContent: {
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  confirmBtn: {
-    width: '100%',
-    height: 52,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-  },
-  confirmBtnContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing[2],
-  },
-  confirmBtnText: {
-    fontFamily: fontFamily.bold,
-    fontSize: 16, // button-text
-    color: colors.white,
-  },
-  emptyContainer: {
-    flex: 1,
-    backgroundColor: '#FCF3DC',
-  },
-  emptyWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing[6],
-  },
-  emptyCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: 'rgba(151, 72, 0, 0.1)', // primary with opacity
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing[5],
-  },
-  emptyTitle: {
-    fontFamily: fontFamily.bold,
-    fontSize: 24, // headline-md
-    color: colors.textPrimary,
-    marginBottom: spacing[2],
-  },
-  emptyDesc: {
-    fontFamily: fontFamily.regular,
-    fontSize: 15,
-    color: colors.textMuted,
-    textAlign: 'center',
-    marginBottom: spacing[6],
-  },
-  emptyBtn: {
-    paddingHorizontal: spacing[8],
-  },
-  addressBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    gap: spacing[3],
-  },
-  addressBarError: {
-    borderWidth: 1.5,
-    borderColor: colors.error,
-    borderBottomColor: colors.error,
-  },
-  addressErrorText: {
-    fontFamily: fontFamily.medium,
-    fontSize: fontSizes.sm,
-    color: colors.error,
-    textAlign: 'right',
-    paddingHorizontal: spacing[4],
-    paddingTop: spacing[2],
-    backgroundColor: colors.surface,
-  },
-  addressBarIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primary + '15',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addressBarText: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  addressBarLabel: {
-    fontFamily: fontFamily.regular,
-    fontSize: fontSizes.xs,
-    color: colors.textMuted,
-    textAlign: 'right',
-  },
-  addressBarName: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSizes.base,
-    color: colors.textPrimary,
-    textAlign: 'right',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  modalSheet: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: spacing[4],
-    maxHeight: '70%',
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary + '40',
-    alignSelf: 'center',
-    marginBottom: spacing[4],
-  },
-  modalTitle: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSizes.xl,
-    color: colors.textPrimary,
-    textAlign: 'right',
-    marginBottom: spacing[4],
-  },
-  modalScroll: {
-    flexGrow: 0,
-  },
-  addrRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
-    paddingVertical: spacing[3],
-    paddingHorizontal: spacing[3],
-    borderRadius: radius.md,
-    marginBottom: spacing[2],
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  addrRowActive: {
-    backgroundColor: colors.primary + '0D',
-    borderColor: colors.primary + '40',
-  },
-  addrIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.border + '80',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addrIconCircleActive: {
-    backgroundColor: colors.primary + '20',
-  },
-  addrRowText: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  addrLabel: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSizes.base,
-    color: colors.textPrimary,
-    textAlign: 'right',
-  },
-  addrLabelActive: {
-    color: colors.primary,
-  },
-  addrDetail: {
-    fontFamily: fontFamily.regular,
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
-    textAlign: 'right',
-    marginTop: 2,
-  },
-  emptyAddresses: {
-    alignItems: 'center',
-    paddingVertical: spacing[8],
-    gap: spacing[3],
-  },
-  emptyAddressesText: {
-    fontFamily: fontFamily.semibold,
-    fontSize: fontSizes.base,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  emptyAddressesHint: {
-    fontFamily: fontFamily.regular,
-    fontSize: fontSizes.sm,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-  addAddressBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing[2],
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing[3],
-    marginTop: spacing[3],
-  },
-  addAddressBtnText: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSizes.base,
-    color: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#FCF3DC' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing[4], paddingBottom: spacing[3], backgroundColor: '#FCF3DC', zIndex: 50, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
+  headerTitle: { fontFamily: fontFamily.bold, fontSize: 20, color: colors.primary },
+  backBtn: { padding: spacing[2] },
+  minimumBanner: { backgroundColor: '#FEF3C7', paddingHorizontal: spacing[4], paddingVertical: spacing[2], borderBottomWidth: 1, borderBottomColor: '#FDE68A' },
+  minimumBannerText: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: '#92400E', textAlign: 'right' },
+  scrollContent: { paddingHorizontal: spacing[4], paddingTop: spacing[6], gap: spacing[6] },
+  itemsSection: { gap: spacing[3] },
+  itemCard: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: spacing[3], flexDirection: 'row', alignItems: 'center', gap: spacing[3], ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 }, web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' } }) },
+  itemImageWrap: { width: 80, height: 80, borderRadius: radius.md, overflow: 'hidden', backgroundColor: 'rgba(229,224,213,1)' },
+  itemImage: { width: '100%', height: '100%' },
+  itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  itemContent: { flex: 1, minWidth: 0 },
+  itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  itemName: { fontFamily: fontFamily.semibold, fontSize: 16, color: colors.textPrimary, flex: 1, textAlign: 'right' },
+  deleteBtn: { padding: 2 },
+  itemPrice: { fontFamily: fontFamily.bold, color: colors.primary, marginTop: 4, textAlign: 'right' },
+  itemFooter: { marginTop: spacing[2], flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#efecf6', borderRadius: radius.full, paddingHorizontal: spacing[2], paddingVertical: spacing[1], gap: spacing[3] },
+  qtyBtnPlus: { width: 32, height: 32, backgroundColor: colors.primary, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  qtyText: { fontFamily: fontFamily.bold, fontSize: 15, color: colors.textPrimary },
+  qtyBtnMinus: { width: 32, height: 32, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: 'rgba(138,114,101,1)', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  section: { gap: spacing[2] },
+  sectionTitle: { fontFamily: fontFamily.semibold, fontSize: 16, color: colors.textPrimary, paddingHorizontal: 4, textAlign: 'right' },
+  // Coupon
+  couponRow: { flexDirection: 'row', gap: spacing[2], alignItems: 'center' },
+  couponInput: { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: spacing[3], paddingVertical: spacing[2], fontFamily: fontFamily.medium, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  couponInputError: { borderColor: colors.error },
+  couponApplyBtn: { backgroundColor: colors.primary, borderRadius: radius.md, paddingHorizontal: spacing[4], paddingVertical: spacing[3], alignItems: 'center', justifyContent: 'center', minWidth: 80 },
+  couponApplyText: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: '#fff' },
+  couponErrorText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.error, textAlign: 'right', paddingHorizontal: 4 },
+  appliedCoupon: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.secondary + '12', borderRadius: radius.md, padding: spacing[3], gap: spacing[3], borderWidth: 1, borderColor: colors.secondary + '30' },
+  appliedCouponCode: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.secondary, textAlign: 'right' },
+  appliedCouponDiscount: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: colors.secondary, textAlign: 'right' },
+  removeCouponBtn: { padding: 4 },
+  // Notes
+  notesInput: { height: 96, backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: 'rgba(229,224,213,1)', borderRadius: radius.lg, padding: spacing[4], fontFamily: fontFamily.regular, fontSize: 15, textAlignVertical: 'top' },
+  // Payment
+  paymentGrid: { flexDirection: 'row', gap: spacing[3] },
+  paymentCard: { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 2, borderColor: 'transparent', borderRadius: radius.lg, padding: spacing[4], alignItems: 'center', justifyContent: 'center', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 }, web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' } }) },
+  paymentCardActive: { borderColor: colors.primary, backgroundColor: '#ffdbc7' },
+  paymentIcon: { marginBottom: 4 },
+  paymentText: { fontFamily: fontFamily.medium, fontSize: 13, color: colors.textMuted },
+  paymentTextActive: { color: colors.primary },
+  // Summary
+  summaryCard: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: spacing[4], gap: spacing[3], ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 }, web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' } }) },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  summaryLabel: { fontFamily: fontFamily.regular, fontSize: 15, color: colors.textMuted },
+  summaryValueBold: { fontFamily: fontFamily.bold, fontSize: 15, color: colors.textPrimary },
+  dashedDivider: { height: 1, borderBottomWidth: 1, borderBottomColor: 'rgba(229,224,213,1)', borderStyle: 'dashed', marginVertical: spacing[2] },
+  summaryTotalLabel: { fontFamily: fontFamily.semibold, fontSize: 20, color: colors.textPrimary },
+  summaryTotalValue: { fontFamily: fontFamily.semibold, fontSize: 20, color: colors.primary },
+  // Footer
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingHorizontal: spacing[4], paddingTop: spacing[3], ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.05, shadowRadius: 10 }, android: { elevation: 10 }, web: { boxShadow: '0 -4px 10px rgba(0,0,0,0.05)' } }), zIndex: 50 },
+  minimumFooterText: { fontFamily: fontFamily.semibold, fontSize: fontSizes.xs, color: '#92400E', textAlign: 'center', marginBottom: spacing[2] },
+  footerContent: { maxWidth: 600, width: '100%', alignSelf: 'center' },
+  confirmBtn: { width: '100%', height: 52, backgroundColor: colors.primary, borderRadius: radius.md },
+  confirmBtnContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[2] },
+  confirmBtnText: { fontFamily: fontFamily.bold, fontSize: 16, color: colors.white },
+  // Empty state
+  emptyContainer: { flex: 1, backgroundColor: '#FCF3DC' },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing[6] },
+  emptyCircle: { width: 88, height: 88, borderRadius: 44, backgroundColor: 'rgba(151,72,0,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: spacing[5] },
+  emptyTitle: { fontFamily: fontFamily.bold, fontSize: 24, color: colors.textPrimary, marginBottom: spacing[2] },
+  emptyDesc: { fontFamily: fontFamily.regular, fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] },
+  emptyBtn: { paddingHorizontal: spacing[8] },
+  // Address
+  addressBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing[4], paddingVertical: spacing[3], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, gap: spacing[3] },
+  addressBarError: { borderWidth: 1.5, borderColor: colors.error, borderBottomColor: colors.error },
+  addressErrorText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.error, textAlign: 'right', paddingHorizontal: spacing[4], paddingTop: spacing[2], backgroundColor: colors.surface },
+  addressBarIconWrap: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center' },
+  addressBarText: { flex: 1, alignItems: 'flex-end' },
+  addressBarLabel: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs, color: colors.textMuted, textAlign: 'right' },
+  addressBarName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  modalSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing[4], maxHeight: '70%' },
+  modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.primary + '40', alignSelf: 'center', marginBottom: spacing[4] },
+  modalTitle: { fontFamily: fontFamily.bold, fontSize: fontSizes.xl, color: colors.textPrimary, textAlign: 'right', marginBottom: spacing[4] },
+  modalScroll: { flexGrow: 0 },
+  addrRow: { flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[3], paddingHorizontal: spacing[3], borderRadius: radius.md, marginBottom: spacing[2], borderWidth: 1.5, borderColor: 'transparent' },
+  addrRowActive: { backgroundColor: colors.primary + '0D', borderColor: colors.primary + '40' },
+  addrIconCircle: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.border + '80', alignItems: 'center', justifyContent: 'center' },
+  addrIconCircleActive: { backgroundColor: colors.primary + '20' },
+  addrRowText: { flex: 1, alignItems: 'flex-end' },
+  addrLabel: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  addrLabelActive: { color: colors.primary },
+  addrDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
+  emptyAddresses: { alignItems: 'center', paddingVertical: spacing[8], gap: spacing[3] },
+  emptyAddressesText: { fontFamily: fontFamily.semibold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'center' },
+  emptyAddressesHint: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center' },
+  addAddressBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[2], backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: spacing[3], marginTop: spacing[3] },
+  addAddressBtnText: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: '#FFFFFF' },
 });

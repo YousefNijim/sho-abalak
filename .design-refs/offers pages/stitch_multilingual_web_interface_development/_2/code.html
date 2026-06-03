@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary": "#ffffff",
+                "error-container": "#ffdad6",
+                "inverse-primary": "#ffb688",
+                "on-primary": "#ffffff",
+                "background": "#fbf8ff",
+                "secondary-fixed": "#aef2bf",
+                "on-secondary-fixed-variant": "#09522d",
+                "surface-white": "#FFFFFF",
+                "surface-container": "#efecf6",
+                "muted-gray": "#6B7280",
+                "surface-container-low": "#f5f2fc",
+                "on-secondary-fixed": "#00210e",
+                "tertiary-fixed-dim": "#8fcdff",
+                "surface-container-highest": "#e4e1eb",
+                "on-primary-container": "#4e2200",
+                "on-tertiary": "#ffffff",
+                "secondary-container": "#abefbd",
+                "on-tertiary-fixed": "#001e30",
+                "error": "#ba1a1a",
+                "on-tertiary-fixed-variant": "#004b71",
+                "inverse-surface": "#303037",
+                "background-cream": "#FCF3DC",
+                "on-background": "#1b1b22",
+                "inverse-on-surface": "#f2eff9",
+                "on-error-container": "#93000a",
+                "surface-variant": "#e4e1eb",
+                "surface-tint": "#974800",
+                "outline": "#8a7265",
+                "on-surface": "#1b1b22",
+                "primary-fixed-dim": "#ffb688",
+                "surface-dim": "#dbd9e2",
+                "tertiary": "#006495",
+                "primary-fixed": "#ffdbc7",
+                "on-primary-fixed": "#311300",
+                "tertiary-container": "#009ee8",
+                "outline-variant": "#ddc1b1",
+                "surface-bright": "#fbf8ff",
+                "surface": "#fbf8ff",
+                "border-beige": "#E5E0D5",
+                "surface-container-lowest": "#ffffff",
+                "on-surface-variant": "#564337",
+                "tertiary-fixed": "#cbe6ff",
+                "primary": "#974800",
+                "primary-container": "#e6781e",
+                "on-tertiary-container": "#00314c",
+                "on-primary-fixed-variant": "#733600",
+                "error-red": "#EF4444",
+                "secondary": "#296a43",
+                "secondary-fixed-dim": "#92d5a5",
+                "success-green": "#22C55E",
+                "surface-container-high": "#eae7f1",
+                "warning-amber": "#F59E0B",
+                "on-error": "#ffffff",
+                "on-secondary-container": "#2e6f47"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "gap-lg": "20px",
+                "section-md": "24px",
+                "section-lg": "32px",
+                "gap-sm": "8px",
+                "base": "4px",
+                "gap-md": "12px",
+                "gap-xs": "4px",
+                "margin-standard": "16px",
+                "nav-height": "64px"
+            },
+            "fontFamily": {
+                "label-md": ["Montserrat"],
+                "label-sm": ["Montserrat"],
+                "hero-lg": ["Cairo"],
+                "headline-sm": ["Cairo"],
+                "headline-lg": ["Cairo"],
+                "body-base": ["Montserrat"],
+                "headline-lg-mobile": ["Cairo"],
+                "body-lg": ["Montserrat"],
+                "headline-md": ["Cairo"],
+                "button-text": ["Montserrat"]
+            },
+            "fontSize": {
+                "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #FCF3DC; /* Warm Cream Base */
+        }
+        .offer-gradient-overlay {
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased text-on-surface">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="fixed top-0 z-50 flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full bg-background-cream dark:bg-background shadow-sm">
+<button aria-label="Notifications" class="transition-transform active:scale-95 hover:opacity-80">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="notifications">notifications</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-primary-fixed">شو عبالك؟</h1>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional close-up portrait of a friendly young man with a warm expression, set against a minimalist and clean studio background. The lighting is soft and diffused, matching a high-end light-mode UI aesthetic. The overall mood is welcoming, modern, and high-quality, reflecting premium Palestinian hospitality and tech-savviness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDADpjho7MJH0I4vbubeXlzswthnwurjbJ4PQJ9J0Fugwyr_gOnNFLBirdwuR0JxRu6GSlCMddlu7SDUAyYMcjqICtKNsf4gBAjKmedSI4eUvazOgybMj0He4eJy0hUzcp-Uyw3JFBuNdJedRKEj47Na0NSxvSnMndqe2RWTJL7mM8WiMVY7uBIlJK7MZrZE5T6TfrnI4FMAWlLY_TsS1WAF6qP0GSMbkekrPgiWyE2o9QVrv_vDFJyzFTqXoqt0kLePvtSB3uwHCRw"/>
+</div>
+</header>
+<main class="pb-[180px]">
+<!-- Hero Offer Section -->
+<section class="relative w-full h-[397px] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A luxurious, steaming hot spread of traditional Palestinian Maqluba and freshly baked Taboon bread, presented with professional food photography lighting. The scene is warm and inviting, with rich saffron and earth tones dominant in the palette. High-contrast, appetizing textures of crispy chicken and golden rice are highlighted against a clean, warm cream surface, evoking a sense of heritage and high-quality local dining." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJTS7WbowY_nZSm8rYqcuta1UQiJ8Z71fgZofbulK8al6OHsa1U5RGpPDnv-iIltJvSaevyDYYb_ZbDymt9nIAcUnmRFkA3IylPsP26nNYHeKpwtbTT12bs9-qvHfCxiTp-Zn65XKT6CgOJen0_72_R--I9N_YpLLqtgLEWqYMJnF9gu6WZa-cetePGlQsZCtgoOHYuImJCE27I1BZEmEElwgI0WX4tQ5kKbBZvzvFAiEkhMgzqzva3gGsvWOHEcF3PqybGTAhDbxi"/>
+<div class="absolute inset-0 offer-gradient-overlay flex flex-col justify-end p-margin-standard">
+<div class="inline-flex self-start bg-warning-amber text-on-primary font-bold px-4 py-1 rounded-full text-label-md font-label-md mb-2 shadow-lg">
+                    عرض لفترة محدودة
+                </div>
+<h2 class="text-white font-headline-lg text-headline-lg mb-1 leading-tight">وجبة العائلة التوفيرية - خصم 40%</h2>
+<div class="flex items-center gap-sm text-surface-white/90">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+<p class="font-label-md text-label-md">ينتهي العرض خلال 3 أيام</p>
+</div>
+</div>
+<!-- Back Button -->
+<button class="absolute top-20 right-4 bg-white/20 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center text-white border border-white/30 active:scale-90 transition-all" onclick="window.history.back()">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</section>
+<!-- Content Area -->
+<div class="px-margin-standard -mt-6 relative z-10">
+<div class="bg-surface-white rounded-xl p-6 shadow-md border border-border-beige">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">تفاصيل العرض</h3>
+<div class="w-12 h-1 bg-primary-container rounded-full"></div>
+</div>
+<div class="text-left">
+<span class="text-muted-gray line-through text-label-md font-label-md">90.00 ILS</span>
+<div class="text-primary font-headline-md text-headline-md">54.00 ILS</div>
+</div>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant leading-relaxed mb-6">
+                    استمتع بأشهى المأكولات التقليدية مع وجبتنا العائلية الخاصة. تشمل الوجبة صينية دجاج مشوي كبيرة، أرز مبهر بالسمن البلدي، سلطة عربية طازجة، لتر ونصف مشروب بارد، وصحن مقبلات مشكل. العرض مثالي لجمعات العائلة والاصدقاء.
+                </p>
+<div class="space-y-4">
+<div class="flex items-start gap-md">
+<div class="bg-primary-fixed w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface">ماذا تشمل الوجبة؟</h4>
+<p class="font-label-sm text-label-sm text-muted-gray">طبق رئيسي، سلطة، مقبلات، ومشروب</p>
+</div>
+</div>
+<div class="flex items-start gap-md">
+<div class="bg-secondary-fixed w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary" data-icon="group">group</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface">تكفي لعدد</h4>
+<p class="font-label-sm text-label-sm text-muted-gray">4 - 5 أشخاص</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Terms and Conditions Section -->
+<div class="mt-section-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant mb-3 flex items-center gap-sm">
+<span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+                    شروط العرض
+                </h3>
+<div class="bg-white/50 border-r-4 border-primary p-4 rounded-lg">
+<ul class="space-y-3">
+<li class="flex items-start gap-sm font-body-base text-body-base text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[16px] mt-1" data-icon="check_circle">check_circle</span>
+                            العرض ساري للطلبات داخل المطعم والتوصيل.
+                        </li>
+<li class="flex items-start gap-sm font-body-base text-body-base text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[16px] mt-1" data-icon="check_circle">check_circle</span>
+                            لا يمكن دمج هذا العرض مع خصومات أخرى.
+                        </li>
+<li class="flex items-start gap-sm font-body-base text-body-base text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[16px] mt-1" data-icon="check_circle">check_circle</span>
+                            العرض متاح فقط أيام الأسبوع من الأحد حتى الأربعاء.
+                        </li>
+<li class="flex items-start gap-sm font-body-base text-body-base text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[16px] mt-1" data-icon="check_circle">check_circle</span>
+                            تطبق رسوم التوصيل حسب المنطقة الجغرافية.
+                        </li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-white border-t border-border-beige shadow-[0_-8px_30px_rgb(0,0,0,0.06)] px-margin-standard pb-8 pt-4">
+<!-- Mini Restaurant Profile -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-full border border-border-beige p-1 bg-white overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover rounded-full" data-alt="A minimalist and elegant brand logo for a high-end restaurant, featuring clean typography and a stylized olive branch symbol. The logo is displayed on a white background with soft, warm shadows. The visual style is premium and corporate, reflecting traditional Palestinian roots combined with modern design sensibilities." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-6rNcuX44bMdRGqByH4Zjo6OV9J-UcwJkH4j7Clwc6xW_oJ9HmbBUYbNjLZdv8x1nR23o39BUl9I-iXbHHazixu3Hqd-Pv_t1ZK4jQQSvycVgsItlwim7WyfJmBKCh443lefRoo3hMedKw-RBBmZFqiJaHXkJ5gyJ5RJ_MuivxPRrdZkMre932CTWF8JCqwt_-G8wiGyLJirFeKYirKI2ybgtK9FPufOyIjBGNnMJyuZkY1R_WmprIWKB44uPRc6fxx2G-rLVGGx6"/>
+</div>
+<div>
+<h4 class="font-headline-sm text-[16px] text-on-surface leading-tight">مطعم الكرم الأصيل</h4>
+<div class="flex items-center gap-xs text-muted-gray">
+<span class="material-symbols-outlined text-[14px]" data-icon="location_on">location_on</span>
+<span class="font-label-sm text-label-sm">رام الله، الماصيون · 1.2 كم</span>
+</div>
+</div>
+</div>
+<div class="bg-success-green/10 text-success-green px-3 py-1 rounded-full flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-success-green animate-pulse"></div>
+<span class="font-label-sm text-label-sm font-bold">متاح الآن</span>
+</div>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full h-[52px] bg-primary-container hover:bg-primary text-white rounded-xl shadow-lg flex items-center justify-center gap-md transition-all active:scale-95 group">
+<span class="font-button-text text-button-text">اطلب الآن من الكرم الأصيل</span>
+<span class="material-symbols-outlined group-hover:translate-x-[-4px] transition-transform" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        // Simple scale-down feedback for all buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.style.transform = 'scale(0.96)';
+            });
+            btn.addEventListener('touchend', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

@@ -32,18 +32,6 @@ export class ReviewsController {
     return this.reviews.createDriverReview(user.id, dto);
   }
 
-  /** Public: customer reviews for a business (shown on business page). */
-  @Get('business')
-  findByBusiness(@Query('businessId') businessId: string) {
-    return this.reviews.findByBusiness(businessId);
-  }
-
-  /** Public: business reviews for a driver (shown on driver card). */
-  @Get('driver')
-  findByDriver(@Query('driverId') driverId: string) {
-    return this.reviews.findByDriver(driverId);
-  }
-
   /** Admin: all customer reviews. */
   @Get()
   @ApiBearerAuth()
@@ -53,13 +41,34 @@ export class ReviewsController {
     return this.reviews.findAll();
   }
 
-  /** Admin: all driver reviews from businesses. */
+  /** Public: customer reviews for a business (shown on business page). */
+  @Get('business')
+  findByBusiness(@Query('businessId') businessId: string) {
+    return this.reviews.findByBusiness(businessId);
+  }
+
+  /** Admin: all driver reviews from businesses — declared before Get('driver') to avoid conflict. */
   @Get('driver-reviews')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   findAllDriverReviews() {
     return this.reviews.findAllDriverReviews();
+  }
+
+  /** Public: business reviews for a driver (shown on driver card). */
+  @Get('driver')
+  findByDriver(@Query('driverId') driverId: string) {
+    return this.reviews.findByDriver(driverId);
+  }
+
+  /** Admin: delete a driver review — declared before Delete(':id') to avoid conflict. */
+  @Delete('driver-reviews/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  deleteDriverReview(@Param('id') id: string) {
+    return this.reviews.deleteDriverReview(id);
   }
 
   /** Admin: delete a customer review. */
@@ -69,14 +78,5 @@ export class ReviewsController {
   @Roles(UserRole.ADMIN)
   delete(@Param('id') id: string) {
     return this.reviews.delete(id);
-  }
-
-  /** Admin: delete a driver review. */
-  @Delete('driver-reviews/:id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  deleteDriverReview(@Param('id') id: string) {
-    return this.reviews.deleteDriverReview(id);
   }
 }

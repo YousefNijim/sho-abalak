@@ -7,12 +7,13 @@ export interface OrderItem {
 
 export interface CreateOrderDto {
   businessId: string;
-  areaId: string;
+  areaId?: string;
   paymentMethod: 'CASH' | 'ELECTRONIC';
   items: OrderItem[];
   note?: string;
   deliveryAreaName?: string;
   deliveryAddressDetail?: string;
+  couponCode?: string;
 }
 
 export interface UpdateOrderStatusDto {
@@ -34,7 +35,11 @@ export interface Order {
   batchId: string | null;
   status: string;
   paymentMethod: string;
+  subtotal: number;
+  couponDiscount: number;
+  deliveryFee: number;
   total: number;
+  couponCode: string | null;
   note: string | null;
   deliveryAreaName: string | null;
   deliveryAddressDetail: string | null;

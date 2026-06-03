@@ -44,4 +44,14 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   deliveryAddressDetail?: string;
+
+  @ApiPropertyOptional({ description: 'كود كوبون الخصم' })
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
+
+  @ApiPropertyOptional({ description: 'معرّف المنطقة للتوصيل' })
+  @IsOptional()
+  @IsString()
+  areaId?: string;
 }

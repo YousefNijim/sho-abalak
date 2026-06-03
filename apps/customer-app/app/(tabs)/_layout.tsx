@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Package, User, ShoppingCart } from 'lucide-react-native';
+import { Home, Package, User, ShoppingCart, Tag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fontFamily, components, spacing } from '../../src/theme';
@@ -69,6 +69,14 @@ export default function TabsLayout() {
               )}
             </View>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="offers"
+        options={{
+          title: 'العروض',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Tag size={size} color={color} />,
         }}
       />
       <Tabs.Screen

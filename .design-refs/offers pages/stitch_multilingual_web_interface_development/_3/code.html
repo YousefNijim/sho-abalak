@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#ffb688",
+                    "on-primary": "#ffffff",
+                    "background": "#fbf8ff",
+                    "secondary-fixed": "#aef2bf",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "surface-white": "#FFFFFF",
+                    "surface-container": "#efecf6",
+                    "muted-gray": "#6B7280",
+                    "surface-container-low": "#f5f2fc",
+                    "on-secondary-fixed": "#00210e",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-primary-container": "#4e2200",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#abefbd",
+                    "on-tertiary-fixed": "#001e30",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "inverse-surface": "#303037",
+                    "background-cream": "#FCF3DC",
+                    "on-background": "#1b1b22",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#e4e1eb",
+                    "surface-tint": "#974800",
+                    "outline": "#8a7265",
+                    "on-surface": "#1b1b22",
+                    "primary-fixed-dim": "#ffb688",
+                    "surface-dim": "#dbd9e2",
+                    "tertiary": "#006495",
+                    "primary-fixed": "#ffdbc7",
+                    "on-primary-fixed": "#311300",
+                    "tertiary-container": "#009ee8",
+                    "outline-variant": "#ddc1b1",
+                    "surface-bright": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "border-beige": "#E5E0D5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#564337",
+                    "tertiary-fixed": "#cbe6ff",
+                    "primary": "#974800",
+                    "primary-container": "#e6781e",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "error-red": "#EF4444",
+                    "secondary": "#296a43",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "success-green": "#22C55E",
+                    "surface-container-high": "#eae7f1",
+                    "warning-amber": "#F59E0B",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#2e6f47"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gap-lg": "20px",
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "gap-md": "12px",
+                    "gap-xs": "4px",
+                    "margin-standard": "16px",
+                    "nav-height": "64px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC; /* background-cream */
+            font-family: 'Cairo', 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .glass-header {
+            background: rgba(252, 243, 220, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-nav-height">
+<!-- Top App Bar (Task-Focused - No Nav Shell) -->
+<header class="fixed top-0 left-0 w-full z-40 glass-header shadow-sm transition-all duration-300">
+<div class="flex flex-row-reverse justify-between items-center px-margin-standard h-nav-height w-full">
+<button class="flex items-center justify-center w-10 h-10 rounded-full transition-transform active:scale-95 text-primary" onclick="window.history.back()">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-primary">تفاصيل العرض</h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full transition-transform active:scale-95 text-primary">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+</div>
+</header>
+<main class="mt-nav-height">
+<!-- Hero Image Section -->
+<section class="relative w-full aspect-video md:aspect-[21/9] overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A lush, close-up photograph of a vibrant Palestinian feast including hummus topped with olive oil and pine nuts, freshly baked pita bread, and colorful salads. The lighting is warm and golden, reminiscent of a Mediterranean sunset, highlighting the textures of the food. The background is a rustic wooden table in a sun-drenched courtyard, creating an atmosphere of authentic Palestinian hospitality and warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfqaRtyElsZ-qeB7gDZLeooRBFAZ5KFlJYAZcQGTwtelQow1Jgpg-2b4T9LSVDRU2LcbsjrMpJItutm8aXBDcPj8EayYF4U47W7-k4d7OdyZtDqlqi6ZlZcDP3QdokADDJofEqYYDv042487i9jwJkdpzhyibAdL-ekyfmnHvg4MHactFtvMXzA-no5ADV_VrDhuNTi_mTEZ-D_qFLcsy9cTJsiHldcIc176lCNaIuYK4IHXqVIRhenKTYDF_BKkiEI_bLMSBJZsFV"/>
+<div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 right-margin-standard">
+<span class="bg-primary px-3 py-1 rounded-full text-white font-label-sm text-label-sm">عرض محدود</span>
+</div>
+</section>
+<!-- Offer Header Info -->
+<section class="bg-surface-white rounded-t-[32px] -mt-8 relative z-10 px-margin-standard pt-8 pb-6 shadow-lg">
+<div class="flex justify-between items-start mb-4">
+<h2 class="font-headline-md text-headline-md text-on-background">وليمة العائلة الأصيلة</h2>
+<div class="flex flex-col items-end">
+<span class="text-primary font-headline-sm text-headline-sm">85 ₪</span>
+<span class="text-muted-gray line-through text-label-md font-label-md">120 ₪</span>
+</div>
+</div>
+<p class="font-body-base text-body-base text-on-surface-variant leading-relaxed mb-6">
+                استمتع بوجبة متكاملة لجميع أفراد العائلة، تضم تشكيلة واسعة من المشاوي المشكلة، المقبلات الباردة والساخنة، والخبز الطازج من الفرن.
+            </p>
+<div class="flex gap-md items-center text-secondary">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[20px]" data-icon="timer">timer</span>
+<span class="font-label-md text-label-md">متبقي يومان</span>
+</div>
+<div class="h-4 w-[1px] bg-border-beige"></div>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[20px]" data-icon="local_shipping">local_shipping</span>
+<span class="font-label-md text-label-md">توصيل مجاني</span>
+</div>
+</div>
+</section>
+<!-- Terms and Conditions Section -->
+<section class="mt-section-md px-margin-standard">
+<div class="flex items-center gap-sm mb-gap-md">
+<span class="material-symbols-outlined text-primary" data-icon="gavel">gavel</span>
+<h3 class="font-headline-sm text-headline-sm text-on-background">شروط العرض</h3>
+</div>
+<div class="bg-surface-white/50 border border-border-beige rounded-xl p-5">
+<ul class="space-y-4">
+<li class="flex gap-md items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<p class="font-body-base text-body-base text-on-surface-variant">العرض ساري أيام الأسبوع فقط من الأحد إلى الأربعاء.</p>
+</li>
+<li class="flex gap-md items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<p class="font-body-base text-body-base text-on-surface-variant">لا يمكن دمج هذا العرض مع أي خصومات أو قسائم شرائية أخرى.</p>
+</li>
+<li class="flex gap-md items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<p class="font-body-base text-body-base text-on-surface-variant">العرض متاح للطلبات الخارجية وتوصيل الطلبات فقط.</p>
+</li>
+<li class="flex gap-md items-start">
+<span class="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0"></span>
+<p class="font-body-base text-body-base text-on-surface-variant">يسري العرض حتى نفاذ الكمية اليومية المخصصة.</p>
+</li>
+</ul>
+</div>
+</section>
+<!-- Participating Restaurants -->
+<section class="mt-section-lg mb-section-lg">
+<div class="flex justify-between items-center px-margin-standard mb-gap-md">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+<h3 class="font-headline-sm text-headline-sm text-on-background">المطاعم المشاركة</h3>
+</div>
+<button class="text-primary font-label-md text-label-md flex items-center gap-xs transition-opacity hover:opacity-70">
+                    عرض الكل
+                    <span class="material-symbols-outlined text-[16px]" data-icon="chevron_left">chevron_left</span>
+</button>
+</div>
+<!-- Horizontal Carousel -->
+<div class="flex flex-row-reverse overflow-x-auto no-scrollbar gap-gap-md px-margin-standard">
+<!-- Restaurant Card 1 -->
+<div class="flex-shrink-0 w-64 bg-surface-white rounded-xl shadow-md p-3 border border-border-beige">
+<div class="relative w-full h-32 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="Modern interior of a high-end restaurant with traditional Palestinian motifs integrated into the decor. The space is filled with warm, soft lighting reflecting off polished surfaces. Large windows reveal a glimpse of a bustling city at night. The vibe is sophisticated and welcoming, using earthy tones and premium materials." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHZE741OPGuLO2jxOoNCM0SB3lOIw4uFdR5ET5Equf-4YK5lXb4J1t2PdtBsz5CHB9Vh1-f7uXIDNEYGGMo8LkJ0K9qMePD_aEGbX_bOLv_T112WS-IrLd7pi8DtW-37SIO245inoOSvFZyXNVOTtojou24h98nyLK-dAfsLi4yiwHvedKkn7aGJZEiUEMdrVVDbRdaH3Y3JCdScH5o2vs5g4qCWjaRmb18uWv8KUorXIXYH-OBvSszpnrf9NO00yj-lP-4p5XQfj0"/>
+<div class="absolute top-2 right-2 bg-surface-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber text-[14px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-background">4.8</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-background-cream flex items-center justify-center border border-primary-fixed">
+<span class="material-symbols-outlined text-primary" data-icon="bakery_dining">bakery_dining</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[16px] text-on-background">مطعم الياسمين</h4>
+<p class="font-label-sm text-label-sm text-muted-gray">نابلس، وسط المدينة</p>
+</div>
+</div>
+</div>
+<!-- Restaurant Card 2 -->
+<div class="flex-shrink-0 w-64 bg-surface-white rounded-xl shadow-md p-3 border border-border-beige">
+<div class="relative w-full h-32 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="A trendy bistro setting featuring a blend of industrial and heritage design. Exposed stone walls meet sleek metal furniture and warm wood accents. The lighting is intimate, provided by Edison bulbs hanging from the ceiling. A focus on craftsmanship and local heritage is evident in the curated decor pieces." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVJJPbLtZQKlGtQSBm52tq4oW4NqH_XPcLHPHdV7lyW3-jJMBKIqMN0l-gIrmsx95xjA-3WChtnbq519sh4kQL9xq4gS4_Uiv9xMcfk3s6p3x2lqYUYVOxMGDEQ8POa0B5fg71LxoT5DTAhAlH2K-Onr6F2VNhKumKQyY65AhfWId0fNwOnmKY5ojyxw-r9dKxi33iNtfUW0du54nuh2jNbvz5lveIPjKw186OGd4GGli4kwE3a930jNDyOw1OvYUG38J47imGru1s"/>
+<div class="absolute top-2 right-2 bg-surface-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber text-[14px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-background">4.5</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-background-cream flex items-center justify-center border border-primary-fixed">
+<span class="material-symbols-outlined text-primary" data-icon="dinner_dining">dinner_dining</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[16px] text-on-background">قصر الضيافة</h4>
+<p class="font-label-sm text-label-sm text-muted-gray">رام الله، حي الطيرة</p>
+</div>
+</div>
+</div>
+<!-- Restaurant Card 3 -->
+<div class="flex-shrink-0 w-64 bg-surface-white rounded-xl shadow-md p-3 border border-border-beige">
+<div class="relative w-full h-32 rounded-lg overflow-hidden mb-3">
+<img class="w-full h-full object-cover" data-alt="A vibrant outdoor dining terrace overlooking a historic Palestinian neighborhood. Wrought-iron tables are decorated with floral patterns and colorful tablecloths. Lush green plants and vines climb the old stone walls. The scene is bathed in bright daylight, creating a cheerful, airy, and inviting communal dining atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnN6ELCkRWqMVUeHJRngoIu0Z72CgVxIvLfn50q3JjxOihn98hvUk8QcA5O1dl0zG2mPSmt-c1zHAi3je95Yw4WNkrWud6sodS8eX87yPfsLec9iFFg3MKBmi6lTa0sGnuIcGif7oAT33zw6pgq3KBGBmGzsIZJEfmyV9gr1KW-QSN4o_JfjQPLtvyZltBrgb3aA0iRHHn3wxy1ZC4P6yIgSAQhaiS-Pk0Vpu8t-TX4r4R04yvvoKfokqZ0lW4BEjfrg4q_jwT4UX_"/>
+<div class="absolute top-2 right-2 bg-surface-white/90 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber text-[14px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm text-on-background">4.2</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-background-cream flex items-center justify-center border border-primary-fixed">
+<span class="material-symbols-outlined text-primary" data-icon="coffee">coffee</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-[16px] text-on-background">كافيه كنعان</h4>
+<p class="font-label-sm text-label-sm text-muted-gray">بيت لحم، المهد</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Call to Action Bar -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-white p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] flex gap-md items-center">
+<div class="flex-1">
+<button class="w-full h-[52px] bg-primary-container text-white font-button-text text-button-text rounded-xl shadow-md hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+                اطلب العرض الآن
+            </button>
+</div>
+<button class="w-14 h-[52px] border-2 border-primary-fixed text-primary rounded-xl flex items-center justify-center active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+</div>
+<script>
+        // Simple scroll behavior for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('shadow-md');
+                header.classList.remove('shadow-sm');
+            } else {
+                header.classList.add('shadow-sm');
+                header.classList.remove('shadow-md');
+            }
+        });
+
+        // Add touch feedback micro-interactions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.style.opacity = '0.7';
+            });
+            btn.addEventListener('touchend', () => {
+                btn.style.opacity = '1';
+            });
+        });
+    </script>
+</body></html>

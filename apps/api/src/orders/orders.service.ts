@@ -64,7 +64,33 @@ export class OrdersService {
       subtotal = subtotal.add(unitPrice.mul(i.quantity));
       return { productId: i.productId, quantity: i.quantity, unitPrice };
     });
-    const total = subtotal.add(business.area.deliveryFee);
+
+    // Minimum order check
+    if (business.minimumOrder && subtotal.lt(business.minimumOrder)) {
+      throw new BadRequestException(`الحد الأدنى للطلب من هذه المنشأة هو ${business.minimumOrder} ₪`);
+    }
+
+    // Coupon validation & discount
+    let couponDiscount = new Prisma.Decimal(0);
+    let couponCode: string | null = null;
+    let couponId: string | null = null;
+    if (dto.couponCode) {
+      const code = dto.couponCode.toUpperCase().trim();
+      const coupon = await this.prisma.coupon.findUnique({ where: { code } });
+      if (!coupon || !coupon.isActive || coupon.usedAt) {
+        throw new BadRequestException('كود الكوبون غير صحيح أو مستخدم مسبقاً');
+      }
+      if (subtotal.lt(coupon.minimumOrder)) {
+        throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون هو ${coupon.minimumOrder} ₪`);
+      }
+      couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
+      couponCode = code;
+      couponId = coupon.id;
+    }
+
+    const deliveryFee = business.area.deliveryFee;
+    const subtotalAfterCoupon = subtotal.sub(couponDiscount);
+    const total = subtotalAfterCoupon.add(deliveryFee);
 
     // Pre-generate the order id so the payment provider can reference it before we persist.
     const orderId = randomUUID();
@@ -74,22 +100,35 @@ export class OrdersService {
       amount: total,
     });
 
-    const order = await this.prisma.order.create({
-      data: {
-        id: orderId,
-        customerId,
-        businessId: dto.businessId,
-        status: OrderStatus.PENDING,
-        paymentMethod: dto.paymentMethod,
-        total,
-        note: dto.note ?? null,
-        deliveryAreaName: dto.deliveryAreaName ?? null,
-        deliveryAddressDetail: dto.deliveryAddressDetail ?? null,
-        items: { create: itemData },
-        statusHistory: { create: { status: OrderStatus.PENDING, changedBy: customerId } },
-        payment: { create: paymentCreate },
-      },
-      include: ORDER_INCLUDE,
+    const order = await this.prisma.$transaction(async (tx) => {
+      // Mark coupon as used atomically with order creation
+      if (couponId) {
+        await tx.coupon.update({
+          where: { id: couponId },
+          data: { usedAt: new Date(), usedByOrderId: orderId },
+        });
+      }
+      return tx.order.create({
+        data: {
+          id: orderId,
+          customerId,
+          businessId: dto.businessId,
+          status: OrderStatus.PENDING,
+          paymentMethod: dto.paymentMethod,
+          subtotal,
+          couponDiscount,
+          deliveryFee,
+          total,
+          couponCode,
+          note: dto.note ?? null,
+          deliveryAreaName: dto.deliveryAreaName ?? null,
+          deliveryAddressDetail: dto.deliveryAddressDetail ?? null,
+          items: { create: itemData },
+          statusHistory: { create: { status: OrderStatus.PENDING, changedBy: customerId } },
+          payment: { create: paymentCreate },
+        },
+        include: ORDER_INCLUDE,
+      });
     });
 
     // Emit new order socket event to the business owner

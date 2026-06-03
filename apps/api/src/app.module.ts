@@ -18,6 +18,8 @@ import { ReportsModule } from './reports/reports.module';
 import { TagsModule } from './tags/tags.module';
 import { BannersModule } from './banners/banners.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { OffersModule } from './offers/offers.module';
+import { CouponsModule } from './coupons/coupons.module';
 import { HealthController } from './health.controller';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
@@ -42,6 +44,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     TagsModule,
     BannersModule,
     NotificationsModule,
+    OffersModule,
+    CouponsModule,
   ],
   controllers: [HealthController],
 })

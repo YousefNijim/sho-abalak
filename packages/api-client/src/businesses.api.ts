@@ -26,6 +26,7 @@ export interface Business {
   rating: number;
   isOpen: boolean;
   commissionRate?: number;
+  minimumOrder?: number | null;
   area?: { city: string; name: string; deliveryFee: number };
   owner?: { id: string; name: string; phone: string; status: string };
   products?: Product[];

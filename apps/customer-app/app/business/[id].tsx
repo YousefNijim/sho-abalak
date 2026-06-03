@@ -20,7 +20,7 @@ import {
   Banknote
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, offersApi, BASE_URL } from '@shu/api-client';
 import type { Product } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
@@ -54,6 +54,33 @@ export default function BusinessDetail() {
     queryFn: () => businessesApi.getById(id!),
     enabled: !!id,
   });
+
+  const { data: businessOffers = [] } = useQuery({
+    queryKey: ['offers-for-business', id],
+    queryFn: () => offersApi.forBusiness(id!),
+    enabled: !!id,
+  });
+
+  // Build a map: productId → discountedPrice (lowest discount wins if multiple offers)
+  const discountMap = new Map<string, number>();
+  const categoryDiscountMap = new Map<string, number>();
+  for (const offer of businessOffers) {
+    for (const op of offer.offerProducts) {
+      if (op.productId) {
+        const existing = discountMap.get(op.productId) ?? 0;
+        if (Number(op.discountPct) > existing) discountMap.set(op.productId, Number(op.discountPct));
+      } else if (op.categoryName) {
+        const existing = categoryDiscountMap.get(op.categoryName) ?? 0;
+        if (Number(op.discountPct) > existing) categoryDiscountMap.set(op.categoryName, Number(op.discountPct));
+      }
+    }
+  }
+
+  const getDiscountPct = (p: any): number => {
+    if (discountMap.has(p.id)) return discountMap.get(p.id)!;
+    if (p.category && categoryDiscountMap.has(p.category)) return categoryDiscountMap.get(p.category)!;
+    return 0;
+  };
 
   if (isLoading) {
     return (
@@ -212,6 +239,11 @@ export default function BusinessDetail() {
               <Text style={styles.detailText}>دفع نقدي</Text>
             </View>
           </View>
+          {business.minimumOrder ? (
+            <View style={styles.minimumOrderBadge}>
+              <Text style={styles.minimumOrderText}>الحد الأدنى للطلب: {Number(business.minimumOrder)} ₪</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* ── Category tabs ── */}
@@ -243,10 +275,16 @@ export default function BusinessDetail() {
           {filteredProducts.length === 0 ? (
             <Text style={styles.emptyText}>لا توجد منتجات متوفرة حالياً</Text>
           ) : (
-            filteredProducts.map((p: any) => (
-              <Pressable 
-                key={p.id} 
-                style={styles.productCard}
+            filteredProducts.map((p: any) => {
+              const discountPct = getDiscountPct(p);
+              const originalPrice = Number(p.price);
+              const discountedPrice = discountPct > 0
+                ? Math.round(originalPrice * (1 - discountPct / 100) * 100) / 100
+                : originalPrice;
+              return (
+              <Pressable
+                key={p.id}
+                style={[styles.productCard, discountPct > 0 && styles.productCardOffer]}
                 onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id, businessId: business.id } })}
               >
                 <View style={styles.productImageWrap}>
@@ -257,18 +295,28 @@ export default function BusinessDetail() {
                       <ChefHat size={24} color={colors.border} />
                     </View>
                   )}
+                  {discountPct > 0 && (
+                    <View style={styles.offerBadge}>
+                      <Text style={styles.offerBadgeText}>-{discountPct}%</Text>
+                    </View>
+                  )}
                 </View>
 
                 <View style={styles.productInfo}>
                   <View>
-                    <Text style={styles.productName}>{p.name}</Text>
+                    <Text style={[styles.productName, discountPct > 0 && styles.productNameOffer]}>{p.name}</Text>
                     <Text style={styles.productDesc} numberOfLines={2}>
                       {p.description || 'وصف شهي للمنتج'}
                     </Text>
                   </View>
-                  
+
                   <View style={styles.productFooter}>
-                    <Text style={styles.productPrice}>{p.price} ₪</Text>
+                    <View style={{ alignItems: 'flex-start' }}>
+                      <Text style={[styles.productPrice, discountPct > 0 && styles.productPriceDiscounted]}>{discountedPrice} ₪</Text>
+                      {discountPct > 0 && (
+                        <Text style={styles.productPriceOld}>{originalPrice} ₪</Text>
+                      )}
+                    </View>
                     {p.isAvailable && business.isOpen ? (() => {
                       const cartItem = cartItems.find((i) => i.productId === p.id);
                       return cartItem ? (
@@ -294,7 +342,7 @@ export default function BusinessDetail() {
                   </View>
                 </View>
               </Pressable>
-            ))
+            );})
           )}
         </View>
       </ScrollView>
@@ -481,6 +529,21 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textDecorationLine: 'underline',
   },
+  minimumOrderBadge: {
+    backgroundColor: colors.primary + '12',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginTop: spacing[1],
+    borderWidth: 1,
+    borderColor: colors.primary + '30',
+  },
+  minimumOrderText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.xs,
+    color: colors.primary,
+  },
   infoDetailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -545,12 +608,12 @@ const styles = StyleSheet.create({
     gap: spacing[3],
     paddingBottom: spacing[4],
   },
-  productCard: { 
-    flexDirection: 'row', 
-    alignItems: 'stretch', 
-    gap: spacing[3], 
-    backgroundColor: '#FFFFFF', 
-    borderRadius: radius.xl, 
+  productCard: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    gap: spacing[3],
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
     padding: spacing[3],
     borderWidth: 1,
     borderColor: 'transparent',
@@ -560,13 +623,24 @@ const styles = StyleSheet.create({
       web: { boxShadow: '0 1px 2px rgba(0,0,0,0.05)' },
     }),
   },
-  productImageWrap: { 
-    width: 80, 
-    height: 80, 
-    borderRadius: radius.lg, 
+  productCardOffer: {
+    backgroundColor: '#FFFBF0',
+    borderColor: '#F59E0B' + '40',
+    borderWidth: 1.5,
+  },
+  productNameOffer: { color: colors.primary },
+  productPriceDiscounted: { color: colors.secondary },
+  productPriceOld: { fontFamily: fontFamily.medium, fontSize: fontSizes.xs, color: colors.textMuted, textDecorationLine: 'line-through' },
+  offerBadge: { position: 'absolute', top: 4, right: 4, backgroundColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing[2], paddingVertical: 2 },
+  offerBadgeText: { fontFamily: fontFamily.extrabold, fontSize: 10, color: '#fff' },
+  productImageWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.lg,
     overflow: 'hidden',
-    backgroundColor: '#f5f2fc', // surface-container-low
+    backgroundColor: '#f5f2fc',
     flexShrink: 0,
+    position: 'relative',
   },
   productImage: { 
     width: '100%', 

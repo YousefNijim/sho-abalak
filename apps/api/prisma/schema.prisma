@@ -69,6 +69,7 @@ model Business {
   rating         Float        @default(0)
   isOpen         Boolean      @default(true)
   commissionRate Decimal      @default(10.00) @db.Decimal(5, 2)
+  minimumOrder   Decimal?     @db.Decimal(10, 2)
   phone          String?
   addressDetail  String?
   closeTime      String?
@@ -84,6 +85,7 @@ model Business {
   deliveryAreas  Area[]         @relation("BusinessDeliveryAreas")
   tags           Tag[]          @relation("BusinessTags")
   driverReviews  DriverReview[]
+  offerBusinesses OfferBusiness[]
 
   @@map("businesses")
 }
@@ -110,16 +112,17 @@ model Banner {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  businessId  String
-  name        String
-  description String?
-  price       Decimal     @db.Decimal(10, 2)
-  imageUrl    String?
-  isAvailable Boolean     @default(true)
-  category    String?
-  orderItems  OrderItem[]
-  business    Business    @relation(fields: [businessId], references: [id])
+  id            String         @id @default(uuid())
+  businessId    String
+  name          String
+  description   String?
+  price         Decimal        @db.Decimal(10, 2)
+  imageUrl      String?
+  isAvailable   Boolean        @default(true)
+  category      String?
+  orderItems    OrderItem[]
+  business      Business       @relation(fields: [businessId], references: [id])
+  offerProducts OfferProduct[]
 
   @@map("products")
 }
@@ -145,7 +148,11 @@ model Order {
   driverId              String?
   status                OrderStatus          @default(PENDING)
   paymentMethod         PaymentMethod
+  subtotal              Decimal              @db.Decimal(10, 2)
+  couponDiscount        Decimal              @default(0) @db.Decimal(10, 2)
+  deliveryFee           Decimal              @default(0) @db.Decimal(10, 2)
   total                 Decimal              @db.Decimal(10, 2)
+  couponCode            String?
   note                  String?
   createdAt             DateTime             @default(now())
   pendingDriverId       String?
@@ -251,6 +258,68 @@ model SystemSettings {
   updatedAt         DateTime @updatedAt
 
   @@map("system_settings")
+}
+
+// ── Offers ──────────────────────────────────────────────────────────────────
+
+model Offer {
+  id              String          @id @default(uuid())
+  title           String
+  description     String?
+  rules           String?
+  imageUrl        String?
+  isActive        Boolean         @default(true)
+  type            OfferType       @default(INDIVIDUAL)
+  createdAt       DateTime        @default(now())
+  offerBusinesses OfferBusiness[]
+  offerProducts   OfferProduct[]
+
+  @@map("offers")
+}
+
+// Which businesses participate in this offer
+model OfferBusiness {
+  id         String   @id @default(uuid())
+  offerId    String
+  businessId String
+  offer      Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, businessId])
+  @@map("offer_businesses")
+}
+
+// Specific products/categories discounted by this offer
+model OfferProduct {
+  id            String   @id @default(uuid())
+  offerId       String
+  productId     String?
+  categoryName  String?
+  discountPct   Decimal  @db.Decimal(5, 2)
+  offer         Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  product       Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("offer_products")
+}
+
+// ── Coupons ─────────────────────────────────────────────────────────────────
+
+model Coupon {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  discountAmount  Decimal   @db.Decimal(10, 2)
+  minimumOrder    Decimal   @db.Decimal(10, 2)
+  isActive        Boolean   @default(true)
+  usedAt          DateTime?
+  usedByOrderId   String?   @unique
+  createdAt       DateTime  @default(now())
+
+  @@map("coupons")
+}
+
+enum OfferType {
+  INDIVIDUAL
+  SHARED
 }
 
 enum UserRole {

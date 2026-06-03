@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "inverse-primary": "#ffb688",
+                    "on-primary": "#ffffff",
+                    "background": "#fbf8ff",
+                    "secondary-fixed": "#aef2bf",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "surface-white": "#FFFFFF",
+                    "surface-container": "#efecf6",
+                    "muted-gray": "#6B7280",
+                    "surface-container-low": "#f5f2fc",
+                    "on-secondary-fixed": "#00210e",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-primary-container": "#4e2200",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#abefbd",
+                    "on-tertiary-fixed": "#001e30",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "inverse-surface": "#303037",
+                    "background-cream": "#FCF3DC",
+                    "on-background": "#1b1b22",
+                    "inverse-on-surface": "#f2eff9",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#e4e1eb",
+                    "surface-tint": "#974800",
+                    "outline": "#8a7265",
+                    "on-surface": "#1b1b22",
+                    "primary-fixed-dim": "#ffb688",
+                    "surface-dim": "#dbd9e2",
+                    "tertiary": "#006495",
+                    "primary-fixed": "#ffdbc7",
+                    "on-primary-fixed": "#311300",
+                    "tertiary-container": "#009ee8",
+                    "outline-variant": "#ddc1b1",
+                    "surface-bright": "#fbf8ff",
+                    "surface": "#fbf8ff",
+                    "border-beige": "#E5E0D5",
+                    "surface-container-lowest": "#ffffff",
+                    "on-surface-variant": "#564337",
+                    "tertiary-fixed": "#cbe6ff",
+                    "primary": "#974800",
+                    "primary-container": "#e6781e",
+                    "on-tertiary-container": "#00314c",
+                    "on-primary-fixed-variant": "#733600",
+                    "error-red": "#EF4444",
+                    "secondary": "#296a43",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "success-green": "#22C55E",
+                    "surface-container-high": "#eae7f1",
+                    "warning-amber": "#F59E0B",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#2e6f47"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gap-lg": "20px",
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "gap-sm": "8px",
+                    "base": "4px",
+                    "gap-md": "12px",
+                    "gap-xs": "4px",
+                    "margin-standard": "16px",
+                    "nav-height": "64px"
+            },
+            "fontFamily": {
+                    "label-md": ["Montserrat"],
+                    "label-sm": ["Montserrat"],
+                    "hero-lg": ["Cairo"],
+                    "headline-sm": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "body-base": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "body-lg": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "button-text": ["Montserrat"]
+            },
+            "fontSize": {
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #FCF3DC; /* background-cream */
+            font-family: 'Cairo', 'Montserrat', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen pb-24">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 bg-background-cream shadow-sm flex flex-row justify-between items-center px-margin-standard h-nav-height w-full">
+<div class="flex items-center gap-md">
+<button class="transition-transform active:scale-95 hover:opacity-80 p-2">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">العروض</h1>
+</div>
+<div class="flex items-center">
+<button class="transition-transform active:scale-95 hover:opacity-80 p-2">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-margin-standard mt-section-md">
+<!-- Category Filter Chips (Optional UX Enhancement) -->
+<div class="flex flex-row overflow-x-auto gap-sm pb-section-md no-scrollbar">
+<button class="whitespace-nowrap px-4 py-2 bg-primary text-on-primary rounded-full font-label-md text-label-md">الكل</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-white text-on-surface-variant border border-border-beige rounded-full font-label-md text-label-md">مطاعم</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-white text-on-surface-variant border border-border-beige rounded-full font-label-md text-label-md">حلويات</button>
+<button class="whitespace-nowrap px-4 py-2 bg-surface-white text-on-surface-variant border border-border-beige rounded-full font-label-md text-label-md">سوبر ماركت</button>
+</div>
+<!-- Offers 2-Column Grid -->
+<div class="grid grid-cols-2 gap-md">
+<!-- Offer Card 1 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="A delicious, close-up shot of a traditional Palestinian pizza with melting cheese and fresh herbs. The lighting is warm and golden, emphasizing the appetizing texture of the crust and ingredients. The background is a soft, warm cream tone that matches the heritage brand palette, creating a high-quality, professional food photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzmcIlSTwHOrcGHCMMlMArSXW_yI3MACgvCrwfnMcH6C-MMajQFG6sLtjwRLks8CBknzn8OjJEmgXtUXU-Vh_2oJdBaaLIJ_BDea_McgX8kuu-3Rb5n2OqiKg-ATQfp8tdcONY5qR-PsslgAM26OGLzcFYp7vPCT7v0R1U4iuvFg49R7ikA6x-Y50_5LHg_c3vkt53M4vp9KEbA-tNOn2M17CyyiHr6hec-XKWmzk2XRXO3I0mwh2vmtkTL1MYVxcBljQ8blw_Vx4P"/>
+<div class="absolute top-2 right-2 bg-warning-amber text-on-primary-container px-2 py-1 rounded-lg font-bold text-label-sm">
+                        30% خصم
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">بيتزا كلاسيك</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">عرض الغداء المميز</p>
+</div>
+</div>
+<!-- Offer Card 2 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="A vibrant salad bowl with fresh vegetables and grilled chicken, presented in a modern white ceramic bowl. The lighting is bright and natural, reflecting a clean and healthy aesthetic. The color palette features pops of green and red against the brand's warm cream background. It looks high-end and artisanal, perfect for a premium food delivery service." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9h_RKBGsxl_icSlWScQ-kprcduIhtRtX9nC0WYp4AjgMUayESS84mRdxLU5kzjClvjAxp4eY0O3UAxJvvI5Ht_hFeu6Uc8cHJgPzRcvtTIhZi5YVZ-OUyVeyriqql1Db_ATa-WTPm1dWWBPixXmYBtv8vRxgA6FUyLnzJjQvyGXgbC62ad_7hQ8uL0Sd0Q_O-iFSnvV4Vg6zw3vIIVL7DDgifJKZBNYbb3KtQs2mk7eNpDbiveE6pdyblALoCgBhamLpDGp6n61Zy"/>
+<div class="absolute top-2 right-2 bg-success-green text-on-secondary px-2 py-1 rounded-lg font-bold text-label-sm">
+                        توصيل مجاني
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">سلطات صحية</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">اطلب بقيمة 50 شيكل</p>
+</div>
+</div>
+<!-- Offer Card 3 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="A tempting stack of artisanal donuts with glossy chocolate glaze and colorful sprinkles. The photography is professional and high-contrast, with a warm, inviting glow that makes the dessert look irresistible. The aesthetic is clean and modern, perfectly aligned with the tactile minimalism of the brand's Heritage Pulse design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQNkrz1BFuj_pdg5WwLdjltL33GYVPJTYFFi9OLWb9WF6ox0cmSW3gMYd-k8ALIsAtWvKHxbh5-qFNNI6fhlaRWf6MTVT7DEaa8KUIDapQ8eMjR6jBFLJspluWDcp-rMJ4Uxy_7Sr6G8f9Vf4MTX1RiHRSyLPwgCTR8LnYJm41hOvHyUsWbTyVjus7mOC3IpBQ2OkNfTUKcng-u-BMQXX_YilKNcbZq6ouYlOi03C0kkTt6a_DL0ZvhK1QFdkw65hYr1K8cHwbzhIn"/>
+<div class="absolute top-2 right-2 bg-warning-amber text-on-primary-container px-2 py-1 rounded-lg font-bold text-label-sm">
+                        2+1 مجاناً
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">دوناتس مشكلة</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">للطلبات العائلية فقط</p>
+</div>
+</div>
+<!-- Offer Card 4 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="A gourmet beef burger with melting cheese and fresh lettuce on a toasted bun. The image is captured with shallow depth of field, focusing on the juicy texture of the meat. The lighting is soft and golden-hour inspired, creating a warm, premium feeling that evokes local hospitality and high-quality standards in food preparation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvyBxuIX-IRtrUNNFtSzyJNupHiXmBMt0xdlBmTqL4DXkpWqlvOelviPmQHtj3aBmHEr4IaW-ukuo-vMf11QyzJtKAketG9S9hrYIjuZ_t5AYftpMEH134QpBqXYQAZ_6Q6L5WF5v3IJAJBKOZ18URUw0GULEmcRGqbxPPmtS8946VmYLrsCt1lGfxfSv4T8Zdc8jR9G4IM5JMWgzbSSwnoJCvJFR-DlcMHVdgMJXgJGYmwoTbr9SqM26P5pjyAPx5Eme-eDWTTUCp"/>
+<div class="absolute top-2 right-2 bg-error-red text-on-primary px-2 py-1 rounded-lg font-bold text-label-sm">
+                        وفر 15 شيكل
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">برجر دبل</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">من مطعم المدينة</p>
+</div>
+</div>
+<!-- Offer Card 5 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="Traditional Arabic sweets, specifically golden Kunafa with crushed pistachios on top. The photograph is rich in cultural heritage, using deep oranges and greens that contrast beautifully with a warm light-mode background. The texture of the pastry is highly detailed, highlighting the quality and authenticity of local culinary traditions." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKcuJbmY1I9KNcd6SHBHWnHHa3VhDpbkL9cNqljkxEUZIPRtSjWcP1OchKJymagL7eQywt9QmX9u-I-DyX5jWHHb5sNsdIBtvfce94zYUZF72iL0sScLGuPFagV9l_ABobSS7D7UJck8yTN992Rsjc9bmpK8CNC36FnawwosHt8wWHEK554iRtzTLElDFIBjfKv1YknT0xMx_WLggwLA1_v3aEVs19axEdBk32_nBbCnnh-C534zGGQelcZpicuT6z8oxRv7x8gNSy"/>
+<div class="absolute top-2 right-2 bg-warning-amber text-on-primary-container px-2 py-1 rounded-lg font-bold text-label-sm">
+                        خصم 20%
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">حلويات شرقية</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">طبق المشكل الصغير</p>
+</div>
+</div>
+<!-- Offer Card 6 -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex flex-col transition-transform active:scale-95 h-72">
+<div class="relative h-[70%] w-full">
+<img class="w-full h-full object-cover" data-alt="A fresh Italian-style pizza with pepperoni and olives, steam rising softly to suggest it is hot and fresh. The photo uses high-key lighting for a bright, clean look. The composition is modern and artistic, utilizing the brand colors of warm cream and saffron in a subtle way to create a consistent and premium visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_HHKQeDWi1WI7fle0Y6jHfRukVV5sSKCEuJ4mol3EnMHtHBRvCmVmRpkWI_eHsfahgMruQolMOGUoVHG2ZecaZDdYX7ycYE52x37XY0oBqxSOpJ5eVWnbNLsPOv3R7q6-F26paYenOzYknw73hCK5OxOExfDaMBgFt7u7mo28c123Cdz7udHw7XF85d06CQVYi-DARFewVBbBfJQBpUCC5Rpw5Fjl7K1RZwk1HIQF-pnZsE9Yg0dmRm_o3VMPbWIAFtGD14Dg8Hon"/>
+<div class="absolute top-2 right-2 bg-primary-container text-on-primary-container px-2 py-1 rounded-lg font-bold text-label-sm">
+                        عرض الجمعة
+                    </div>
+</div>
+<div class="h-[30%] p-gap-md flex flex-col justify-center">
+<h3 class="font-headline-sm text-[14px] text-on-surface line-clamp-1">بيتزا بيبروني</h3>
+<p class="font-label-sm text-muted-gray line-clamp-1">حجم كبير بخصم خاص</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-white border-t border-border-beige shadow-lg flex flex-row-reverse justify-around items-center h-nav-height px-base">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<!-- Categories -->
+<a class="flex flex-col items-center justify-center text-primary font-bold transition-all duration-200 active:scale-90 px-4 active-tab" href="#">
+<span class="material-symbols-outlined" data-icon="category" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="font-label-sm text-label-sm">الأقسام</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-all duration-200 active:scale-90 px-4" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">حسابي</span>
+</a>
+</nav>
+<script>
+        // Simple Micro-interaction for tabs
+        document.querySelectorAll('nav a').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('nav a').forEach(t => {
+                    t.classList.remove('text-primary', 'font-bold', 'active-tab');
+                    t.classList.add('text-muted-gray');
+                    t.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0";
+                });
+                tab.classList.remove('text-muted-gray');
+                tab.classList.add('text-primary', 'font-bold', 'active-tab');
+                tab.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1";
+            });
+        });
+
+        // Pull to refresh effect (visual only)
+        let touchstartY = 0;
+        document.addEventListener('touchstart', e => {
+            touchstartY = e.changedTouches[0].screenY;
+        });
+
+        document.addEventListener('touchend', e => {
+            let touchendY = e.changedTouches[0].screenY;
+            if (touchendY > touchstartY + 100 && window.scrollY === 0) {
+                // Mimic refresh
+                document.body.style.opacity = '0.5';
+                setTimeout(() => {
+                    document.body.style.opacity = '1';
+                }, 500);
+            }
+        });
+    </script>
+</body></html>
