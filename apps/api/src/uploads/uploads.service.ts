@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import * as fs from 'node:fs';
+import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'node:stream';
 import * as path from 'node:path';
 
 export interface UploadedFileDto {
@@ -13,13 +14,12 @@ export interface UploadedFileDto {
 
 @Injectable()
 export class UploadsService {
-  private readonly uploadDir = path.join(process.cwd(), 'public', 'uploads');
-
   constructor() {
-    // Ensure the public uploads directory exists
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true });
-    }
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
   }
 
   async saveFile(file: UploadedFileDto): Promise<string> {
@@ -34,16 +34,27 @@ export class UploadsService {
       throw new BadRequestException('نوع الملف غير مدعوم، يرجى رفع صورة فقط (JPG, PNG, WEBP)');
     }
 
-    // Create unique random name to avoid collisions
-    const uniqueFilename = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-    const filePath = path.join(this.uploadDir, uniqueFilename);
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'sho_abalak_uploads',
+          // Optionally you can automatically format and optimize all uploads
+          // format: 'webp',
+        },
+        (error, result) => {
+          if (error || !result) {
+            reject(new BadRequestException('فشل في رفع الصورة إلى خوادم التخزين سحابياً'));
+          } else {
+            resolve(result.secure_url);
+          }
+        },
+      );
 
-    try {
-      await fs.promises.writeFile(filePath, file.buffer);
-      // Return public URL path
-      return `/uploads/${uniqueFilename}`;
-    } catch (err) {
-      throw new BadRequestException('فشل في حفظ الصورة على خادم الملفات');
-    }
+      // Create a readable stream from the buffer and pipe it to Cloudinary
+      const readableStream = new Readable();
+      readableStream.push(file.buffer);
+      readableStream.push(null);
+      readableStream.pipe(uploadStream);
+    });
   }
 }
