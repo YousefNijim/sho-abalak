@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { offersApi, couponsApi, businessesApi, uploadsApi, BASE_URL } from '@shu/api-client';
+import { offersApi, couponsApi, businessesApi, uploadsApi } from '@shu/api-client';
 import type { Offer, Coupon } from '@shu/api-client';
 
 type Tab = 'offers' | 'coupons';
@@ -73,13 +73,13 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
   const { data: businesses = [] } = useQuery({ queryKey: ['businesses-all'], queryFn: () => businessesApi.list({}) });
 
   const createMutation = useMutation({
-    mutationFn: () => offersApi.create({ ...form, businessIds: form.businessIds }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-offers'] }); setShowCreate(false); setForm(emptyForm); showToast('success', 'تم إنشاء العرض بنجاح'); },
+    mutationFn: (snapshot: typeof emptyForm) => offersApi.create({ ...snapshot, businessIds: snapshot.businessIds }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-offers'] }); setShowCreate(false); setForm(emptyForm); setPreviewUrl(null); setSelectedFile(null); showToast('success', 'تم إنشاء العرض بنجاح'); },
     onError: () => showToast('error', 'فشل إنشاء العرض'),
   });
 
   const updateMutation = useMutation({
-    mutationFn: () => offersApi.update(editOffer!.id, { ...form }),
+    mutationFn: (snapshot: typeof emptyForm) => offersApi.update(editOffer!.id, { ...snapshot }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-offers'] }); setEditOffer(null); showToast('success', 'تم تحديث العرض'); },
     onError: () => showToast('error', 'فشل تحديث العرض'),
   });
@@ -107,9 +107,11 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
     setUploading(true);
     try {
       const result = await uploadsApi.uploadImage(selectedFile);
-      const url = result.url?.startsWith('http') ? result.url : `${BASE_URL}${result.url}`;
+      // Cloudinary always returns a full https:// URL
+      const url = result.url;
       setForm((f) => ({ ...f, imageUrl: url }));
-      showToast('success', 'تم رفع الصورة');
+      setPreviewUrl(url);
+      showToast('success', 'تم رفع الصورة بنجاح ✓');
     } catch {
       showToast('error', 'فشل رفع الصورة');
     } finally {
@@ -211,7 +213,7 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">إضافة عرض جديد</h2>
-            <OfferForm onSubmit={() => createMutation.mutate()} label={createMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء العرض'} />
+            <OfferForm onSubmit={() => createMutation.mutate(form)} label={createMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء العرض'} />
           </div>
         </div>
       )}
@@ -221,7 +223,7 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">تعديل العرض</h2>
-            <OfferForm onSubmit={() => updateMutation.mutate()} label={updateMutation.isPending ? 'جاري الحفظ...' : 'حفظ التعديلات'} />
+            <OfferForm onSubmit={() => updateMutation.mutate(form)} label={updateMutation.isPending ? 'جاري الحفظ...' : 'حفظ التعديلات'} />
           </div>
         </div>
       )}
