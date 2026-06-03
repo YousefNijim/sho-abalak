@@ -66,7 +66,7 @@ export default function OrderDetail() {
       driverRatingShownRef.current = true;
       setTimeout(() => setDriverRatingVisible(true), 600);
     }
-  }, [order?.status, order?.driverId, (order as any)?.driverReview]);
+  }, [order?.status, order?.driverId, order?.driverReview]);
 
   const submitDriverReview = useMutation({
     mutationFn: () => reviewsApi.createDriverReview({ orderId: order!.id, rating: driverRating }),
@@ -75,8 +75,9 @@ export default function OrderDetail() {
       queryClient.invalidateQueries({ queryKey: ['order', id] });
       Alert.alert('شكراً! 🌟', 'تم إرسال تقييم السائق بنجاح');
     },
-    onError: () => {
-      Alert.alert('خطأ', 'فشل إرسال التقييم');
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'فشل إرسال التقييم';
+      Alert.alert('خطأ', msg);
     },
   });
 

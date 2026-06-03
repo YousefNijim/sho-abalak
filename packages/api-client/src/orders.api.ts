@@ -56,6 +56,8 @@ export interface Order {
   };
   payment?: { status: string; method: string; amount: number };
   statusHistory?: { status: string; changedBy?: string; createdAt: string }[];
+  review?: { id: string; businessRating: number; deliveryRating: number | null; comment: string | null } | null;
+  driverReview?: { id: string; rating: number } | null;
 }
 
 export const ordersApi = {
