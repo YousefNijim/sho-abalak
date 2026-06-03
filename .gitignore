@@ -61,3 +61,4 @@ GoogleService-Info.plist
 # Dev/tooling scripts that may contain API keys — never commit
 fetch-stitch.mjs
 *.mjs
+apps/api/.env.example
