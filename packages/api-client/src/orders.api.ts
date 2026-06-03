@@ -31,6 +31,7 @@ export interface Order {
   customerId: string;
   businessId: string;
   driverId: string | null;
+  batchId: string | null;
   status: string;
   paymentMethod: string;
   total: number;
@@ -70,11 +71,12 @@ export const ordersApi = {
   updateStatus: (id: string, dto: UpdateOrderStatusDto) =>
     http.patch<Order>(`/orders/${id}/status`, dto).then((r) => r.data),
 
-  sendDriverRequest: (id: string, driverId: string) =>
-    http.post<{ message: string }>(`/orders/${id}/send-driver-request`, { driverId }).then((r) => r.data),
+  /** Send a batch of READY orders to a driver. Pass one or more orderIds. */
+  sendDriverRequest: (orderIds: string[], driverId: string) =>
+    http.post<{ message: string; batchId: string }>('/orders/send-driver-request', { orderIds, driverId }).then((r) => r.data),
 
   acceptDriver: (id: string) =>
-    http.post<Order>(`/orders/${id}/accept-driver`).then((r) => r.data),
+    http.post<Order[]>(`/orders/${id}/accept-driver`).then((r) => r.data),
 
   rejectDriver: (id: string) =>
     http.patch<Order>(`/orders/${id}/reject-driver`).then((r) => r.data),

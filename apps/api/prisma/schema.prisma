@@ -147,6 +147,7 @@ model Order {
   note                  String?
   createdAt             DateTime             @default(now())
   pendingDriverId       String?
+  batchId               String?
   deliveryAreaName      String?
   deliveryAddressDetail String?
   items                 OrderItem[]

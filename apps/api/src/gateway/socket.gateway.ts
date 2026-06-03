@@ -92,9 +92,18 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  /** Dispatches delivery request directly to assigned driver's app */
-  emitDriverRequest(driverUserId: string, payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) {
-    this.logger.log(`Emit driver request to driver user:${driverUserId} for order:${payload.orderId}`);
+  /** Dispatches delivery request directly to assigned driver's app.
+   *  `orders` carries the full batch (1 or more orders). Legacy single-order
+   *  callers still work — they pass a single-element array.
+   */
+  emitDriverRequest(
+    driverUserId: string,
+    payload: {
+      batchId: string;
+      orders: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number; items: { name: string; quantity: number }[] }[];
+    },
+  ) {
+    this.logger.log(`Emit driver request to driver user:${driverUserId} batchId:${payload.batchId} orders:${payload.orders.length}`);
     this.server.to(`user:${driverUserId}`).emit(SocketEvents.DRIVER_REQUEST, payload);
   }
 

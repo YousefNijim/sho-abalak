@@ -182,19 +182,48 @@ export class OrdersService {
   }
 
   /**
-   * Business sends a delivery request to a driver — order stays READY, no assignment yet.
-   * The driver must accept before the order is assigned.
+   * Business sends a batch delivery request to a driver.
+   * All orders must be READY, belong to the same business, and have delivery
+   * addresses in the same city. A shared batchId is stamped on every order so
+   * accept/reject can operate atomically on the whole group.
+   *
+   * Backwards-compatible: passing a single orderId still works exactly as before.
    */
-  async sendDriverRequest(id: string, user: AuthUser, driverId: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id },
-      include: { business: true, customer: { include: { area: true } } },
-    });
-    if (!order) throw new NotFoundException('الطلب غير موجود');
-    if (order.status !== OrderStatus.READY) {
-      throw new BadRequestException('يمكن إرسال طلب للسائق فقط عندما يكون الطلب جاهزاً');
+  async sendDriverRequest(orderIds: string[], user: AuthUser, driverId: string) {
+    if (!orderIds || orderIds.length === 0) {
+      throw new BadRequestException('يجب تحديد طلب واحد على الأقل');
     }
-    await this.assertOwnsOrderBusiness(order.businessId, user);
+
+    const orders = await this.prisma.order.findMany({
+      where: { id: { in: orderIds } },
+      include: { business: true, customer: { include: { area: true } }, items: { include: { product: true } } },
+    });
+
+    if (orders.length !== orderIds.length) {
+      throw new NotFoundException('بعض الطلبات غير موجودة');
+    }
+
+    // All must be READY
+    const notReady = orders.filter((o) => o.status !== OrderStatus.READY);
+    if (notReady.length > 0) {
+      throw new BadRequestException('جميع الطلبات يجب أن تكون في حالة جاهز للإرسال');
+    }
+
+    // All must belong to the same business
+    const firstBusinessId = orders[0].businessId;
+    await this.assertOwnsOrderBusiness(firstBusinessId, user);
+    if (orders.some((o) => o.businessId !== firstBusinessId)) {
+      throw new BadRequestException('يجب أن تكون جميع الطلبات من نفس المنشأة');
+    }
+
+    // All must be in the same city (delivery area city)
+    if (orders.length > 1) {
+      const cities = orders.map((o) => o.customer?.area?.city?.trim().toLowerCase()).filter(Boolean);
+      const uniqueCities = new Set(cities);
+      if (uniqueCities.size > 1) {
+        throw new BadRequestException('يمكن تجميع الطلبات فقط إذا كانت عناوين التوصيل في نفس المدينة');
+      }
+    }
 
     const driver = await this.prisma.driver.findUnique({
       where: { id: driverId },
@@ -205,28 +234,46 @@ export class OrdersService {
       throw new BadRequestException('السائق غير متاح حالياً');
     }
 
-    // Store which driver was sent the request (no assignment yet)
-    await this.prisma.order.update({
-      where: { id },
-      data: { pendingDriverId: driverId },
+    // Stamp all orders with the same batchId and pendingDriverId
+    const batchId = randomUUID();
+    await this.prisma.order.updateMany({
+      where: { id: { in: orderIds } },
+      data: { pendingDriverId: driverId, batchId },
     });
 
-    // Emit request to driver's socket room — include full delivery address snapshot
-    this.socketGateway.emitDriverRequest(driver.user.id, {
-      orderId: order.id,
-      businessName: order.business?.name || 'منشأة تجارية',
-      areaName: order.deliveryAreaName || order.customer?.area?.name || 'العنوان المسجل',
-      addressDetail: order.deliveryAddressDetail || '',
-      total: Number(order.total),
-    });
-    // Push (additive): wake the selected driver even if their app is closed.
-    this.pushDriverRequest(driver.user.id, order.id, order.business?.name);
+    // Build per-order payload for the driver's alert screen
+    const orderPayloads = orders.map((o) => ({
+      orderId: o.id,
+      businessName: o.business?.name || 'منشأة تجارية',
+      areaName: o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل',
+      addressDetail: o.deliveryAddressDetail || '',
+      total: Number(o.total),
+      items: (o.items || []).map((it) => ({
+        name: it.product?.name || '',
+        quantity: it.quantity,
+      })),
+    }));
 
-    return { message: 'تم إرسال الطلب للسائق، بانتظار القبول' };
+    this.socketGateway.emitDriverRequest(driver.user.id, { batchId, orders: orderPayloads });
+
+    // FCM push — summarise the batch
+    const businessName = orders[0].business?.name;
+    const pushBody = orders.length > 1
+      ? `${orders.length} طلبات توصيل من ${businessName || 'منشأة تجارية'}`
+      : `طلب توصيل من ${businessName || 'منشأة تجارية'}`;
+    void this.notifications.send(driver.user.id, {
+      title: 'طلب توصيل جديد 🛵',
+      body: pushBody,
+      data: { type: 'driver_request', orderId: orders[0].id, batchId, role: 'driver' },
+    });
+
+    return { message: 'تم إرسال الطلب للسائق، بانتظار القبول', batchId };
   }
 
   /**
-   * Driver accepts a pending request — order transitions READY → PICKED_UP with assignment.
+   * Driver accepts a pending request.
+   * If the order is part of a batch (batchId set), ALL orders in that batch are
+   * transitioned to PICKED_UP atomically and the driver is marked BUSY once.
    */
   async acceptDriver(id: string, user: AuthUser) {
     if (user.role !== UserRole.DRIVER) {
@@ -248,15 +295,25 @@ export class OrdersService {
       throw new BadRequestException('هذا الطلب لم يعد متاحاً للقبول');
     }
 
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id },
-        data: {
-          status: OrderStatus.PICKED_UP,
-          driverId: driver.id,
-          pendingDriverId: null,
-          statusHistory: { create: { status: OrderStatus.PICKED_UP, changedBy: user.id } },
-        },
+    // Collect all orders in the batch (may be just this one)
+    const batchOrders = order.batchId
+      ? await this.prisma.order.findMany({
+          where: { batchId: order.batchId, pendingDriverId: driver.id, status: OrderStatus.READY },
+          include: { business: true },
+        })
+      : [order];
+
+    const updatedOrders = await this.prisma.$transaction(async (tx) => {
+      const ids = batchOrders.map((o) => o.id);
+
+      await tx.order.updateMany({
+        where: { id: { in: ids } },
+        data: { status: OrderStatus.PICKED_UP, driverId: driver.id, pendingDriverId: null },
+      });
+
+      // Create status history entries for each order
+      await tx.orderStatusHistory.createMany({
+        data: ids.map((oid) => ({ orderId: oid, status: OrderStatus.PICKED_UP, changedBy: user.id })),
       });
 
       await tx.driver.update({
@@ -264,17 +321,19 @@ export class OrdersService {
         data: { status: DriverStatus.BUSY },
       });
 
-      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+      return tx.order.findMany({ where: { id: { in: ids } }, include: ORDER_INCLUDE });
     });
 
-    // Notify customer and business
-    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.PICKED_UP);
-    this.pushOrderStatusToCustomer(updatedOrder.customerId, updatedOrder.id, OrderStatus.PICKED_UP);
-    if (updatedOrder.business?.ownerId) {
-      this.socketGateway.emitOrderStatusUpdateToBusiness(updatedOrder.business.ownerId, updatedOrder.id, OrderStatus.PICKED_UP);
+    // Notify customers and businesses for every order in the batch
+    for (const o of updatedOrders) {
+      this.socketGateway.emitOrderStatusUpdate(o.customerId, o.id, OrderStatus.PICKED_UP);
+      this.pushOrderStatusToCustomer(o.customerId, o.id, OrderStatus.PICKED_UP);
+      if (o.business?.ownerId) {
+        this.socketGateway.emitOrderStatusUpdateToBusiness(o.business.ownerId, o.id, OrderStatus.PICKED_UP);
+      }
     }
 
-    return updatedOrder;
+    return updatedOrders;
   }
 
   // --- push helpers (additive to socket emits; never throw) ---
@@ -311,44 +370,65 @@ export class OrdersService {
       where: { id },
       include: { business: true },
     });
-
     if (!order) throw new NotFoundException('الطلب غير موجود');
 
-    // Handle rejection of a pending request (READY status, pendingDriverId set)
+    // Rejection of a pending batch (READY status, pendingDriverId set)
     if (order.status === OrderStatus.READY && order.pendingDriverId === driver.id) {
-      await this.prisma.order.update({
-        where: { id },
-        data: { pendingDriverId: null },
+      // Clear pendingDriverId (and batchId) on the whole batch
+      const batchWhere = order.batchId
+        ? { batchId: order.batchId, pendingDriverId: driver.id }
+        : { id };
+
+      const batchOrders = await this.prisma.order.findMany({
+        where: batchWhere,
+        include: { business: true },
       });
 
-      if (order.business?.ownerId) {
-        this.socketGateway.emitOrderDriverRejected(order.business.ownerId, {
-          orderId: order.id,
-          driverName: driver.user?.name ?? 'سائق',
-        });
+      await this.prisma.order.updateMany({
+        where: batchWhere,
+        data: { pendingDriverId: null, batchId: null },
+      });
+
+      // Notify each business owner (may be the same owner for all orders)
+      const notifiedOwners = new Set<string>();
+      for (const o of batchOrders) {
+        if (o.business?.ownerId && !notifiedOwners.has(o.business.ownerId)) {
+          this.socketGateway.emitOrderDriverRejected(o.business.ownerId, {
+            orderId: o.id,
+            driverName: driver.user?.name ?? 'سائق',
+          });
+          notifiedOwners.add(o.business.ownerId);
+        }
       }
-      // Re-read with full includes for a consistent response shape
+
       return this.prisma.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
     }
 
-    // Legacy path: driver was already assigned (PICKED_UP) and wants to cancel
+    // Driver cancels an already-assigned batch (PICKED_UP)
     if (!order.driverId || order.driverId !== driver.id) {
       throw new ForbiddenException('أنت غير معين لهذا الطلب أو الطلب غير مسند لأي سائق');
     }
-
     if (order.status !== OrderStatus.PICKED_UP) {
       throw new BadRequestException('لا يمكن رفض هذا الطلب في حالته الحالية');
     }
 
-    const updatedOrder = await this.prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id },
-        data: {
-          status: OrderStatus.READY,
-          driverId: null,
-          pendingDriverId: null,
-          statusHistory: { create: { status: OrderStatus.READY, changedBy: user.id } },
-        },
+    const batchOrders = order.batchId
+      ? await this.prisma.order.findMany({
+          where: { batchId: order.batchId, driverId: driver.id, status: OrderStatus.PICKED_UP },
+          include: { business: true },
+        })
+      : [order];
+
+    const updatedOrders = await this.prisma.$transaction(async (tx) => {
+      const ids = batchOrders.map((o) => o.id);
+
+      await tx.order.updateMany({
+        where: { id: { in: ids } },
+        data: { status: OrderStatus.READY, driverId: null, pendingDriverId: null, batchId: null },
+      });
+
+      await tx.orderStatusHistory.createMany({
+        data: ids.map((oid) => ({ orderId: oid, status: OrderStatus.READY, changedBy: user.id })),
       });
 
       await tx.driver.update({
@@ -356,18 +436,22 @@ export class OrdersService {
         data: { status: DriverStatus.AVAILABLE },
       });
 
-      return tx.order.findUniqueOrThrow({ where: { id }, include: ORDER_INCLUDE });
+      return tx.order.findMany({ where: { id: { in: ids } }, include: ORDER_INCLUDE });
     });
 
-    if (updatedOrder.business?.ownerId) {
-      this.socketGateway.emitOrderDriverRejected(updatedOrder.business.ownerId, {
-        orderId: updatedOrder.id,
-        driverName: driver.user?.name ?? 'سائق',
-      });
+    const notifiedOwners = new Set<string>();
+    for (const o of updatedOrders) {
+      this.socketGateway.emitOrderStatusUpdate(o.customerId, o.id, OrderStatus.READY);
+      if (o.business?.ownerId && !notifiedOwners.has(o.business.ownerId)) {
+        this.socketGateway.emitOrderDriverRejected(o.business.ownerId, {
+          orderId: o.id,
+          driverName: driver.user?.name ?? 'سائق',
+        });
+        notifiedOwners.add(o.business.ownerId);
+      }
     }
-    this.socketGateway.emitOrderStatusUpdate(updatedOrder.customerId, updatedOrder.id, OrderStatus.READY);
 
-    return updatedOrder;
+    return updatedOrders[0];
   }
 
   async adminIntervention(id: string, user: AuthUser, dto: AdminInterventionDto) {
@@ -500,11 +584,15 @@ export class OrdersService {
     // NOT send the driver a spurious new-request alert.
     if (dto.status === OrderStatus.PICKED_UP && updatedOrder.driver?.user?.id) {
       this.socketGateway.emitDriverRequest(updatedOrder.driver.user.id, {
-        orderId: updatedOrder.id,
-        businessName: updatedOrder.business?.name || 'منشأة تجارية',
-        areaName: updatedOrder.deliveryAreaName || updatedOrder.customer?.area?.name || 'العنوان المسجل',
-        addressDetail: updatedOrder.deliveryAddressDetail || '',
-        total: Number(updatedOrder.total),
+        batchId: updatedOrder.batchId ?? randomUUID(),
+        orders: [{
+          orderId: updatedOrder.id,
+          businessName: updatedOrder.business?.name || 'منشأة تجارية',
+          areaName: updatedOrder.deliveryAreaName || (updatedOrder as any).customer?.area?.name || 'العنوان المسجل',
+          addressDetail: updatedOrder.deliveryAddressDetail || '',
+          total: Number(updatedOrder.total),
+          items: ((updatedOrder as any).items || []).map((it: any) => ({ name: it.product?.name || '', quantity: it.quantity })),
+        }],
       });
       this.pushDriverRequest(updatedOrder.driver.user.id, updatedOrder.id, updatedOrder.business?.name);
     }

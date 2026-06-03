@@ -10,10 +10,18 @@ import { useSocket } from '../src/hooks/useSocket';
 export default function DriverSelection() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { orderId } = useLocalSearchParams<{ orderId: string }>();
+  // Accept both single orderId (legacy) and comma-separated orderIds (batch)
+  const params = useLocalSearchParams<{ orderId?: string; orderIds?: string }>();
+
+  const orderIds: string[] = params.orderIds
+    ? params.orderIds.split(',').filter(Boolean)
+    : params.orderId
+    ? [params.orderId]
+    : [];
+
+  const isBatch = orderIds.length > 1;
 
   const [filter, setFilter] = useState<'mine' | 'all'>('mine');
-  // Track which driver we're waiting on acceptance from
   const [pendingDriverId, setPendingDriverId] = useState<string | null>(null);
 
   const { data: business } = useQuery({
@@ -29,9 +37,8 @@ export default function DriverSelection() {
     enabled: !!business,
   });
 
-  // Send request to driver — order stays READY, waiting for acceptance
   const sendRequest = useMutation({
-    mutationFn: (driverId: string) => ordersApi.sendDriverRequest(orderId!, driverId),
+    mutationFn: (driverId: string) => ordersApi.sendDriverRequest(orderIds, driverId),
     onSuccess: (_, driverId) => {
       setPendingDriverId(driverId);
     },
@@ -44,59 +51,49 @@ export default function DriverSelection() {
   const socket = useSocket();
   const appStateRef = useRef(AppState.currentState);
 
-  // Refetch order when app returns to foreground — catches missed socket events
+  // Refetch when app returns to foreground
   useEffect(() => {
-    if (!orderId || !pendingDriverId) return;
+    if (!orderIds.length || !pendingDriverId) return;
+    const primaryId = orderIds[0];
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
       if (appStateRef.current.match(/inactive|background/) && next === 'active') {
-        ordersApi.getById(orderId).then((order) => {
+        ordersApi.getById(primaryId).then((order) => {
           if (order.status !== 'READY') {
-            queryClient.invalidateQueries({ queryKey: ['order', orderId] });
             queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-            router.replace(`/order/${orderId}`);
+            router.replace(`/order/${primaryId}`);
           }
         }).catch(() => {});
       }
       appStateRef.current = next;
     });
     return () => sub.remove();
-  }, [orderId, pendingDriverId, queryClient, router]);
+  }, [orderIds.join(','), pendingDriverId, queryClient, router]);
 
   useEffect(() => {
-    if (!socket || !orderId) return;
+    if (!socket || !orderIds.length) return;
 
-    // Any status change while waiting for driver → navigate back to order detail.
-    // Covers: PICKED_UP (driver accepted), DELIVERED, CANCELLED (missed PICKED_UP).
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
-      if (payload.orderId === orderId) {
-        queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      if (orderIds.includes(payload.orderId) && payload.status !== 'READY') {
         queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-        if (payload.status !== 'READY') {
-          router.replace(`/order/${orderId}`);
-        }
+        router.replace(`/order/${payload.orderId}`);
       }
     };
 
-    // Driver rejected → clear pending state, let business pick another
     const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
-      if (payload.orderId === orderId) {
+      if (orderIds.includes(payload.orderId)) {
         setPendingDriverId(null);
         queryClient.invalidateQueries({ queryKey: ['available-drivers', filter, areaId] });
-        Alert.alert(
-          'تم رفض الطلب',
-          `اعتذر السائق ${payload.driverName} عن التوصيل. الرجاء اختيار سائق آخر.`,
-        );
+        Alert.alert('تم رفض الطلب', `اعتذر السائق ${payload.driverName} عن التوصيل. الرجاء اختيار سائق آخر.`);
       }
     };
 
     socket.on('order:status_update', handleStatusUpdate);
     socket.on('order:driver_rejected', handleDriverRejected);
-
     return () => {
       socket.off('order:status_update', handleStatusUpdate);
       socket.off('order:driver_rejected', handleDriverRejected);
     };
-  }, [socket, orderId, filter, areaId, queryClient, router]);
+  }, [socket, orderIds.join(','), filter, areaId, queryClient, router]);
 
   if (isLoading) {
     return (
@@ -106,13 +103,12 @@ export default function DriverSelection() {
     );
   }
 
-  // Waiting for driver to accept/reject
   if (pendingDriverId) {
     const pendingDriver = drivers.find((d: any) => d.id === pendingDriverId);
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', padding: spacing[5] }}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.pendingTitle}>تم إرسال الطلب للسائق</Text>
+        <Text style={styles.pendingTitle}>تم إرسال {isBatch ? `${orderIds.length} طلبات` : 'الطلب'} للسائق</Text>
         <Text style={styles.pendingName}>{pendingDriver?.user?.name || 'السائق'}</Text>
         <Text style={styles.pendingSubtitle}>بانتظار القبول...</Text>
         <Button
@@ -127,6 +123,13 @@ export default function DriverSelection() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Batch summary banner */}
+      {isBatch && (
+        <View style={styles.batchBanner}>
+          <Text style={styles.batchBannerText}>📦 سيتم إرسال {orderIds.length} طلبات لنفس السائق</Text>
+        </View>
+      )}
+
       <View style={styles.filters}>
         {[
           { key: 'mine', label: 'منطقتي فقط' },
@@ -158,7 +161,7 @@ export default function DriverSelection() {
                 <View style={styles.availTag}><Text style={styles.availText}>نشط</Text></View>
               </View>
               <Button
-                title={sendRequest.isPending && sendRequest.variables === d.id ? 'جاري الإرسال...' : 'إرسال الطلب للسائق'}
+                title={sendRequest.isPending && sendRequest.variables === d.id ? 'جاري الإرسال...' : `إرسال ${isBatch ? `${orderIds.length} طلبات` : 'الطلب'} للسائق`}
                 onPress={() => sendRequest.mutate(d.id)}
                 disabled={sendRequest.isPending}
                 style={{ marginTop: spacing[3] }}
@@ -172,6 +175,8 @@ export default function DriverSelection() {
 }
 
 const styles = StyleSheet.create({
+  batchBanner: { backgroundColor: colors.primary + '15', padding: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.primary + '30' },
+  batchBannerText: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.sm, textAlign: 'center' },
   filters: { flexDirection: 'row', gap: spacing[2], padding: spacing[4] },
   filter: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.md, alignItems: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   filterActive: { backgroundColor: colors.primary, borderColor: colors.primary },

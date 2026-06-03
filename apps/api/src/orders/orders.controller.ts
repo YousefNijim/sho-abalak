@@ -40,15 +40,31 @@ export class OrdersController {
     return this.orders.updateStatus(id, user, dto);
   }
 
-  @Post(':id/send-driver-request')
+  /** Send one or more READY orders to a driver as a batch.
+   *  Body: { orderIds: string[]; driverId: string }
+   *  The :id param is ignored — kept for URL compatibility but orderIds is authoritative.
+   */
+  @Post('send-driver-request')
   @UseGuards(RolesGuard)
   @Roles(UserRole.BUSINESS)
   sendDriverRequest(
+    @CurrentUser() user: AuthUser,
+    @Body('orderIds') orderIds: string[],
+    @Body('driverId') driverId: string,
+  ) {
+    return this.orders.sendDriverRequest(orderIds, user, driverId);
+  }
+
+  /** Legacy single-order route — wraps to batch with one element. */
+  @Post(':id/send-driver-request')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  sendDriverRequestLegacy(
     @Param('id') id: string,
     @CurrentUser() user: AuthUser,
     @Body('driverId') driverId: string,
   ) {
-    return this.orders.sendDriverRequest(id, user, driverId);
+    return this.orders.sendDriverRequest([id], user, driverId);
   }
 
   @Post(':id/accept-driver')

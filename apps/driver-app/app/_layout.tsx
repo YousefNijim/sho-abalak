@@ -36,15 +36,16 @@ function GlobalSocketListener() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleDriverRequest = (payload: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number }) => {
+    const handleDriverRequest = (payload: {
+      batchId: string;
+      orders: { orderId: string; businessName: string; areaName: string; addressDetail?: string; total: number; items: { name: string; quantity: number }[] }[];
+    }) => {
+      // Serialise the orders array as JSON so it survives expo-router params (strings only)
       router.push({
         pathname: '/request-alert',
         params: {
-          orderId: payload.orderId,
-          businessName: payload.businessName,
-          areaName: payload.areaName,
-          addressDetail: payload.addressDetail ?? '',
-          total: String(payload.total),
+          batchId: payload.batchId,
+          ordersJson: JSON.stringify(payload.orders),
         },
       });
     };
