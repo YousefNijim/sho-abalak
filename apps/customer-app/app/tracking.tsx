@@ -78,6 +78,38 @@ export default function Tracking() {
     }
   }, [order, setActiveOrder, clearActiveOrder]);
 
+  // Rating modal state — must be before any early returns (Rules of Hooks)
+  const [ratingVisible, setRatingVisible] = useState(false);
+  const [businessRating, setBusinessRating] = useState(0);
+  const [deliveryRating, setDeliveryRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const ratingShownRef = useRef(false);
+
+  useEffect(() => {
+    if (order?.status === 'DELIVERED' && !order?.review && !ratingShownRef.current) {
+      ratingShownRef.current = true;
+      setTimeout(() => setRatingVisible(true), 800);
+    }
+  }, [order?.status, order?.review]);
+
+  const submitReview = useMutation({
+    mutationFn: () =>
+      reviewsApi.create({
+        orderId: order!.id,
+        businessRating,
+        deliveryRating: deliveryRating > 0 ? deliveryRating : undefined,
+        comment: comment.trim() || undefined,
+      }),
+    onSuccess: () => {
+      setRatingVisible(false);
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      Alert.alert('شكراً لك! 🌟', 'تم إرسال تقييمك بنجاح');
+    },
+    onError: () => {
+      Alert.alert('خطأ', 'فشل إرسال التقييم، يرجى المحاولة مجدداً');
+    },
+  });
+
   if (!id) {
     return (
       <View style={styles.errorContainer}>
@@ -111,7 +143,6 @@ export default function Tracking() {
     );
   }
 
-  // Get current status index
   const getStatusIndex = (status: string) => {
     switch (status) {
       case 'PENDING': return 0;
@@ -126,44 +157,6 @@ export default function Tracking() {
 
   const currentIdx = getStatusIndex(order.status);
   const isCancelled = order.status === 'CANCELLED';
-
-  // Rating modal state
-  const [ratingVisible, setRatingVisible] = useState(false);
-  const [businessRating, setBusinessRating] = useState(0);
-  const [deliveryRating, setDeliveryRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const ratingShownRef = useRef(false);
-
-  // Show rating modal once when order is delivered and not yet rated
-  useEffect(() => {
-    if (
-      order?.status === 'DELIVERED' &&
-      !order?.review &&
-      !ratingShownRef.current
-    ) {
-      ratingShownRef.current = true;
-      // Small delay so the delivered state renders first
-      setTimeout(() => setRatingVisible(true), 800);
-    }
-  }, [order?.status, order?.review]);
-
-  const submitReview = useMutation({
-    mutationFn: () =>
-      reviewsApi.create({
-        orderId: order!.id,
-        businessRating,
-        deliveryRating: deliveryRating > 0 ? deliveryRating : undefined,
-        comment: comment.trim() || undefined,
-      }),
-    onSuccess: () => {
-      setRatingVisible(false);
-      queryClient.invalidateQueries({ queryKey: ['order', id] });
-      Alert.alert('شكراً لك! 🌟', 'تم إرسال تقييمك بنجاح');
-    },
-    onError: () => {
-      Alert.alert('خطأ', 'فشل إرسال التقييم، يرجى المحاولة مجدداً');
-    },
-  });
 
   const handleCallDriver = () => {
     if (order.driver?.user?.phone) {
