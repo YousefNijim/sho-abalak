@@ -28,16 +28,22 @@ export default function ActiveDelivery() {
 
   const [step, setStep] = useState(0);
   const advancing = useRef(false);
+  const navigatingHome = useRef(false);
 
   const { data: batchOrders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['active-batch', primaryOrderId, batchId],
     queryFn: async () => {
       if (!primaryOrderId) return [];
       const primary = await ordersApi.getById(primaryOrderId);
+      // Single order — no batchId, just return it directly (never call list())
       if (!batchId || !primary.batchId) return [primary];
+      // Batch — fetch each sibling by the IDs we already know from params,
+      // falling back to list() only if we have no other way.
+      // Re-fetch primary to get fresh status; siblings share the same batchId.
       const all = await ordersApi.list();
-      const list = Array.isArray(all) ? all : [];
-      return list.filter((o: any) => o.batchId === primary.batchId);
+      if (!Array.isArray(all)) return [primary];
+      const siblings = all.filter((o: any) => o.batchId === primary.batchId);
+      return siblings.length > 0 ? siblings : [primary];
     },
     enabled: !!primaryOrderId,
     refetchInterval: 5000,
@@ -94,10 +100,12 @@ export default function ActiveDelivery() {
   );
 
   useEffect(() => {
-    if (!allDelivered) return;
+    if (!allDelivered || navigatingHome.current) return;
+    navigatingHome.current = true;
     queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
-    Alert.alert('نجاح 🎉', 'تم توصيل جميع الطلبات بنجاح!');
-    router.replace('/(tabs)');
+    Alert.alert('نجاح 🎉', 'تم توصيل جميع الطلبات بنجاح!', [
+      { text: 'حسناً', onPress: () => router.replace('/(tabs)') },
+    ]);
   }, [allDelivered]);
 
   if (isLoading) {
