@@ -132,11 +132,11 @@ export default function ReviewsPage() {
           </div>
         ),
       }),
-      columnHelper.accessor('driverRating', {
-        header: 'تقييم السائق',
+      columnHelper.accessor('deliveryRating', {
+        header: 'تقييم التوصيل',
         cell: (info) => {
           const val = info.getValue();
-          if (val == null) return <span className="text-muted-gray text-xs">—</span>;
+          if (val == null) return (<span className="text-muted-gray text-xs">—</span>);
           const driverName = info.row.original.order?.driver?.user?.name ?? 'السائق';
           return (
             <div className="flex flex-col gap-0.5">
