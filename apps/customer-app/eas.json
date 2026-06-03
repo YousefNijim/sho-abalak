@@ -27,6 +27,10 @@
       "autoIncrement": true,
       "channel": "production",
       "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "production",
+        "EXPO_PUBLIC_API_URL": "https://shu-abalak-production.up.railway.app"
+      },
       "android": {
         "buildType": "apk"
       }
