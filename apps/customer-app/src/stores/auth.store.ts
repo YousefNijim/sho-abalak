@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi, setAuthToken } from '@shu/api-client';
 import type { LoginDto, RegisterDto } from '@shu/api-client';
+import { useActiveOrderStore } from './active-order.store';
 
 interface AuthUser {
   id: string;
@@ -52,6 +53,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         setAuthToken(null);
         set({ user: null, token: null });
+        // Clear any persisted active-order so the next user on this device
+        // doesn't see a stale banner from the previous account.
+        useActiveOrderStore.getState().clear();
       },
 
       hydrate: () => {

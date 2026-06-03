@@ -216,12 +216,12 @@ export class OrdersService {
       throw new BadRequestException('يجب أن تكون جميع الطلبات من نفس المنشأة');
     }
 
-    // All must be in the same city (delivery area city)
+    // All must deliver to the same village (area). Compare by areaId for exact match.
     if (orders.length > 1) {
-      const cities = orders.map((o) => o.customer?.area?.city?.trim().toLowerCase()).filter(Boolean);
-      const uniqueCities = new Set(cities);
-      if (uniqueCities.size > 1) {
-        throw new BadRequestException('يمكن تجميع الطلبات فقط إذا كانت عناوين التوصيل في نفس المدينة');
+      const areaIds = orders.map((o) => o.customer?.area?.id).filter(Boolean);
+      const uniqueAreas = new Set(areaIds);
+      if (uniqueAreas.size > 1) {
+        throw new BadRequestException('يمكن تجميع الطلبات فقط إذا كانت عناوين التوصيل في نفس القرية أو المنطقة');
       }
     }
 

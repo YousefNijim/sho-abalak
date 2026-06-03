@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
 import { ordersApi } from '@shu/api-client';
+import type { Order } from '@shu/api-client';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 
@@ -29,7 +30,7 @@ export default function ActiveDelivery() {
   const advancing = useRef(false);
 
   // Fetch all orders in the batch. For a single order this returns [order].
-  const { data: batchOrders = [], isLoading } = useQuery({
+  const { data: batchOrders = [], isLoading } = useQuery<Order[]>({
     queryKey: ['active-batch', primaryOrderId, batchId],
     queryFn: async () => {
       if (!primaryOrderId) return [];
@@ -93,19 +94,17 @@ export default function ActiveDelivery() {
     });
   };
 
-  // All orders delivered → go home
+  // All orders delivered → go home (handled via effect, not in render)
   const allDelivered = batchOrders.length > 0 && batchOrders.every(
     (o: any) => o.status === 'DELIVERED' || deliveredIds.has(o.id),
   );
 
-  if (allDelivered) {
-    // Navigate home after a short render — avoid calling router in render
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
-      Alert.alert('نجاح 🎉', 'تم توصيل جميع الطلبات بنجاح!');
-      router.replace('/(tabs)');
-    }, 300);
-  }
+  useEffect(() => {
+    if (!allDelivered) return;
+    queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
+    Alert.alert('نجاح 🎉', 'تم توصيل جميع الطلبات بنجاح!');
+    router.replace('/(tabs)');
+  }, [allDelivered]);
 
   if (isLoading) {
     return (

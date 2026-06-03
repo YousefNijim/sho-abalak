@@ -189,7 +189,7 @@ export default function Dashboard() {
                 <Text style={styles.batchHint}>
                   {selectedIds.length === 0
                     ? 'اختر الطلبات الجاهزة التي تريد إرسالها معاً'
-                    : `تم اختيار ${selectedIds.length} طلب — يجب أن تكون في نفس المدينة`}
+                    : `تم اختيار ${selectedIds.length} طلب — يجب أن تكون في نفس القرية`}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: spacing[2] }}>
                   <Pressable

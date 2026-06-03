@@ -73,7 +73,14 @@ export default function DriverHome() {
   }
 
   const isAvailable = driver?.status === 'AVAILABLE';
-  const activeOrder = orders.find((o: any) => ['READY', 'PICKED_UP'].includes(o.status));
+  // All orders currently assigned to this driver that are in-progress
+  const activeOrders = orders.filter((o: any) => ['READY', 'PICKED_UP'].includes(o.status));
+  const activeOrder = activeOrders[0] ?? null;
+  // If all active orders share a batchId, use it so active-delivery loads the full batch
+  const activeBatchId = activeOrders.length > 0 && activeOrders[0].batchId
+    && activeOrders.every((o: any) => o.batchId === activeOrders[0].batchId)
+    ? activeOrders[0].batchId
+    : null;
 
   // Compute live today's stats
   const completedToday = orders.filter((o: any) => {
@@ -152,15 +159,30 @@ export default function DriverHome() {
             onPress={() =>
               router.push({
                 pathname: '/active-delivery',
-                params: { orderId: activeOrder.id },
+                params: {
+                  primaryOrderId: activeOrder.id,
+                  ...(activeBatchId ? { batchId: activeBatchId } : {}),
+                },
               })
             }
           >
             <View style={styles.orderRow}>
-              <Text style={styles.amount}>{activeOrder.total} ₪</Text>
-              <Text style={styles.orderTitle}>{activeOrder.business?.name || 'المنشأة التجارية'}</Text>
+              <Text style={styles.amount}>
+                {activeOrders.length > 1
+                  ? `${activeOrders.reduce((s: number, o: any) => s + Number(o.total), 0)} ₪`
+                  : `${activeOrder.total} ₪`}
+              </Text>
+              <Text style={styles.orderTitle}>
+                {activeOrders.length > 1
+                  ? `${activeOrders.length} طلبات — ${activeOrder.business?.name || 'المنشأة التجارية'}`
+                  : activeOrder.business?.name || 'المنشأة التجارية'}
+              </Text>
             </View>
-            <Text style={styles.muted}>إلى: {activeOrder.customer?.area?.name || 'العنوان المسجل'}</Text>
+            <Text style={styles.muted}>
+              {activeOrders.length > 1
+                ? `${activeOrders.length} عناوين توصيل`
+                : `إلى: ${activeOrder.customer?.area?.name || 'العنوان المسجل'}`}
+            </Text>
             <View style={styles.deliverBtn}>
               <Text style={styles.deliverText}>عرض تفاصيل التوصيل</Text>
             </View>
