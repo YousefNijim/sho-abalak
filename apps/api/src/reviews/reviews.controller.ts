@@ -7,35 +7,44 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthUser } from '../auth/jwt.strategy';
 import { ReviewsService } from './reviews.service';
-import { CreateReviewDto } from './dto/create-review.dto';
+import { CreateReviewDto, CreateDriverReviewDto } from './dto/create-review.dto';
 
 @ApiTags('reviews')
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviews: ReviewsService) {}
 
-  /** الزبون يقيّم طلبه بعد التسليم. */
+  /** Customer rates their delivered order (product quality + delivery speed). */
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.CUSTOMER, UserRole.BUSINESS)
+  @Roles(UserRole.CUSTOMER)
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateReviewDto) {
     return this.reviews.create(user.id, dto);
   }
 
-  /** تقييمات منشأة (عام). */
+  /** Business rates driver speed/service after delivery. */
+  @Post('driver')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  createDriverReview(@CurrentUser() user: AuthUser, @Body() dto: CreateDriverReviewDto) {
+    return this.reviews.createDriverReview(user.id, dto);
+  }
+
+  /** Public: customer reviews for a business (shown on business page). */
   @Get('business')
   findByBusiness(@Query('businessId') businessId: string) {
     return this.reviews.findByBusiness(businessId);
   }
 
-  /** تقييمات سائق (عام). */
+  /** Public: business reviews for a driver (shown on driver card). */
   @Get('driver')
   findByDriver(@Query('driverId') driverId: string) {
     return this.reviews.findByDriver(driverId);
   }
 
-  /** جلب جميع المراجعات والتقييمات للوحة الأدمن. */
+  /** Admin: all customer reviews. */
   @Get()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,12 +53,30 @@ export class ReviewsController {
     return this.reviews.findAll();
   }
 
-  /** حذف تقييم يدوياً — لوحة الأدمن. */
+  /** Admin: all driver reviews from businesses. */
+  @Get('driver-reviews')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  findAllDriverReviews() {
+    return this.reviews.findAllDriverReviews();
+  }
+
+  /** Admin: delete a customer review. */
   @Delete(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   delete(@Param('id') id: string) {
     return this.reviews.delete(id);
+  }
+
+  /** Admin: delete a driver review. */
+  @Delete('driver-reviews/:id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  deleteDriverReview(@Param('id') id: string) {
+    return this.reviews.deleteDriverReview(id);
   }
 }

@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
-import { ActivityIndicator, Alert, Modal, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
+import { Star } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { ordersApi } from '@shu/api-client';
+import { ordersApi, reviewsApi } from '@shu/api-client';
 import { useSocket } from '../../src/hooks/useSocket';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -21,8 +22,12 @@ export default function OrderDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const queryClient = useQueryClient();
-  // Ref guard: prevents two taps from firing two mutations in the same render cycle
   const submitting = useRef(false);
+
+  // Driver rating modal
+  const [driverRatingVisible, setDriverRatingVisible] = useState(false);
+  const [driverRating, setDriverRating] = useState(0);
+  const driverRatingShownRef = useRef(false);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
@@ -49,6 +54,31 @@ export default function OrderDetail() {
     submitting.current = true;
     updateStatus.mutate(status);
   };
+
+  // Show driver rating modal once when order becomes DELIVERED and has a driver
+  useEffect(() => {
+    if (
+      order?.status === 'DELIVERED' &&
+      order?.driverId &&
+      !order?.driverReview &&
+      !driverRatingShownRef.current
+    ) {
+      driverRatingShownRef.current = true;
+      setTimeout(() => setDriverRatingVisible(true), 600);
+    }
+  }, [order?.status, order?.driverId, (order as any)?.driverReview]);
+
+  const submitDriverReview = useMutation({
+    mutationFn: () => reviewsApi.createDriverReview({ orderId: order!.id, rating: driverRating }),
+    onSuccess: () => {
+      setDriverRatingVisible(false);
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      Alert.alert('شكراً! 🌟', 'تم إرسال تقييم السائق بنجاح');
+    },
+    onError: () => {
+      Alert.alert('خطأ', 'فشل إرسال التقييم');
+    },
+  });
 
   const handleReject = () => {
     if (submitting.current || updateStatus.isPending) return;
@@ -122,6 +152,39 @@ export default function OrderDetail() {
           <View style={styles.overlayCard}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={styles.overlayText}>جاري التحديث...</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Driver rating modal */}
+      <Modal visible={driverRatingVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>قيّم السائق 🛵</Text>
+            <Text style={styles.modalSubtitle}>
+              {order?.driver?.user?.name || 'السائق'} — كيف كانت سرعة الاستجابة والتوصيل؟
+            </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing[3], marginVertical: spacing[2] }}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Pressable key={n} onPress={() => setDriverRating(n)}>
+                  <Star size={40} color="#F59E0B" fill={n <= driverRating ? '#F59E0B' : 'transparent'} />
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.modalBtns}>
+              <Pressable style={styles.skipBtn} onPress={() => setDriverRatingVisible(false)}>
+                <Text style={styles.skipText}>تخطي</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.submitBtn, driverRating === 0 && { opacity: 0.4 }]}
+                disabled={driverRating === 0 || submitDriverReview.isPending}
+                onPress={() => submitDriverReview.mutate()}
+              >
+                {submitDriverReview.isPending
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.submitText}>إرسال التقييم</Text>}
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -259,4 +322,13 @@ const styles = StyleSheet.create({
   btnRow: { flexDirection: 'row', gap: spacing[3] },
   completedState: { alignItems: 'center', paddingVertical: 12 },
   completedText: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textMuted },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalCard: { backgroundColor: '#fff', borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: spacing[6], gap: spacing[4] },
+  modalTitle: { fontFamily: fontFamily.extrabold, fontSize: fontSizes.xl, color: colors.textPrimary, textAlign: 'center' },
+  modalSubtitle: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center' },
+  modalBtns: { flexDirection: 'row', gap: spacing[3] },
+  skipBtn: { flex: 1, paddingVertical: spacing[3], borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
+  skipText: { fontFamily: fontFamily.semibold, color: colors.textMuted },
+  submitBtn: { flex: 2, paddingVertical: spacing[3], borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: 'center' },
+  submitText: { fontFamily: fontFamily.bold, color: '#fff' },
 });

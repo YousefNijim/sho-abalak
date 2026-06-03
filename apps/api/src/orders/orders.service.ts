@@ -19,6 +19,8 @@ const ORDER_INCLUDE = {
   driver: { include: { user: true, area: true } },
   statusHistory: { orderBy: { createdAt: 'asc' as const } },
   payment: true,
+  review: true,
+  driverReview: true,
 } satisfies Prisma.OrderInclude;
 
 /** Customer-facing Arabic push copy for each order status (only statuses we notify on). */

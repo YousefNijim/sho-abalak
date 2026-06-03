@@ -187,6 +187,17 @@ export default function BusinessDetail() {
             </View>
           </View>
 
+          {/* Reviews link */}
+          <Pressable
+            style={styles.reviewsLink}
+            onPress={() => router.push({ pathname: '/business/reviews', params: { businessId: id, businessName: business.name } })}
+          >
+            <Star size={14} color={colors.primary} fill={colors.primary} />
+            <Text style={styles.reviewsLinkText}>
+              {business.rating ? `${Number(business.rating).toFixed(1)} ★` : 'لا يوجد تقييم'} — اقرأ التقييمات
+            </Text>
+          </Pressable>
+
           <View style={styles.infoDetailsRow}>
             <View style={styles.detailItem}>
               <Clock size={18} color={colors.primary} />
@@ -457,6 +468,18 @@ const styles = StyleSheet.create({
     fontSize: 13, // label-md
     fontFamily: fontFamily.bold,
     color: '#4e2200', // on-primary-container
+  },
+  reviewsLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing[2],
+  },
+  reviewsLinkText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    textDecorationLine: 'underline',
   },
   infoDetailsRow: {
     flexDirection: 'row',

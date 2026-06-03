@@ -81,8 +81,9 @@ model Business {
   owner          User         @relation(fields: [ownerId], references: [id])
   orders         Order[]
   products       Product[]
-  deliveryAreas  Area[]       @relation("BusinessDeliveryAreas")
-  tags           Tag[]        @relation("BusinessTags")
+  deliveryAreas  Area[]         @relation("BusinessDeliveryAreas")
+  tags           Tag[]          @relation("BusinessTags")
+  driverReviews  DriverReview[]
 
   @@map("businesses")
 }
@@ -124,14 +125,15 @@ model Product {
 }
 
 model Driver {
-  id     String       @id @default(uuid())
-  userId String       @unique
-  status DriverStatus @default(OFFLINE)
-  areaId String
-  rating Float        @default(0)
-  area   Area         @relation(fields: [areaId], references: [id])
-  user   User         @relation(fields: [userId], references: [id])
-  orders Order[]
+  id            String         @id @default(uuid())
+  userId        String         @unique
+  status        DriverStatus   @default(OFFLINE)
+  areaId        String
+  rating        Float          @default(0)
+  area          Area           @relation(fields: [areaId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  orders        Order[]
+  driverReviews DriverReview[]
 
   @@map("drivers")
 }
@@ -157,6 +159,7 @@ model Order {
   driver                Driver?              @relation(fields: [driverId], references: [id])
   payment               Payment?
   review                Review?
+  driverReview          DriverReview?
 
   @@map("orders")
 }
@@ -185,15 +188,29 @@ model OrderStatusHistory {
 }
 
 model Review {
-  id             String   @id @default(uuid())
-  orderId        String   @unique
-  businessRating Int
-  driverRating   Int?
-  comment        String?
-  createdAt      DateTime @default(now())
-  order          Order    @relation(fields: [orderId], references: [id])
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  businessRating  Int
+  deliveryRating  Int?
+  comment         String?
+  createdAt       DateTime @default(now())
+  order           Order    @relation(fields: [orderId], references: [id])
 
   @@map("reviews")
+}
+
+model DriverReview {
+  id         String   @id @default(uuid())
+  orderId    String   @unique
+  driverId   String
+  businessId String
+  rating     Int
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id])
+  driver     Driver   @relation(fields: [driverId], references: [id])
+  business   Business @relation(fields: [businessId], references: [id])
+
+  @@map("driver_reviews")
 }
 
 model SavedAddress {

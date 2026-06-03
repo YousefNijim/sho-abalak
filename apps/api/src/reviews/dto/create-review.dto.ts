@@ -1,28 +1,39 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
-/** يقيّم الزبون طلبه بعد التسليم: تقييم المنشأة (إلزامي) وتقييم السائق (اختياري). */
 export class CreateReviewDto {
   @ApiProperty()
   @IsString()
   orderId!: string;
 
-  @ApiProperty({ minimum: 1, maximum: 5, description: 'تقييم المنشأة' })
+  @ApiProperty({ minimum: 1, maximum: 5, description: 'تقييم جودة المنتجات' })
   @IsInt()
   @Min(1)
   @Max(5)
   businessRating!: number;
 
-  @ApiPropertyOptional({ minimum: 1, maximum: 5, description: 'تقييم السائق' })
+  @ApiPropertyOptional({ minimum: 1, maximum: 5, description: 'تقييم سرعة التوصيل' })
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(5)
-  driverRating?: number;
+  deliveryRating?: number;
 
-  @ApiPropertyOptional({ description: 'تعليق' })
+  @ApiPropertyOptional({ description: 'تعليق اختياري' })
   @IsOptional()
   @IsString()
   @MaxLength(500)
   comment?: string;
+}
+
+export class CreateDriverReviewDto {
+  @ApiProperty()
+  @IsString()
+  orderId!: string;
+
+  @ApiProperty({ minimum: 1, maximum: 5, description: 'تقييم سرعة الاستجابة والتوصيل' })
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating!: number;
 }

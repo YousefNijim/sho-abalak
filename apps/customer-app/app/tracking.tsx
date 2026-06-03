@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View, Platform, Animated } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Platform, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MapPin, X, CheckCircle, Utensils, Bike, Home, Phone, Star, MessageCircle } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { Button } from '@shu/ui-components/native';
-import { ordersApi } from '@shu/api-client';
+import { ordersApi, reviewsApi } from '@shu/api-client';
 import { useSocket } from '../src/hooks/useSocket';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -127,6 +127,44 @@ export default function Tracking() {
   const currentIdx = getStatusIndex(order.status);
   const isCancelled = order.status === 'CANCELLED';
 
+  // Rating modal state
+  const [ratingVisible, setRatingVisible] = useState(false);
+  const [businessRating, setBusinessRating] = useState(0);
+  const [deliveryRating, setDeliveryRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const ratingShownRef = useRef(false);
+
+  // Show rating modal once when order is delivered and not yet rated
+  useEffect(() => {
+    if (
+      order?.status === 'DELIVERED' &&
+      !order?.review &&
+      !ratingShownRef.current
+    ) {
+      ratingShownRef.current = true;
+      // Small delay so the delivered state renders first
+      setTimeout(() => setRatingVisible(true), 800);
+    }
+  }, [order?.status, order?.review]);
+
+  const submitReview = useMutation({
+    mutationFn: () =>
+      reviewsApi.create({
+        orderId: order!.id,
+        businessRating,
+        deliveryRating: deliveryRating > 0 ? deliveryRating : undefined,
+        comment: comment.trim() || undefined,
+      }),
+    onSuccess: () => {
+      setRatingVisible(false);
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      Alert.alert('شكراً لك! 🌟', 'تم إرسال تقييمك بنجاح');
+    },
+    onError: () => {
+      Alert.alert('خطأ', 'فشل إرسال التقييم، يرجى المحاولة مجدداً');
+    },
+  });
+
   const handleCallDriver = () => {
     if (order.driver?.user?.phone) {
       Linking.openURL(`tel:${order.driver.user.phone}`);
@@ -139,6 +177,56 @@ export default function Tracking() {
 
   return (
     <View style={styles.container}>
+      {/* Rating Modal */}
+      <Modal visible={ratingVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>قيّم تجربتك 🌟</Text>
+            <Text style={styles.modalSubtitle}>طلبك من {order?.business?.name}</Text>
+
+            <View style={styles.ratingSection}>
+              <Text style={styles.ratingLabel}>جودة المنتجات</Text>
+              <StarRow value={businessRating} onChange={setBusinessRating} />
+            </View>
+
+            {order?.driver && (
+              <View style={styles.ratingSection}>
+                <Text style={styles.ratingLabel}>سرعة التوصيل</Text>
+                <StarRow value={deliveryRating} onChange={setDeliveryRating} />
+              </View>
+            )}
+
+            <TextInput
+              style={styles.commentInput}
+              placeholder="اكتب اقتراحاتك أو ملاحظاتك (اختياري)"
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={3}
+              value={comment}
+              onChangeText={setComment}
+              textAlign="right"
+            />
+
+            <View style={styles.modalBtns}>
+              <Pressable
+                style={styles.skipBtn}
+                onPress={() => setRatingVisible(false)}
+              >
+                <Text style={styles.skipText}>تخطي</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.submitBtn, businessRating === 0 && { opacity: 0.4 }]}
+                disabled={businessRating === 0 || submitReview.isPending}
+                onPress={() => submitReview.mutate()}
+              >
+                {submitReview.isPending
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.submitText}>إرسال التقييم</Text>}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {/* TopAppBar */}
       <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
         <View style={styles.headerRight}>
@@ -316,6 +404,18 @@ export default function Tracking() {
         </View>
 
       </ScrollView>
+    </View>
+  );
+}
+
+function StarRow({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center' }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Pressable key={n} onPress={() => onChange(n)}>
+          <Star size={36} color="#F59E0B" fill={n <= value ? '#F59E0B' : 'transparent'} />
+        </Pressable>
+      ))}
     </View>
   );
 }
@@ -701,5 +801,79 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'right',
     lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    padding: spacing[6],
+    gap: spacing[4],
+  },
+  modalTitle: {
+    fontFamily: fontFamily.extrabold,
+    fontSize: fontSizes['2xl'],
+    color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.base,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: -spacing[2],
+  },
+  ratingSection: {
+    gap: spacing[2],
+  },
+  ratingLabel: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  commentInput: {
+    backgroundColor: '#F9F9F9',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing[3],
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  modalBtns: {
+    flexDirection: 'row',
+    gap: spacing[3],
+    marginTop: spacing[2],
+  },
+  skipBtn: {
+    flex: 1,
+    paddingVertical: spacing[3],
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  skipText: {
+    fontFamily: fontFamily.semibold,
+    color: colors.textMuted,
+  },
+  submitBtn: {
+    flex: 2,
+    paddingVertical: spacing[3],
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+  },
+  submitText: {
+    fontFamily: fontFamily.bold,
+    color: '#fff',
   },
 });

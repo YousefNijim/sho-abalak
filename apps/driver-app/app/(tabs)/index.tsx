@@ -34,7 +34,7 @@ export default function DriverHome() {
   useEffect(() => {
     if (!socket) return;
 
-    const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
+    const handleStatusUpdate = () => {
       queryClient.invalidateQueries({ queryKey: ['driver-orders'] });
     };
 
@@ -73,10 +73,23 @@ export default function DriverHome() {
   }
 
   const isAvailable = driver?.status === 'AVAILABLE';
-  // Orders sent to this driver but not yet accepted (pendingDriverId set, driverId null)
-  const pendingOrders = Array.isArray(orders)
+  // Orders sent to this driver but not yet accepted — grouped by batchId into offers
+  const rawPending = Array.isArray(orders)
     ? orders.filter((o: any) => o.status === 'READY' && o.driverId == null)
     : [];
+  // Group into offers: orders sharing a batchId are one offer; orders without batchId are individual offers
+  const pendingOffers: { batchId: string; orders: any[] }[] = [];
+  const seenBatch = new Set<string>();
+  for (const o of rawPending) {
+    if (o.batchId) {
+      if (!seenBatch.has(o.batchId)) {
+        seenBatch.add(o.batchId);
+        pendingOffers.push({ batchId: o.batchId, orders: rawPending.filter((x: any) => x.batchId === o.batchId) });
+      }
+    } else {
+      pendingOffers.push({ batchId: o.id, orders: [o] });
+    }
+  }
   // Orders currently in-progress (accepted)
   const activeOrders = Array.isArray(orders)
     ? orders.filter((o: any) => ['READY', 'PICKED_UP'].includes(o.status) && o.driverId != null)
@@ -156,44 +169,55 @@ export default function DriverHome() {
         <Stat label="تقييمي العام" value={driver?.rating ? driver.rating.toFixed(1) : '5.0'} />
       </View>
 
-      {/* New pending orders — sent by business, awaiting driver acceptance */}
-      {pendingOrders.length > 0 && (
+      {/* New pending offers — sent by business, awaiting driver acceptance */}
+      {pendingOffers.length > 0 && (
         <View>
           <Text style={styles.sectionTitle}>طلبات جديدة 🔔</Text>
           <View style={{ gap: spacing[3] }}>
-            {pendingOrders.map((o: any) => (
-              <Pressable
-                key={o.id}
-                style={[styles.orderCard, styles.pendingCard]}
-                onPress={() =>
-                  router.push({
-                    pathname: '/request-alert',
-                    params: {
-                      batchId: o.batchId ?? o.id,
-                      ordersJson: JSON.stringify([{
-                        orderId: o.id,
-                        businessName: o.business?.name || 'منشأة تجارية',
-                        areaName: o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل',
-                        addressDetail: o.deliveryAddressDetail || '',
-                        total: Number(o.total),
-                        items: (o.items || []).map((it: any) => ({ name: it.product?.name || '', quantity: it.quantity })),
-                      }]),
-                    },
-                  })
-                }
-              >
-                <View style={styles.orderRow}>
-                  <Text style={styles.amount}>{o.total} ₪</Text>
-                  <Text style={styles.orderTitle}>{o.business?.name || 'المنشأة التجارية'}</Text>
-                </View>
-                <Text style={styles.muted}>
-                  إلى: {o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل'}
-                </Text>
-                <View style={[styles.deliverBtn, { backgroundColor: colors.secondary }]}>
-                  <Text style={styles.deliverText}>عرض الطلب والرد عليه</Text>
-                </View>
-              </Pressable>
-            ))}
+            {pendingOffers.map((offer) => {
+              const first = offer.orders[0];
+              const isBatch = offer.orders.length > 1;
+              const grandTotal = offer.orders.reduce((s: number, o: any) => s + Number(o.total), 0);
+              return (
+                <Pressable
+                  key={offer.batchId}
+                  style={[styles.orderCard, styles.pendingCard]}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/request-alert',
+                      params: {
+                        batchId: offer.batchId,
+                        ordersJson: JSON.stringify(offer.orders.map((o: any) => ({
+                          orderId: o.id,
+                          businessName: o.business?.name || 'منشأة تجارية',
+                          areaName: o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل',
+                          addressDetail: o.deliveryAddressDetail || '',
+                          total: Number(o.total),
+                          items: (o.items || []).map((it: any) => ({ name: it.product?.name || '', quantity: it.quantity })),
+                        }))),
+                      },
+                    })
+                  }
+                >
+                  <View style={styles.orderRow}>
+                    <Text style={styles.amount}>{grandTotal} ₪</Text>
+                    <Text style={styles.orderTitle}>
+                      {isBatch
+                        ? `${offer.orders.length} طلبات — ${first.business?.name || 'المنشأة'}`
+                        : first.business?.name || 'المنشأة التجارية'}
+                    </Text>
+                  </View>
+                  <Text style={styles.muted}>
+                    {isBatch
+                      ? `${offer.orders.length} عناوين توصيل`
+                      : `إلى: ${first.deliveryAreaName || first.customer?.area?.name || 'العنوان المسجل'}`}
+                  </Text>
+                  <View style={[styles.deliverBtn, { backgroundColor: colors.secondary }]}>
+                    <Text style={styles.deliverText}>عرض العرض والرد عليه</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
       )}

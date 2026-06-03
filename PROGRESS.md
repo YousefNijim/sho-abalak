@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-06-02
-**Current phase:** Phase 37 (P2 access-control — role gates, business-as-customer, admin user↔business link)
+**Last updated:** 2026-06-04
+**Current phase:** Phase 41 (Rating system — customer rates order, business rates driver, reviews page)
 
 ---
 
@@ -379,6 +379,86 @@
     - **Driver app:** same treatment — `notifications.store` (key `shu-driver-notifications`), `NotificationBell` in the Home greeting row, `app/notifications.tsx` (taps open `/request-alert`), and the push hook records into the store. Created `apps/driver-app/src/components/` (didn't exist).
     - **Backend triggers unchanged** — business already gets `order_new`, driver gets `driver_request`, customer gets every status incl. CANCELLED; all now carry sound.
     - **Verified:** `nest build` ✅. `tsc --noEmit`: customer ✅ 0 errors; business/driver — **0 new errors** in any touched file (the 6 business + 1 driver remaining errors are all pre-existing in `register.tsx`/`profile.tsx`/`login.tsx`, untouched here). Real push delivery still needs a native dev build on a physical device (Expo Go ignores `google-services.json`).
+
+36. **Production Environment Audit (Phase 38)** ✅ **DONE**
+    - Confirmed all three mobile apps point to `shu-abalak-production.up.railway.app` (not staging).
+    - Fixed `apps/driver-app/.env`: `EXPO_PUBLIC_API_URL` was still pointing to the staging URL — corrected to production.
+    - `apps/api/.env.example` updated: added Cloudinary vars, fixed PORT from 3000 → 3001.
+    - Database: Railway PostgreSQL (internal URL `postgres.railway.internal:5432`, only reachable from Railway network — cannot run `prisma migrate dev` locally against it).
+    - Images: Cloudinary (credentials in `apps/api/.env`). No local disk for production.
+    - Staging environment no longer used.
+
+37. **Multi-Order Batch Assignment (Phase 39)** ✅ **DONE**
+    - **Schema:** `batchId String?` added to `Order` model. Migration: `20260603000000_add_batch_id_to_orders` (`ALTER TABLE "orders" ADD COLUMN "batchId" TEXT;`). Applied on Railway deploy via `prisma migrate deploy`.
+    - **API (`orders.service.ts`):**
+      - `sendDriverRequest` rewritten to accept `orderIds: string[]`. Validates all READY, same business. Generates shared `batchId = randomUUID()`. Stamps `pendingDriverId` + `batchId` on all orders via `updateMany`. Emits new socket payload `{ batchId, orders[] }`.
+      - New `POST /orders/send-driver-request` batch endpoint declared before `POST /orders/:id/...` (literal path wins in NestJS routing). Legacy `:id/send-driver-request` still works (wraps to single-item array).
+      - `acceptDriver`: finds all orders with same `batchId` + `pendingDriverId`, transitions all atomically, marks driver BUSY once.
+      - `rejectDriver`: clears `pendingDriverId` + `batchId` on whole batch atomically, deduplicates business owner notifications.
+      - `adminIntervention`: updated to use new `{ batchId, orders[] }` socket format.
+    - **Socket gateway:** `emitDriverRequest` now accepts batch payload `{ batchId, orders[] }`.
+    - **api-client:** `Order.batchId` added; `sendDriverRequest(orderIds[], driverId)` updated; `acceptDriver` returns `Order[]`.
+    - **Business app (`(tabs)/index.tsx`):** Select mode for READY orders — long-press or toolbar button. Checkbox per READY card. "اختر سائقاً (N)" navigates to driver-selection with `orderIds` comma-separated. Selection clears on tab change.
+    - **Business app (`driver-selection.tsx`):** Reads `orderIds` param OR legacy `orderId`. Shows batch summary banner. Calls `ordersApi.sendDriverRequest(orderIds, driverId)`. Button label adapts to batch count.
+    - **Driver app (`_layout.tsx`):** `GlobalSocketListener` updated to handle `{ batchId, ordersJson }` params — serializes orders array as JSON for expo-router string params.
+    - **Driver app (`request-alert.tsx`):** Fully rewritten. Shows each order in batch as a card with items, address, total. Grand total for multi-order batches. 165s timer still applies.
+    - **Driver app (`active-delivery.tsx`):** Fully rewritten. 2-step flow: step 0 = heading to business (shows order summary), step 1 = delivering each order individually with per-order "تأكيد التسليم" button. `Array.isArray()` guard on `ordersApi.list()` to prevent crash.
+    - **Driver home (`(tabs)/index.tsx`):**
+      - Pending orders section "طلبات جديدة 🔔": groups orders by `batchId` into offers — one card per offer (not per order). Tapping opens `request-alert` with full batch.
+      - Active orders: filters by `driverId != null`, computes `activeBatchId`, shows combined total for batches.
+    - **`scopeFor` DRIVER:** returns `OR: [{ driverId }, { pendingDriverId }]` so pending offers appear in driver's list query.
+    - **`useSocket` fix (all 3 apps):** Added `forceUpdate` on `connect` event so `GlobalSocketListener` re-registers `driver:request` after socket connects (was registering when socket was still null).
+    - **`useEffect` import fix:** `active-delivery.tsx` was missing `useEffect` in imports.
+
+38. **Bug Fixes Batch (Phase 40)** ✅ **DONE**
+    - **Stale active-order banner after logout:** `useActiveOrderStore.getState().clear()` now called in `logout()` in customer `auth.store.ts`. Next user on same device won't see previous account's active order banner.
+    - **Area validation removed:** Originally validated same city, then same village (`customer.area.id`). Both caused false rejections because customers in the same physical village may be registered under different area records. Validation removed entirely — business owner is responsible for grouping appropriate orders.
+    - **Driver home `orders.filter` crash:** `Array.isArray()` guard added before `.filter()` on `ordersApi.list()` in both `active-delivery.tsx` and `(tabs)/index.tsx`.
+    - **Active-delivery stepper UX:** Reduced from 3 confusing steps to 2 clear ones: "في الطريق للمنشأة" → "جاري التوصيل للزبائن". One button: "استلمت الطلب من المنشأة 🛵 ابدأ التوصيل". Then per-order "تأكيد التسليم" cards at step 2.
+    - **`setTimeout` in render:** Moved `allDelivered` navigation to `useEffect([allDelivered])` — was in render body causing re-trigger on every render.
+
+39. **Rating System (Phase 41)** ✅ **DONE**
+    - **Schema changes (migration `20260604000000_add_rating_system`):**
+      - `Review.driverRating` removed (replaced by dedicated `DriverReview` table)
+      - `Review.deliveryRating Int?` added (customer rates delivery speed → feeds driver rating)
+      - New `DriverReview` model: `id, orderId (unique), driverId, businessId, rating Int, createdAt` — business rates driver per delivery
+      - `Order.driverReview` relation added; `Driver.driverReviews` + `Business.driverReviews` relations added
+    - **API (`reviews.service.ts`):**
+      - `create`: customer posts `businessRating` (required) + `deliveryRating` (optional) + `comment`. `businessRating` → `business.rating` avg. `deliveryRating` → feeds driver rating combined calc.
+      - `createDriverReview`: business posts `orderId + rating`. Validates order belongs to business, DELIVERED, driver assigned, once per order. Updates driver rating.
+      - Driver rating = weighted average of `Review.deliveryRating` (from customers) + `DriverReview.rating` (from businesses).
+      - `findByBusiness`: returns reviews with customer name for public reviews page.
+      - `findByDriver`: returns `DriverReview` records for driver card display.
+      - `findAll` + `findAllDriverReviews`: admin-only, full details.
+      - `delete` + `deleteDriverReview`: admin-only, recomputes ratings after deletion.
+    - **API (`reviews.controller.ts`):**
+      - `POST /reviews` — CUSTOMER only (was CUSTOMER|BUSINESS, removed BUSINESS)
+      - `POST /reviews/driver` — BUSINESS only (new endpoint)
+      - `GET /reviews/business?businessId=` — public
+      - `GET /reviews/driver?driverId=` — public
+      - `GET /reviews` — ADMIN (customer reviews)
+      - `GET /reviews/driver-reviews` — ADMIN (driver reviews)
+      - `DELETE /reviews/:id` — ADMIN
+      - `DELETE /reviews/driver-reviews/:id` — ADMIN
+    - **`ORDER_INCLUDE`:** added `review: true` + `driverReview: true` so order detail returns both.
+    - **api-client (`reviews.api.ts`):** `CreateReviewDto.deliveryRating` (replaces `driverRating`); `DriverReview` interface; `createDriverReview`, `listDriverReviews`, `byDriver` (now returns `DriverReview[]`), `deleteDriverReview`.
+    - **Customer app — rating modal (`tracking.tsx`):**
+      - `useEffect` watches `order.status === 'DELIVERED' && !order.review` — shows modal once with 800ms delay (renders delivered state first).
+      - `StarRow` component: 5 tappable stars, fill on select.
+      - Row 1: "جودة المنتجات" (required, 1–5) → `businessRating`.
+      - Row 2: "سرعة التوصيل" (optional, only shown if order had driver) → `deliveryRating`.
+      - Optional `TextInput` for comment/suggestion.
+      - "تخطي" dismisses without submitting. Submit disabled until at least 1 star selected.
+      - Bottom sheet modal (`animationType="slide"`).
+    - **Customer app — reviews page (`app/business/reviews.tsx`):** New screen. Large avg score + star display. Per-review cards: customer name, date, product quality stars, delivery stars (if present), comment. Registered in `_layout.tsx` as `business/reviews` with title "التقييمات".
+    - **Customer app — business detail (`business/[id].tsx`):** "اقرأ التقييمات" tappable link under rating badge. Shows live `business.rating` rounded to 1 decimal.
+    - **Business app — driver rating modal (`order/[id].tsx`):**
+      - `useEffect` watches `order.status === 'DELIVERED' && order.driverId && !order.driverReview`.
+      - Shows modal once with 600ms delay. Single star row 1–5 for driver speed.
+      - "تخطي" dismisses. Submit calls `reviewsApi.createDriverReview({ orderId, rating })`.
+      - Driver name shown in subtitle. Bottom sheet modal.
+    - **Driver rating on selection screen:** `d.rating` was already displayed — now reflects real weighted average of customer + business reviews.
+    - **Business rating:** starts at 0 (default), recalculates after every customer review submission and after admin deletion.
 
 ## 🗂️ How to use this file (for AI agents)
 
