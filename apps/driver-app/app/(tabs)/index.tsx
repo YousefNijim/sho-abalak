@@ -73,8 +73,14 @@ export default function DriverHome() {
   }
 
   const isAvailable = driver?.status === 'AVAILABLE';
-  // All orders currently assigned to this driver that are in-progress
-  const activeOrders = orders.filter((o: any) => ['READY', 'PICKED_UP'].includes(o.status));
+  // Orders sent to this driver but not yet accepted (pendingDriverId set, driverId null)
+  const pendingOrders = Array.isArray(orders)
+    ? orders.filter((o: any) => o.status === 'READY' && o.driverId == null)
+    : [];
+  // Orders currently in-progress (accepted)
+  const activeOrders = Array.isArray(orders)
+    ? orders.filter((o: any) => ['READY', 'PICKED_UP'].includes(o.status) && o.driverId != null)
+    : [];
   const activeOrder = activeOrders[0] ?? null;
   // If all active orders share a batchId, use it so active-delivery loads the full batch
   const activeBatchId = activeOrders.length > 0 && activeOrders[0].batchId
@@ -150,6 +156,48 @@ export default function DriverHome() {
         <Stat label="تقييمي العام" value={driver?.rating ? driver.rating.toFixed(1) : '5.0'} />
       </View>
 
+      {/* New pending orders — sent by business, awaiting driver acceptance */}
+      {pendingOrders.length > 0 && (
+        <View>
+          <Text style={styles.sectionTitle}>طلبات جديدة 🔔</Text>
+          <View style={{ gap: spacing[3] }}>
+            {pendingOrders.map((o: any) => (
+              <Pressable
+                key={o.id}
+                style={[styles.orderCard, styles.pendingCard]}
+                onPress={() =>
+                  router.push({
+                    pathname: '/request-alert',
+                    params: {
+                      batchId: o.batchId ?? o.id,
+                      ordersJson: JSON.stringify([{
+                        orderId: o.id,
+                        businessName: o.business?.name || 'منشأة تجارية',
+                        areaName: o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل',
+                        addressDetail: o.deliveryAddressDetail || '',
+                        total: Number(o.total),
+                        items: (o.items || []).map((it: any) => ({ name: it.product?.name || '', quantity: it.quantity })),
+                      }]),
+                    },
+                  })
+                }
+              >
+                <View style={styles.orderRow}>
+                  <Text style={styles.amount}>{o.total} ₪</Text>
+                  <Text style={styles.orderTitle}>{o.business?.name || 'المنشأة التجارية'}</Text>
+                </View>
+                <Text style={styles.muted}>
+                  إلى: {o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل'}
+                </Text>
+                <View style={[styles.deliverBtn, { backgroundColor: colors.secondary }]}>
+                  <Text style={styles.deliverText}>عرض الطلب والرد عليه</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
+
       {/* Current order */}
       <View>
         <Text style={styles.sectionTitle}>الطلب الحالي النشط</Text>
@@ -219,6 +267,7 @@ const styles = StyleSheet.create({
   statLabel: { color: colors.textMuted, fontSize: fontSizes.xs, marginTop: 2 },
   sectionTitle: { fontSize: fontSizes.lg, fontFamily: fontFamily.bold, color: colors.textPrimary, marginBottom: spacing[3], textAlign: 'right' },
   orderCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
+  pendingCard: { borderColor: colors.secondary, borderWidth: 2 },
   orderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderTitle: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },
   amount: { color: colors.primary, fontFamily: fontFamily.bold },

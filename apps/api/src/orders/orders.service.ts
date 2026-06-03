@@ -603,7 +603,8 @@ export class OrdersService {
       }
       case UserRole.DRIVER: {
         const driver = await this.prisma.driver.findUnique({ where: { userId: user.id } });
-        return { driverId: driver?.id ?? '__none__' };
+        const id = driver?.id ?? '__none__';
+        return { OR: [{ driverId: id }, { pendingDriverId: id }] };
       }
       case UserRole.ADMIN:
         return {};
