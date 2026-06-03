@@ -89,18 +89,7 @@ export default function Orders() {
     <View style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
-        <View style={styles.headerRight}>
-          <NotificationBell size={24} />
-          <View style={styles.avatarWrap}>
-            <Image
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDh93PwDaqVIlUIoTlscPh4woOwQpD7y_Mrs8EiM2sWRt2NN3H18sugX2vvmYNigGR_lw1EA-NDuSPgKx4xKLSBPZ0W9vbN4v9fWK2DSK3wOENLWyRTnm3urIBlTMXd9wdrHZMlglmqzonhHg-Qq_1imfh-5AzD9NS5tl53qdh7zrKVocjAW0tZTLLKQaL8wbu5Tx-H3jCvRJkFd7IjCpWhnR2FCfrEWqHBiTDCcOfFa9hmbq3R_1w79sWTXkOwmQ5l2qWrmqTJYG3e' }}
-              style={styles.avatar}
-              contentFit="cover"
-            />
-          </View>
-        </View>
-        <Text style={styles.headerTitle}>شو عبالك؟</Text>
-        <View style={styles.headerSpacer} />
+        <Text style={styles.headerTitle}>طلباتي</Text>
       </View>
 
       {/* Main Content */}

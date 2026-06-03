@@ -29,7 +29,7 @@ const GROUPS = [
     { Icon: Globe, label: 'اللغة', route: null, trailing: 'العربية' },
   ],
   [
-    { Icon: Lock, label: 'تغيير كلمة المرور', route: '/profile/change-password' },
+    { Icon: Lock, label: 'تغيير كلمة السر', route: '/profile/change-password' },
     { Icon: Star, label: 'تقييم التطبيق', route: null },
   ],
   [
@@ -189,8 +189,11 @@ export default function Profile() {
 
         {/* Version Info */}
         <View style={styles.versionInfo}>
-          <Text style={styles.versionText}>الإصدار 2.4.0 (2024)</Text>
+          <Text style={styles.versionText}>الإصدار 2.4.0 (2026)</Text>
           <Text style={styles.versionText}>صنع بكل حب في فلسطين 🇵🇸</Text>
+          <Pressable onPress={() => Linking.openURL('https://codeoura.com')}>
+            <Text style={styles.versionLink}>Developed by Codeoura</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -402,5 +405,12 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     fontSize: 11,
     color: colors.textMuted,
+  },
+  versionLink: {
+    fontFamily: fontFamily.semibold,
+    fontSize: 11,
+    color: colors.primary,
+    textDecorationLine: 'underline',
+    marginTop: 2,
   },
 });

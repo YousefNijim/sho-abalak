@@ -461,11 +461,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-end',
   },
-  businessName: { 
-    fontSize: 26, // headline-lg-mobile
-    fontFamily: fontFamily.bold, 
+  businessName: {
+    fontSize: 26,
+    fontFamily: fontFamily.bold,
     color: colors.textPrimary,
     marginBottom: 4,
+    textAlign: 'right',
   },
   businessLocation: {
     fontSize: 15,
@@ -707,7 +708,7 @@ const styles = StyleSheet.create({
   // Cart bar
   cartBarContainer: {
     position: 'absolute',
-    bottom: 0,
+    bottom: spacing[4],
     left: 0,
     right: 0,
     paddingHorizontal: spacing[4],

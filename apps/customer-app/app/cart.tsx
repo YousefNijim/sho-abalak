@@ -136,6 +136,7 @@ export default function Cart() {
             <ArrowRight size={28} color={colors.primary} />
           </Pressable>
           <Text style={styles.headerTitle}>سلّتك</Text>
+          <View style={{ width: 44 }} />
         </View>
         <View style={styles.emptyWrap}>
           <View style={styles.emptyCircle}>
@@ -151,11 +152,13 @@ export default function Cart() {
 
   return (
     <View style={styles.container}>
+      {/* Single header: title on right, back arrow on left */}
       <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
-        <Text style={styles.headerTitle}>سلّتك</Text>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
           <ArrowRight size={28} color={colors.primary} />
         </Pressable>
+        <Text style={styles.headerTitle}>سلّتك</Text>
+        <View style={{ width: 44 }} />
       </View>
 
       {/* Minimum order warning banner */}
@@ -236,21 +239,23 @@ export default function Cart() {
         <View style={styles.itemsSection}>
           {items.map((it) => (
             <View key={it.productId} style={styles.itemCard}>
+              {/* Image */}
               <View style={styles.itemImageWrap}>
                 {(it as any).imageUrl ? (
                   <Image source={{ uri: mediaUrl((it as any).imageUrl)! }} style={styles.itemImage} contentFit="cover" />
                 ) : (
                   <View style={styles.itemImagePlaceholder}>
-                    <Text style={{ fontSize: 32 }}>🍽️</Text>
+                    <Text style={{ fontSize: 28 }}>🍽️</Text>
                   </View>
                 )}
               </View>
+              {/* Content */}
               <View style={styles.itemContent}>
                 <View style={styles.itemHeader}>
-                  <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
                   <Pressable onPress={() => removeItem(it.productId)} style={styles.deleteBtn}>
-                    <Trash2 size={20} color={colors.error} />
+                    <Trash2 size={18} color={colors.error} />
                   </Pressable>
+                  <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
                 </View>
                 <Text style={styles.itemPrice}>{it.price} ₪</Text>
                 <View style={styles.itemFooter}>
@@ -394,20 +399,20 @@ export default function Cart() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FCF3DC' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing[4], paddingBottom: spacing[3], backgroundColor: '#FCF3DC', zIndex: 50, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
-  headerTitle: { fontFamily: fontFamily.bold, fontSize: 20, color: colors.primary },
+  headerTitle: { fontFamily: fontFamily.bold, fontSize: 20, color: colors.primary, flex: 1, textAlign: 'right' },
   backBtn: { padding: spacing[2] },
   minimumBanner: { backgroundColor: '#FEF3C7', paddingHorizontal: spacing[4], paddingVertical: spacing[2], borderBottomWidth: 1, borderBottomColor: '#FDE68A' },
   minimumBannerText: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: '#92400E', textAlign: 'right' },
   scrollContent: { paddingHorizontal: spacing[4], paddingTop: spacing[6], gap: spacing[6] },
   itemsSection: { gap: spacing[3] },
   itemCard: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: spacing[3], flexDirection: 'row', alignItems: 'center', gap: spacing[3], ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 }, web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' } }) },
-  itemImageWrap: { width: 80, height: 80, borderRadius: radius.md, overflow: 'hidden', backgroundColor: 'rgba(229,224,213,1)' },
+  itemImageWrap: { width: 76, height: 76, borderRadius: radius.md, overflow: 'hidden', backgroundColor: 'rgba(229,224,213,1)', flexShrink: 0 },
   itemImage: { width: '100%', height: '100%' },
   itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   itemContent: { flex: 1, minWidth: 0 },
-  itemHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  itemName: { fontFamily: fontFamily.semibold, fontSize: 16, color: colors.textPrimary, flex: 1, textAlign: 'right' },
-  deleteBtn: { padding: 2 },
+  itemHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-end' },
+  itemName: { fontFamily: fontFamily.semibold, fontSize: 15, color: colors.textPrimary, flex: 1, textAlign: 'right' },
+  deleteBtn: { padding: 2, marginLeft: spacing[1] },
   itemPrice: { fontFamily: fontFamily.bold, color: colors.primary, marginTop: 4, textAlign: 'right' },
   itemFooter: { marginTop: spacing[2], flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#efecf6', borderRadius: radius.full, paddingHorizontal: spacing[2], paddingVertical: spacing[1], gap: spacing[3] },
@@ -459,7 +464,7 @@ const styles = StyleSheet.create({
   emptyDesc: { fontFamily: fontFamily.regular, fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] },
   emptyBtn: { paddingHorizontal: spacing[8] },
   // Address
-  addressBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing[4], paddingVertical: spacing[3], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, gap: spacing[3] },
+  addressBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing[4], paddingVertical: spacing[2], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, gap: spacing[2] },
   addressBarError: { borderWidth: 1.5, borderColor: colors.error, borderBottomColor: colors.error },
   addressErrorText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.error, textAlign: 'right', paddingHorizontal: spacing[4], paddingTop: spacing[2], backgroundColor: colors.surface },
   addressBarIconWrap: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center' },
