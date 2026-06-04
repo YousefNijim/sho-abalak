@@ -433,7 +433,7 @@ export default function Cart() {
             onPress={handleConfirm}
             loading={createOrder.isPending}
             disabled={createOrder.isPending || loadingBusiness || belowMinimum}
-            style={[styles.confirmBtn, belowMinimum && { opacity: 0.5 }]}
+            style={{ ...styles.confirmBtn, ...(belowMinimum ? { opacity: 0.5 } : {}) }}
           >
             <View style={styles.confirmBtnContent}>
               <Text style={styles.confirmBtnText}>تأكيد الطلب</Text>

@@ -154,7 +154,7 @@ export default function Home() {
 
   const isSearchActive = searchFocused || searchQuery.trim().length > 0;
 
-  const selectedAreaId = selectedAddress?.areaId;
+  const selectedAreaId = selectedAddress?.areaId ?? undefined;
 
   // Search — always scoped to selected area
   const { data: searchBusinesses = [], isFetching: searchingBusinesses } = useQuery({

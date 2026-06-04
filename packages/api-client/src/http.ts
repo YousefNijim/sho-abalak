@@ -8,17 +8,33 @@ export const BASE_URL =
 
 export const http = axios.create({
   baseURL: BASE_URL,
-  headers: { 
+  headers: {
     'Content-Type': 'application/json',
     'Bypass-Tunnel-Reminder': 'true'
   },
 });
 
+// Module-level token reference. The request interceptor reads this on every
+// request, so even if a query fires before setAuthToken runs, as long as the
+// token is set by the time the request goes out, the header is attached.
+let currentToken: string | null = null;
+
 /** Call this once on app init / after login to attach the bearer token. */
 export function setAuthToken(token: string | null) {
+  currentToken = token;
   if (token) {
     http.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   } else {
     delete http.defaults.headers.common['Authorization'];
   }
 }
+
+// Always attach the latest token at request time (covers the hydration race on
+// web view / cold start where the header default may not be set yet).
+http.interceptors.request.use((config) => {
+  if (currentToken) {
+    config.headers = config.headers ?? {};
+    config.headers['Authorization'] = `Bearer ${currentToken}`;
+  }
+  return config;
+});

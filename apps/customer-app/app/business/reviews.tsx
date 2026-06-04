@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   customerName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary },
   date: { fontSize: fontSizes.xs, color: colors.textMuted },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexDirection: 'row-reverse', justifyContent: 'flex-end' },
+  ratingRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: spacing[2], justifyContent: 'flex-end' },
   ratingLabel: { fontSize: fontSizes.sm, color: colors.textMuted, fontFamily: fontFamily.medium },
   comment: { fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right', lineHeight: 22, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing[2], marginTop: spacing[1] },
 });

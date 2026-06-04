@@ -74,6 +74,12 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'shu-customer-auth',
       storage: createJSONStorage(() => AsyncStorage),
+      // Re-attach the bearer token to Axios the instant the persisted state is
+      // rehydrated from storage. This closes the race where a query fires on
+      // cold start (web view especially) before hydrate() runs → 401.
+      onRehydrateStorage: () => (state) => {
+        if (state?.token) setAuthToken(state.token);
+      },
     },
   ),
 );
