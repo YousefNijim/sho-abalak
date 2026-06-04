@@ -23,9 +23,9 @@ export const productsApi = {
       .get<Product[]>('/products', { params: { businessId } })
       .then((r) => r.data),
 
-  search: (q: string) =>
+  search: (q: string, areaId?: string) =>
     http
-      .get<SearchProduct[]>('/products/search', { params: { q } })
+      .get<SearchProduct[]>('/products/search', { params: { q, areaId } })
       .then((r) => r.data),
 
   create: (dto: CreateProductDto) =>

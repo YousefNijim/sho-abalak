@@ -151,19 +151,79 @@ export default function Home() {
 
   const isSearchActive = searchFocused || searchQuery.trim().length > 0;
 
+  const selectedAreaId = selectedAddress?.areaId;
+
+  // Search — always scoped to selected area
   const { data: searchBusinesses = [], isFetching: searchingBusinesses } = useQuery({
-    queryKey: ['search-businesses', searchQuery],
-    queryFn: () => businessesApi.list({ search: searchQuery }),
+    queryKey: ['search-businesses', searchQuery, selectedAreaId],
+    queryFn: () => businessesApi.list({ search: searchQuery, areaId: selectedAreaId }),
     enabled: searchQuery.trim().length >= 2,
   });
 
   const { data: searchProducts = [], isFetching: searchingProducts } = useQuery({
-    queryKey: ['search-products', searchQuery],
-    queryFn: () => productsApi.search(searchQuery),
+    queryKey: ['search-products', searchQuery, selectedAreaId],
+    queryFn: () => productsApi.search(searchQuery, selectedAreaId),
     enabled: searchQuery.trim().length >= 2,
   });
 
   const isSearching = searchingBusinesses || searchingProducts;
+
+  // Search: also find businesses that match query but deliver to OTHER saved addresses (show disabled in search)
+  const { data: searchDisabledBusinesses = [] } = useQuery({
+    queryKey: ['search-businesses-other', searchQuery, otherAreaIds.map((a) => a.areaId).join(',')],
+    queryFn: async () => {
+      if (otherAreaIds.length === 0) return [];
+      const results = await Promise.all(
+        otherAreaIds.map((addr) =>
+          businessesApi.list({ search: searchQuery, type: 'FOOD', areaId: addr.areaId })
+            .then((bs: any[]) => bs.map((b: any) => ({ ...b, _deliverableAddress: addr.label })))
+        )
+      );
+      const flat = results.flat();
+      const seen = new Set<string>();
+      // Exclude businesses already in active search results
+      return flat.filter((b: any) => {
+        if (seen.has(b.id)) return false;
+        if ((searchBusinesses as any[]).some((ab: any) => ab.id === b.id)) return false;
+        seen.add(b.id);
+        return true;
+      });
+    },
+    enabled: searchQuery.trim().length >= 2 && otherAreaIds.length > 0,
+  });
+
+  // Other saved addresses (excluding the currently selected one)
+  const otherAreaIds = addresses
+    .filter((a) => a.areaId && a.areaId !== selectedAreaId)
+    .map((a) => ({ addressId: a.id, areaId: a.areaId!, label: a.label, area: a.area }));
+
+  // Fetch businesses for each other saved address to show disabled cards
+  const { data: nearbyOtherBusinesses = [] } = useQuery({
+    queryKey: ['businesses-other-areas', otherAreaIds.map((a) => a.areaId).join(',')],
+    queryFn: async () => {
+      if (otherAreaIds.length === 0) return [];
+      // Fetch for all other areas and tag each result with which address delivers there
+      const results = await Promise.all(
+        otherAreaIds.map((addr) =>
+          businessesApi.list({ type: 'FOOD', areaId: addr.areaId })
+            .then((bs: any[]) => bs.map((b: any) => ({
+              ...b,
+              _deliverableAddress: addr.label,
+              _deliverableArea: addr.area,
+            })))
+        )
+      );
+      // Flatten, dedupe by businessId, exclude ones already in main list
+      const flat = results.flat();
+      const seen = new Set<string>();
+      return flat.filter((b: any) => {
+        if (seen.has(b.id)) return false;
+        seen.add(b.id);
+        return true;
+      });
+    },
+    enabled: otherAreaIds.length > 0,
+  });
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -658,16 +718,41 @@ export default function Home() {
                   </>
                 )}
 
-                {(searchBusinesses as any[]).length === 0 && (searchProducts as SearchProduct[]).length === 0 && (
+                {/* Disabled businesses in search — match query but deliver to other saved addresses */}
+                {(searchDisabledBusinesses as any[]).length > 0 && (
+                  <>
+                    <Text style={[styles.searchSectionTitle, { marginTop: spacing[5], color: colors.textMuted }]}>
+                      غير متاح لعنوانك الحالي
+                    </Text>
+                    {(searchDisabledBusinesses as any[]).map((b: any) => (
+                      <View key={`ds-${b.id}`} style={[styles.searchBusinessCard, { opacity: 0.7 }]}>
+                        <View style={[styles.searchBusinessImg, { opacity: 0.5 }]}>
+                          {b.imageUrl ? (
+                            <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                          ) : (
+                            <Store size={28} color={colors.border} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                          <Text style={styles.searchBusinessName} numberOfLines={1}>{b.name}</Text>
+                          <Text style={[styles.searchBusinessMeta, { color: colors.secondary, fontFamily: fontFamily.semibold }]} numberOfLines={1}>
+                            يوصّل إلى: {b._deliverableAddress}
+                          </Text>
+                          <Text style={styles.searchBusinessMeta}>غيّر عنوانك للطلب من هنا</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </>
+                )}
+
+                {(searchBusinesses as any[]).length === 0 && (searchProducts as SearchProduct[]).length === 0 && (searchDisabledBusinesses as any[]).length === 0 && (
                   <View style={styles.searchHint}>
                     <Search size={48} color={colors.border} />
                     <Text style={styles.searchHintText}>لا توجد نتائج لـ "{searchQuery}"</Text>
                     <Text style={styles.searchHintSub}>جرّب كلمة مختلفة أو تصفح الأقسام</Text>
                   </View>
                 )}
-              </>
-            )}
-          </ScrollView>
+            </ScrollView>
         </View>
       )}
 
@@ -813,73 +898,117 @@ export default function Home() {
 
         {isLoading ? (
           <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing[8] }} />
-        ) : businesses.length === 0 ? (
-          <View style={styles.emptyWrap}>
-            <Store size={48} color={colors.border} />
-            <Text style={styles.emptyText}>لا توجد منشآت مطابقة</Text>
-          </View>
         ) : (
           <View style={styles.newGrid}>
-            {businesses.map((b: any) => {
-              const statusBgColor = b.isOpen ? '#22C55E' : '#EF4444';
-              return (
-                <Pressable
-                  key={b.id}
-                  style={styles.newCard}
-                  onPress={() => router.push(`/business/${b.id}`)}
-                >
-                  <View style={styles.newCardImageWrap}>
-                    {b.imageUrl ? (
-                      <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={styles.newCardImage} contentFit="cover" />
-                    ) : (
-                      <View style={[styles.newCardImage, styles.newCardImagePlaceholder]}>
-                        <ImageIcon size={40} color={colors.border} />
-                      </View>
-                    )}
-                    {/* Status badge */}
-                    <View style={[styles.newStatusBadge, { backgroundColor: statusBgColor }]}>
-                      <Text style={styles.newStatusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
-                    </View>
-                    {/* Rating badge overlay */}
-                    <View style={styles.newRatingBadge}>
-                      <Text style={styles.newRatingText}>{b.rating ? b.rating.toFixed(1) : '4.8'}</Text>
-                      <Star size={12} color="#F59E0B" fill="#F59E0B" style={{ marginLeft: 2 }} />
-                    </View>
-                  </View>
-                  
-                  <View style={styles.newCardBody}>
-                    <View style={styles.newCardRow}>
-                      {/* Right Side: Title and Tags */}
-                      <View style={styles.newCardRightCol}>
-                        <Text style={styles.newCardTitle} numberOfLines={1}>{b.name}</Text>
-                        <Text style={styles.newCardDesc} numberOfLines={1}>
-                          {b.tags && b.tags.length > 0
-                            ? b.tags.map((t: Tag) => t.name).join(' • ')
-                            : 'مأكولات ومشروبات'}
-                        </Text>
-                      </View>
-                      
-                      {/* Left Side: Delivery info */}
-                      <View style={styles.newCardLeftCol}>
-                        <View style={styles.newMetaItem}>
-                          <Text style={styles.newMetaText}>20-30 دقيقة</Text>
-                          <Clock size={13} color="#8A7A5F" style={{ marginLeft: 4 }} />
-                        </View>
-                        <View style={[styles.newMetaItem, { marginTop: 4 }]}>
-                          <Text style={[styles.newMetaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                            {b.area?.deliveryFee ?? 3} شيكل
-                          </Text>
-                          <Bike size={13} color={colors.primary} style={{ marginLeft: 4 }} />
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
+            {/* Active businesses — deliver to selected address */}
+            {businesses.map((b: any) => (
+              <BusinessCard key={b.id} b={b} onPress={() => router.push(`/business/${b.id}`)} />
+            ))}
+
+            {/* Disabled businesses — deliver to other saved addresses */}
+            {(nearbyOtherBusinesses as any[])
+              .filter((b: any) => !(businesses as any[]).some((ab: any) => ab.id === b.id))
+              .map((b: any) => (
+                <DisabledBusinessCard key={`disabled-${b.id}`} b={b} />
+              ))}
+
+            {businesses.length === 0 && nearbyOtherBusinesses.length === 0 && (
+              <View style={styles.emptyWrap}>
+                <Store size={48} color={colors.border} />
+                <Text style={styles.emptyText}>لا توجد منشآت مطابقة</Text>
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
+    </View>
+  );
+}
+
+function BusinessCard({ b, onPress }: { b: any; onPress: () => void }) {
+  const statusBgColor = b.isOpen ? '#22C55E' : '#EF4444';
+  return (
+    <Pressable style={styles.newCard} onPress={onPress}>
+      <View style={styles.newCardImageWrap}>
+        {b.imageUrl ? (
+          <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={styles.newCardImage} contentFit="cover" />
+        ) : (
+          <View style={[styles.newCardImage, styles.newCardImagePlaceholder]}>
+            <ImageIcon size={40} color={colors.border} />
+          </View>
+        )}
+        <View style={[styles.newStatusBadge, { backgroundColor: statusBgColor }]}>
+          <Text style={styles.newStatusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
+        </View>
+        <View style={styles.newRatingBadge}>
+          <Text style={styles.newRatingText}>{b.rating ? b.rating.toFixed(1) : '4.8'}</Text>
+          <Star size={12} color="#F59E0B" fill="#F59E0B" style={{ marginLeft: 2 }} />
+        </View>
+      </View>
+      <View style={styles.newCardBody}>
+        <View style={styles.newCardRow}>
+          <View style={styles.newCardRightCol}>
+            <Text style={styles.newCardTitle} numberOfLines={1}>{b.name}</Text>
+            <Text style={styles.newCardDesc} numberOfLines={1}>
+              {b.tags && b.tags.length > 0 ? b.tags.map((t: Tag) => t.name).join(' • ') : 'مأكولات ومشروبات'}
+            </Text>
+          </View>
+          <View style={styles.newCardLeftCol}>
+            <View style={styles.newMetaItem}>
+              <Text style={styles.newMetaText}>20-30 دقيقة</Text>
+              <Clock size={13} color="#8A7A5F" style={{ marginLeft: 4 }} />
+            </View>
+            <View style={[styles.newMetaItem, { marginTop: 4 }]}>
+              <Text style={[styles.newMetaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
+                {b.area?.deliveryFee ?? 3} شيكل
+              </Text>
+              <Bike size={13} color={colors.primary} style={{ marginLeft: 4 }} />
+            </View>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+function DisabledBusinessCard({ b }: { b: any }) {
+  return (
+    <View style={[styles.newCard, styles.disabledCard]}>
+      <View style={styles.newCardImageWrap}>
+        {b.imageUrl ? (
+          <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={[styles.newCardImage, { opacity: 0.45 }]} contentFit="cover" />
+        ) : (
+          <View style={[styles.newCardImage, styles.newCardImagePlaceholder, { opacity: 0.45 }]}>
+            <ImageIcon size={40} color={colors.border} />
+          </View>
+        )}
+        {/* Delivery address badge */}
+        <View style={styles.deliverableBadge}>
+          <MapPin size={11} color="#fff" />
+          <Text style={styles.deliverableBadgeText} numberOfLines={1}>
+            يوصّل إلى: {b._deliverableAddress}
+          </Text>
+        </View>
+      </View>
+      <View style={[styles.newCardBody, { opacity: 0.55 }]}>
+        <View style={styles.newCardRow}>
+          <View style={styles.newCardRightCol}>
+            <Text style={styles.newCardTitle} numberOfLines={1}>{b.name}</Text>
+            <Text style={styles.newCardDesc} numberOfLines={1}>
+              {b.tags && b.tags.length > 0 ? b.tags.map((t: Tag) => t.name).join(' • ') : 'مأكولات ومشروبات'}
+            </Text>
+          </View>
+          <View style={styles.newCardLeftCol}>
+            <View style={styles.newMetaItem}>
+              <Text style={styles.newMetaText}>20-30 دقيقة</Text>
+              <Clock size={13} color="#8A7A5F" style={{ marginLeft: 4 }} />
+            </View>
+          </View>
+        </View>
+        <Text style={styles.disabledCardHint}>
+          غيّر عنوانك إلى "{b._deliverableAddress}" للطلب من هنا
+        </Text>
+      </View>
     </View>
   );
 }
@@ -1631,6 +1760,42 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
     fontSize: 12,
     color: '#8A7A5F',
+  },
+
+  // Disabled business card
+  disabledCard: {
+    opacity: 0.8,
+    borderColor: '#E5E0D5',
+    borderStyle: 'dashed',
+  },
+  deliverableBadge: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(22,90,52,0.85)',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[2],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  deliverableBadgeText: {
+    fontFamily: fontFamily.bold,
+    fontSize: 11,
+    color: '#fff',
+    flex: 1,
+    textAlign: 'right',
+  },
+  disabledCardHint: {
+    fontFamily: fontFamily.medium,
+    fontSize: 11,
+    color: colors.secondary,
+    textAlign: 'right',
+    marginTop: spacing[2],
+    paddingTop: spacing[2],
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
 
   // Search enhancements

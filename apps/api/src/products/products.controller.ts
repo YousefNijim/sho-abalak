@@ -16,9 +16,9 @@ export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
   @Get('search')
-  search(@Query('q') q: string) {
+  search(@Query('q') q: string, @Query('areaId') areaId?: string) {
     if (!q || q.trim().length < 2) return [];
-    return this.products.search(q.trim());
+    return this.products.search(q.trim(), areaId);
   }
 
   @Get()

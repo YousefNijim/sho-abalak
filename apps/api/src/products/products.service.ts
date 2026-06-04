@@ -11,7 +11,7 @@ export class ProductsService {
     return this.prisma.product.findMany({ where: { businessId }, orderBy: { name: 'asc' } });
   }
 
-  search(query: string) {
+  search(query: string, areaId?: string) {
     return this.prisma.product.findMany({
       where: {
         isAvailable: true,
@@ -19,6 +19,15 @@ export class ProductsService {
           { name: { contains: query, mode: 'insensitive' } },
           { description: { contains: query, mode: 'insensitive' } },
         ],
+        // Only show products from businesses that deliver to the customer's area
+        ...(areaId ? {
+          business: {
+            OR: [
+              { deliveryAreas: { some: { id: areaId } } },
+              { areaId },
+            ],
+          },
+        } : {}),
       },
       include: {
         business: {
