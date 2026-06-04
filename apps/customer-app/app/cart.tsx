@@ -170,21 +170,6 @@ export default function Cart() {
         </View>
       )}
 
-      <Pressable style={[styles.addressBar, addressError && styles.addressBarError]} onPress={() => setAddressPickerVisible(true)}>
-        <ChevronDown size={18} color={colors.primary} style={{ marginLeft: 2 }} />
-        <View style={styles.addressBarText}>
-          <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
-          <Text style={styles.addressBarName} numberOfLines={1}>
-            {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
-          </Text>
-        </View>
-        <View style={styles.addressBarIconWrap}>
-          <MapPin size={18} color={colors.primary} />
-        </View>
-      </Pressable>
-      {addressError && (
-        <Text style={styles.addressErrorText}>الرجاء اختيار عنوان التوصيل لإتمام الطلب</Text>
-      )}
 
       <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
@@ -235,6 +220,24 @@ export default function Cart() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 120 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Address selector — compact, inside scroll */}
+        <Pressable
+          style={[styles.addressSelector, addressError && styles.addressSelectorError]}
+          onPress={() => setAddressPickerVisible(true)}
+        >
+          <ChevronDown size={16} color={colors.primary} />
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Text style={styles.addressSelectorLabel}>التوصيل إلى</Text>
+            <Text style={styles.addressSelectorName} numberOfLines={1}>
+              {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
+            </Text>
+          </View>
+          <MapPin size={16} color={colors.primary} />
+        </Pressable>
+        {addressError && (
+          <Text style={styles.addressErrorText}>الرجاء اختيار عنوان التوصيل لإتمام الطلب</Text>
+        )}
+
         {/* Cart Items */}
         <View style={styles.itemsSection}>
           {items.map((it) => (
@@ -463,14 +466,12 @@ const styles = StyleSheet.create({
   emptyTitle: { fontFamily: fontFamily.bold, fontSize: 24, color: colors.textPrimary, marginBottom: spacing[2] },
   emptyDesc: { fontFamily: fontFamily.regular, fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: spacing[6] },
   emptyBtn: { paddingHorizontal: spacing[8] },
-  // Address
-  addressBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing[4], paddingVertical: spacing[2], backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border, gap: spacing[2] },
-  addressBarError: { borderWidth: 1.5, borderColor: colors.error, borderBottomColor: colors.error },
-  addressErrorText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.error, textAlign: 'right', paddingHorizontal: spacing[4], paddingTop: spacing[2], backgroundColor: colors.surface },
-  addressBarIconWrap: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.primary + '15', alignItems: 'center', justifyContent: 'center' },
-  addressBarText: { flex: 1, alignItems: 'flex-end' },
-  addressBarLabel: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs, color: colors.textMuted, textAlign: 'right' },
-  addressBarName: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
+  // Address selector (inside scroll)
+  addressSelector: { flexDirection: 'row', alignItems: 'center', gap: spacing[2], backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: spacing[3], paddingVertical: spacing[2], borderWidth: 1, borderColor: colors.border },
+  addressSelectorError: { borderColor: colors.error },
+  addressSelectorLabel: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs, color: colors.textMuted, textAlign: 'right' },
+  addressSelectorName: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right' },
+  addressErrorText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.error, textAlign: 'right', paddingTop: spacing[1] },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   modalSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing[4], maxHeight: '70%' },
   modalHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.primary + '40', alignSelf: 'center', marginBottom: spacing[4] },

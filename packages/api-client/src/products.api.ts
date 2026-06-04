@@ -13,10 +13,19 @@ export interface CreateProductDto {
   imageUrl?: string;
 }
 
+export interface SearchProduct extends Product {
+  business?: { id: string; name: string; imageUrl: string | null; isOpen: boolean; area?: { city: string; name: string; deliveryFee: number } };
+}
+
 export const productsApi = {
   listByBusiness: (businessId: string) =>
     http
       .get<Product[]>('/products', { params: { businessId } })
+      .then((r) => r.data),
+
+  search: (q: string) =>
+    http
+      .get<SearchProduct[]>('/products/search', { params: { q } })
       .then((r) => r.data),
 
   create: (dto: CreateProductDto) =>

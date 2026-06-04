@@ -59,6 +59,7 @@ export default function TabsLayout() {
         options={{
           title: 'السلة',
           href: '/cart',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <View>
               <ShoppingCart size={size} color={color} />

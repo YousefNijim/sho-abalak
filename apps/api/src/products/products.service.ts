@@ -11,6 +11,25 @@ export class ProductsService {
     return this.prisma.product.findMany({ where: { businessId }, orderBy: { name: 'asc' } });
   }
 
+  search(query: string) {
+    return this.prisma.product.findMany({
+      where: {
+        isAvailable: true,
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      include: {
+        business: {
+          select: { id: true, name: true, imageUrl: true, isOpen: true, area: { select: { city: true, name: true, deliveryFee: true } } },
+        },
+      },
+      orderBy: { name: 'asc' },
+      take: 30,
+    });
+  }
+
   async create(ownerId: string, dto: CreateProductDto) {
     const business = await this.ownedBusiness(ownerId);
     return this.prisma.product.create({ data: { ...dto, businessId: business.id } });

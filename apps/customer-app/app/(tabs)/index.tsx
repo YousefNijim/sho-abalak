@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -24,6 +24,8 @@ import {
   Coffee,
   SlidersHorizontal,
   Star,
+  X,
+  ArrowRight,
   Clock,
   Bike,
   ImageIcon,
@@ -42,7 +44,8 @@ import {
 } from 'lucide-react-native';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, tagsApi, areasApi, bannersApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, tagsApi, areasApi, bannersApi, productsApi, BASE_URL } from '@shu/api-client';
+import type { SearchProduct } from '@shu/api-client';
 import type { Tag, Banner } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null => {
@@ -93,8 +96,25 @@ export default function Home() {
 
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [searchQuery, setSearchQuery] = useState(''); // debounced
+  const [searchFocused, setSearchFocused] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [addressPickerVisible, setAddressPickerVisible] = useState(false);
+  const searchInputRef = useRef<TextInput>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearchChange = (text: string) => {
+    setSearch(text);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => setSearchQuery(text), 300);
+  };
+
+  const clearSearch = () => {
+    setSearch('');
+    setSearchQuery('');
+    setSearchFocused(false);
+    searchInputRef.current?.blur();
+  };
   
   const bannerScrollRef = useRef<ScrollView>(null);
   const bannerIndexRef = useRef(0);
@@ -120,15 +140,30 @@ export default function Home() {
   const locationTagText = currentArea ? `${currentArea.city}، ${currentArea.name}` : 'نابلس، المركز';
 
   const { data: businesses = [], isLoading } = useQuery({
-    queryKey: ['businesses', 'FOOD', selectedTagId, search, selectedAddress?.areaId],
+    queryKey: ['businesses', 'FOOD', selectedTagId, selectedAddress?.areaId],
     queryFn: () =>
       businessesApi.list({
         type: 'FOOD',
         tagId: selectedTagId || undefined,
-        search: search || undefined,
         areaId: selectedAddress?.areaId || undefined,
       }),
   });
+
+  const isSearchActive = searchFocused || searchQuery.trim().length > 0;
+
+  const { data: searchBusinesses = [], isFetching: searchingBusinesses } = useQuery({
+    queryKey: ['search-businesses', searchQuery],
+    queryFn: () => businessesApi.list({ search: searchQuery }),
+    enabled: searchQuery.trim().length >= 2,
+  });
+
+  const { data: searchProducts = [], isFetching: searchingProducts } = useQuery({
+    queryKey: ['search-products', searchQuery],
+    queryFn: () => productsApi.search(searchQuery),
+    enabled: searchQuery.trim().length >= 2,
+  });
+
+  const isSearching = searchingBusinesses || searchingProducts;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -503,6 +538,139 @@ export default function Home() {
         </View>
       </Modal>
 
+      {/* Full-page search overlay */}
+      {isSearchActive && (
+        <View style={[styles.searchOverlay, { paddingTop: insets.top }]}>
+          {/* Search header */}
+          <View style={styles.searchOverlayHeader}>
+            <Pressable style={styles.searchOverlayBack} onPress={clearSearch}>
+              <ArrowRight size={24} color={colors.primary} />
+            </Pressable>
+            <View style={[styles.newSearchBar, styles.searchOverlayInput]}>
+              <Search size={20} color={colors.primary} style={styles.newSearchIconRight} />
+              <TextInput
+                ref={searchInputRef}
+                placeholder="ابحث عن مطعم أو منتج..."
+                placeholderTextColor="rgba(107, 114, 128, 0.7)"
+                style={styles.newSearchInput}
+                textAlign="right"
+                value={search}
+                onChangeText={handleSearchChange}
+                autoFocus
+                returnKeyType="search"
+              />
+              {search.length > 0 && (
+                <Pressable style={styles.newSearchClearBtn} onPress={clearSearch}>
+                  <X size={18} color={colors.textMuted} />
+                </Pressable>
+              )}
+            </View>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{ paddingHorizontal: spacing[4], paddingBottom: 100 + bottomInset, paddingTop: spacing[2] }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            {searchQuery.trim().length === 0 ? (
+              <View style={styles.searchHint}>
+                <Search size={48} color={colors.border} />
+                <Text style={styles.searchHintText}>ابحث عن مطعم، منتج، أو طبق...</Text>
+              </View>
+            ) : isSearching ? (
+              <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing[12] }} />
+            ) : (
+              <>
+                {/* Business results */}
+                {(searchBusinesses as any[]).length > 0 && (
+                  <>
+                    <Text style={styles.searchSectionTitle}>المطاعم والمنشآت</Text>
+                    {(searchBusinesses as any[]).map((b: any) => (
+                      <Pressable
+                        key={b.id}
+                        style={styles.searchBusinessCard}
+                        onPress={() => { clearSearch(); router.push(`/business/${b.id}`); }}
+                      >
+                        <View style={styles.searchBusinessImg}>
+                          {b.imageUrl ? (
+                            <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                          ) : (
+                            <Store size={28} color={colors.border} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                          <Text style={styles.searchBusinessName} numberOfLines={1}>{b.name}</Text>
+                          <Text style={styles.searchBusinessMeta} numberOfLines={1}>
+                            {b.tags?.map((t: any) => t.name).join(' • ') || 'مطعم'} • {b.area?.city}
+                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            <Star size={12} color="#F59E0B" fill="#F59E0B" />
+                            <Text style={styles.searchBusinessMeta}>{b.rating ? b.rating.toFixed(1) : '—'}</Text>
+                            <Text style={[styles.searchBusinessMeta, { color: b.isOpen ? colors.secondary : colors.error }]}>
+                              • {b.isOpen ? 'مفتوح' : 'مغلق'}
+                            </Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    ))}
+                  </>
+                )}
+
+                {/* Product results */}
+                {(searchProducts as SearchProduct[]).length > 0 && (
+                  <>
+                    <Text style={[styles.searchSectionTitle, { marginTop: spacing[5] }]}>المنتجات</Text>
+                    {(searchProducts as SearchProduct[]).map((p) => (
+                      <Pressable
+                        key={p.id}
+                        style={styles.searchProductCard}
+                        onPress={() => { clearSearch(); router.push(`/business/${p.business?.id ?? p.businessId}`); }}
+                      >
+                        <View style={styles.searchProductImg}>
+                          {p.imageUrl ? (
+                            <Image source={{ uri: mediaUrl(p.imageUrl)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                          ) : (
+                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                              <UtensilsCrossed size={22} color={colors.border} />
+                            </View>
+                          )}
+                        </View>
+                        <View style={{ flex: 1, alignItems: 'flex-end', gap: 2 }}>
+                          <Text style={styles.searchProductName} numberOfLines={1}>{p.name}</Text>
+                          {p.description ? (
+                            <Text style={styles.searchProductDesc} numberOfLines={1}>{p.description}</Text>
+                          ) : null}
+                          <Text style={styles.searchProductBusiness} numberOfLines={1}>
+                            {p.business?.name ?? ''}
+                            {p.business?.area?.city ? ` • ${p.business.area.city}` : ''}
+                          </Text>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                            <Text style={styles.searchProductPrice}>{Number(p.price)} ₪</Text>
+                            {p.business && (
+                              <Text style={[styles.searchBusinessMeta, { color: p.business.isOpen ? colors.secondary : colors.error }]}>
+                                {p.business.isOpen ? 'مفتوح' : 'مغلق'}
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                      </Pressable>
+                    ))}
+                  </>
+                )}
+
+                {(searchBusinesses as any[]).length === 0 && (searchProducts as SearchProduct[]).length === 0 && (
+                  <View style={styles.searchHint}>
+                    <Search size={48} color={colors.border} />
+                    <Text style={styles.searchHintText}>لا توجد نتائج لـ "{searchQuery}"</Text>
+                    <Text style={styles.searchHintSub}>جرّب كلمة مختلفة أو تصفح الأقسام</Text>
+                  </View>
+                )}
+              </>
+            )}
+          </ScrollView>
+        </View>
+      )}
+
       <ScrollView
         contentContainerStyle={[styles.newScroll, { paddingBottom: 100 + bottomInset }]}
         showsVerticalScrollIndicator={false}
@@ -522,22 +690,26 @@ export default function Home() {
           </Pressable>
         )}
 
-        {/* New Search Bar */}
+        {/* Smart Search Bar */}
         <View style={styles.newSearchWrap}>
-          <View style={styles.newSearchBar}>
-            <Search size={22} color={colors.textMuted} style={styles.newSearchIconRight} />
+          <View style={[styles.newSearchBar, searchFocused && styles.newSearchBarFocused]}>
+            <Search size={22} color={searchFocused ? colors.primary : colors.textMuted} style={styles.newSearchIconRight} />
             <TextInput
-              placeholder="شو عبالك تأكل اليوم؟"
+              ref={searchInputRef}
+              placeholder="ابحث عن مطعم أو منتج..."
               placeholderTextColor="rgba(107, 114, 128, 0.7)"
               style={styles.newSearchInput}
               textAlign="right"
               value={search}
-              onChangeText={setSearch}
+              onChangeText={handleSearchChange}
+              onFocus={() => setSearchFocused(true)}
+              returnKeyType="search"
             />
-            {/* Filter button preserved but simplified in style */}
-            <Pressable style={styles.newFilterBtn}>
-              <SlidersHorizontal size={18} color={colors.primary} />
-            </Pressable>
+            {search.length > 0 && (
+              <Pressable style={styles.newSearchClearBtn} onPress={clearSearch}>
+                <X size={18} color={colors.textMuted} />
+              </Pressable>
+            )}
           </View>
         </View>
 
@@ -1459,6 +1631,166 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
     fontSize: 12,
     color: '#8A7A5F',
+  },
+
+  // Search enhancements
+  newSearchBarFocused: {
+    borderColor: colors.primary,
+    borderWidth: 1.5,
+  },
+  newSearchClearBtn: {
+    position: 'absolute',
+    left: spacing[4],
+    padding: 4,
+  },
+
+  // Full-page search overlay
+  searchOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FCF3DC',
+    zIndex: 100,
+  },
+  searchOverlayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing[3],
+    paddingVertical: spacing[3],
+    gap: spacing[2],
+    backgroundColor: '#FCF3DC',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  searchOverlayBack: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  searchOverlayInput: {
+    flex: 1,
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  searchSectionTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.lg,
+    color: colors.textPrimary,
+    textAlign: 'right',
+    marginBottom: spacing[3],
+    marginTop: spacing[2],
+  },
+  searchHint: {
+    alignItems: 'center',
+    paddingTop: spacing[16],
+    gap: spacing[3],
+  },
+  searchHintText: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.base,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  searchHintSub: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+  },
+  // Business result card
+  searchBusinessCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing[3],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  searchBusinessImg: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.lg,
+    backgroundColor: colors.border + '60',
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  searchBusinessName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  searchBusinessMeta: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: colors.textMuted,
+    textAlign: 'right',
+    marginTop: 2,
+  },
+  // Product result card — same style as business card
+  searchProductCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[3],
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: spacing[3],
+    marginBottom: spacing[3],
+    borderWidth: 1,
+    borderColor: '#E5E0D5',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.07, shadowRadius: 6 },
+      android: { elevation: 3 },
+      web: { boxShadow: '0 3px 6px rgba(0,0,0,0.07)' },
+    }),
+  },
+  searchProductImg: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.lg,
+    backgroundColor: colors.border + '60',
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  searchProductName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    textAlign: 'right',
+  },
+  searchProductBusiness: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.xs,
+    color: colors.primary,
+    textAlign: 'right',
+  },
+  searchProductDesc: {
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.xs,
+    color: colors.textMuted,
+    textAlign: 'right',
+  },
+  searchProductPrice: {
+    fontFamily: fontFamily.extrabold,
+    fontSize: fontSizes.lg,
+    color: colors.primary,
   },
 });
 

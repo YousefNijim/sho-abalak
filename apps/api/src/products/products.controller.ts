@@ -15,6 +15,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
+  @Get('search')
+  search(@Query('q') q: string) {
+    if (!q || q.trim().length < 2) return [];
+    return this.products.search(q.trim());
+  }
+
   @Get()
   findByBusiness(@Query('businessId') businessId: string) {
     return this.products.findByBusiness(businessId);
