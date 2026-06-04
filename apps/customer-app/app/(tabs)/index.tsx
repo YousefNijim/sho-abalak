@@ -171,6 +171,11 @@ export default function Home() {
 
   const isSearching = searchingBusinesses || searchingProducts;
 
+  // Other saved addresses (excluding the currently selected one) — must be before queries that use it
+  const otherAreaIds = addresses
+    .filter((a) => a.areaId && a.areaId !== selectedAreaId)
+    .map((a) => ({ addressId: a.id, areaId: a.areaId!, label: a.label, area: a.area }));
+
   // Search: also find businesses that match query but deliver to OTHER saved addresses (show disabled in search)
   const { data: searchDisabledBusinesses = [] } = useQuery({
     queryKey: ['search-businesses-other', searchQuery, otherAreaIds.map((a) => a.areaId).join(',')],
@@ -184,7 +189,6 @@ export default function Home() {
       );
       const flat = results.flat();
       const seen = new Set<string>();
-      // Exclude businesses already in active search results
       return flat.filter((b: any) => {
         if (seen.has(b.id)) return false;
         if ((searchBusinesses as any[]).some((ab: any) => ab.id === b.id)) return false;
@@ -194,11 +198,6 @@ export default function Home() {
     },
     enabled: searchQuery.trim().length >= 2 && otherAreaIds.length > 0,
   });
-
-  // Other saved addresses (excluding the currently selected one)
-  const otherAreaIds = addresses
-    .filter((a) => a.areaId && a.areaId !== selectedAreaId)
-    .map((a) => ({ addressId: a.id, areaId: a.areaId!, label: a.label, area: a.area }));
 
   // Fetch businesses for each other saved address to show disabled cards
   const { data: nearbyOtherBusinesses = [] } = useQuery({
@@ -755,7 +754,9 @@ export default function Home() {
                     <Text style={styles.searchHintSub}>جرّب كلمة مختلفة أو تصفح الأقسام</Text>
                   </View>
                 )}
-            </ScrollView>
+              </>
+            )}
+          </ScrollView>
         </View>
       )}
 
