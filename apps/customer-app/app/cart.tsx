@@ -48,6 +48,11 @@ export default function Cart() {
     queryFn: () => addressesApi.list(),
   });
 
+  const { data: availableCoupons = [] } = useQuery({
+    queryKey: ['coupons-active'],
+    queryFn: () => couponsApi.active(),
+  });
+
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
   const { data: business, isLoading: loadingBusiness } = useQuery({
@@ -160,6 +165,48 @@ export default function Cart() {
         <Text style={styles.headerTitle}>سلّتك</Text>
         <View style={{ width: 44 }} />
       </View>
+
+      {/* Coupon slider */}
+      {availableCoupons.length > 0 && (
+        <View style={styles.couponSliderWrap}>
+          <Text style={styles.couponSliderTitle}>🎟️ كوبونات متاحة</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.couponSliderScroll}>
+            {(availableCoupons as any[]).map((c) => {
+              const isApplied = appliedCoupon?.code === c.code;
+              const discountLabel = c.discountType === 'PERCENTAGE'
+                ? `${c.discountPct}%${c.maxDiscount ? ` (حتى ${c.maxDiscount} ₪)` : ''}`
+                : `${c.discountAmount} ₪`;
+              return (
+                <View key={c.id} style={[styles.couponCard, isApplied && styles.couponCardApplied]}>
+                  <View style={styles.couponDash} />
+                  <Tag size={18} color={isApplied ? '#fff' : colors.primary} />
+                  <Text style={[styles.couponCode, isApplied && { color: '#fff' }]}>{c.code}</Text>
+                  <Text style={[styles.couponDiscount, isApplied && { color: 'rgba(255,255,255,0.85)' }]}>خصم {discountLabel}</Text>
+                  <Text style={[styles.couponMin, isApplied && { color: 'rgba(255,255,255,0.7)' }]}>حد أدنى {c.minimumOrder} ₪</Text>
+                  {isApplied ? (
+                    <Pressable style={styles.couponRemoveBtn} onPress={removeCoupon}>
+                      <Text style={styles.couponRemoveBtnText}>إزالة</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      style={styles.couponApplyCardBtn}
+                      onPress={() => {
+                        setCouponInput(c.code);
+                        couponsApi.apply(c.code, Number(subtotal))
+                          .then((result) => { setAppliedCoupon(result); setCouponError(''); })
+                          .catch((err: any) => setCouponError(err?.response?.data?.message || 'لا يمكن تطبيق هذا الكوبون'));
+                      }}
+                    >
+                      <Text style={styles.couponApplyCardBtnText}>تطبيق</Text>
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })}
+          </ScrollView>
+          {couponError ? <Text style={styles.couponErrorText}>{couponError}</Text> : null}
+        </View>
+      )}
 
       {/* Minimum order warning banner */}
       {belowMinimum && (
@@ -424,7 +471,21 @@ const styles = StyleSheet.create({
   qtyBtnMinus: { width: 32, height: 32, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: 'rgba(138,114,101,1)', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   section: { gap: spacing[2] },
   sectionTitle: { fontFamily: fontFamily.semibold, fontSize: 16, color: colors.textPrimary, paddingHorizontal: 4, textAlign: 'right' },
-  // Coupon
+  // Coupon slider
+  couponSliderWrap: { paddingTop: spacing[3], borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface },
+  couponSliderTitle: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right', paddingHorizontal: spacing[4], marginBottom: spacing[2] },
+  couponSliderScroll: { paddingHorizontal: spacing[4], gap: spacing[3], paddingBottom: spacing[3] },
+  couponCard: { width: 160, backgroundColor: '#fff', borderRadius: radius.xl, padding: spacing[3], borderWidth: 1.5, borderColor: colors.primary + '40', borderStyle: 'dashed', gap: spacing[1], alignItems: 'flex-end' },
+  couponCardApplied: { backgroundColor: colors.primary, borderColor: colors.primary, borderStyle: 'solid' },
+  couponDash: { position: 'absolute', left: -1, top: '40%', width: 12, height: 12, borderRadius: 6, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.primary + '40' },
+  couponCode: { fontFamily: fontFamily.extrabold, fontSize: fontSizes.base, color: colors.primary, letterSpacing: 1 },
+  couponDiscount: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: colors.secondary },
+  couponMin: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs, color: colors.textMuted },
+  couponApplyCardBtn: { backgroundColor: colors.primary, borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: 4, marginTop: spacing[1], alignSelf: 'flex-end' },
+  couponApplyCardBtnText: { fontFamily: fontFamily.bold, fontSize: fontSizes.xs, color: '#fff' },
+  couponRemoveBtn: { backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: 4, marginTop: spacing[1], alignSelf: 'flex-end' },
+  couponRemoveBtnText: { fontFamily: fontFamily.bold, fontSize: fontSizes.xs, color: '#fff' },
+  // Coupon input row
   couponRow: { flexDirection: 'row', gap: spacing[2], alignItems: 'center' },
   couponInput: { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, paddingHorizontal: spacing[3], paddingVertical: spacing[2], fontFamily: fontFamily.medium, fontSize: fontSizes.base, color: colors.textPrimary, textAlign: 'right' },
   couponInputError: { borderColor: colors.error },

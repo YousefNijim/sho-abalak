@@ -6,6 +6,15 @@ import { ordersApi } from '@shu/api-client';
 import { formatShekel } from '@shu/utils';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
+/** Driver's earning for an order = their share of the delivery fee.
+ *  Prefers the order snapshot, falls back to area config, then full fee for legacy orders. */
+function driverFeeFor(o: any): number {
+  if (o?.driverDeliveryFee != null && Number(o.driverDeliveryFee) > 0) return Number(o.driverDeliveryFee);
+  if (o?.business?.area?.driverDeliveryFee != null && Number(o.business.area.driverDeliveryFee) > 0)
+    return Number(o.business.area.driverDeliveryFee);
+  return Number(o?.business?.area?.deliveryFee ?? 5);
+}
+
 export default function History() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
@@ -41,8 +50,9 @@ export default function History() {
       }
     })
     .reduce((acc: number, o: any) => {
-      // Prisma Decimal serialises as string — coerce to Number to avoid concatenation
-      return acc + Number(o.business?.area?.deliveryFee ?? 5);
+      // Driver earns only their share of the delivery fee (snapshotted on the order).
+      // Fall back to the area's driver fee, then the full delivery fee for legacy orders.
+      return acc + driverFeeFor(o);
     }, 0);
 
   const formatDate = (dateStr: string) => {
@@ -99,7 +109,7 @@ function DriverOrderCard({ o, formatDate }: any) {
     <Pressable style={styles.card} onPress={() => setExpanded(!expanded)}>
       <View style={styles.row}>
         <Text style={styles.business}>{o.business?.name || 'المنشأة التجارية'}</Text>
-        <Text style={styles.amount}>+{formatShekel(Number(o.business?.area?.deliveryFee ?? 5))}</Text>
+        <Text style={styles.amount}>+{formatShekel(driverFeeFor(o))}</Text>
       </View>
       <Text style={styles.muted}>{o.customer?.area?.city} - {o.customer?.area?.name || 'العنوان المسجل'}</Text>
       <View style={styles.row}>

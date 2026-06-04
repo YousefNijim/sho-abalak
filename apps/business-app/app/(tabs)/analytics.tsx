@@ -53,8 +53,22 @@ export default function Analytics() {
   const periodOrders = filterOrdersByPeriod(orders, period);
   const completedOrders = periodOrders.filter((o: any) => o.status === 'DELIVERED');
 
-  const totalSales = Math.round(completedOrders.reduce((acc: number, o: any) => acc + Number(o.total || 0), 0) * 100) / 100;
+  // Products subtotal (excludes delivery fee, which belongs to driver+platform)
+  const commissionRate = Number(business?.commissionRate ?? 10);
+  const totalSales = Math.round(completedOrders.reduce((acc: number, o: any) => {
+    const sub = o.subtotal != null ? Number(o.subtotal) : Number(o.total || 0);
+    return acc + sub;
+  }, 0) * 100) / 100;
   const avgOrder = completedOrders.length > 0 ? Math.round((totalSales / completedOrders.length) * 100) / 100 : 0;
+
+  // Net business earnings = (subtotal - coupon discount absorbed by business) - platform commission
+  const netEarnings = Math.round(completedOrders.reduce((acc: number, o: any) => {
+    const sub = o.subtotal != null ? Number(o.subtotal) : Number(o.total || 0);
+    const businessCoupon = o.couponIssuedBy === 'BUSINESS' ? Number(o.couponDiscount || 0) : 0;
+    const net = sub - businessCoupon;
+    const commission = net * (commissionRate / 100);
+    return acc + (net - commission);
+  }, 0) * 100) / 100;
 
   // Compile top selling products
   const compileTopProducts = (arr: any[]) => {
@@ -112,7 +126,8 @@ export default function Analytics() {
       </View>
 
       <View style={styles.cards}>
-        <Card label="إجمالي المبيعات" value={`₪${totalSales}`} />
+        <Card label="إجمالي مبيعات المنتجات" value={`₪${totalSales}`} />
+        <Card label="صافي الأرباح (بعد العمولة)" value={`₪${netEarnings}`} />
         <Card label="عدد الطلبات" value={String(periodOrders.length)} />
         <Card label="متوسط الطلب" value={`₪${avgOrder}`} />
         <Card label="التقييم العام" value={`${business?.rating ? business.rating.toFixed(1) : '5.0'} ⭐`} />

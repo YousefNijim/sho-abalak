@@ -12,6 +12,12 @@ import { CreateCouponDto, UpdateCouponDto, ApplyCouponDto } from './dto/coupon.d
 export class CouponsController {
   constructor(private readonly coupons: CouponsService) {}
 
+  /** Public: active unused coupons — shown in cart and offers page. */
+  @Get('active')
+  findActive() {
+    return this.coupons.findActive();
+  }
+
   /** Customer/Business: validate a coupon code before checkout. */
   @Post('apply')
   @ApiBearerAuth()

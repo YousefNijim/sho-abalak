@@ -30,8 +30,9 @@ export default function AreasPage() {
   const [confirmDeleteArea, setConfirmDeleteArea] = useState<Area | null>(null);
 
   // Form states
-  const [newArea, setNewArea] = useState({ city: CITIES[0], name: '', deliveryFee: 3.0 });
+  const [newArea, setNewArea] = useState({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0 });
   const [editFee, setEditFee] = useState<string>('');
+  const [editDriverFee, setEditDriverFee] = useState<string>('');
 
   // Success/Error Toasts
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -61,12 +62,12 @@ export default function AreasPage() {
 
   // Mutations
   const createAreaMutation = useMutation({
-    mutationFn: (dto: { city: string; name: string; deliveryFee: number }) =>
+    mutationFn: (dto: { city: string; name: string; deliveryFee: number; driverDeliveryFee: number }) =>
       areasApi.create(dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['areas'] });
       showToast('success', 'تمت إضافة المنطقة الجديدة بنجاح');
-      setNewArea({ city: CITIES[0], name: '', deliveryFee: 3.0 });
+      setNewArea({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0 });
       setIsAddModalOpen(false);
     },
     onError: (err: any) => {
@@ -75,13 +76,14 @@ export default function AreasPage() {
   });
 
   const updateAreaMutation = useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: { deliveryFee: number } }) =>
+    mutationFn: ({ id, dto }: { id: string; dto: { deliveryFee?: number; driverDeliveryFee?: number } }) =>
       areasApi.update(id, dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['areas'] });
       showToast('success', 'تم تعديل رسوم توصيل المنطقة بنجاح');
       setEditingArea(null);
       setEditFee('');
+      setEditDriverFee('');
     },
     onError: (err: any) => {
       showToast('error', err.response?.data?.message || 'فشل تعديل رسوم التوصيل');
@@ -122,12 +124,29 @@ export default function AreasPage() {
         cell: (info) => <span className="text-muted-gray">{info.getValue()}</span>,
       }),
       columnHelper.accessor('deliveryFee', {
-        header: 'رسوم التوصيل الافتراضية',
+        header: 'رسوم التوصيل الكلية',
         cell: (info) => (
           <span className="font-bold text-secondary">
             ₪{Number(info.getValue()).toFixed(2)}
           </span>
         ),
+      }),
+      columnHelper.accessor('driverDeliveryFee', {
+        header: 'حصة السائق',
+        cell: (info) => (
+          <span className="font-semibold text-primary">
+            ₪{Number(info.getValue() ?? 0).toFixed(2)}
+          </span>
+        ),
+      }),
+      columnHelper.display({
+        id: 'platformFee',
+        header: 'حصة المنصة',
+        cell: (info) => {
+          const a = info.row.original;
+          const platform = Number(a.deliveryFee) - Number(a.driverDeliveryFee ?? 0);
+          return <span className="font-semibold text-green-700">₪{platform.toFixed(2)}</span>;
+        },
       }),
       columnHelper.display({
         id: 'actions',
@@ -140,6 +159,7 @@ export default function AreasPage() {
                 onClick={() => {
                   setEditingArea(rowArea);
                   setEditFee(String(rowArea.deliveryFee));
+                  setEditDriverFee(String(rowArea.driverDeliveryFee ?? 0));
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/5 text-primary transition-all hover:bg-primary hover:text-white"
                 title="تعديل رسوم التوصيل"
@@ -371,7 +391,7 @@ export default function AreasPage() {
 
               {/* Delivery Fee Input */}
               <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1.5">رسوم التوصيل الافتراضية (شيكل)</label>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">رسوم التوصيل الكلية (شيكل)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -380,6 +400,23 @@ export default function AreasPage() {
                   onChange={(e) => setNewArea({ ...newArea, deliveryFee: parseFloat(e.target.value) || 0 })}
                   className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
                 />
+              </div>
+
+              {/* Driver share input */}
+              <div>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق من التوصيل (شيكل)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max={newArea.deliveryFee}
+                  value={newArea.driverDeliveryFee}
+                  onChange={(e) => setNewArea({ ...newArea, driverDeliveryFee: parseFloat(e.target.value) || 0 })}
+                  className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
+                />
+                <p className="mt-1 text-[11px] text-muted-gray">
+                  حصة المنصة = {Math.max(0, newArea.deliveryFee - newArea.driverDeliveryFee).toFixed(2)} ₪
+                </p>
               </div>
             </div>
 
@@ -392,7 +429,7 @@ export default function AreasPage() {
               </button>
               <button
                 onClick={() => createAreaMutation.mutate(newArea)}
-                disabled={!newArea.name.trim() || newArea.deliveryFee < 0 || createAreaMutation.isPending}
+                disabled={!newArea.name.trim() || newArea.deliveryFee < 0 || newArea.driverDeliveryFee > newArea.deliveryFee || createAreaMutation.isPending}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-[13px] font-bold text-white shadow-md hover:bg-primary/95 transition-all disabled:opacity-50"
               >
                 {createAreaMutation.isPending && (
@@ -426,7 +463,7 @@ export default function AreasPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1.5">رسوم التوصيل الجديدة (شيكل)</label>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">رسوم التوصيل الكلية (شيكل)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -435,6 +472,21 @@ export default function AreasPage() {
                   onChange={(e) => setEditFee(e.target.value)}
                   className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق من التوصيل (شيكل)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={editDriverFee}
+                  onChange={(e) => setEditDriverFee(e.target.value)}
+                  className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
+                />
+                <p className="mt-1 text-[11px] text-muted-gray">
+                  حصة المنصة = {Math.max(0, (parseFloat(editFee) || 0) - (parseFloat(editDriverFee) || 0)).toFixed(2)} ₪
+                </p>
               </div>
             </div>
 
@@ -449,10 +501,10 @@ export default function AreasPage() {
                 onClick={() =>
                   updateAreaMutation.mutate({
                     id: editingArea.id,
-                    dto: { deliveryFee: parseFloat(editFee) || 0 },
+                    dto: { deliveryFee: parseFloat(editFee) || 0, driverDeliveryFee: parseFloat(editDriverFee) || 0 },
                   })
                 }
-                disabled={editFee === '' || parseFloat(editFee) < 0 || updateAreaMutation.isPending}
+                disabled={editFee === '' || parseFloat(editFee) < 0 || (parseFloat(editDriverFee) || 0) > (parseFloat(editFee) || 0) || updateAreaMutation.isPending}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-[13px] font-bold text-white shadow-md hover:bg-primary/95 transition-all disabled:opacity-50"
               >
                 {updateAreaMutation.isPending && (

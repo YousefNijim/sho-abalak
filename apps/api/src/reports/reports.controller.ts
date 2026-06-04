@@ -16,10 +16,18 @@ export class ReportsController {
 
   @Get('finance')
   getFinanceSummary(
-    @Query('period') period: string,
+    @Query('period') period?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('businessId') businessId?: string,
+    @Query('customerId') customerId?: string,
+    @Query('driverId') driverId?: string,
+    @Query('areaId') areaId?: string,
+    @Query('city') city?: string,
+    @Query('tagId') tagId?: string,
+    @Query('businessType') businessType?: string,
+    @Query('search') search?: string,
   ) {
-    return this.reports.getFinanceSummary(period, startDate, endDate);
+    return this.reports.getFinanceSummary({ period, startDate, endDate, businessId, customerId, driverId, areaId, city, tagId, businessType, search });
   }
 }

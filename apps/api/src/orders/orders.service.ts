@@ -73,6 +73,7 @@ export class OrdersService {
     // Coupon validation & discount
     let couponDiscount = new Prisma.Decimal(0);
     let couponCode: string | null = null;
+    let couponIssuedBy: string | null = null;
     let couponId: string | null = null;
     if (dto.couponCode) {
       const code = dto.couponCode.toUpperCase().trim();
@@ -83,12 +84,23 @@ export class OrdersService {
       if (subtotal.lt(coupon.minimumOrder)) {
         throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون هو ${coupon.minimumOrder} ₪`);
       }
-      couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
+      // Compute discount based on type (FIXED or PERCENTAGE with maxDiscount cap)
+      if (coupon.discountType === 'PERCENTAGE') {
+        const pct = (coupon.discountPct ?? new Prisma.Decimal(0)).div(100);
+        const raw = subtotal.mul(pct);
+        const max = coupon.maxDiscount ?? new Prisma.Decimal(999999);
+        couponDiscount = Prisma.Decimal.min(raw, max, subtotal);
+      } else {
+        couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
+      }
       couponCode = code;
+      couponIssuedBy = coupon.issuedBy;
       couponId = coupon.id;
     }
 
     const deliveryFee = business.area.deliveryFee;
+    const driverDeliveryFee = (business.area as any).driverDeliveryFee ?? new Prisma.Decimal(0);
+    const platformDeliveryFee = deliveryFee.sub(driverDeliveryFee);
     const subtotalAfterCoupon = subtotal.sub(couponDiscount);
     const total = subtotalAfterCoupon.add(deliveryFee);
 
@@ -118,8 +130,11 @@ export class OrdersService {
           subtotal,
           couponDiscount,
           deliveryFee,
+          driverDeliveryFee,
+          platformDeliveryFee,
           total,
           couponCode,
+          couponIssuedBy,
           note: dto.note ?? null,
           deliveryAreaName: dto.deliveryAreaName ?? null,
           deliveryAddressDetail: dto.deliveryAddressDetail ?? null,

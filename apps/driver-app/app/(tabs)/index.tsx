@@ -118,8 +118,13 @@ export default function DriverHome() {
   });
 
   const earnings = Math.round(completedToday.reduce((acc: number, o: any) => {
-    // Driver gets the delivery fee portion
-    return acc + Number(o.business?.area?.deliveryFee ?? 5);
+    // Driver earns only their share of the delivery fee (snapshotted on the order)
+    const driverFee = o.driverDeliveryFee != null && Number(o.driverDeliveryFee) > 0
+      ? Number(o.driverDeliveryFee)
+      : o.business?.area?.driverDeliveryFee != null && Number(o.business.area.driverDeliveryFee) > 0
+        ? Number(o.business.area.driverDeliveryFee)
+        : Number(o.business?.area?.deliveryFee ?? 5);
+    return acc + driverFee;
   }, 0) * 100) / 100;
 
   const handleRefresh = async () => {

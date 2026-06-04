@@ -277,16 +277,26 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
 
 // ─── Coupons Tab ─────────────────────────────────────────────────────────────
 
+const EMPTY_COUPON = { code: '', discountType: 'FIXED' as 'FIXED' | 'PERCENTAGE', discountAmount: '', discountPct: '', maxDiscount: '', minimumOrder: '', issuedBy: 'PLATFORM' as 'PLATFORM' | 'BUSINESS' };
+
 function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: string) => void; qc: any }) {
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Coupon | null>(null);
-  const [form, setForm] = useState({ code: '', discountAmount: '', minimumOrder: '' });
+  const [form, setForm] = useState(EMPTY_COUPON);
 
   const { data: coupons = [], isLoading } = useQuery({ queryKey: ['admin-coupons'], queryFn: () => couponsApi.list() });
 
   const createMutation = useMutation({
-    mutationFn: () => couponsApi.create({ code: form.code.toUpperCase(), discountAmount: Number(form.discountAmount), minimumOrder: Number(form.minimumOrder) }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-coupons'] }); setShowCreate(false); setForm({ code: '', discountAmount: '', minimumOrder: '' }); showToast('success', 'تم إنشاء الكوبون'); },
+    mutationFn: (f: typeof EMPTY_COUPON) => couponsApi.create({
+      code: f.code.toUpperCase(),
+      discountType: f.discountType,
+      discountAmount: f.discountType === 'FIXED' ? Number(f.discountAmount) : undefined,
+      discountPct: f.discountType === 'PERCENTAGE' ? Number(f.discountPct) : undefined,
+      maxDiscount: f.maxDiscount ? Number(f.maxDiscount) : undefined,
+      minimumOrder: Number(f.minimumOrder),
+      issuedBy: f.issuedBy,
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-coupons'] }); setShowCreate(false); setForm(EMPTY_COUPON); showToast('success', 'تم إنشاء الكوبون'); },
     onError: (err: any) => showToast('error', err?.response?.data?.message || 'فشل إنشاء الكوبون'),
   });
 
@@ -301,6 +311,11 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
     onError: () => showToast('error', 'فشل الحذف'),
   });
 
+  const discountLabel = (c: Coupon) =>
+    c.discountType === 'PERCENTAGE'
+      ? `${c.discountPct}%${c.maxDiscount ? ` (حتى ${c.maxDiscount} ₪)` : ''}`
+      : `${c.discountAmount} ₪`;
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -310,27 +325,60 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">إضافة كوبون جديد</h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">كود الكوبون *</label>
-                <input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} className="w-full border rounded-lg px-3 py-2 text-sm font-mono tracking-wider" placeholder="مثال: SAVE20" />
-                <p className="text-xs text-gray-400 mt-1">كود من حروف وأرقام — سيتم تحويله لأحرف كبيرة</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">كود الكوبون *</label>
+                  <input value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} className="w-full border rounded-lg px-3 py-2 text-sm font-mono tracking-wider" placeholder="SAVE20" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">نوع الخصم *</label>
+                  <select value={form.discountType} onChange={(e) => setForm((f) => ({ ...f, discountType: e.target.value as any }))} className="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="FIXED">قيمة ثابتة (₪)</option>
+                    <option value="PERCENTAGE">نسبة مئوية (%)</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">قيمة الخصم (₪) *</label>
-                <input type="number" min={0.01} step={0.01} value={form.discountAmount} onChange={(e) => setForm((f) => ({ ...f, discountAmount: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="مثال: 10" />
-                <p className="text-xs text-gray-400 mt-1">يُطرح من إجمالي المنتجات قبل إضافة رسوم التوصيل</p>
+
+              {form.discountType === 'FIXED' ? (
+                <div>
+                  <label className="block text-sm font-medium mb-1">قيمة الخصم (₪) *</label>
+                  <input type="number" min={0.01} step={0.01} value={form.discountAmount} onChange={(e) => setForm((f) => ({ ...f, discountAmount: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="10" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">نسبة الخصم (%) *</label>
+                    <input type="number" min={1} max={100} value={form.discountPct} onChange={(e) => setForm((f) => ({ ...f, discountPct: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="10" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">أقصى خصم (₪)</label>
+                    <input type="number" min={0} step={0.01} value={form.maxDiscount} onChange={(e) => setForm((f) => ({ ...f, maxDiscount: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="20 (اختياري)" />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">الحد الأدنى للطلب (₪) *</label>
+                  <input type="number" min={0} step={0.01} value={form.minimumOrder} onChange={(e) => setForm((f) => ({ ...f, minimumOrder: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="50" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">مصدر الكوبون *</label>
+                  <select value={form.issuedBy} onChange={(e) => setForm((f) => ({ ...f, issuedBy: e.target.value as any }))} className="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="PLATFORM">المنصة (الخصم من عمولة المنصة)</option>
+                    <option value="BUSINESS">منشأة (الخصم من أرباح المنشأة)</option>
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">يحدد من يتحمل تكلفة الخصم في التقارير المالية</p>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">الحد الأدنى للطلب (₪) *</label>
-                <input type="number" min={0} step={0.01} value={form.minimumOrder} onChange={(e) => setForm((f) => ({ ...f, minimumOrder: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="مثال: 50" />
-              </div>
+
               <div className="flex gap-3 pt-2">
-                <button onClick={() => setShowCreate(false)} className="flex-1 border rounded-xl py-2 text-sm">إلغاء</button>
-                <button onClick={() => createMutation.mutate()} disabled={!form.code || !form.discountAmount || !form.minimumOrder || createMutation.isPending} className="flex-1 bg-primary text-white rounded-xl py-2 text-sm font-bold disabled:opacity-50">
+                <button onClick={() => { setShowCreate(false); setForm(EMPTY_COUPON); }} className="flex-1 border rounded-xl py-2 text-sm">إلغاء</button>
+                <button onClick={() => createMutation.mutate(form)} disabled={!form.code || !form.minimumOrder || createMutation.isPending} className="flex-1 bg-primary text-white rounded-xl py-2 text-sm font-bold disabled:opacity-50">
                   {createMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء الكوبون'}
                 </button>
               </div>
@@ -358,8 +406,9 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الكود</th>
-                <th className="px-4 py-3 text-right font-semibold text-gray-600">قيمة الخصم</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">الخصم</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الحد الأدنى</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">المصدر</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الحالة</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">مستخدم</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">إجراءات</th>
@@ -369,8 +418,13 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
               {(coupons as Coupon[]).map((c) => (
                 <tr key={c.id} className="bg-white hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono font-bold text-primary">{c.code}</td>
-                  <td className="px-4 py-3 font-bold text-green-600">{c.discountAmount} ₪</td>
+                  <td className="px-4 py-3 font-bold text-green-600">{discountLabel(c)}</td>
                   <td className="px-4 py-3 text-gray-600">{c.minimumOrder} ₪</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${c.issuedBy === 'PLATFORM' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {c.issuedBy === 'PLATFORM' ? 'المنصة' : 'منشأة'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${c.isActive && !c.usedAt ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                       {c.usedAt ? 'مستخدم' : c.isActive ? 'نشط' : 'متوقف'}
@@ -387,7 +441,7 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
                   </td>
                 </tr>
               ))}
-              {coupons.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">لا توجد كوبونات</td></tr>}
+              {coupons.length === 0 && <tr><td colSpan={7} className="text-center py-12 text-gray-400">لا توجد كوبونات</td></tr>}
             </tbody>
           </table>
         </div>

@@ -1,11 +1,11 @@
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tag } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { offersApi, BASE_URL } from '@shu/api-client';
+import { offersApi, couponsApi, BASE_URL } from '@shu/api-client';
 import type { Offer } from '@shu/api-client';
 
 const mediaUrl = (p: string | null | undefined) =>
@@ -18,6 +18,11 @@ export default function OffersTab() {
   const { data: offers = [], isLoading } = useQuery({
     queryKey: ['offers'],
     queryFn: () => offersApi.list(true),
+  });
+
+  const { data: coupons = [] } = useQuery({
+    queryKey: ['coupons-active'],
+    queryFn: () => couponsApi.active(),
   });
 
   if (isLoading) {
@@ -33,6 +38,37 @@ export default function OffersTab() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>العروض والخصومات</Text>
         <Tag size={24} color={colors.primary} />
+      </View>
+
+      {/* Coupon slider */}
+      <View style={styles.couponSection}>
+        <Text style={styles.couponSectionTitle}>🎟️ الكوبونات المتاحة</Text>
+        {(coupons as any[]).length === 0 ? (
+          <View style={styles.couponEmpty}>
+            <Tag size={24} color={colors.border} />
+            <Text style={styles.couponEmptyText}>لا توجد كوبونات متاحة حالياً</Text>
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.couponScroll}>
+            {(coupons as any[]).map((c) => {
+              const discountLabel = c.discountType === 'PERCENTAGE'
+                ? `${c.discountPct}%${c.maxDiscount ? ` (حتى ${c.maxDiscount} ₪)` : ''}`
+                : `${c.discountAmount} ₪`;
+              return (
+                <View key={c.id} style={styles.couponCard}>
+                  <View style={styles.couponNotch} />
+                  <Tag size={16} color={colors.primary} />
+                  <Text style={styles.couponCode}>{c.code}</Text>
+                  <Text style={styles.couponDiscount}>خصم {discountLabel}</Text>
+                  <Text style={styles.couponMin}>حد أدنى {c.minimumOrder} ₪</Text>
+                  <View style={styles.couponIssuerBadge}>
+                    <Text style={styles.couponIssuerText}>{c.issuedBy === 'PLATFORM' ? 'من المنصة' : 'من المنشأة'}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {offers.length === 0 ? (
@@ -101,6 +137,20 @@ const styles = StyleSheet.create({
   cardBody: { padding: spacing[3], gap: 4 },
   cardTitle: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right' },
   cardDesc: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs, color: colors.textMuted, textAlign: 'right' },
+  // Coupon slider
+  couponSection: { borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: spacing[3], marginBottom: spacing[2] },
+  couponSectionTitle: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: colors.textPrimary, textAlign: 'right', paddingHorizontal: spacing[4], marginBottom: spacing[2], marginTop: spacing[2] },
+  couponScroll: { paddingHorizontal: spacing[4], gap: spacing[3] },
+  couponEmpty: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing[2], paddingVertical: spacing[3] },
+  couponEmptyText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.textMuted },
+  couponCard: { width: 150, backgroundColor: '#fff', borderRadius: radius.xl, padding: spacing[3], borderWidth: 1.5, borderColor: colors.primary + '40', borderStyle: 'dashed', gap: spacing[1], alignItems: 'flex-end', position: 'relative' },
+  couponNotch: { position: 'absolute', left: -1, top: '35%', width: 10, height: 10, borderRadius: 5, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.primary + '40' },
+  couponCode: { fontFamily: fontFamily.extrabold, fontSize: fontSizes.sm, color: colors.primary, letterSpacing: 1 },
+  couponDiscount: { fontFamily: fontFamily.bold, fontSize: fontSizes.xs, color: colors.secondary },
+  couponMin: { fontFamily: fontFamily.regular, fontSize: 10, color: colors.textMuted },
+  couponIssuerBadge: { backgroundColor: colors.primary + '15', borderRadius: radius.full, paddingHorizontal: spacing[2], paddingVertical: 2, marginTop: spacing[1] },
+  couponIssuerText: { fontFamily: fontFamily.medium, fontSize: 10, color: colors.primary },
+  // Offers grid
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing[3], padding: spacing[6] },
   emptyTitle: { fontFamily: fontFamily.bold, fontSize: fontSizes.xl, color: colors.textPrimary },
   emptyDesc: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'center' },

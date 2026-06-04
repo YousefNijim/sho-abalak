@@ -12,24 +12,19 @@ export class CreateAreaDto {
   @IsNotEmpty()
   name!: string;
 
-  @ApiProperty({ description: 'رسوم التوصيل لهذه المنطقة بالشيكل' })
+  @ApiProperty({ description: 'رسوم التوصيل الإجمالية (سائق + منصة)' })
   @IsNumber()
   deliveryFee!: number;
+
+  @ApiPropertyOptional({ description: 'حصة السائق من رسوم التوصيل' })
+  @IsOptional()
+  @IsNumber()
+  driverDeliveryFee?: number;
 }
 
 export class UpdateAreaDto {
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  city?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  deliveryFee?: number;
+  @ApiPropertyOptional() @IsOptional() @IsString() city?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() name?: string;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() deliveryFee?: number;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() driverDeliveryFee?: number;
 }

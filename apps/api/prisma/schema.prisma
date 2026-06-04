@@ -15,6 +15,7 @@ model Area {
   city               String
   name               String
   deliveryFee        Decimal        @db.Decimal(10, 2)
+  driverDeliveryFee  Decimal        @default(0) @db.Decimal(10, 2)
   businesses         Business[]     @relation("BusinessLocation")
   drivers            Driver[]
   savedAddresses     SavedAddress[]
@@ -151,8 +152,11 @@ model Order {
   subtotal              Decimal              @db.Decimal(10, 2)
   couponDiscount        Decimal              @default(0) @db.Decimal(10, 2)
   deliveryFee           Decimal              @default(0) @db.Decimal(10, 2)
+  driverDeliveryFee     Decimal              @default(0) @db.Decimal(10, 2)
+  platformDeliveryFee   Decimal              @default(0) @db.Decimal(10, 2)
   total                 Decimal              @db.Decimal(10, 2)
   couponCode            String?
+  couponIssuedBy        String?
   note                  String?
   createdAt             DateTime             @default(now())
   pendingDriverId       String?
@@ -305,16 +309,30 @@ model OfferProduct {
 // ── Coupons ─────────────────────────────────────────────────────────────────
 
 model Coupon {
-  id              String    @id @default(uuid())
-  code            String    @unique
-  discountAmount  Decimal   @db.Decimal(10, 2)
-  minimumOrder    Decimal   @db.Decimal(10, 2)
-  isActive        Boolean   @default(true)
+  id              String       @id @default(uuid())
+  code            String       @unique
+  discountType    DiscountType @default(FIXED)
+  discountAmount  Decimal      @db.Decimal(10, 2)
+  discountPct     Decimal?     @db.Decimal(5, 2)
+  maxDiscount     Decimal?     @db.Decimal(10, 2)
+  minimumOrder    Decimal      @db.Decimal(10, 2)
+  issuedBy        CouponIssuer @default(PLATFORM)
+  isActive        Boolean      @default(true)
   usedAt          DateTime?
-  usedByOrderId   String?   @unique
-  createdAt       DateTime  @default(now())
+  usedByOrderId   String?      @unique
+  createdAt       DateTime     @default(now())
 
   @@map("coupons")
+}
+
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
+enum CouponIssuer {
+  PLATFORM
+  BUSINESS
 }
 
 enum OfferType {
