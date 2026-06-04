@@ -80,16 +80,19 @@ export default function Home() {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
   const activeOrder = useActiveOrderStore((s) => s.order);
 
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
 
-  // Fetch addresses from server instead of local store to ensure consistency
+  // Wait for both user AND token — token is what Axios actually uses for auth
+  const isAuthed = !!user && !!token;
+
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
-    enabled: !!user,
+    enabled: isAuthed,
   });
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
