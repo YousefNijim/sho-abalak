@@ -3,8 +3,8 @@
 > **Living status document.** AI agents read this at the start of every session and update it at the end.
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
-**Last updated:** 2026-06-04
-**Current phase:** Phase 41 (Rating system — customer rates order, business rates driver, reviews page)
+**Last updated:** 2026-06-05
+**Current phase:** Phase 42 (Delivery-fee split, auth race-condition fixes, push-notifications web-guard, coupon/address query guards)
 
 ---
 
@@ -459,6 +459,21 @@
       - Driver name shown in subtitle. Bottom sheet modal.
     - **Driver rating on selection screen:** `d.rating` was already displayed — now reflects real weighted average of customer + business reviews.
     - **Business rating:** starts at 0 (default), recalculates after every customer review submission and after admin deletion.
+
+40. **Delivery Fee Split per Area (Phase 42 — branch `Yousef2`)** ✅ **DONE** — Per-area configurable driver share of the delivery fee, snapshotted on each order.
+    - **Schema (migrations `20260604300000_delivery_fee_split` + `20260605000000_set_driver_fee_2`):** Added `Area.driverDeliveryFee DECIMAL(10,2) DEFAULT 0` and `Order.driverDeliveryFee` + `Order.platformDeliveryFee` (both snapshotted at order-creation time). The backfill UPDATE (`LEAST(2, deliveryFee)`) was split into a separate migration (`set_driver_fee_2`) so the ALTER and the data update run in separate deploy steps — safer on Railway.
+    - **Key invariant:** `platformDeliveryFee = area.deliveryFee − area.driverDeliveryFee`. Driver share is admin-configurable per area; platform always gets the remainder.
+
+41. **Auth Hydration Race Fix + Request Interceptor (Phase 42 — branch `Yousef2`)** ✅ **DONE** — Closed a cold-start 401 race where queries fired before Zustand rehydrated the token from AsyncStorage.
+    - **`packages/api-client/src/http.ts`:** Added a module-level `currentToken` variable. `setAuthToken` now stores it there AND updates `http.defaults.headers`. A request interceptor always attaches `currentToken` at request time — so even if a query fires before `setAuthToken` is called, the header is injected as long as the token is set by dispatch time.
+    - **`apps/customer-app/src/stores/auth.store.ts`:** Added `onRehydrateStorage` callback to the Zustand persist middleware — calls `setAuthToken(state.token)` immediately when the store rehydrates from AsyncStorage, closing the race on cold start / web view.
+    - **`apps/customer-app/app/cart.tsx`:** Added `enabled: !!token` to the `addresses` and `coupons-active` React Query calls so they don't fire unauthenticated on mount.
+
+42. **Push Notifications Web Guard (Phase 42 — branch `Yousef2`)** ✅ **DONE** — `expo-notifications` throws on web; guarded all three apps.
+    - All three `usePushNotifications.ts` hooks (customer, business, driver) now guard every `expo-notifications` call behind `Platform.OS !== 'web'`: `setNotificationHandler`, `getPushToken`, the registration `useEffect`, and the foreground/tap `useEffect`. The hooks are now safe to mount in web/admin preview environments.
+
+43. **Diagnostic Script (Phase 42 — branch `Yousef2`)** ✅ **DONE**
+    - Added `apps/api/check_order_367793.js` — a one-off Node script to query Railway Postgres directly and dump the raw row for the order whose ID ends in `367793`. Used to debug a specific production data issue. Not part of the app runtime; safe to delete once the investigation is complete.
 
 ## 🗂️ How to use this file (for AI agents)
 
