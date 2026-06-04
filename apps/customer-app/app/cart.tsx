@@ -7,6 +7,7 @@ import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
 import { useCartStore } from '../src/stores/cart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
+import { useAuthStore } from '../src/stores/auth.store';
 import { businessesApi, ordersApi, addressesApi, couponsApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
 import type { CreateOrderDto, CouponApplyResult } from '@shu/api-client';
@@ -43,14 +44,18 @@ export default function Cart() {
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
 
+  const token = useAuthStore((s) => s.token);
+
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
+    enabled: !!token,
   });
 
   const { data: availableCoupons = [] } = useQuery({
     queryKey: ['coupons-active'],
     queryFn: () => couponsApi.active(),
+    enabled: !!token,
   });
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
