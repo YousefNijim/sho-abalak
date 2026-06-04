@@ -7,14 +7,17 @@ import { notificationsApi } from '@shu/api-client';
 import { useAuthStore } from '../stores/auth.store';
 import { useNotificationsStore } from '../stores/notifications.store';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// expo-notifications is not supported on web — guard every call.
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 /** A tapped business notification opens the order detail. */
 function routeForData(router: ReturnType<typeof useRouter>, data?: Record<string, unknown>) {
@@ -24,6 +27,7 @@ function routeForData(router: ReturnType<typeof useRouter>, data?: Record<string
 }
 
 async function getPushToken(): Promise<string | null> {
+  if (Platform.OS === 'web') return null; // push tokens are not supported on web
   if (!Device.isDevice) return null;
 
   const { status: existing } = await Notifications.getPermissionsAsync();
@@ -56,6 +60,9 @@ export function usePushNotifications() {
   const deviceTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
+    // Push tokens are not supported on web.
+    if (Platform.OS === 'web') return;
+
     let cancelled = false;
 
     if (token) {
@@ -86,6 +93,9 @@ export function usePushNotifications() {
   }, [token]);
 
   useEffect(() => {
+    // expo-notifications listeners are not supported on web.
+    if (Platform.OS === 'web') return;
+
     // Record a notification into the in-app list (deduped by request id in the store).
     const record = (req: Notifications.NotificationRequest) => {
       const c = req.content;

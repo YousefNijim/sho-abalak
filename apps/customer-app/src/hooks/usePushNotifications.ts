@@ -8,14 +8,17 @@ import { useAuthStore } from '../stores/auth.store';
 import { useNotificationsStore } from '../stores/notifications.store';
 
 // Show notifications while the app is in the foreground.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// expo-notifications is not supported on web — guard every call.
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 /** Where a tapped notification should take the customer. */
 function routeForData(router: ReturnType<typeof useRouter>, data?: Record<string, unknown>) {
@@ -28,6 +31,7 @@ function routeForData(router: ReturnType<typeof useRouter>, data?: Record<string
 }
 
 async function getPushToken(): Promise<string | null> {
+  if (Platform.OS === 'web') return null; // push tokens are not supported on web
   if (!Device.isDevice) return null; // push tokens only work on real devices
 
   const { status: existing } = await Notifications.getPermissionsAsync();
@@ -65,6 +69,9 @@ export function usePushNotifications() {
 
   // Register / unregister the device token with the backend, tied to auth.
   useEffect(() => {
+    // Push tokens are not supported on web.
+    if (Platform.OS === 'web') return;
+
     let cancelled = false;
 
     if (token) {
@@ -97,6 +104,9 @@ export function usePushNotifications() {
 
   // Foreground capture + tap handling.
   useEffect(() => {
+    // expo-notifications listeners are not supported on web.
+    if (Platform.OS === 'web') return;
+
     // Record a notification into the in-app list (dedupes by request id / recent content).
     const record = (req: Notifications.NotificationRequest) => {
       const c = req.content;
