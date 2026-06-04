@@ -59,9 +59,11 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { useCartStore } from '../../src/stores/cart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
-import { addressesApi } from '@shu/api-client';
+import { addressesApi, promotedBusinessesApi } from '@shu/api-client';
 import { getCategoryImage } from '../../src/constants/CategoryImages';
 import { NotificationBell } from '../../src/components/NotificationBell';
+import { PopupAdOverlay } from '../../src/components/PopupAdOverlay';
+import { PromotedBusinessCard } from '../../src/components/PromotedBusinessCard';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
@@ -170,6 +172,12 @@ export default function Home() {
   });
 
   const isSearching = searchingBusinesses || searchingProducts;
+
+  // Promoted businesses
+  const { data: promotedBusinesses = [] } = useQuery({
+    queryKey: ['promoted-businesses', selectedAddress?.areaId],
+    queryFn: () => promotedBusinessesApi.list(selectedAddress?.areaId || undefined),
+  });
 
   // Other saved addresses (excluding the currently selected one) — must be before queries that use it
   const otherAreaIds = addresses
@@ -529,6 +537,7 @@ export default function Home() {
   // --- 2) NEW PREMIUM DESIGN (ACTIVE BY DEFAULT) ---
   return (
     <View style={styles.container}>
+      <PopupAdOverlay page="home" />
       {/* New TopAppBar */}
       <View style={[styles.newHeader, { paddingTop: insets.top + spacing[2] }]}>
         {/* Right (renders first on right side in forced RTL): Notification Bell */}
@@ -899,6 +908,15 @@ export default function Home() {
           </View>
           <Text style={styles.newSectionTitle}>المطاعم القريبة</Text>
         </View>
+
+        {/* Promoted Businesses */}
+        {promotedBusinesses.length > 0 && !isLoading && !selectedTagId && !isSearching && (
+           <View style={{ marginBottom: spacing[2], marginTop: spacing[2] }}>
+              {promotedBusinesses.map((promo: any) => (
+                <PromotedBusinessCard key={promo.id} promoted={promo} />
+              ))}
+           </View>
+        )}
 
         {isLoading ? (
           <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: spacing[8] }} />

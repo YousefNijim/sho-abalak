@@ -4,7 +4,7 @@
 > The spec lives in [PROJECT_HANDOFF.md](./PROJECT_HANDOFF.md) (what to build) and [FRONTEND_DESIGN.md](./FRONTEND_DESIGN.md) (how it should look). This file tracks **actual progress against that spec**.
 
 **Last updated:** 2026-06-05
-**Current phase:** Phase 42 (Delivery-fee split, auth race-condition fixes, push-notifications web-guard, coupon/address query guards)
+**Current phase:** Phase 43 (Popup Ads & Promoted Businesses)
 
 ---
 
@@ -261,6 +261,21 @@
     - **Gotcha for next agent:** the seed's `upsertUser` does NOT re-hash passwords on update (no-op), so once a password is changed via the admin/owner endpoints, re-seeding won't reset it — reset via `PATCH /businesses/:id/password` if needed. Seed business logins: `0599000002`/`0599000004` = `test1234` (unless changed since).
 
 23. **Business App Splash & Onboarding (Phase 25)** ✅ **DONE** — Added a Splash/Welcome screen and an Onboarding screen at the START of the business-app:
+
+---
+
+43. **Popup Ads & Promoted Businesses (Phase 43)** ✅ **DONE** — Implemented two new monetisation features across the stack:
+    - **Database:** Added `PopupAd` and `PromotedBusiness` models to Prisma with relations to `Business` and `Area`. Added `migration.sql` (to be deployed).
+    - **API Backend:** Created `popup-ads` and `promoted-businesses` modules with public GET endpoints and admin CRUD endpoints. Integrated into `app.module.ts`.
+    - **API Client:** Added `popup-ads.api.ts` and `promoted-businesses.api.ts` to `@shu/api-client`.
+    - **Customer App:** 
+      - Created `PopupAdOverlay` component (session-based, animated display for home screen).
+      - Created `PromotedBusinessCard` component (premium design with sponsored badge and glow effect).
+      - Integrated both into the main `index.tsx` screen, conditionally fetching and rendering based on the user's selected area.
+    - **Admin Dashboard:**
+      - Added `/popup-ads/page.tsx` for managing popup images, target pages, CTA links, and display intervals.
+      - Added `/promoted-businesses/page.tsx` for assigning sponsored slots to businesses per area, with priority sorting and active toggles.
+      - Updated `nav-items.ts` and `sidebar.tsx` to include both new routes in the admin dashboard navigation.
     - **Splash (`app/index.tsx`):** Cream background, centered "شو عبالك؟" logo, subtitle "تطبيق المنشأة التجارية", PREMIUM HOSPITALITY label, and Lucide icons (Utensils, Truck, Store). Auto-redirects to onboarding on first launch, else dashboard/login.
     - **Onboarding (`app/onboarding.tsx`):** Mirroring the structure of the customer app onboarding, created a Carousel format. Slide 1 features the chef/owner image with "+24% مبيعات" and "طلب جديد" stat chips overlaid, using the brand tokens. "تخطي" skips to login, persisting `businessOnboardingSeen` flag in `auth.store.ts`.
     - **Wiring:** Modified `auth.store.ts` to include `businessOnboardingSeen: boolean` synced via AsyncStorage. Modified Splash to properly redirect based on this new flag.

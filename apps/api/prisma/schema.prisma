@@ -16,11 +16,12 @@ model Area {
   name               String
   deliveryFee        Decimal        @db.Decimal(10, 2)
   driverDeliveryFee  Decimal        @default(0) @db.Decimal(10, 2)
-  businesses         Business[]     @relation("BusinessLocation")
+  businesses         Business[]        @relation("BusinessLocation")
   drivers            Driver[]
   savedAddresses     SavedAddress[]
   users              User[]
-  deliveryBusinesses Business[]     @relation("BusinessDeliveryAreas")
+  deliveryBusinesses Business[]        @relation("BusinessDeliveryAreas")
+  promotedBusinesses PromotedBusiness[]
 
   @@map("areas")
 }
@@ -83,10 +84,11 @@ model Business {
   owner          User         @relation(fields: [ownerId], references: [id])
   orders         Order[]
   products       Product[]
-  deliveryAreas  Area[]         @relation("BusinessDeliveryAreas")
-  tags           Tag[]          @relation("BusinessTags")
-  driverReviews  DriverReview[]
-  offerBusinesses OfferBusiness[]
+  deliveryAreas       Area[]             @relation("BusinessDeliveryAreas")
+  tags                Tag[]              @relation("BusinessTags")
+  driverReviews       DriverReview[]
+  offerBusinesses     OfferBusiness[]
+  promotedBusinesses  PromotedBusiness[]
 
   @@map("businesses")
 }
@@ -110,6 +112,40 @@ model Banner {
   createdAt DateTime @default(now())
 
   @@map("banners")
+}
+
+model PopupAd {
+  id            String    @id @default(uuid())
+  imageUrl      String
+  title         String?
+  buttonText    String?
+  buttonUrl     String?
+  targetPage    String    @default("home")  // home | cart | orders | business_detail | all
+  isActive      Boolean   @default(true)
+  intervalHours Int       @default(0)      // 0 = always, 24 = once/day
+  startsAt      DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("popup_ads")
+}
+
+model PromotedBusiness {
+  id         String    @id @default(uuid())
+  businessId String
+  areaId     String?                      // null = all areas
+  isPopup    Boolean   @default(false)    // also show as popup overlay
+  isActive   Boolean   @default(true)
+  priority   Int       @default(0)        // higher = shown first
+  startsAt   DateTime?
+  endsAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  area       Area?     @relation(fields: [areaId], references: [id])
+
+  @@map("promoted_businesses")
 }
 
 model Product {
