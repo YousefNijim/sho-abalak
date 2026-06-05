@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 interface CreatePromotedBusinessDto {
   businessId: string;
-  areaId?: string;
   isPopup?: boolean;
   isActive?: boolean;
   priority?: number;
@@ -40,12 +39,11 @@ export class PromotedBusinessesService {
         isActive: true,
         OR: [{ startsAt: null }, { startsAt: { lte: now } }],
         AND: [{ OR: [{ endsAt: null }, { endsAt: { gte: now } }] }],
-        ...(areaId ? { OR: [{ areaId }, { areaId: null }] } : {}),
+        ...(areaId ? { business: { deliveryAreas: { some: { id: areaId } } } } : {}),
       },
       orderBy: { priority: 'desc' },
       include: {
         business: { select: BUSINESS_SELECT },
-        area: { select: { id: true, city: true, name: true } },
       },
     });
   }
@@ -55,7 +53,6 @@ export class PromotedBusinessesService {
       orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
       include: {
         business: { select: { id: true, name: true, imageUrl: true, type: true } },
-        area: { select: { id: true, city: true, name: true } },
       },
     });
   }

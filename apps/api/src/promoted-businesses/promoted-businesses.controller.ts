@@ -18,11 +18,6 @@ class CreatePromotedBusinessDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  areaId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
   @IsBoolean()
   isPopup?: boolean;
 
@@ -51,7 +46,6 @@ class CreatePromotedBusinessDto {
 
 class UpdatePromotedBusinessDto {
   @ApiPropertyOptional() @IsOptional() @IsString() businessId?: string;
-  @ApiPropertyOptional() @IsOptional() @IsString() areaId?: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isPopup?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() isActive?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsInt() @Min(0) @Type(() => Number) priority?: number;

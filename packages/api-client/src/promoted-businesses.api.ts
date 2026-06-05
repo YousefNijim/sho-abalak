@@ -4,7 +4,6 @@ import type { Business } from './businesses.api';
 export interface PromotedBusiness {
   id: string;
   businessId: string;
-  areaId: string | null;
   isPopup: boolean;
   isActive: boolean;
   priority: number;
@@ -13,12 +12,10 @@ export interface PromotedBusiness {
   createdAt: string;
   updatedAt: string;
   business: Business;
-  area: { id: string; city: string; name: string } | null;
 }
 
 export interface CreatePromotedBusinessDto {
   businessId: string;
-  areaId?: string;
   isPopup?: boolean;
   isActive?: boolean;
   priority?: number;

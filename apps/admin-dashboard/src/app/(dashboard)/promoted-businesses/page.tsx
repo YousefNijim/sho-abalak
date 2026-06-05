@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { promotedBusinessesApi, businessesApi, areasApi, BASE_URL } from '@shu/api-client';
+import { promotedBusinessesApi, businessesApi, BASE_URL } from '@shu/api-client';
 import type { PromotedBusiness } from '@shu/api-client';
 
 export default function PromotedBusinessesPage() {
@@ -13,13 +13,11 @@ export default function PromotedBusinessesPage() {
 
   const [newPromo, setNewPromo] = useState<{
     businessId: string;
-    areaId: string;
     isPopup: boolean;
     isActive: boolean;
     priority: number;
   }>({
     businessId: '',
-    areaId: '',
     isPopup: false,
     isActive: true,
     priority: 0,
@@ -42,16 +40,10 @@ export default function PromotedBusinessesPage() {
     queryFn: () => businessesApi.list(),
   });
 
-  const { data: areas = [] } = useQuery({
-    queryKey: ['areas'],
-    queryFn: () => areasApi.list(),
-  });
-
   const createMutation = useMutation({
     mutationFn: () =>
       promotedBusinessesApi.create({
         businessId: newPromo.businessId,
-        areaId: newPromo.areaId || undefined,
         isPopup: newPromo.isPopup,
         isActive: newPromo.isActive,
         priority: newPromo.priority,
@@ -60,7 +52,7 @@ export default function PromotedBusinessesPage() {
       qc.invalidateQueries({ queryKey: ['promoted-businesses'] });
       showToast('success', 'تمت إضافة المنشأة المميزة بنجاح');
       setIsAddModalOpen(false);
-      setNewPromo({ businessId: '', areaId: '', isPopup: false, isActive: true, priority: 0 });
+      setNewPromo({ businessId: '', isPopup: false, isActive: true, priority: 0 });
     },
     onError: (err: any) => {
       showToast('error', err.response?.data?.message || err.message || 'فشل إضافة المنشأة المميزة');
@@ -160,7 +152,7 @@ export default function PromotedBusinessesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-muted-gray">
-                      {promo.area ? promo.area.name : <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] text-primary">جميع المناطق</span>}
+                      <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] text-primary">مناطق توصيل المنشأة</span>
                     </td>
                     <td className="px-6 py-4 font-bold text-secondary">
                       {promo.priority}
@@ -231,20 +223,6 @@ export default function PromotedBusinessesPage() {
                   <option value="" disabled>اختر المنشأة...</option>
                   {businesses.map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1.5">المنطقة (اختياري)</label>
-                <select
-                  value={newPromo.areaId}
-                  onChange={(e) => setNewPromo({ ...newPromo, areaId: e.target.value })}
-                  className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] focus:border-primary focus:outline-none bg-white"
-                >
-                  <option value="">جميع المناطق (تظهر للكل)</option>
-                  {areas.map((a) => (
-                    <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </select>
               </div>

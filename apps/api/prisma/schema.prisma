@@ -21,7 +21,6 @@ model Area {
   savedAddresses     SavedAddress[]
   users              User[]
   deliveryBusinesses Business[]        @relation("BusinessDeliveryAreas")
-  promotedBusinesses PromotedBusiness[]
 
   @@map("areas")
 }
@@ -134,7 +133,6 @@ model PopupAd {
 model PromotedBusiness {
   id         String    @id @default(uuid())
   businessId String
-  areaId     String?                      // null = all areas
   isPopup    Boolean   @default(false)    // also show as popup overlay
   isActive   Boolean   @default(true)
   priority   Int       @default(0)        // higher = shown first
@@ -143,7 +141,6 @@ model PromotedBusiness {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  area       Area?     @relation(fields: [areaId], references: [id])
 
   @@map("promoted_businesses")
 }
