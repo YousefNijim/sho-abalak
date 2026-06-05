@@ -88,6 +88,8 @@ model Business {
   driverReviews       DriverReview[]
   offerBusinesses     OfferBusiness[]
   promotedBusinesses  PromotedBusiness[]
+  settlements         BusinessSettlement[]
+  platformBalance     Decimal        @default(0) @db.Decimal(10, 2)
 
   @@map("businesses")
 }
@@ -187,6 +189,17 @@ model DriverSettlement {
   driver    Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
 
   @@map("driver_settlements")
+}
+
+model BusinessSettlement {
+  id         String   @id @default(uuid())
+  businessId String
+  amount     Decimal  @db.Decimal(10, 2)
+  adminId    String   // The admin who performed the settlement
+  createdAt  DateTime @default(now())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("business_settlements")
 }
 
 model Order {

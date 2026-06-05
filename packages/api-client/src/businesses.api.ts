@@ -26,6 +26,7 @@ export interface Business {
   rating: number;
   isOpen: boolean;
   commissionRate?: number;
+  platformBalance?: number;
   minimumOrder?: number | null;
   area?: { city: string; name: string; deliveryFee: number };
   owner?: { id: string; name: string; phone: string; status: string };
@@ -103,4 +104,7 @@ export const businessesApi = {
 
   adminResetPassword: (id: string, password: string) =>
     http.patch<{ reset: boolean }>(`/businesses/${id}/password`, { password }).then((r) => r.data),
+
+  settleAccount: (id: string, amount?: number) =>
+    http.post<Business>(`/businesses/${id}/settle`, { amount }).then((r) => r.data),
 };

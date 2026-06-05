@@ -39,11 +39,8 @@ export default function DriversPage() {
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
 
   // Intervention Confirmation Dialogs state
-  const [confirmAction, setConfirmAction] = useState<{
-    type: 'status' | 'area' | 'settle';
-    payload: any;
-    message: string;
-  } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ type: 'status' | 'area' | 'settle', payload: any, message: string } | null>(null);
+  const [settleAmountInput, setSettleAmountInput] = useState<string>('');
 
   // Success/Error Toasts
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -110,7 +107,7 @@ export default function DriversPage() {
   });
 
   const settleAccountMutation = useMutation({
-    mutationFn: (id: string) => driversApi.settleAccount(id),
+    mutationFn: ({ id, amount }: { id: string; amount?: number }) => driversApi.settleAccount(id, amount),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['drivers'] });
       showToast('success', 'تم تسوية حساب الكابتن بنجاح وتصفير المديونية');
@@ -234,7 +231,10 @@ export default function DriversPage() {
     const { type, payload } = confirmAction;
 
     if (type === 'settle') {
-      settleAccountMutation.mutate(selectedDriverId);
+      settleAccountMutation.mutate({ 
+        id: selectedDriverId, 
+        amount: settleAmountInput ? Number(settleAmountInput) : undefined 
+      });
       return;
     }
 
@@ -265,6 +265,19 @@ export default function DriversPage() {
             <p className="text-[14px] text-muted-gray mb-6 leading-relaxed">
               {confirmAction.message}
             </p>
+            {confirmAction.type === 'settle' && (
+              <div className="mb-6 space-y-2">
+                <label className="mr-1 block text-[13px] font-bold text-on-surface">مبلغ التسوية (شيكل)</label>
+                <input
+                  type="number"
+                  placeholder="أدخل المبلغ جزئياً أو أتركه فارغاً للتسوية الكاملة"
+                  value={settleAmountInput}
+                  onChange={(e) => setSettleAmountInput(e.target.value)}
+                  className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] font-mono"
+                  dir="ltr"
+                />
+              </div>
+            )}
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmAction(null)}
@@ -523,11 +536,14 @@ export default function DriversPage() {
                   </div>
                   {Number(selectedDriver.platformBalance) > 0 && (
                     <button
-                      onClick={() => setConfirmAction({
-                        type: 'settle',
-                        payload: null,
-                        message: `هل أنت متأكد من تسوية مديونية الكابتن "${selectedDriver.user?.name}" البالغة ${Number(selectedDriver.platformBalance).toFixed(2)} ₪ وتصفير حسابه؟`
-                      })}
+                      onClick={() => {
+                        setSettleAmountInput(Number(selectedDriver.platformBalance).toFixed(2));
+                        setConfirmAction({
+                          type: 'settle',
+                          payload: null,
+                          message: `تسوية مديونية الكابتن "${selectedDriver.user?.name}" البالغة ${Number(selectedDriver.platformBalance).toFixed(2)} ₪. يمكنك تحديد مبلغ أقل للتسوية الجزئية.`
+                        });
+                      }}
                       className="w-full mt-2 h-9 rounded-lg bg-error/10 text-error font-bold text-[13px] hover:bg-error hover:text-white transition-colors"
                     >
                       تسوية الحساب

@@ -215,4 +215,31 @@ export class BusinessesService {
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
     if (business.ownerId !== ownerId) throw new ForbiddenException('لا تملك صلاحية تعديل هذه المنشأة');
   }
+
+  /** تسوية حساب المنشأة (للوحة الأدمن). */
+  async settleAccount(adminId: string, businessId: string, amount?: number) {
+    const business = await this.prisma.business.findUnique({ where: { id: businessId } });
+    if (!business) throw new NotFoundException('المنشأة غير موجودة');
+
+    const settleAmount = amount ?? Number(business.platformBalance);
+    if (settleAmount <= 0) return business;
+
+    return this.prisma.$transaction(async (tx) => {
+      // Create a settlement record for history
+      await tx.businessSettlement.create({
+        data: {
+          businessId,
+          adminId,
+          amount: settleAmount,
+        },
+      });
+
+      // Decrement balance
+      return tx.business.update({
+        where: { id: businessId },
+        data: { platformBalance: { decrement: settleAmount } },
+        include: { area: true, tags: true, deliveryAreas: true, owner: { select: OWNER_SELECT } },
+      });
+    });
+  }
 }

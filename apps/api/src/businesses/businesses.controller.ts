@@ -111,4 +111,12 @@ export class BusinessesController {
   adminResetPassword(@Param('id') id: string, @Body() dto: SetPasswordDto) {
     return this.businesses.adminResetPassword(id, dto.password);
   }
+
+  @Post(':id/settle')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  settleAccount(@CurrentUser() admin: AuthUser, @Param('id') id: string, @Body('amount') amount?: number) {
+    return this.businesses.settleAccount(admin.id, id, amount);
+  }
 }

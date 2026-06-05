@@ -128,6 +128,12 @@ export default function Analytics() {
       <View style={styles.cards}>
         <Card label="إجمالي مبيعات المنتجات" value={`₪${totalSales}`} />
         <Card label="صافي الأرباح (بعد العمولة)" value={`₪${netEarnings}`} />
+        <Card 
+          label={`المستحق للمنصة (${commissionRate}%)`} 
+          value={`₪${Number(business?.platformBalance ?? 0).toFixed(2)}`} 
+          style={{ borderColor: colors.error, backgroundColor: '#fef2f2' }} 
+          valueStyle={{ color: colors.error }} 
+        />
         <Card label="عدد الطلبات" value={String(periodOrders.length)} />
         <Card label="متوسط الطلب" value={`₪${avgOrder}`} />
         <Card label="التقييم العام" value={`${business?.rating ? business.rating.toFixed(1) : '5.0'} ⭐`} />
@@ -195,10 +201,10 @@ export default function Analytics() {
   );
 }
 
-function Card({ label, value }: { label: string; value: string }) {
+function Card({ label, value, style, valueStyle }: { label: string; value: string; style?: any; valueStyle?: any }) {
   return (
-    <View style={styles.statCard}>
-      <Text style={styles.statValue}>{value}</Text>
+    <View style={[styles.statCard, style]}>
+      <Text style={[styles.statValue, valueStyle]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );

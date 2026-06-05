@@ -76,26 +76,27 @@ export class DriversService {
   }
 
   /** تسوية حساب السائق (للوحة الأدمن). */
-  async settleAccount(adminId: string, driverId: string) {
+  async settleAccount(adminId: string, driverId: string, amount?: number) {
     const driver = await this.prisma.driver.findUnique({ where: { id: driverId } });
     if (!driver) throw new NotFoundException('السائق غير موجود');
 
+    const settleAmount = amount ?? Number(driver.platformBalance);
+    if (settleAmount <= 0) return driver;
+
     return this.prisma.$transaction(async (tx) => {
       // Create a settlement record for history
-      if (Number(driver.platformBalance) > 0) {
-        await tx.driverSettlement.create({
-          data: {
-            driverId,
-            adminId,
-            amount: driver.platformBalance,
-          },
-        });
-      }
+      await tx.driverSettlement.create({
+        data: {
+          driverId,
+          adminId,
+          amount: settleAmount,
+        },
+      });
 
-      // Reset balance to 0
+      // Decrement balance
       return tx.driver.update({
         where: { id: driverId },
-        data: { platformBalance: 0 },
+        data: { platformBalance: { decrement: settleAmount } },
         include: DRIVER_INCLUDE,
       });
     });

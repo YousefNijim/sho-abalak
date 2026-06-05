@@ -71,7 +71,7 @@ export class DriversController {
   /** تسوية حساب السائق — لوحة الأدمن. */
   @Post(':id/settle')
   @Roles(UserRole.ADMIN)
-  settleAccount(@CurrentUser() admin: AuthUser, @Param('id') id: string) {
-    return this.drivers.settleAccount(admin.id, id);
+  settleAccount(@CurrentUser() admin: AuthUser, @Param('id') id: string, @Body('amount') amount?: number) {
+    return this.drivers.settleAccount(admin.id, id, amount);
   }
 }

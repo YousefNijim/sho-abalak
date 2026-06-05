@@ -234,6 +234,15 @@ export class OrdersService {
 
       // Cash is collected on delivery → settle the payment to PAID in the same transaction.
       if (dto.status === OrderStatus.DELIVERED) {
+        // Calculate the platform commission from the subtotal
+        const commission = Number(order.subtotal) * (Number(order.business.commissionRate) / 100);
+        await tx.business.update({
+          where: { id: order.businessId },
+          data: {
+            platformBalance: { increment: commission }
+          }
+        });
+
         await this.payments.settleCashOnDelivery(id, tx);
       }
 

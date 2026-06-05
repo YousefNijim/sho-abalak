@@ -41,6 +41,6 @@ export const driversApi = {
   updateProfile: (dto: { areaId?: string; vehicleType?: string }) =>
     http.patch<Driver>('/drivers/me/profile', dto).then((r) => r.data),
 
-  settleAccount: (id: string) =>
-    http.post<Driver>(`/drivers/${id}/settle`).then((r) => r.data),
+  settleAccount: (id: string, amount?: number) =>
+    http.post<Driver>(`/drivers/${id}/settle`, { amount }).then((r) => r.data),
 };

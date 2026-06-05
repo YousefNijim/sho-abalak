@@ -39,10 +39,11 @@ export default function BusinessesPage() {
 
   // Intervention Confirmation Dialogs state
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'isOpen' | 'commission';
+    type: 'isOpen' | 'commission' | 'settle';
     payload: any;
     message: string;
   } | null>(null);
+  const [settleAmountInput, setSettleAmountInput] = useState<string>('');
 
   // Success/Error Toasts
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -141,6 +142,20 @@ export default function BusinessesPage() {
     },
     onError: (err: any) => {
       showToast('error', err.response?.data?.message || 'فشل تعديل نسبة العمولة');
+      setConfirmAction(null);
+    },
+  });
+
+  const settleAccountMutation = useMutation({
+    mutationFn: ({ id, amount }: { id: string; amount?: number }) => businessesApi.settleAccount(id, amount),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['businesses'] });
+      if (selectedBusinessId) qc.invalidateQueries({ queryKey: ['business', selectedBusinessId] });
+      showToast('success', 'تم تسوية حساب المتجر بنجاح');
+      setConfirmAction(null);
+    },
+    onError: (err: any) => {
+      showToast('error', err.response?.data?.message || 'فشل تسوية الحساب');
       setConfirmAction(null);
     },
   });
@@ -342,6 +357,14 @@ export default function BusinessesPage() {
           </span>
         ),
       }),
+      columnHelper.accessor('platformBalance', {
+        header: 'المستحق للمنصة',
+        cell: (info) => (
+          <span className="font-bold text-[14px] text-error">
+            {Number(info.getValue() ?? 0).toFixed(2)} ₪
+          </span>
+        ),
+      }),
       columnHelper.accessor('rating', {
         header: () => <div className="text-center">التقييم</div>,
         cell: (info) => (
@@ -456,6 +479,12 @@ export default function BusinessesPage() {
     if (type === 'commission') {
       updateCommissionMutation.mutate({ id: selectedBusinessId, rate: payload });
     }
+    if (type === 'settle') {
+      settleAccountMutation.mutate({ 
+        id: selectedBusinessId, 
+        amount: settleAmountInput ? Number(settleAmountInput) : undefined 
+      });
+    }
   };
 
   return (
@@ -478,6 +507,19 @@ export default function BusinessesPage() {
             <p className="text-[14px] text-muted-gray mb-6 leading-relaxed">
               {confirmAction.message}
             </p>
+            {confirmAction.type === 'settle' && (
+              <div className="mb-6 space-y-2">
+                <label className="mr-1 block text-[13px] font-bold text-on-surface">مبلغ التسوية (شيكل)</label>
+                <input
+                  type="number"
+                  placeholder="أدخل المبلغ جزئياً أو أتركه فارغاً للتسوية الكاملة"
+                  value={settleAmountInput}
+                  onChange={(e) => setSettleAmountInput(e.target.value)}
+                  className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none text-[14px] font-mono"
+                  dir="ltr"
+                />
+              </div>
+            )}
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmAction(null)}
@@ -487,7 +529,7 @@ export default function BusinessesPage() {
               </button>
               <button
                 onClick={handleInterventionSubmit}
-                disabled={updateStatusMutation.isPending || updateCommissionMutation.isPending}
+                disabled={updateStatusMutation.isPending || updateCommissionMutation.isPending || settleAccountMutation.isPending}
                 className="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 disabled:opacity-50 transition-colors"
               >
                 تأكيد وتطبيق
@@ -932,6 +974,34 @@ export default function BusinessesPage() {
                     <span className="material-symbols-outlined text-[20px]">bolt</span>
                     خيارات التحكم الإشرافي المتطورة
                   </h4>
+
+                  {/* Earnings & Settlement */}
+                  <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-error/20 bg-red-50/30">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-error/10 text-error">
+                        <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-muted-gray">المستحق للمنصة</span>
+                        <h4 className="font-extrabold text-[18px] text-error">₪{Number(selectedBusiness.platformBalance ?? 0).toFixed(2)}</h4>
+                      </div>
+                    </div>
+                    {Number(selectedBusiness.platformBalance) > 0 && (
+                      <button
+                        onClick={() => {
+                          setSettleAmountInput(Number(selectedBusiness.platformBalance).toFixed(2));
+                          setConfirmAction({
+                            type: 'settle',
+                            payload: null,
+                            message: `تسوية مديونية المتجر "${selectedBusiness.name}" البالغة ${Number(selectedBusiness.platformBalance).toFixed(2)} ₪. يمكنك تحديد مبلغ أقل للتسوية الجزئية.`
+                          });
+                        }}
+                        className="h-9 px-4 rounded-lg bg-error text-white font-bold text-[12px] hover:brightness-95 transition-colors shadow-sm"
+                      >
+                        تسوية الحساب
+                      </button>
+                    )}
+                  </div>
 
                   {/* Open/Close status Toggle override */}
                   <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-border">
