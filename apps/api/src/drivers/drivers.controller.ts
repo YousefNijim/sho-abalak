@@ -10,6 +10,7 @@ import { DriversService } from './drivers.service';
 import { RegisterDriverDto } from './dto/register-driver.dto';
 import { UpdateDriverStatusDto } from './dto/update-driver-status.dto';
 import { QueryDriversDto } from './dto/query-drivers.dto';
+import { UpdateDriverProfileDto } from './dto/update-driver-profile.dto';
 
 @ApiTags('drivers')
 @ApiBearerAuth()
@@ -58,5 +59,19 @@ export class DriversController {
   @Roles(UserRole.ADMIN)
   adminUpdate(@Param('id') id: string, @Body() dto: UpdateDriverStatusDto) {
     return this.drivers.adminUpdate(id, dto);
+  }
+
+  /** السائق يحدّث بياناته الشخصية (منطقته ونوع مركبته). */
+  @Patch('me/profile')
+  @Roles(UserRole.DRIVER)
+  updateProfile(@CurrentUser() user: AuthUser, @Body() dto: UpdateDriverProfileDto) {
+    return this.drivers.updateProfile(user.id, dto);
+  }
+
+  /** تسوية حساب السائق — لوحة الأدمن. */
+  @Post(':id/settle')
+  @Roles(UserRole.ADMIN)
+  settleAccount(@CurrentUser() admin: AuthUser, @Param('id') id: string) {
+    return this.drivers.settleAccount(admin.id, id);
   }
 }

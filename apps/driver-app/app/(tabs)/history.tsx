@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ordersApi } from '@shu/api-client';
+import { driversApi, ordersApi } from '@shu/api-client';
 import { formatShekel } from '@shu/utils';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 
@@ -24,6 +24,11 @@ export default function History() {
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['driver-orders-history'],
     queryFn: () => ordersApi.list(),
+  });
+
+  const { data: driver } = useQuery({
+    queryKey: ['driver-me'],
+    queryFn: () => driversApi.me(),
   });
 
   if (isLoading) {
@@ -71,7 +76,10 @@ export default function History() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['driver-orders-history'] });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['driver-orders-history'] }),
+      queryClient.invalidateQueries({ queryKey: ['driver-me'] })
+    ]);
     setRefreshing(false);
   };
 
@@ -86,6 +94,11 @@ export default function History() {
       <View style={styles.summary}>
         <Text style={styles.summaryLabel}>إجمالي أرباح التوصيل هذا الشهر</Text>
         <Text style={styles.summaryValue}>{formatShekel(monthlyEarnings)}</Text>
+      </View>
+
+      <View style={styles.balanceCard}>
+        <Text style={styles.balanceLabel}>المستحق للمنصة (الرصيد المطلوب)</Text>
+        <Text style={styles.balanceValue}>{formatShekel(Number(driver?.platformBalance ?? 0))}</Text>
       </View>
 
       {completedOrders.map((o: any) => (
@@ -123,6 +136,11 @@ function DriverOrderCard({ o, formatDate }: any) {
           <Text style={styles.detailText}>رقم الطلب: #{o.id.slice(-6).toUpperCase()}</Text>
           <Text style={styles.detailText}>العميل: {o.customer?.name} ({o.customer?.phone})</Text>
           <Text style={styles.detailText}>دفع العميل: {o.total} ₪ ({o.paymentMethod === 'CASH' ? 'نقدي' : 'إلكتروني'})</Text>
+          {o.paymentMethod === 'CASH' && Number(o.platformDeliveryFee) > 0 && (
+            <Text style={[styles.detailText, { color: colors.error, fontFamily: fontFamily.bold }]}>
+              رسوم المنصة المقتطعة للطلب: {o.platformDeliveryFee} ₪
+            </Text>
+          )}
           
           <Text style={[styles.sectionTitle, { marginTop: spacing[3] }]}>العناصر ({itemsCount}):</Text>
           {o.items?.map((it: any) => (
@@ -138,8 +156,11 @@ function DriverOrderCard({ o, formatDate }: any) {
 
 const styles = StyleSheet.create({
   summary: { backgroundColor: colors.secondary, borderRadius: radius.lg, padding: spacing[5], alignItems: 'center' },
-  summaryLabel: { color: '#fff', opacity: 0.9 },
+  summaryLabel: { color: '#fff', opacity: 0.9, fontFamily: fontFamily.medium },
   summaryValue: { color: '#fff', fontSize: 32, fontFamily: fontFamily.extrabold, marginTop: 4 },
+  balanceCard: { backgroundColor: colors.error + '10', borderRadius: radius.lg, padding: spacing[4], alignItems: 'center', borderWidth: 1, borderColor: colors.error + '30', marginTop: spacing[1], marginBottom: spacing[2] },
+  balanceLabel: { color: colors.error, opacity: 0.9, fontFamily: fontFamily.bold, fontSize: fontSizes.sm },
+  balanceValue: { color: colors.error, fontSize: 24, fontFamily: fontFamily.extrabold, marginTop: 4 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: 4 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   business: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textPrimary },

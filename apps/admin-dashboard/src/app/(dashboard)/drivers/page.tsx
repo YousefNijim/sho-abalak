@@ -109,6 +109,19 @@ export default function DriversPage() {
     },
   });
 
+  const settleAccountMutation = useMutation({
+    mutationFn: (id: string) => driversApi.settleAccount(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['drivers'] });
+      showToast('success', 'تم تسوية حساب الكابتن بنجاح وتصفير المديونية');
+      setConfirmAction(null);
+    },
+    onError: (err: any) => {
+      showToast('error', err.response?.data?.message || 'فشل تسوية حساب الكابتن');
+      setConfirmAction(null);
+    },
+  });
+
   // Client side filters
   const filteredDrivers = useMemo(() => {
     return drivers.filter((d) => {
@@ -177,6 +190,14 @@ export default function DriversPage() {
           </span>
         ),
       }),
+      columnHelper.accessor('platformBalance', {
+        header: 'المستحق للمنصة',
+        cell: (info) => (
+          <span className="font-bold text-[14px] text-error">
+            {Number(info.getValue() ?? 0).toFixed(2)} ₪
+          </span>
+        ),
+      }),
       columnHelper.display({
         id: 'actions',
         header: () => <div className="text-left">إجراءات</div>,
@@ -211,6 +232,11 @@ export default function DriversPage() {
   const handleInterventionSubmit = () => {
     if (!confirmAction || !selectedDriverId) return;
     const { type, payload } = confirmAction;
+
+    if (type === 'settle') {
+      settleAccountMutation.mutate(selectedDriverId);
+      return;
+    }
 
     let dto: any = {};
     if (type === 'status') dto.status = payload;
@@ -485,14 +511,28 @@ export default function DriversPage() {
 
               {/* Earnings & Delivery statistics logs */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border border-border p-4 bg-surface-white flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 text-green-700">
-                    <span className="material-symbols-outlined text-[22px]">payments</span>
+                <div className="rounded-xl border border-border p-4 bg-surface-white flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 text-error">
+                      <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-gray">المستحق للمنصة</span>
+                      <h4 className="font-extrabold text-[18px] text-error">₪{Number(selectedDriver.platformBalance ?? 0).toFixed(2)}</h4>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[11px] text-muted-gray">إجمالي الأرباح المستحقة</span>
-                    <h4 className="font-extrabold text-[18px] text-secondary">₪{driverStats.earnings.toFixed(2)}</h4>
-                  </div>
+                  {Number(selectedDriver.platformBalance) > 0 && (
+                    <button
+                      onClick={() => setConfirmAction({
+                        type: 'settle',
+                        payload: null,
+                        message: `هل أنت متأكد من تسوية مديونية الكابتن "${selectedDriver.user?.name}" البالغة ${Number(selectedDriver.platformBalance).toFixed(2)} ₪ وتصفير حسابه؟`
+                      })}
+                      className="w-full mt-2 h-9 rounded-lg bg-error/10 text-error font-bold text-[13px] hover:bg-error hover:text-white transition-colors"
+                    >
+                      تسوية الحساب
+                    </button>
+                  )}
                 </div>
 
                 <div className="rounded-xl border border-border p-4 bg-surface-white flex items-center gap-3">

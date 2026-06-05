@@ -6,8 +6,10 @@ export interface Driver {
   status: string;
   areaId: string;
   rating: number;
-  user?: { name: string; phone: string };
-  area?: { city: string; name: string };
+  vehicleType?: string;
+  platformBalance?: number;
+  user?: { id: string; name: string; phone: string; imageUrl?: string };
+  area?: { id: string; city: string; name: string; deliveryFee: number; driverDeliveryFee: number };
 }
 
 export interface UpdateDriverStatusDto {
@@ -35,4 +37,10 @@ export const driversApi = {
 
   adminUpdateStatus: (id: string, dto: UpdateDriverStatusDto) =>
     http.patch<Driver>(`/drivers/${id}/status`, dto).then((r) => r.data),
+
+  updateProfile: (dto: { areaId?: string; vehicleType?: string }) =>
+    http.patch<Driver>('/drivers/me/profile', dto).then((r) => r.data),
+
+  settleAccount: (id: string) =>
+    http.post<Driver>(`/drivers/${id}/settle`).then((r) => r.data),
 };

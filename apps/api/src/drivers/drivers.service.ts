@@ -60,6 +60,47 @@ export class DriversService {
     return updated;
   }
 
+  /** السائق يحدّث ملفه الشخصي (منطقته ونوع مركبته). */
+  async updateProfile(userId: string, dto: { areaId?: string, vehicleType?: string }) {
+    const driver = await this.findByUser(userId);
+    if (dto.areaId) await this.assertAreaExists(dto.areaId);
+
+    return this.prisma.driver.update({
+      where: { id: driver.id },
+      data: {
+        ...(dto.areaId ? { areaId: dto.areaId } : {}),
+        ...(dto.vehicleType ? { vehicleType: dto.vehicleType } : {}),
+      },
+      include: DRIVER_INCLUDE,
+    });
+  }
+
+  /** تسوية حساب السائق (للوحة الأدمن). */
+  async settleAccount(adminId: string, driverId: string) {
+    const driver = await this.prisma.driver.findUnique({ where: { id: driverId } });
+    if (!driver) throw new NotFoundException('السائق غير موجود');
+
+    return this.prisma.$transaction(async (tx) => {
+      // Create a settlement record for history
+      if (Number(driver.platformBalance) > 0) {
+        await tx.driverSettlement.create({
+          data: {
+            driverId,
+            adminId,
+            amount: driver.platformBalance,
+          },
+        });
+      }
+
+      // Reset balance to 0
+      return tx.driver.update({
+        where: { id: driverId },
+        data: { platformBalance: 0 },
+        include: DRIVER_INCLUDE,
+      });
+    });
+  }
+
   /** السائقون المتاحون — لشاشة اختيار السائق لدى المنشأة. */
   findAvailable(query: QueryDriversDto) {
     const where: Prisma.DriverWhereInput = { status: DriverStatus.AVAILABLE };

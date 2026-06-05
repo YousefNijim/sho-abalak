@@ -219,11 +219,16 @@ export class OrdersService {
         });
       }
 
-      // If transitioning to DELIVERED, toggle the driver status back to AVAILABLE
+      // If transitioning to DELIVERED, toggle the driver status back to AVAILABLE and update balance if CASH
       if (dto.status === OrderStatus.DELIVERED && order.driverId) {
         await tx.driver.update({
           where: { id: order.driverId },
-          data: { status: DriverStatus.AVAILABLE },
+          data: { 
+            status: DriverStatus.AVAILABLE,
+            ...(order.paymentMethod === 'CASH' ? {
+              platformBalance: { increment: order.platformDeliveryFee }
+            } : {})
+          },
         });
       }
 
@@ -312,6 +317,9 @@ export class OrdersService {
       businessName: o.business?.name || 'منشأة تجارية',
       areaName: o.deliveryAreaName || o.customer?.area?.name || 'العنوان المسجل',
       addressDetail: o.deliveryAddressDetail || '',
+      subtotal: Number(o.subtotal),
+      couponDiscount: Number(o.couponDiscount),
+      deliveryFee: Number(o.deliveryFee),
       total: Number(o.total),
       items: (o.items || []).map((it) => ({
         name: it.product?.name || '',
@@ -587,11 +595,16 @@ export class OrdersService {
         });
       }
 
-      // If status changed to DELIVERED and we have a driver, set driver to AVAILABLE
+      // If status changed to DELIVERED and we have a driver, set driver to AVAILABLE and update balance if CASH
       if (dto.status === OrderStatus.DELIVERED && nextDriverId) {
         await tx.driver.update({
           where: { id: nextDriverId },
-          data: { status: DriverStatus.AVAILABLE },
+          data: { 
+            status: DriverStatus.AVAILABLE,
+            ...(order.paymentMethod === 'CASH' ? {
+              platformBalance: { increment: order.platformDeliveryFee }
+            } : {})
+          },
         });
       }
 

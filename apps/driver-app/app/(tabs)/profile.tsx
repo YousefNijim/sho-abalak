@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, TouchableOpacity, ScrollView, StyleSheet, Swi
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Phone, Bike, MapPin, LogOut } from 'lucide-react-native';
+import { User, Phone, Bike, MapPin, LogOut, Info, Edit3 } from 'lucide-react-native';
 import { driversApi } from '@shu/api-client';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { useAuthStore } from '../../src/stores/auth.store';
@@ -79,6 +79,10 @@ export default function DriverProfile() {
   const name = driver?.user?.name || '—';
   const phone = driver?.user?.phone || '—';
   const area = driver?.area ? `${driver.area.city} — ${driver.area.name}` : '—';
+  const vehicleType = driver?.vehicleType === 'CAR' ? 'سيارة' : driver?.vehicleType === 'BICYCLE' ? 'دراجة هوائية' : 'دراجة نارية';
+  const platformFee = driver?.area?.deliveryFee && driver?.area?.driverDeliveryFee 
+    ? (Number(driver.area.deliveryFee) - Number(driver.area.driverDeliveryFee)).toFixed(2)
+    : '0.00';
 
   return (
     <ScrollView
@@ -120,7 +124,13 @@ export default function DriverProfile() {
         </View>
 
         {/* Personal info */}
-        <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>المعلومات الشخصية</Text>
+          <TouchableOpacity onPress={() => router.push('/edit-profile')} style={styles.editBtn}>
+            <Text style={styles.editBtnText}>تعديل</Text>
+            <Edit3 size={14} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.card}>
           <InfoRow icon={<User size={18} color={colors.primary} />} label="الاسم الكامل" value={name} />
           <View style={styles.divider} />
@@ -136,7 +146,25 @@ export default function DriverProfile() {
         {/* Vehicle */}
         <Text style={styles.sectionTitle}>بيانات المركبة</Text>
         <View style={styles.card}>
-          <InfoRow icon={<Bike size={18} color={colors.primary} />} label="نوع المركبة" value="دراجة نارية" />
+          <InfoRow icon={<Bike size={18} color={colors.primary} />} label="نوع المركبة" value={vehicleType} />
+        </View>
+
+        {/* Platform Fee Info */}
+        <Text style={styles.sectionTitle}>رسوم المنصة</Text>
+        <View style={[styles.card, { backgroundColor: colors.primary + '05', borderColor: colors.primary + '20' }]}>
+          <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: colors.primary, textAlign: 'right', marginBottom: 4 }}>
+                رسوم المنصة: {platformFee} ₪ للطلب
+              </Text>
+              <Text style={{ fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right' }}>
+                هذا المبلغ تقتطعه المنصة من رسوم التوصيل الكلية لكل طلب تقوم بتوصيله بنجاح. رصيدك المستحق للمنصة هو {Number(driver?.platformBalance ?? 0).toFixed(2)} ₪.
+              </Text>
+            </View>
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary + '10', alignItems: 'center', justifyContent: 'center' }}>
+              <Info size={20} color={colors.primary} />
+            </View>
+          </View>
         </View>
 
         {/* Logout — TouchableOpacity instead of Pressable so it works inside ScrollView */}
@@ -194,12 +222,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     gap: spacing[3],
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing[2],
+  },
   sectionTitle: {
     fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
     textAlign: 'right',
-    marginTop: spacing[2],
+  },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primary + '10',
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    borderRadius: radius.full,
+  },
+  editBtnText: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: colors.primary,
   },
   card: {
     backgroundColor: colors.surface,

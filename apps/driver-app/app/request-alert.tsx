@@ -14,6 +14,9 @@ interface OrderSummary {
   areaName: string;
   addressDetail?: string;
   total: number;
+  subtotal: number;
+  couponDiscount: number;
+  deliveryFee: number;
   items: { name: string; quantity: number }[];
 }
 
@@ -112,10 +115,27 @@ export default function RequestAlert() {
               <Text style={styles.value}>{o.businessName}</Text>
             </View>
             <View style={styles.row}>
-              <Text style={styles.muted}>المبلغ</Text>
-              <Text style={styles.value}>{o.total} ₪</Text>
+              <Text style={styles.muted}>مجموع المنتجات</Text>
+              <Text style={styles.value}>{o.subtotal} ₪</Text>
             </View>
-
+            {o.couponDiscount > 0 && (
+              <View style={styles.row}>
+                <Text style={styles.muted}>الخصم</Text>
+                <Text style={styles.discountValue}>-{o.couponDiscount} ₪</Text>
+              </View>
+            )}
+            <View style={styles.row}>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={styles.muted}>رسوم التوصيل</Text>
+                <Text style={styles.smallNote}>(تشمل رسوم المنصة)</Text>
+              </View>
+              <Text style={styles.value}>{o.deliveryFee} ₪</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.row}>
+              <Text style={styles.grandTotalLabel}>الإجمالي</Text>
+              <Text style={styles.grandTotalValue}>{o.total} ₪</Text>
+            </View>
             {/* Items list */}
             <View style={styles.divider} />
             <Text style={styles.sectionLabel}>محتويات الطلب</Text>
@@ -188,5 +208,9 @@ const styles = StyleSheet.create({
   addressDetail: { fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
   totalCard: { backgroundColor: colors.primary + '10', borderRadius: radius.lg, padding: spacing[4], flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: colors.primary + '30' },
   grandTotal: { fontFamily: fontFamily.extrabold, fontSize: fontSizes.xl, color: colors.primary },
+  grandTotalLabel: { fontFamily: fontFamily.bold, fontSize: fontSizes.lg, color: colors.textPrimary },
+  grandTotalValue: { fontFamily: fontFamily.bold, fontSize: fontSizes.lg, color: colors.primary },
+  discountValue: { color: colors.secondary, fontFamily: fontFamily.bold, fontSize: fontSizes.base },
+  smallNote: { fontSize: 10, color: colors.textMuted, fontFamily: fontFamily.regular },
   actions: { flexDirection: 'row', gap: spacing[3], padding: spacing[4], backgroundColor: colors.background, borderTopWidth: 1, borderTopColor: colors.border },
 });
