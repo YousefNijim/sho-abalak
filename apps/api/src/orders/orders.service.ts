@@ -78,8 +78,14 @@ export class OrdersService {
     if (dto.couponCode) {
       const code = dto.couponCode.toUpperCase().trim();
       const coupon = await this.prisma.coupon.findUnique({ where: { code } });
-      if (!coupon || !coupon.isActive || coupon.usedAt) {
-        throw new BadRequestException('كود الكوبون غير صحيح أو مستخدم مسبقاً');
+      if (!coupon || !coupon.isActive) {
+        throw new BadRequestException('كود الكوبون غير صحيح أو غير فعّال');
+      }
+      if (coupon.maxUses !== null && coupon.currentUses >= coupon.maxUses) {
+        throw new BadRequestException('تم الوصول للحد الأقصى لمرات استخدام هذا الكوبون');
+      }
+      if (coupon.maxTotalDiscount !== null && Number(coupon.currentTotalDiscount) >= Number(coupon.maxTotalDiscount)) {
+        throw new BadRequestException('تم الوصول للحد الأقصى لقيمة الخصم الإجمالية لهذا الكوبون');
       }
       if (subtotal.lt(coupon.minimumOrder)) {
         throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون هو ${coupon.minimumOrder} ₪`);
@@ -93,6 +99,15 @@ export class OrdersService {
       } else {
         couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
       }
+      
+      // Cap the discount if maxTotalDiscount limit is close
+      if (coupon.maxTotalDiscount !== null) {
+        const remainingDiscount = new Prisma.Decimal(coupon.maxTotalDiscount).sub(coupon.currentTotalDiscount);
+        if (couponDiscount.gt(remainingDiscount)) {
+          couponDiscount = remainingDiscount;
+        }
+      }
+
       couponCode = code;
       couponIssuedBy = coupon.issuedBy;
       couponId = coupon.id;
@@ -113,11 +128,14 @@ export class OrdersService {
     });
 
     const order = await this.prisma.$transaction(async (tx) => {
-      // Mark coupon as used atomically with order creation
+      // Increment coupon usage atomically with order creation
       if (couponId) {
         await tx.coupon.update({
           where: { id: couponId },
-          data: { usedAt: new Date(), usedByOrderId: orderId },
+          data: { 
+            currentUses: { increment: 1 },
+            currentTotalDiscount: { increment: couponDiscount }
+          },
         });
       }
       return tx.order.create({

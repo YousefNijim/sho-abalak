@@ -57,7 +57,7 @@ export default function ReportsPage() {
 
   const exportCsv = () => {
     const headers = ['رقم الطلب', 'المنشأة', 'المدينة', 'القرية', 'الزبون', 'السائق', 'مجموع المنتجات', 'الخصم', 'توصيل كلي', 'توصيل سائق', 'توصيل منصة', 'الإجمالي', 'ربح منشأة', 'ربح سائق', 'ربح منصة', 'طريقة الدفع', 'الحالة', 'التاريخ'];
-    const rows = orders.map((o) => [o.id.slice(-8), o.businessName, o.businessCity, o.businessArea, o.customerName, o.driverName, o.subtotal, o.couponDiscount, o.deliveryFee, (o as any).driverDeliveryFee ?? 0, (o as any).platformDeliveryFee ?? 0, o.total, (o as any).businessEarnings ?? 0, (o as any).driverEarnings ?? 0, (o as any).platformEarnings ?? 0, o.paymentMethod, STATUS_LABELS[o.status] ?? o.status, new Date(o.createdAt).toLocaleDateString('ar-EG')]);
+    const rows = orders.map((o) => [o.id.slice(-6).toUpperCase(), o.businessName, o.businessCity, o.businessArea, o.customerName, o.driverName, o.subtotal, o.couponDiscount, o.deliveryFee, (o as any).driverDeliveryFee ?? 0, (o as any).platformDeliveryFee ?? 0, o.total, (o as any).businessEarnings ?? 0, (o as any).driverEarnings ?? 0, (o as any).platformEarnings ?? 0, o.paymentMethod, STATUS_LABELS[o.status] ?? o.status, new Date(o.createdAt).toLocaleDateString('ar-EG')]);
     const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

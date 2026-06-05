@@ -8,6 +8,8 @@ export class CreateCouponDto {
   @IsOptional() @IsNumber() @Min(0) maxDiscount?: number;
   @IsNumber() @Min(0) minimumOrder!: number;
   @IsEnum(['PLATFORM', 'BUSINESS']) issuedBy!: 'PLATFORM' | 'BUSINESS';
+  @IsOptional() @IsNumber() @Min(1) maxUses?: number;
+  @IsOptional() @IsNumber() @Min(0) maxTotalDiscount?: number;
 }
 
 export class UpdateCouponDto {
@@ -16,6 +18,8 @@ export class UpdateCouponDto {
   @IsOptional() @IsNumber() @Min(0) maxDiscount?: number;
   @IsOptional() @IsNumber() @Min(0) minimumOrder?: number;
   @IsOptional() @IsBoolean() isActive?: boolean;
+  @IsOptional() @IsNumber() @Min(1) maxUses?: number;
+  @IsOptional() @IsNumber() @Min(0) maxTotalDiscount?: number;
 }
 
 export class ApplyCouponDto {

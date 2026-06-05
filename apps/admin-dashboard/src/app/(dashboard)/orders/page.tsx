@@ -208,7 +208,7 @@ export default function OrdersPage() {
         const customerName = o.customer?.name?.toLowerCase() || '';
         const businessName = o.business?.name?.toLowerCase() || '';
         const orderId = o.id.toLowerCase();
-        const shortId = `#${o.id.slice(0, 8)}`.toLowerCase();
+        const shortId = `#${o.id.slice(-6).toUpperCase()}`;
 
         return (
           customerName.includes(query) ||
@@ -229,7 +229,7 @@ export default function OrdersPage() {
         header: 'رقم الطلب',
         cell: (info) => (
           <span className="font-mono text-[13px] text-on-surface font-semibold">
-            #{info.getValue().slice(0, 8)}
+            #{info.getValue().slice(-6).toUpperCase()}
           </span>
         ),
       }),

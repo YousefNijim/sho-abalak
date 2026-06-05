@@ -14,7 +14,14 @@ export class CouponsService {
   /** Public endpoint: return all active unused coupons so the customer can browse them. */
   findActive() {
     return this.prisma.coupon.findMany({
-      where: { isActive: true, usedAt: null },
+      where: {
+        isActive: true,
+        OR: [
+          { maxUses: null },
+          { maxUses: { gt: this.prisma.coupon.fields.currentUses } },
+        ],
+        // Also could check maxTotalDiscount, but let's keep it simple here.
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -44,6 +51,8 @@ export class CouponsService {
         maxDiscount: dto.maxDiscount ?? null,
         minimumOrder: dto.minimumOrder,
         issuedBy: dto.issuedBy,
+        maxUses: dto.maxUses ?? null,
+        maxTotalDiscount: dto.maxTotalDiscount ?? null,
       },
     });
   }
@@ -64,7 +73,16 @@ export class CouponsService {
     const code = dto.code.toUpperCase().trim();
     const coupon = await this.prisma.coupon.findUnique({ where: { code } });
     if (!coupon) throw new NotFoundException('كود الكوبون غير صحيح');
-    if (!coupon.isActive || coupon.usedAt) throw new BadRequestException('هذا الكوبون مستخدم أو غير فعّال');
+    if (!coupon.isActive) throw new BadRequestException('هذا الكوبون غير فعّال');
+    
+    if (coupon.maxUses !== null && coupon.currentUses >= coupon.maxUses) {
+      throw new BadRequestException('تم الوصول للحد الأقصى لمرات استخدام هذا الكوبون');
+    }
+
+    if (coupon.maxTotalDiscount !== null && Number(coupon.currentTotalDiscount) >= Number(coupon.maxTotalDiscount)) {
+      throw new BadRequestException('تم الوصول للحد الأقصى لقيمة الخصم الإجمالية لهذا الكوبون');
+    }
+
     if (dto.cartSubtotal < Number(coupon.minimumOrder)) {
       throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون ${coupon.minimumOrder} ₪`);
     }
@@ -78,6 +96,14 @@ export class CouponsService {
       discount = Math.min(Number(coupon.discountAmount), dto.cartSubtotal);
     }
 
+    // Cap the discount if the total allowed discount is close to being reached
+    if (coupon.maxTotalDiscount !== null) {
+      const remainingDiscount = Number(coupon.maxTotalDiscount) - Number(coupon.currentTotalDiscount);
+      if (discount > remainingDiscount) {
+        discount = remainingDiscount;
+      }
+    }
+
     return {
       code: coupon.code,
       discountAmount: Math.round(discount * 100) / 100,
@@ -86,6 +112,7 @@ export class CouponsService {
       maxDiscount: coupon.maxDiscount ? Number(coupon.maxDiscount) : null,
       minimumOrder: Number(coupon.minimumOrder),
       issuedBy: coupon.issuedBy,
+      couponId: coupon.id,
     };
   }
 

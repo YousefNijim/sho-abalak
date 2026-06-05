@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "coupons" DROP COLUMN "usedAt",
+DROP COLUMN "usedByOrderId",
+ADD COLUMN "maxUses" INTEGER,
+ADD COLUMN "currentUses" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "maxTotalDiscount" DECIMAL(10,2),
+ADD COLUMN "currentTotalDiscount" DECIMAL(10,2) NOT NULL DEFAULT 0;

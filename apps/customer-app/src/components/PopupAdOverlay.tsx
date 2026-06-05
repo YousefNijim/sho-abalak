@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   imageWrap: {
     width: '100%',
-    height: 220,
+    aspectRatio: 1,
     backgroundColor: colors.border,
   },
   image: {

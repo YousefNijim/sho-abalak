@@ -247,7 +247,7 @@ export default function Tracking() {
           <View style={styles.card}>
             <View style={styles.statusHeaderRow}>
               <View style={styles.orderIdBadge}>
-                <Text style={styles.orderIdText}>رقم الطلب: #{order.id.slice(-5).toUpperCase()}</Text>
+                <Text style={styles.orderIdText}>رقم الطلب: #{order.id.slice(-6).toUpperCase()}</Text>
               </View>
               <Text style={styles.timeElapsedText}>منذ قليل</Text>
             </View>

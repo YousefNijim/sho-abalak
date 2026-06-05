@@ -277,7 +277,7 @@ function OffersTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: s
 
 // ─── Coupons Tab ─────────────────────────────────────────────────────────────
 
-const EMPTY_COUPON = { code: '', discountType: 'FIXED' as 'FIXED' | 'PERCENTAGE', discountAmount: '', discountPct: '', maxDiscount: '', minimumOrder: '', issuedBy: 'PLATFORM' as 'PLATFORM' | 'BUSINESS' };
+const EMPTY_COUPON = { code: '', discountType: 'FIXED' as 'FIXED' | 'PERCENTAGE', discountAmount: '', discountPct: '', maxDiscount: '', minimumOrder: '', issuedBy: 'PLATFORM' as 'PLATFORM' | 'BUSINESS', maxUses: '', maxTotalDiscount: '' };
 
 function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: string) => void; qc: any }) {
   const [showCreate, setShowCreate] = useState(false);
@@ -295,6 +295,8 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
       maxDiscount: f.maxDiscount ? Number(f.maxDiscount) : undefined,
       minimumOrder: Number(f.minimumOrder),
       issuedBy: f.issuedBy,
+      maxUses: f.maxUses ? Number(f.maxUses) : undefined,
+      maxTotalDiscount: f.maxTotalDiscount ? Number(f.maxTotalDiscount) : undefined,
     }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-coupons'] }); setShowCreate(false); setForm(EMPTY_COUPON); showToast('success', 'تم إنشاء الكوبون'); },
     onError: (err: any) => showToast('error', err?.response?.data?.message || 'فشل إنشاء الكوبون'),
@@ -376,6 +378,17 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">مرات الاستخدام (اختياري)</label>
+                  <input type="number" min={1} value={form.maxUses} onChange={(e) => setForm((f) => ({ ...f, maxUses: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="10 مرات" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">أقصى إجمالي للخصم ₪ (اختياري)</label>
+                  <input type="number" min={0} step={0.01} value={form.maxTotalDiscount} onChange={(e) => setForm((f) => ({ ...f, maxTotalDiscount: e.target.value }))} className="w-full border rounded-lg px-3 py-2 text-sm" placeholder="250 ₪" />
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button onClick={() => { setShowCreate(false); setForm(EMPTY_COUPON); }} className="flex-1 border rounded-xl py-2 text-sm">إلغاء</button>
                 <button onClick={() => createMutation.mutate(form)} disabled={!form.code || !form.minimumOrder || createMutation.isPending} className="flex-1 bg-primary text-white rounded-xl py-2 text-sm font-bold disabled:opacity-50">
@@ -408,9 +421,10 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الكود</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الخصم</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الحد الأدنى</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">الاستخدامات</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">إجمالي الخصم</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">المصدر</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">الحالة</th>
-                <th className="px-4 py-3 text-right font-semibold text-gray-600">مستخدم</th>
                 <th className="px-4 py-3 text-right font-semibold text-gray-600">إجراءات</th>
               </tr>
             </thead>
@@ -420,22 +434,25 @@ function CouponsTab({ showToast, qc }: { showToast: (t: 'success' | 'error', m: 
                   <td className="px-4 py-3 font-mono font-bold text-primary">{c.code}</td>
                   <td className="px-4 py-3 font-bold text-green-600">{discountLabel(c)}</td>
                   <td className="px-4 py-3 text-gray-600">{c.minimumOrder} ₪</td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {c.maxUses ? `${c.currentUses} / ${c.maxUses}` : `${c.currentUses} (مفتوح)`}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 text-xs">
+                    {c.maxTotalDiscount ? `${c.currentTotalDiscount} / ${c.maxTotalDiscount} ₪` : `${c.currentTotalDiscount} ₪`}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${c.issuedBy === 'PLATFORM' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                       {c.issuedBy === 'PLATFORM' ? 'المنصة' : 'منشأة'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${c.isActive && !c.usedAt ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {c.usedAt ? 'مستخدم' : c.isActive ? 'نشط' : 'متوقف'}
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${c.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {c.isActive ? 'نشط' : 'متوقف'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{c.usedAt ? new Date(c.usedAt).toLocaleDateString('ar-EG') : '—'}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      {!c.usedAt && (
-                        <button onClick={() => toggleMutation.mutate(c)} className={`text-xs px-2 py-1 rounded-lg font-bold ${c.isActive ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>{c.isActive ? 'إيقاف' : 'تفعيل'}</button>
-                      )}
+                      <button onClick={() => toggleMutation.mutate(c)} className={`text-xs px-2 py-1 rounded-lg font-bold ${c.isActive ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>{c.isActive ? 'إيقاف' : 'تفعيل'}</button>
                       <button onClick={() => setConfirmDelete(c)} className="text-xs px-2 py-1 rounded-lg bg-red-50 text-red-600 font-bold">حذف</button>
                     </div>
                   </td>

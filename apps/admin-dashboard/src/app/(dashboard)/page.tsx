@@ -156,7 +156,7 @@ export default function DashboardPage() {
     () => [
       columnHelper.accessor('id', {
         header: 'رقم الطلب',
-        cell: (info) => `#${info.getValue().slice(0, 8)}`,
+        cell: (info) => `#${info.getValue().slice(-6).toUpperCase()}`,
       }),
       columnHelper.accessor('customer.name', {
         header: 'الزبون',

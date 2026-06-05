@@ -10,8 +10,10 @@ export interface Coupon {
   minimumOrder: number;
   issuedBy: 'PLATFORM' | 'BUSINESS';
   isActive: boolean;
-  usedAt: string | null;
-  usedByOrderId: string | null;
+  maxUses: number | null;
+  currentUses: number;
+  maxTotalDiscount: number | null;
+  currentTotalDiscount: number;
   createdAt: string;
 }
 
@@ -35,10 +37,10 @@ export const couponsApi = {
   list: () =>
     http.get<Coupon[]>('/coupons').then((r) => r.data),
 
-  create: (dto: { code: string; discountType: 'FIXED' | 'PERCENTAGE'; discountAmount?: number; discountPct?: number; maxDiscount?: number; minimumOrder: number; issuedBy: 'PLATFORM' | 'BUSINESS' }) =>
+  create: (dto: { code: string; discountType: 'FIXED' | 'PERCENTAGE'; discountAmount?: number; discountPct?: number; maxDiscount?: number; minimumOrder: number; issuedBy: 'PLATFORM' | 'BUSINESS'; maxUses?: number; maxTotalDiscount?: number }) =>
     http.post<Coupon>('/coupons', dto).then((r) => r.data),
 
-  update: (id: string, dto: { discountAmount?: number; discountPct?: number; maxDiscount?: number; minimumOrder?: number; isActive?: boolean }) =>
+  update: (id: string, dto: { discountAmount?: number; discountPct?: number; maxDiscount?: number; minimumOrder?: number; isActive?: boolean; maxUses?: number; maxTotalDiscount?: number }) =>
     http.patch<Coupon>(`/coupons/${id}`, dto).then((r) => r.data),
 
   delete: (id: string) =>
