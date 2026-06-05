@@ -40,7 +40,7 @@ export default function DriversPage() {
 
   // Intervention Confirmation Dialogs state
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'status' | 'area';
+    type: 'status' | 'area' | 'settle';
     payload: any;
     message: string;
   } | null>(null);
