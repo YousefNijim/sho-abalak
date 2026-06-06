@@ -51,10 +51,10 @@ export class OrdersService {
 
     const productIds = dto.items.map((i) => i.productId);
     const products = await this.prisma.product.findMany({
-      where: { id: { in: productIds }, businessId: dto.businessId },
+      where: { id: { in: productIds }, businessId: dto.businessId, isAvailable: true },
     });
     if (products.length !== productIds.length) {
-      throw new BadRequestException('بعض المنتجات غير صالحة لهذه المنشأة');
+      throw new BadRequestException('بعض المنتجات غير متوفرة حالياً');
     }
 
     const priceOf = new Map(products.map((p) => [p.id, p.price]));
@@ -223,10 +223,10 @@ export class OrdersService {
       if (dto.status === OrderStatus.DELIVERED && order.driverId) {
         await tx.driver.update({
           where: { id: order.driverId },
-          data: { 
+          data: {
             status: DriverStatus.AVAILABLE,
             ...(order.paymentMethod === 'CASH' ? {
-              platformBalance: { increment: order.platformDeliveryFee }
+              platformBalance: { increment: order.driverDeliveryFee }
             } : {})
           },
         });
@@ -235,7 +235,7 @@ export class OrdersService {
       // Cash is collected on delivery → settle the payment to PAID in the same transaction.
       if (dto.status === OrderStatus.DELIVERED) {
         // Calculate the platform commission from the subtotal
-        const commission = Number(order.subtotal) * (Number(order.business.commissionRate) / 100);
+        const commission = new Prisma.Decimal(order.subtotal).mul(order.business.commissionRate).div(new Prisma.Decimal(100));
         await tx.business.update({
           where: { id: order.businessId },
           data: {
@@ -244,6 +244,25 @@ export class OrdersService {
         });
 
         await this.payments.settleCashOnDelivery(id, tx);
+      }
+
+      // If cancelling an order that already has a driver assigned, free the driver.
+      if (dto.status === OrderStatus.CANCELLED) {
+        if (order.driverId) {
+          const postPickup = [OrderStatus.PICKED_UP, OrderStatus.DELIVERED].includes(from);
+          if (postPickup) {
+            await tx.driver.update({
+              where: { id: order.driverId },
+              data: { status: DriverStatus.AVAILABLE },
+            });
+          }
+        }
+        if (order.pendingDriverId) {
+          await tx.order.update({
+            where: { id },
+            data: { pendingDriverId: null },
+          });
+        }
       }
 
       // Re-read with includes AFTER settlement so the response carries the fresh payment status.
@@ -608,10 +627,10 @@ export class OrdersService {
       if (dto.status === OrderStatus.DELIVERED && nextDriverId) {
         await tx.driver.update({
           where: { id: nextDriverId },
-          data: { 
+          data: {
             status: DriverStatus.AVAILABLE,
             ...(order.paymentMethod === 'CASH' ? {
-              platformBalance: { increment: order.platformDeliveryFee }
+              platformBalance: { increment: order.driverDeliveryFee }
             } : {})
           },
         });

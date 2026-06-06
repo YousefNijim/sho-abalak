@@ -92,6 +92,32 @@ export default function Tracking() {
     }
   }, [order?.status, order?.review]);
 
+  const cancelOrder = useMutation({
+    mutationFn: () => ordersApi.updateStatus(order!.id, { status: 'CANCELLED' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      clearActiveOrder();
+    },
+    onError: () => {
+      Alert.alert('خطأ', 'فشل إلغاء الطلب، يرجى المحاولة مجدداً');
+    },
+  });
+
+  const handleCancelOrder = () => {
+    Alert.alert(
+      'إلغاء الطلب',
+      'هل أنت متأكد من إلغاء الطلب؟',
+      [
+        { text: 'لا', style: 'cancel' },
+        {
+          text: 'نعم، إلغاء',
+          style: 'destructive',
+          onPress: () => cancelOrder.mutate(),
+        },
+      ],
+    );
+  };
+
   const submitReview = useMutation({
     mutationFn: () =>
       reviewsApi.create({
@@ -377,6 +403,19 @@ export default function Tracking() {
               <Text style={styles.deliveryAddressDetail}>{order.deliveryAddressDetail}</Text>
             )}
           </View>
+        )}
+
+        {/* Cancel button — only visible while order is still PENDING */}
+        {order.status === 'PENDING' && (
+          <Pressable
+            style={styles.cancelBtn}
+            onPress={handleCancelOrder}
+            disabled={cancelOrder.isPending}
+          >
+            {cancelOrder.isPending
+              ? <ActivityIndicator color="#EF4444" />
+              : <Text style={styles.cancelBtnText}>إلغاء الطلب</Text>}
+          </Pressable>
         )}
 
         {/* Order Summary (Glassmorphism style) */}
@@ -868,5 +907,20 @@ const styles = StyleSheet.create({
   submitText: {
     fontFamily: fontFamily.bold,
     color: '#fff',
+  },
+  cancelBtn: {
+    marginHorizontal: spacing[4],
+    marginBottom: spacing[3],
+    paddingVertical: spacing[3],
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    backgroundColor: '#FEF2F2',
+    alignItems: 'center',
+  },
+  cancelBtnText: {
+    fontFamily: fontFamily.bold,
+    color: '#EF4444',
+    fontSize: fontSizes.base,
   },
 });

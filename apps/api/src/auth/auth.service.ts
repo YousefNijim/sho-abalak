@@ -195,7 +195,7 @@ export class AuthService {
    * No SMS provider wired yet; returns a fixed dev code so the flow is testable.
    */
   requestOtp(phone: string) {
-    return { phone, sent: true, devCode: '0000' };
+    return { phone, sent: true };
   }
 
   verifyOtp(phone: string, code: string) {
