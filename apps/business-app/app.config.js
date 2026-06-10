@@ -16,8 +16,16 @@ module.exports = {
     userInterfaceStyle: 'light',
     backgroundColor: '#FCF3DC',
     icon: './assets/images/icon.png',
+    web: {
+      bundler: 'metro',
+      output: 'single',
+      favicon: './assets/favicon.png',
+    },
     ios: {
       supportsTablet: false,
+      infoPlist: {
+        NSCameraUsageDescription: 'نستخدم الكاميرا لمسح بار كود المنتجات',
+      },
     },
     android: {
       package: IS_STAGING ? 'com.shoabalak.business.staging' : 'com.shoabalak.business',
@@ -27,10 +35,12 @@ module.exports = {
         backgroundColor: IS_STAGING ? '#E6781E' : '#FCF3DC',
       },
       usesCleartextTraffic: true,
+      permissions: ['CAMERA'],
     },
     plugins: [
       'expo-router',
       'expo-font',
+      'expo-camera',
       [
         'expo-splash-screen',
         {

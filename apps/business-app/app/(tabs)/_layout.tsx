@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { ClipboardList, UtensilsCrossed, BarChart2, UserCircle } from 'lucide-react-native';
+import { ClipboardList, UtensilsCrossed, BarChart2, UserCircle, Package } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fontFamily } from '../../src/theme';
 
@@ -43,6 +43,14 @@ export default function TabsLayout() {
           title: 'القائمة',
           headerShown: false,
           tabBarIcon: ({ color, size }) => <UtensilsCrossed size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="inventory"
+        options={{
+          title: 'المخزون',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <Package size={size} color={color} />,
         }}
       />
       <Tabs.Screen
