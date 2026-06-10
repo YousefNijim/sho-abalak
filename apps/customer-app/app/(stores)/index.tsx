@@ -5,9 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart } from 'lucide-react-native';
-import { businessesApi, tagsApi, promotedBusinessesApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, tagsApi, promotedBusinessesApi, addressesApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 import { fontFamily, spacing } from '../../src/theme';
+import { AddressSelector } from '../../components/AddressSelector';
 
 const mediaUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;
@@ -33,7 +34,14 @@ const storeColors = {
 export default function StoreHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const selectedAddress = useSavedAddressesStore((s) => s.selectedAddress());
+  const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: () => addressesApi.list(),
+  });
+
+  const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;
   
   const [search, setSearch] = useState('');
   
@@ -66,12 +74,8 @@ export default function StoreHome() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + spacing[4] }]}>
         <View style={styles.headerTop}>
-          <View style={styles.locationWrap}>
-            <MapPin size={18} color={storeColors.primary} />
-            <Text style={styles.locationText}>
-              {selectedAddress ? `${selectedAddress.area?.city}، ${selectedAddress.label}` : 'حدد موقعك'}
-            </Text>
-          </View>
+          <View style={{ width: 40 }} /> {/* Spacer */}
+          <AddressSelector />
           <Pressable style={styles.profileBtn}>
             <Store size={20} color={storeColors.primary} />
           </Pressable>
@@ -121,16 +125,20 @@ export default function StoreHome() {
           <Text style={styles.sectionTitle}>الأقسام</Text>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesScroll}>
+        <View style={styles.categoriesGrid}>
           {storeTags.map((tag: any) => (
-            <Pressable key={tag.id} style={styles.categoryItem} onPress={() => router.push({ pathname: '/all', params: { tagId: tag.id } })}>
-              <View style={styles.categoryBox}>
-                <Store size={28} color={storeColors.primaryContainer} />
+            <Pressable key={tag.id} style={styles.categoryGridItem} onPress={() => router.push({ pathname: '/all', params: { tagId: tag.id } })}>
+              <View style={styles.categoryGridBox}>
+                {tag.imageUrl ? (
+                  <Image source={{ uri: mediaUrl(tag.imageUrl)! }} style={styles.categoryGridImage} contentFit="cover" />
+                ) : (
+                  <Store size={32} color={storeColors.primaryContainer} />
+                )}
               </View>
-              <Text style={styles.categoryText}>{tag.name}</Text>
+              <Text style={styles.categoryGridText} numberOfLines={2}>{tag.name}</Text>
             </Pressable>
           ))}
-        </ScrollView>
+        </View>
 
         {/* Order Again Widget */}
         <View style={styles.sectionHeader}>
@@ -317,30 +325,41 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: storeColors.primaryContainer,
   },
-  categoriesScroll: {
+  categoriesGrid: {
+    flexDirection: 'row-reverse',
+    flexWrap: 'wrap',
     paddingHorizontal: spacing[4],
-    gap: spacing[4],
+    gap: spacing[3],
+    justifyContent: 'flex-start',
   },
-  categoryItem: {
+  categoryGridItem: {
+    width: (Dimensions.get('window').width - spacing[4] * 2 - spacing[3] * 2) / 3,
     alignItems: 'center',
-    gap: spacing[2],
+    marginBottom: spacing[2],
   },
-  categoryBox: {
-    width: 64,
-    height: 64,
+  categoryGridBox: {
+    width: '100%',
+    aspectRatio: 1,
     borderRadius: 20,
     backgroundColor: storeColors.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: spacing[2],
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
       android: { elevation: 2 },
     }),
   },
-  categoryText: {
+  categoryGridImage: {
+    width: '100%',
+    height: '100%',
+  },
+  categoryGridText: {
     fontFamily: fontFamily.bold,
-    fontSize: 12,
+    fontSize: 13,
     color: storeColors.textPrimary,
+    textAlign: 'center',
   },
   orderAgainCard: {
     flexDirection: 'row',

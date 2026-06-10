@@ -21,27 +21,8 @@ import {
   MapPin,
   UtensilsCrossed,
   Store,
-  Coffee,
-  SlidersHorizontal,
-  Star,
-  X,
-  ArrowRight,
-  Clock,
-  Bike,
-  ImageIcon,
-  ChevronRight,
-  ChevronDown,
-  Package,
-  Home as HomeIcon,
-  Check,
-  Plus,
-  LayoutGrid,
-  Menu,
-  Croissant,
-  ShoppingBag,
-  IceCream,
-  Utensils,
-} from 'lucide-react-native';
+import { Menu, Search, Filter, ShoppingBag, MapPin, ChevronDown, Check, Home as HomeIcon, Plus, ArrowRight, X, Clock, Bike, Star, Store, UtensilsCrossed, Settings, SlidersHorizontal, Package, ChevronRight, Share2 } from 'lucide-react-native';
+import { AddressSelector } from '../../components/AddressSelector';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, tagsApi, areasApi, bannersApi, productsApi, BASE_URL } from '@shu/api-client';
@@ -309,66 +290,8 @@ export default function Home() {
 
         {/* Address bar */}
         <View style={styles.addressBarSection}>
-          <Pressable style={styles.addressBarRow} onPress={() => setAddressPickerVisible(true)}>
-            <View style={styles.addressIconWrap}>
-              <MapPin size={24} color={colors.primary} />
-            </View>
-            <View style={styles.addressBarTextCol}>
-              <View style={styles.addressBarLabelRow}>
-                <Text style={styles.addressBarLabel}>التوصيل إلى</Text>
-                <ChevronDown size={14} color={colors.textMuted} />
-              </View>
-              <Text style={styles.addressBarName} numberOfLines={1}>
-                {selectedAddress ? selectedAddress.label : 'اختر عنوان التوصيل'}
-              </Text>
-            </View>
-          </Pressable>
+          <AddressSelector />
         </View>
-
-        {/* Address picker modal */}
-        <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
-          <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
-          <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
-            <View style={styles.modalHandle} />
-            <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
-              {addresses.length === 0 ? (
-                <View style={styles.emptyAddresses}>
-                  <MapPin size={40} color={colors.border} />
-                  <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
-                  <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
-                </View>
-              ) : (
-                addresses.map((a) => {
-                  const isActive = (selectedAddress?.id ?? null) === a.id || (selectedAddressId === null && addresses[0]?.id === a.id);
-                  return (
-                    <Pressable
-                      key={a.id}
-                      style={[styles.addrRow, isActive && styles.addrRowActive]}
-                      onPress={() => { selectAddress(a.id); setAddressPickerVisible(false); }}
-                    >
-                      <View style={[styles.addrIconCircle, isActive && styles.addrIconCircleActive]}>
-                        <HomeIcon size={18} color={isActive ? colors.primary : colors.textMuted} />
-                      </View>
-                      <View style={styles.addrRowText}>
-                        <Text style={[styles.addrLabel, isActive && styles.addrLabelActive]}>{a.label}</Text>
-                        <Text style={styles.addrDetail} numberOfLines={1}>{a.detail}</Text>
-                      </View>
-                      {isActive && <Check size={18} color={colors.primary} />}
-                    </Pressable>
-                  );
-                })
-              )}
-            </ScrollView>
-            <Pressable
-              style={styles.addAddressBtn}
-              onPress={() => { setAddressPickerVisible(false); router.push('/profile/addresses'); }}
-            >
-              <Plus size={18} color={colors.white} />
-              <Text style={styles.addAddressBtnText}>إضافة عنوان جديد</Text>
-            </Pressable>
-          </View>
-        </Modal>
 
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingBottom: 100 + bottomInset }]}
@@ -555,68 +478,7 @@ export default function Home() {
         </View>
 
         {/* Center: Address selector */}
-        <Pressable style={styles.headerAddressBtn} onPress={() => setAddressPickerVisible(true)}>
-          <View style={styles.addressLabelRow}>
-            <Text style={styles.addressLabel}>التوصيل إلى</Text>
-            <ChevronDown size={12} color={colors.primary} style={{ marginTop: 2 }} />
-          </View>
-          <Text style={styles.addressName} numberOfLines={1}>
-            {selectedAddress 
-              ? `${selectedAddress.label}، ${currentArea?.city || ''}` 
-              : 'اختر عنوان التوصيل'}
-          </Text>
-        </Pressable>
-
-        {/* Left (renders on far left in forced RTL): Hamburger Menu Button */}
-        <Pressable style={styles.headerCircularBtn} onPress={() => router.replace('/sections')}>
-          <Menu size={24} color={colors.primary} />
-        </Pressable>
-      </View>
-
-      {/* Address picker modal (shared) */}
-      <Modal visible={addressPickerVisible} transparent animationType="slide" onRequestClose={() => setAddressPickerVisible(false)}>
-        <Pressable style={styles.modalOverlay} onPress={() => setAddressPickerVisible(false)} />
-        <View style={[styles.modalSheet, { paddingBottom: insets.bottom + spacing[4] }]}>
-          <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>اختر عنوان التوصيل</Text>
-          <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
-            {addresses.length === 0 ? (
-              <View style={styles.emptyAddresses}>
-                <MapPin size={40} color={colors.border} />
-                <Text style={styles.emptyAddressesText}>لا توجد عناوين محفوظة</Text>
-                <Text style={styles.emptyAddressesHint}>أضف عنواناً لتسريع عملية الطلب</Text>
-              </View>
-            ) : (
-              addresses.map((a) => {
-                const isActive = (selectedAddress?.id ?? null) === a.id || (selectedAddressId === null && addresses[0]?.id === a.id);
-                return (
-                  <Pressable
-                    key={a.id}
-                    style={[styles.addrRow, isActive && styles.addrRowActive]}
-                    onPress={() => { selectAddress(a.id); setAddressPickerVisible(false); }}
-                  >
-                    <View style={[styles.addrIconCircle, isActive && styles.addrIconCircleActive]}>
-                      <HomeIcon size={18} color={isActive ? colors.primary : colors.textMuted} />
-                    </View>
-                    <View style={styles.addrRowText}>
-                      <Text style={[styles.addrLabel, isActive && styles.addrLabelActive]}>{a.label}</Text>
-                      <Text style={styles.addrDetail} numberOfLines={1}>{a.detail}</Text>
-                    </View>
-                    {isActive && <Check size={18} color={colors.primary} />}
-                  </Pressable>
-                );
-              })
-            )}
-          </ScrollView>
-          <Pressable
-            style={styles.addAddressBtn}
-            onPress={() => { setAddressPickerVisible(false); router.push('/profile/addresses'); }}
-          >
-            <Plus size={18} color={colors.white} />
-            <Text style={styles.addAddressBtnText}>إضافة عنوان جديد</Text>
-          </Pressable>
-        </View>
-      </Modal>
+        <AddressSelector />
 
       {/* Full-page search overlay */}
       {isSearchActive && (

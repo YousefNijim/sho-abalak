@@ -246,8 +246,11 @@ export class OrdersService {
     return { ...order, checkout };
   }
 
-  async findForUser(user: AuthUser) {
+  async findForUser(user: AuthUser, businessType?: 'FOOD' | 'STORE') {
     const where = await this.scopeFor(user);
+    if (businessType) {
+      where.business = { type: businessType };
+    }
     return this.prisma.order.findMany({ where, include: ORDER_INCLUDE, orderBy: { createdAt: 'desc' } });
   }
 

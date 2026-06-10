@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@shu/shared-types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -26,8 +26,8 @@ export class OrdersController {
   }
 
   @Get()
-  findMine(@CurrentUser() user: AuthUser) {
-    return this.orders.findForUser(user);
+  findMine(@CurrentUser() user: AuthUser, @Query('businessType') businessType?: 'FOOD' | 'STORE') {
+    return this.orders.findForUser(user, businessType);
   }
 
   @Get(':id')

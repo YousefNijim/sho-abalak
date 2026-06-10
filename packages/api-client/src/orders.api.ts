@@ -72,7 +72,7 @@ export const ordersApi = {
   create: (dto: CreateOrderDto) =>
     http.post<Order>('/orders', dto).then((r) => r.data),
 
-  list: (params?: { status?: string; limit?: number }) =>
+  list: (params?: { status?: string; limit?: number; businessType?: 'FOOD' | 'STORE' }) =>
     http.get<Order[]>('/orders', { params }).then((r) => r.data),
 
   getById: (id: string) =>

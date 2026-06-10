@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Platf
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Search, SlidersHorizontal, Heart, Clock, Bike, Store } from 'lucide-react-native';
+import { ArrowRight, Search, SlidersHorizontal, Heart, Clock, Bike, Store, Star } from 'lucide-react-native';
 import { Image } from 'expo-image';
-import { businessesApi, tagsApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, tagsApi, addressesApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 import { fontFamily, spacing } from '../../src/theme';
 
@@ -32,7 +32,15 @@ const storeColors = {
 export default function AllStores() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const selectedAddress = useSavedAddressesStore((s) => s.selectedAddress());
+  const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: () => addressesApi.list(),
+  });
+
+  const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;
+
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
 
   const { data: tags = [] } = useQuery({

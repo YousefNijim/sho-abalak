@@ -37,8 +37,8 @@ export default function Orders() {
 
   // Fetch orders from API
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ['orders', 'FOOD'],
-    queryFn: () => ordersApi.list({ businessType: 'FOOD' }),
+    queryKey: ['orders', 'STORE'],
+    queryFn: () => ordersApi.list({ businessType: 'STORE' }),
   });
 
   const current = orders.filter((o: any) =>

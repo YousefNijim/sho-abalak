@@ -86,9 +86,16 @@ export default function StoresTabsLayout() {
         name="orders"
         options={{
           title: 'الطلبات',
-          href: '/(tabs)/orders', // global orders but might need specific store orders if requested
           headerShown: false,
           tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'حسابي',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
       <Tabs.Screen

@@ -6,10 +6,10 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Star, Clock, Bike, MapPin, Store, Plus, Minus, ArrowRight, Share2, Heart, Banknote, Search, Package } from 'lucide-react-native';
 import { businessesApi, offersApi, BASE_URL } from '@shu/api-client';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useCartStore } from '../../../src/stores/cart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { VariantPicker, type CartAddPayload } from '../../components/VariantPicker';
-import { fontFamily, spacing } from '../../src/theme';
+import { VariantPicker, type CartAddPayload } from '../../../components/VariantPicker';
+import { fontFamily, spacing } from '../../../src/theme';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;

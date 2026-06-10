@@ -1,5 +1,5 @@
 import { ProfileScreen } from '../../components/ProfileScreen';
 
-export default function ProfileTab() {
+export default function StoreProfileTab() {
   return <ProfileScreen />;
 }
