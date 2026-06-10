@@ -130,7 +130,7 @@ export default function Cart() {
       businessId,
       areaId: deliveryAreaId,
       paymentMethod: payment,
-      items: items.map((it) => ({ productId: it.productId, quantity: it.quantity })),
+      items: items.map((it) => ({ productId: it.productId, quantity: it.quantity, variantId: it.variantId ?? undefined })),
       note: notes.trim() || undefined,
       deliveryAreaName: areaLabel,
       deliveryAddressDetail: selectedAddress?.detail,
@@ -296,7 +296,7 @@ export default function Cart() {
         {/* Cart Items */}
         <View style={styles.itemsSection}>
           {items.map((it) => (
-            <View key={it.productId} style={styles.itemCard}>
+            <View key={`${it.productId}__${it.variantId ?? ''}`} style={styles.itemCard}>
               {/* Image */}
               <View style={styles.itemImageWrap}>
                 {(it as any).imageUrl ? (
@@ -310,19 +310,24 @@ export default function Cart() {
               {/* Content */}
               <View style={styles.itemContent}>
                 <View style={styles.itemHeader}>
-                  <Pressable onPress={() => removeItem(it.productId)} style={styles.deleteBtn}>
+                  <Pressable onPress={() => removeItem(it.productId, it.variantId)} style={styles.deleteBtn}>
                     <Trash2 size={18} color={colors.error} />
                   </Pressable>
-                  <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
+                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
+                    {it.variantName ? (
+                      <Text style={styles.itemVariantName}>{it.variantName}</Text>
+                    ) : null}
+                  </View>
                 </View>
                 <Text style={styles.itemPrice}>{it.price} ₪</Text>
                 <View style={styles.itemFooter}>
                   <View style={styles.qtyWrap}>
-                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1)}>
+                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
                       <Plus size={18} color={colors.white} />
                     </Pressable>
                     <Text style={styles.qtyText}>{it.quantity}</Text>
-                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1)}>
+                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
                       <Minus size={18} color={colors.textPrimary} />
                     </Pressable>
                   </View>
@@ -469,7 +474,8 @@ const styles = StyleSheet.create({
   itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   itemContent: { flex: 1, minWidth: 0 },
   itemHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-end' },
-  itemName: { fontFamily: fontFamily.semibold, fontSize: 15, color: colors.textPrimary, flex: 1, textAlign: 'right' },
+  itemName: { fontFamily: fontFamily.semibold, fontSize: 15, color: colors.textPrimary, textAlign: 'right' },
+  itemVariantName: { fontFamily: fontFamily.regular, fontSize: 12, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
   deleteBtn: { padding: 2, marginLeft: spacing[1] },
   itemPrice: { fontFamily: fontFamily.bold, color: colors.primary, marginTop: 4, textAlign: 'right' },
   itemFooter: { marginTop: spacing[2], flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

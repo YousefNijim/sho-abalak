@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput, FlatList } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -17,7 +17,9 @@ import {
   ArrowRight,
   Share2,
   Heart,
-  Banknote
+  Banknote,
+  Search,
+  Package,
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, offersApi, BASE_URL } from '@shu/api-client';
@@ -27,6 +29,7 @@ const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
 import { useCartStore } from '../../src/stores/cart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { VariantPicker, type CartAddPayload } from '../../components/VariantPicker';
 
 const TYPE_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> = {
   FOOD:  { Icon: UtensilsCrossed, color: colors.primary },
@@ -37,7 +40,7 @@ export default function BusinessDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  
+
   const addItem    = useCartStore((s) => s.addItem);
   const updateQty  = useCartStore((s) => s.updateQty);
   const clearCart  = useCartStore((s) => s.clear);
@@ -48,6 +51,11 @@ export default function BusinessDetail() {
   const [tab, setTab] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const queryClient = useQueryClient();
+
+  // STORE-only state
+  const [storeSearch, setStoreSearch] = useState('');
+  const [storeCatTab, setStoreCatTab] = useState<string | null>(null);
+  const [pickerProduct, setPickerProduct] = useState<any | null>(null);
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', id],
@@ -61,7 +69,7 @@ export default function BusinessDetail() {
     enabled: !!id,
   });
 
-  // Build a map: productId → discountedPrice (lowest discount wins if multiple offers)
+  // Build discount maps (used by both FOOD and STORE)
   const discountMap = new Map<string, number>();
   const categoryDiscountMap = new Map<string, number>();
   for (const offer of businessOffers) {
@@ -82,6 +90,116 @@ export default function BusinessDetail() {
     return 0;
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['business', id] });
+    setRefreshing(false);
+  };
+
+  // ── FOOD add-to-cart (unchanged) ────────────────────────────────────────────
+  const handleAdd = (p: Product) => {
+    const result = addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+    if (result === 'different_business') {
+      if (Platform.OS === 'web') {
+        if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
+          clearCart();
+          addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+        }
+        return;
+      }
+      Alert.alert(
+        'تنبيه السلة',
+        'سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'إفراغ والبدء',
+            style: 'destructive',
+            onPress: () => {
+              clearCart();
+              addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+            },
+          },
+        ],
+      );
+    }
+  };
+
+  // ── STORE add-to-cart via VariantPicker ─────────────────────────────────────
+  const handleStoreAddToCart = (payload: CartAddPayload) => {
+    const doAdd = () => {
+      for (let i = 0; i < payload.quantity; i++) {
+        addItem(
+          {
+            productId: payload.productId,
+            name: payload.name,
+            price: payload.price,
+            variantId: payload.variantId,
+            variantName: payload.variantName,
+          },
+          business!.id,
+          business!.areaId,
+        );
+      }
+    };
+
+    const result = addItem(
+      {
+        productId: payload.productId,
+        name: payload.name,
+        price: payload.price,
+        variantId: payload.variantId,
+        variantName: payload.variantName,
+      },
+      business!.id,
+      business!.areaId,
+    );
+
+    if (result === 'different_business') {
+      if (Platform.OS === 'web') {
+        if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
+          clearCart();
+          // Re-add with full quantity
+          for (let i = 0; i < payload.quantity; i++) {
+            addItem(
+              { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+              business!.id, business!.areaId,
+            );
+          }
+        }
+        return;
+      }
+      Alert.alert(
+        'تنبيه السلة',
+        'سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟',
+        [
+          { text: 'إلغاء', style: 'cancel' },
+          {
+            text: 'إفراغ والبدء',
+            style: 'destructive',
+            onPress: () => {
+              clearCart();
+              for (let i = 0; i < payload.quantity; i++) {
+                addItem(
+                  { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+                  business!.id, business!.areaId,
+                );
+              }
+            },
+          },
+        ],
+      );
+    } else if (payload.quantity > 1) {
+      // First addItem already added 1, add remaining
+      for (let i = 1; i < payload.quantity; i++) {
+        addItem(
+          { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+          business!.id, business!.areaId,
+        );
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -98,48 +216,248 @@ export default function BusinessDetail() {
     );
   }
 
+  const isStore = business.type === 'STORE';
   const catMeta = TYPE_ICON[business.type] ?? TYPE_ICON.FOOD;
   const products = business.products || [];
+
+  // ── FOOD view data ───────────────────────────────────────────────────────────
   const categories = ['الكل', ...Array.from(new Set(products.map((p: any) => p.category).filter(Boolean) as string[]))];
   const filteredProducts = tab === 0 ? products : products.filter((p: any) => p.category === categories[tab]);
 
-  const handleAdd = (p: Product) => {
-    const result = addItem({ productId: p.id, name: p.name, price: p.price }, business.id, business.areaId);
-    if (result === 'different_business') {
-      if (Platform.OS === 'web') {
-        if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
-          clearCart();
-          addItem({ productId: p.id, name: p.name, price: p.price }, business.id, business.areaId);
-        }
-        return;
-      }
-      Alert.alert(
-        'تنبيه السلة',
-        'سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟',
-        [
-          { text: 'إلغاء', style: 'cancel' },
-          {
-            text: 'إفراغ والبدء',
-            style: 'destructive',
-            onPress: () => {
-              clearCart();
-              addItem({ productId: p.id, name: p.name, price: p.price }, business.id, business.areaId);
-            },
-          },
-        ],
-      );
-    }
-  };
+  // ── STORE view data ──────────────────────────────────────────────────────────
+  const storeCategoryNames = Array.from(
+    new Set(products.map((p: any) => p.productCategory?.name).filter(Boolean) as string[])
+  );
+  const storeFilteredProducts = products.filter((p: any) => {
+    const matchesCat = !storeCatTab || p.productCategory?.name === storeCatTab;
+    const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
+    return matchesCat && matchesSearch;
+  });
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['business', id] });
-    setRefreshing(false);
-  };
+  // ── Shared business header ───────────────────────────────────────────────────
+  const BusinessHeader = () => (
+    <>
+      {/* ── Hero image ── */}
+      <View style={styles.heroWrap}>
+        {business.imageUrl ? (
+          <Image source={{ uri: mediaUrl(business.imageUrl)! }} style={styles.heroImg} contentFit="cover" />
+        ) : (
+          <View style={[styles.heroImg, styles.heroPlaceholder]}>
+            <View style={styles.heroIcon}>
+              <catMeta.Icon size={48} color={catMeta.color} />
+            </View>
+          </View>
+        )}
+        <LinearGradient
+          colors={['rgba(0,0,0,0.4)', 'transparent', 'transparent']}
+          style={styles.heroGradient}
+          pointerEvents="none"
+        />
 
+        {/* Back Button & Actions */}
+        <View style={[styles.heroActions, { top: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
+          <Pressable style={styles.heroBtn} onPress={() => router.back()}>
+            <ArrowRight size={24} color={colors.textPrimary} />
+          </Pressable>
+          <View style={styles.heroActionsRight}>
+            <Pressable style={styles.heroBtn}>
+              <Share2 size={22} color={colors.textPrimary} />
+            </Pressable>
+            <Pressable style={styles.heroBtn}>
+              <Heart size={22} color={colors.textPrimary} />
+            </Pressable>
+          </View>
+        </View>
+      </View>
+
+      {/* ── Info block ── */}
+      <View style={styles.infoCard}>
+        <View style={styles.infoHeader}>
+          <View style={styles.infoTitleWrap}>
+            <Text style={styles.businessName}>{business.name}</Text>
+            <Text style={styles.businessLocation}>{business.area?.city || 'فلسطين'} - {business.area?.name || ''}</Text>
+            {business.tags && business.tags.length > 0 ? (
+              <View style={styles.tagsRow}>
+                {business.tags.map((t: any) => (
+                  <View key={t.id} style={styles.tagPill}>
+                    <Text style={styles.tagPillText}>{t.name}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+            {business.addressDetail ? (
+              <View style={styles.addressRow}>
+                <MapPin size={14} color={colors.textMuted} />
+                <Text style={styles.addressText}>{business.addressDetail}</Text>
+              </View>
+            ) : null}
+            {business.openTime && business.closeTime ? (
+              <View style={styles.addressRow}>
+                <Clock size={14} color={colors.textMuted} />
+                <Text style={styles.addressText}>{business.openTime} - {business.closeTime}</Text>
+              </View>
+            ) : null}
+          </View>
+          <View style={styles.ratingBadge}>
+            <Star size={16} color="#733600" fill="#733600" />
+            <Text style={styles.ratingText}>{business.rating ? business.rating.toFixed(1) : '4.8'}</Text>
+          </View>
+        </View>
+
+        <Pressable
+          style={styles.reviewsLink}
+          onPress={() => router.push({ pathname: '/business/reviews', params: { businessId: id, businessName: business.name } })}
+        >
+          <Star size={14} color={colors.primary} fill={colors.primary} />
+          <Text style={styles.reviewsLinkText}>
+            {business.rating ? `${Number(business.rating).toFixed(1)} ★` : 'لا يوجد تقييم'} — اقرأ التقييمات
+          </Text>
+        </Pressable>
+
+        <View style={styles.infoDetailsRow}>
+          <View style={styles.detailItem}>
+            <Clock size={18} color={colors.primary} />
+            <Text style={styles.detailText}>25-35 دقيقة</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Bike size={18} color={colors.primary} />
+            <Text style={styles.detailText}>توصيل {business.area?.deliveryFee ?? 0} ₪</Text>
+          </View>
+          <View style={styles.detailItem}>
+            <Banknote size={18} color={colors.primary} />
+            <Text style={styles.detailText}>دفع نقدي</Text>
+          </View>
+        </View>
+        {business.minimumOrder ? (
+          <View style={styles.minimumOrderBadge}>
+            <Text style={styles.minimumOrderText}>الحد الأدنى للطلب: {Number(business.minimumOrder)} ₪</Text>
+          </View>
+        ) : null}
+      </View>
+    </>
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // STORE view
+  // ══════════════════════════════════════════════════════════════════════════════
+  if (isStore) {
+    const numCols = 2;
+
+    return (
+      <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: cartQty > 0 ? 100 : spacing[8] }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} colors={[colors.primary]} tintColor={colors.primary} />
+          }
+        >
+          <BusinessHeader />
+
+          {/* Search bar */}
+          <View style={styles.storeSearchWrap}>
+            <View style={styles.storeSearchBar}>
+              <Search size={18} color={colors.textMuted} style={styles.storeSearchIcon} />
+              <TextInput
+                style={styles.storeSearchInput}
+                placeholder="ابحث في المتجر..."
+                placeholderTextColor={colors.textMuted}
+                value={storeSearch}
+                onChangeText={setStoreSearch}
+                textAlign="right"
+                returnKeyType="search"
+              />
+            </View>
+          </View>
+
+          {/* Category tabs (horizontal) */}
+          {storeCategoryNames.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.storeCatScroll}
+            >
+              {/* "الكل" tab */}
+              <Pressable
+                style={[styles.storeCatBtn, !storeCatTab && styles.storeCatBtnActive]}
+                onPress={() => setStoreCatTab(null)}
+              >
+                <Text style={[styles.storeCatText, !storeCatTab && styles.storeCatTextActive]}>الكل</Text>
+              </Pressable>
+              {storeCategoryNames.map((catName) => (
+                <Pressable
+                  key={catName}
+                  style={[styles.storeCatBtn, storeCatTab === catName && styles.storeCatBtnActive]}
+                  onPress={() => setStoreCatTab(catName)}
+                >
+                  <Text style={[styles.storeCatText, storeCatTab === catName && styles.storeCatTextActive]}>
+                    {catName}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* Products grid (2 columns) */}
+          <View style={styles.storeGrid}>
+            {storeFilteredProducts.length === 0 ? (
+              <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
+            ) : (
+              // Manual 2-column grid (FlatList can't nest in ScrollView)
+              storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
+                if (idx % numCols === 0) rows.push([p]);
+                else rows[rows.length - 1].push(p);
+                return rows;
+              }, []).map((row: any[], rowIdx: number) => (
+                <View key={rowIdx} style={styles.storeGridRow}>
+                  {row.map((p: any) => <StoreProductCard
+                    key={p.id}
+                    product={p}
+                    isOpen={business.isOpen}
+                    onPress={() => setPickerProduct(p)}
+                  />)}
+                  {/* Filler if row has only 1 item */}
+                  {row.length < numCols && <View style={styles.storeGridFiller} />}
+                </View>
+              ))
+            )}
+          </View>
+        </ScrollView>
+
+        {/* Floating Cart Bar */}
+        {cartQty > 0 && (
+          <View style={[styles.cartBarContainer, { paddingBottom: Platform.OS === 'ios' ? insets.bottom || spacing[4] : spacing[4] }]}>
+            <Pressable style={styles.cartBar} onPress={() => router.push('/cart')}>
+              <View style={styles.cartBarLeft}>
+                <View style={styles.cartBarBadge}>
+                  <Text style={styles.cartBarBadgeText}>{cartQty}</Text>
+                </View>
+                <Text style={styles.cartBarText}>عرض السلة</Text>
+              </View>
+              <Text style={styles.cartBarTotal}>{cartTotal} ₪</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {/* Variant Picker Modal */}
+        {pickerProduct && (
+          <VariantPicker
+            visible={!!pickerProduct}
+            product={pickerProduct}
+            onClose={() => setPickerProduct(null)}
+            onAddToCart={handleStoreAddToCart}
+          />
+        )}
+      </View>
+    );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // FOOD view (unchanged)
+  // ══════════════════════════════════════════════════════════════════════════════
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingBottom: cartQty > 0 ? 100 : spacing[8] }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -147,119 +465,22 @@ export default function BusinessDetail() {
         }
       >
 
-        {/* ── Hero image ── */}
-        <View style={styles.heroWrap}>
-          {business.imageUrl ? (
-            <Image source={{ uri: mediaUrl(business.imageUrl)! }} style={styles.heroImg} contentFit="cover" />
-          ) : (
-            <View style={[styles.heroImg, styles.heroPlaceholder]}>
-              <View style={styles.heroIcon}>
-                <catMeta.Icon size={48} color={catMeta.color} />
-              </View>
-            </View>
-          )}
-          <LinearGradient
-            colors={['rgba(0,0,0,0.4)', 'transparent', 'transparent']}
-            style={styles.heroGradient}
-            pointerEvents="none"
-          />
-          
-          {/* Back Button & Actions */}
-          <View style={[styles.heroActions, { top: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
-            <Pressable style={styles.heroBtn} onPress={() => router.back()}>
-              <ArrowRight size={24} color={colors.textPrimary} />
-            </Pressable>
-            <View style={styles.heroActionsRight}>
-              <Pressable style={styles.heroBtn}>
-                <Share2 size={22} color={colors.textPrimary} />
-              </Pressable>
-              <Pressable style={styles.heroBtn}>
-                <Heart size={22} color={colors.textPrimary} />
-              </Pressable>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Info block (overlapping) ── */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoHeader}>
-            <View style={styles.infoTitleWrap}>
-              <Text style={styles.businessName}>{business.name}</Text>
-              <Text style={styles.businessLocation}>{business.area?.city || 'فلسطين'} - {business.area?.name || ''}</Text>
-              {business.tags && business.tags.length > 0 ? (
-                <View style={styles.tagsRow}>
-                  {business.tags.map((t) => (
-                    <View key={t.id} style={styles.tagPill}>
-                      <Text style={styles.tagPillText}>{t.name}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-              {business.addressDetail ? (
-                <View style={styles.addressRow}>
-                  <MapPin size={14} color={colors.textMuted} />
-                  <Text style={styles.addressText}>{business.addressDetail}</Text>
-                </View>
-              ) : null}
-              {business.openTime && business.closeTime ? (
-                <View style={styles.addressRow}>
-                  <Clock size={14} color={colors.textMuted} />
-                  <Text style={styles.addressText}>{business.openTime} - {business.closeTime}</Text>
-                </View>
-              ) : null}
-            </View>
-            <View style={styles.ratingBadge}>
-              <Star size={16} color="#733600" fill="#733600" />
-              <Text style={styles.ratingText}>{business.rating ? business.rating.toFixed(1) : '4.8'}</Text>
-            </View>
-          </View>
-
-          {/* Reviews link */}
-          <Pressable
-            style={styles.reviewsLink}
-            onPress={() => router.push({ pathname: '/business/reviews', params: { businessId: id, businessName: business.name } })}
-          >
-            <Star size={14} color={colors.primary} fill={colors.primary} />
-            <Text style={styles.reviewsLinkText}>
-              {business.rating ? `${Number(business.rating).toFixed(1)} ★` : 'لا يوجد تقييم'} — اقرأ التقييمات
-            </Text>
-          </Pressable>
-
-          <View style={styles.infoDetailsRow}>
-            <View style={styles.detailItem}>
-              <Clock size={18} color={colors.primary} />
-              <Text style={styles.detailText}>25-35 دقيقة</Text>
-            </View>
-            <View style={styles.detailItem}>
-              <Bike size={18} color={colors.primary} />
-              <Text style={styles.detailText}>توصيل {business.area?.deliveryFee ?? 0} ₪</Text>
-            </View>
-            <View style={styles.detailItem}>
-              <Banknote size={18} color={colors.primary} />
-              <Text style={styles.detailText}>دفع نقدي</Text>
-            </View>
-          </View>
-          {business.minimumOrder ? (
-            <View style={styles.minimumOrderBadge}>
-              <Text style={styles.minimumOrderText}>الحد الأدنى للطلب: {Number(business.minimumOrder)} ₪</Text>
-            </View>
-          ) : null}
-        </View>
+        <BusinessHeader />
 
         {/* ── Category tabs ── */}
         {categories.length > 0 && (
           <View style={styles.tabsContainer}>
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.tabsScrollContent}
             >
               {categories.map((cat, i) => {
                 const isActive = tab === i;
                 return (
-                  <Pressable 
-                    key={cat} 
-                    onPress={() => setTab(i)} 
+                  <Pressable
+                    key={cat}
+                    onPress={() => setTab(i)}
                     style={[styles.tabBtn, isActive ? styles.tabBtnActive : styles.tabBtnInactive]}
                   >
                     <Text style={[styles.tabText, isActive ? styles.tabTextActive : styles.tabTextInactive]}>{cat}</Text>
@@ -318,7 +539,7 @@ export default function BusinessDetail() {
                       )}
                     </View>
                     {p.isAvailable && business.isOpen ? (() => {
-                      const cartItem = cartItems.find((i) => i.productId === p.id);
+                      const cartItem = cartItems.find((i) => i.productId === p.id && !i.variantId);
                       return cartItem ? (
                         <View style={styles.stepperWrap}>
                           <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, -1)}>
@@ -365,10 +586,85 @@ export default function BusinessDetail() {
   );
 }
 
+// ── Store Product Card component ──────────────────────────────────────────────
+
+function StoreProductCard({
+  product,
+  isOpen,
+  onPress,
+}: {
+  product: any;
+  isOpen: boolean;
+  onPress: () => void;
+}) {
+  const variants = (product.variants ?? []).filter((v: any) => v.isAvailable);
+  const hasVariants = product.hasVariants && variants.length > 0;
+
+  const minPrice = hasVariants
+    ? Math.min(...variants.map((v: any) => Number(v.price)))
+    : Number(product.price);
+
+  const priceLabel = hasVariants
+    ? `من ${minPrice.toFixed(2)} ₪`
+    : `${Number(product.price).toFixed(2)} ₪${product.unit ? ` / ${product.unit}` : ''}`;
+
+  const outOfStock = product.stock === 0;
+  const lowStock = product.stock !== null && product.stock !== undefined && product.stock > 0 && product.stock <= 5;
+  const unavailable = !product.isAvailable || !isOpen || outOfStock;
+
+  return (
+    <Pressable
+      style={[styles.storeCard, unavailable && styles.storeCardUnavailable]}
+      onPress={unavailable ? undefined : onPress}
+    >
+      {/* Image */}
+      <View style={styles.storeCardImageWrap}>
+        {product.imageUrl ? (
+          <Image
+            source={{ uri: (product.imageUrl.startsWith('http') ? product.imageUrl : `${BASE_URL}${product.imageUrl}`) }}
+            style={styles.storeCardImage}
+            contentFit="cover"
+          />
+        ) : (
+          <View style={[styles.storeCardImage, styles.storeCardImagePlaceholder]}>
+            <Package size={32} color={colors.border} />
+          </View>
+        )}
+
+        {/* Out of stock overlay */}
+        {outOfStock && (
+          <View style={styles.outOfStockOverlay}>
+            <Text style={styles.outOfStockText}>نفد المخزون</Text>
+          </View>
+        )}
+
+        {/* Low stock badge */}
+        {lowStock && (
+          <View style={styles.lowStockBadge}>
+            <Text style={styles.lowStockText}>آخر {product.stock}</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Info */}
+      <View style={styles.storeCardInfo}>
+        <Text style={styles.storeCardName} numberOfLines={2}>{product.name}</Text>
+        <Text style={styles.storeCardPrice}>{priceLabel}</Text>
+
+        {!unavailable && (
+          <View style={styles.storeCardAddBtn}>
+            <Plus size={16} color="#fff" strokeWidth={2.5} />
+          </View>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FCF3DC', // background-cream
+    backgroundColor: '#FCF3DC',
   },
   loaderContainer: {
     flex: 1,
@@ -376,39 +672,39 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  
+
   // Hero
-  heroWrap: { 
-    height: 256, // h-64
+  heroWrap: {
+    height: 256,
     position: 'relative',
     width: '100%'
   },
-  heroImg: { 
-    width: '100%', 
-    height: '100%' 
+  heroImg: {
+    width: '100%',
+    height: '100%'
   },
-  heroPlaceholder: { 
-    backgroundColor: 'rgba(151, 72, 0, 0.1)', 
-    alignItems: 'center', 
-    justifyContent: 'center' 
+  heroPlaceholder: {
+    backgroundColor: 'rgba(151, 72, 0, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  heroIcon: { 
-    width: 88, 
-    height: 88, 
-    borderRadius: radius.xl, 
-    backgroundColor: '#FFF', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
+  heroIcon: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.xl,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
       android: { elevation: 4 },
     }),
   },
-  heroGradient: { 
-    position: 'absolute', 
-    top: 0, 
-    left: 0, 
-    right: 0, 
+  heroGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     bottom: 0,
   },
   heroActions: {
@@ -438,11 +734,11 @@ const styles = StyleSheet.create({
   },
 
   // Info Card
-  infoCard: { 
-    backgroundColor: '#FFFFFF', 
-    marginHorizontal: spacing[4], 
-    borderRadius: radius.xl, 
-    marginTop: -40, // overlap
+  infoCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: spacing[4],
+    borderRadius: radius.xl,
+    marginTop: -40,
     padding: spacing[4],
     zIndex: 10,
     ...Platform.select({
@@ -508,15 +804,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#ffdbc7', // primary-fixed
+    backgroundColor: '#ffdbc7',
     paddingHorizontal: spacing[3],
     paddingVertical: 4,
     borderRadius: radius.full,
   },
   ratingText: {
-    fontSize: 13, // label-md
+    fontSize: 13,
     fontFamily: fontFamily.bold,
-    color: '#4e2200', // on-primary-container
+    color: '#4e2200',
   },
   reviewsLink: {
     flexDirection: 'row',
@@ -551,7 +847,7 @@ const styles = StyleSheet.create({
     gap: spacing[5],
     paddingTop: spacing[3],
     borderTopWidth: 1,
-    borderTopColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderTopColor: 'rgba(229, 224, 213, 1)',
     marginTop: spacing[3],
   },
   detailItem: {
@@ -560,12 +856,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   detailText: {
-    fontSize: 13, // label-md
+    fontSize: 13,
     fontFamily: fontFamily.medium,
-    color: '#564337', // on-surface-variant
+    color: '#564337',
   },
 
-  // Tabs
+  // FOOD Tabs
   tabsContainer: {
     marginTop: spacing[4],
     backgroundColor: '#FCF3DC',
@@ -589,7 +885,7 @@ const styles = StyleSheet.create({
   tabBtnInactive: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(229, 224, 213, 1)', // border-beige
+    borderColor: 'rgba(229, 224, 213, 1)',
   },
   tabText: {
     fontSize: 16,
@@ -603,7 +899,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
   },
 
-  // Products
+  // FOOD Products
   productsContainer: {
     paddingHorizontal: spacing[4],
     gap: spacing[3],
@@ -643,28 +939,28 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     position: 'relative',
   },
-  productImage: { 
-    width: '100%', 
-    height: '100%' 
+  productImage: {
+    width: '100%',
+    height: '100%'
   },
-  productImagePlaceholder: { 
-    alignItems: 'center', 
-    justifyContent: 'center' 
+  productImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   productInfo: {
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'flex-end',
   },
-  productName: { 
-    fontSize: 16, 
-    fontFamily: fontFamily.bold, 
-    color: colors.textPrimary, 
-    textAlign: 'right' 
+  productName: {
+    fontSize: 16,
+    fontFamily: fontFamily.bold,
+    color: colors.textPrimary,
+    textAlign: 'right'
   },
-  productDesc: { 
-    color: colors.textMuted, 
-    fontSize: 13, 
+  productDesc: {
+    color: colors.textMuted,
+    fontSize: 13,
     textAlign: 'right',
     marginTop: 2,
     fontFamily: fontFamily.regular,
@@ -676,33 +972,33 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: spacing[2],
   },
-  productPrice: { 
-    color: colors.primary, 
-    fontFamily: fontFamily.bold, 
-    fontSize: 17, // body-lg
+  productPrice: {
+    color: colors.primary,
+    fontFamily: fontFamily.bold,
+    fontSize: 17,
   },
-  addBtn: { 
-    width: 32, 
-    height: 32, 
-    borderRadius: radius.md, 
-    backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
-    alignItems: 'center', 
+  addBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(230, 120, 30, 1)',
+    alignItems: 'center',
     justifyContent: 'center',
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
       android: { elevation: 2 },
     }),
   },
-  unavailableBadge: { 
-    paddingHorizontal: spacing[2], 
-    paddingVertical: 4, 
-    borderRadius: radius.sm, 
-    backgroundColor: colors.border 
+  unavailableBadge: {
+    paddingHorizontal: spacing[2],
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+    backgroundColor: colors.border
   },
-  unavailableText: { 
-    color: colors.textMuted, 
-    fontSize: fontSizes.xs, 
-    fontFamily: fontFamily.semibold 
+  unavailableText: {
+    color: colors.textMuted,
+    fontSize: fontSizes.xs,
+    fontFamily: fontFamily.semibold
   },
 
   // Cart bar
@@ -714,13 +1010,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     backgroundColor: 'transparent',
   },
-  cartBar: { 
-    height: 56, 
-    borderRadius: radius.xl, 
-    backgroundColor: 'rgba(230, 120, 30, 1)', // primary-container
+  cartBar: {
+    height: 56,
+    borderRadius: radius.xl,
+    backgroundColor: 'rgba(230, 120, 30, 1)',
     flexDirection: 'row',
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing[6],
     ...Platform.select({
       ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 },
@@ -733,7 +1029,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   cartBarBadge: {
-    backgroundColor: 'rgba(78, 34, 0, 0.2)', // on-primary-container/20
+    backgroundColor: 'rgba(78, 34, 0, 0.2)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
@@ -741,12 +1037,12 @@ const styles = StyleSheet.create({
   cartBarBadgeText: {
     fontFamily: fontFamily.bold,
     fontSize: 13,
-    color: '#4e2200', // on-primary-container
+    color: '#4e2200',
   },
-  cartBarText: { 
-    color: '#4e2200', 
-    fontFamily: fontFamily.bold, 
-    fontSize: 16, 
+  cartBarText: {
+    color: '#4e2200',
+    fontFamily: fontFamily.bold,
+    fontSize: 16,
   },
   cartBarTotal: {
     fontFamily: fontFamily.bold,
@@ -779,5 +1075,163 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.bold,
     fontSize: fontSizes.base,
     color: colors.textPrimary,
+  },
+
+  // STORE-specific styles
+  storeSearchWrap: {
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[4],
+    paddingBottom: spacing[2],
+  },
+  storeSearchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
+    height: 48,
+    paddingHorizontal: spacing[4],
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' },
+    }),
+  },
+  storeSearchIcon: {
+    position: 'absolute',
+    right: spacing[4],
+  },
+  storeSearchInput: {
+    flex: 1,
+    fontFamily: fontFamily.regular,
+    fontSize: fontSizes.base,
+    color: colors.textPrimary,
+    paddingRight: 36,
+  },
+  storeCatScroll: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[3],
+    gap: spacing[2],
+    flexDirection: 'row',
+  },
+  storeCatBtn: {
+    paddingHorizontal: spacing[4],
+    paddingVertical: 8,
+    borderRadius: radius.full,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  storeCatBtnActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  storeCatText: {
+    fontSize: fontSizes.sm,
+    fontFamily: fontFamily.bold,
+    color: colors.textPrimary,
+  },
+  storeCatTextActive: {
+    color: '#FFFFFF',
+  },
+  storeGrid: {
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[4],
+    paddingTop: spacing[2],
+    gap: spacing[3],
+  },
+  storeGridRow: {
+    flexDirection: 'row',
+    gap: spacing[3],
+  },
+  storeGridFiller: {
+    flex: 1,
+  },
+  storeCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 4 },
+      android: { elevation: 2 },
+      web: { boxShadow: '0 2px 4px rgba(0,0,0,0.06)' },
+    }),
+  },
+  storeCardUnavailable: {
+    opacity: 0.6,
+  },
+  storeCardImageWrap: {
+    width: '100%',
+    aspectRatio: 1,
+    position: 'relative',
+    backgroundColor: colors.border + '40',
+  },
+  storeCardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  storeCardImagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outOfStockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outOfStockText: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: '#FFFFFF',
+  },
+  lowStockBadge: {
+    position: 'absolute',
+    top: spacing[2],
+    right: spacing[2],
+    backgroundColor: '#F59E0B',
+    borderRadius: radius.full,
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+  },
+  lowStockText: {
+    fontFamily: fontFamily.bold,
+    fontSize: 10,
+    color: '#FFFFFF',
+  },
+  storeCardInfo: {
+    padding: spacing[3],
+    alignItems: 'flex-end',
+  },
+  storeCardName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
+    textAlign: 'right',
+    marginBottom: 4,
+  },
+  storeCardPrice: {
+    fontFamily: fontFamily.semibold,
+    fontSize: fontSizes.sm,
+    color: colors.primary,
+    textAlign: 'right',
+  },
+  storeCardAddBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing[2],
+    alignSelf: 'flex-start',
   },
 });

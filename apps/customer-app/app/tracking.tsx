@@ -424,7 +424,12 @@ export default function Tracking() {
           
           {order.items?.map((it: any) => (
             <View key={it.id} style={styles.summaryRow}>
-              <Text style={styles.summaryItemText}>{it.product?.name} × {it.quantity}</Text>
+              <View style={{ alignItems: 'flex-end', flex: 1 }}>
+                <Text style={styles.summaryItemText}>{it.product?.name} × {it.quantity}</Text>
+                {it.variantName ? (
+                  <Text style={styles.summaryItemVariant}>{it.variantName}</Text>
+                ) : null}
+              </View>
               <Text style={styles.summaryItemText}>₪ {it.unitPrice * it.quantity}</Text>
             </View>
           ))}
@@ -730,6 +735,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     fontSize: 13,
     color: colors.textMuted,
+  },
+  summaryItemVariant: {
+    fontFamily: fontFamily.regular,
+    fontSize: 11,
+    color: colors.textMuted,
+    textAlign: 'right',
+    marginTop: 1,
   },
   summaryTotalRow: {
     flexDirection: 'row',

@@ -154,6 +154,15 @@ export default function Home() {
       }),
   });
 
+  const { data: storeBusinesses = [] } = useQuery({
+    queryKey: ['businesses', 'STORE', selectedAddress?.areaId],
+    queryFn: () =>
+      businessesApi.list({
+        type: 'STORE',
+        areaId: selectedAddress?.areaId || undefined,
+      }),
+  });
+
   const isSearchActive = searchFocused || searchQuery.trim().length > 0;
 
   const selectedAreaId = selectedAddress?.areaId ?? undefined;
@@ -941,6 +950,50 @@ export default function Home() {
               </View>
             )}
           </View>
+        )}
+
+        {/* ── Stores & Supermarkets section ── */}
+        {(storeBusinesses as any[]).length > 0 && (
+          <>
+            <View style={styles.newSectionHeader}>
+              <Pressable onPress={() => router.push('/stores-coming-soon')}>
+                <Text style={styles.newSectionLink}>عرض الكل</Text>
+              </Pressable>
+              <Text style={styles.newSectionTitle}>المتاجر والسوبرماركت</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.storesHorizontalScroll}
+            >
+              {(storeBusinesses as any[]).map((b: any) => (
+                <Pressable
+                  key={b.id}
+                  style={styles.storeHCard}
+                  onPress={() => router.push(`/business/${b.id}`)}
+                >
+                  <View style={styles.storeHCardImg}>
+                    {b.imageUrl ? (
+                      <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                    ) : (
+                      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <Store size={32} color={colors.secondary} />
+                      </View>
+                    )}
+                    <View style={[styles.newStatusBadge, { backgroundColor: b.isOpen ? '#22C55E' : '#EF4444' }]}>
+                      <Text style={styles.newStatusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.storeHCardName} numberOfLines={1}>{b.name}</Text>
+                  {b.tags && b.tags.length > 0 && (
+                    <Text style={styles.storeHCardTag} numberOfLines={1}>
+                      {b.tags[0].name}
+                    </Text>
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </>
         )}
       </ScrollView>
     </View>
@@ -1978,6 +2031,49 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.extrabold,
     fontSize: fontSizes.lg,
     color: colors.primary,
+  },
+
+  // Stores horizontal scroll
+  storesHorizontalScroll: {
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[3],
+    gap: spacing[3],
+    flexDirection: 'row',
+  },
+  storeHCard: {
+    width: 130,
+    backgroundColor: '#FFFFFF',
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E5E0D5',
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.07, shadowRadius: 5 },
+      android: { elevation: 3 },
+      web: { boxShadow: '0 3px 6px rgba(0,0,0,0.07)' },
+    }),
+  },
+  storeHCardImg: {
+    width: '100%',
+    height: 100,
+    backgroundColor: '#F5F5F0',
+    position: 'relative',
+  },
+  storeHCardName: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: '#1C1C23',
+    textAlign: 'right',
+    padding: spacing[2],
+    paddingBottom: 2,
+  },
+  storeHCardTag: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.xs,
+    color: colors.secondary,
+    textAlign: 'right',
+    paddingHorizontal: spacing[2],
+    paddingBottom: spacing[2],
   },
 });
 

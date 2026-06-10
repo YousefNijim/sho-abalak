@@ -7,7 +7,13 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  variantId?: string | null;
+  variantName?: string | null;
 }
+
+// Unique key per cart line: same product + different variant = different line
+const lineKey = (productId: string, variantId?: string | null) =>
+  variantId ? `${productId}__${variantId}` : productId;
 
 interface CartState {
   businessId: string | null;
@@ -18,8 +24,8 @@ interface CartState {
     businessId: string,
     areaId: string,
   ) => 'added' | 'different_business';
-  removeItem: (productId: string) => void;
-  updateQty: (productId: string, delta: number) => void;
+  removeItem: (productId: string, variantId?: string | null) => void;
+  updateQty: (productId: string, delta: number, variantId?: string | null) => void;
   clear: () => void;
   total: () => number;
 }
@@ -33,15 +39,15 @@ export const useCartStore = create<CartState>()(
 
       addItem: (item, businessId, areaId) => {
         const { businessId: currentBiz, items } = get();
-        // Cart must belong to one business
         if (currentBiz && currentBiz !== businessId) {
           return 'different_business';
         }
-        const existing = items.find((i) => i.productId === item.productId);
+        const key = lineKey(item.productId, item.variantId);
+        const existing = items.find((i) => lineKey(i.productId, i.variantId) === key);
         if (existing) {
           set({
             items: items.map((i) =>
-              i.productId === item.productId
+              lineKey(i.productId, i.variantId) === key
                 ? { ...i, quantity: i.quantity + 1 }
                 : i,
             ),
@@ -56,19 +62,23 @@ export const useCartStore = create<CartState>()(
         return 'added';
       },
 
-      removeItem: (productId) =>
-        set((s) => ({ items: s.items.filter((i) => i.productId !== productId) })),
+      removeItem: (productId, variantId) => {
+        const key = lineKey(productId, variantId);
+        set((s) => ({ items: s.items.filter((i) => lineKey(i.productId, i.variantId) !== key) }));
+      },
 
-      updateQty: (productId, delta) =>
+      updateQty: (productId, delta, variantId) => {
+        const key = lineKey(productId, variantId);
         set((s) => ({
           items: s.items
             .map((i) =>
-              i.productId === productId
+              lineKey(i.productId, i.variantId) === key
                 ? { ...i, quantity: Math.max(0, i.quantity + delta) }
                 : i,
             )
             .filter((i) => i.quantity > 0),
-        })),
+        }));
+      },
 
       clear: () => set({ businessId: null, areaId: null, items: [] }),
 
