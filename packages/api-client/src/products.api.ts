@@ -61,6 +61,13 @@ export interface SearchProduct extends Product {
   business?: { id: string; name: string; imageUrl: string | null; isOpen: boolean; area?: { city: string; name: string; deliveryFee: number } };
 }
 
+export interface ImportResult {
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: Array<{ row: number; reason: string }>;
+}
+
 export const productsApi = {
   listByBusiness: (businessId: string) =>
     http
@@ -103,6 +110,21 @@ export const productsApi = {
 
   deleteVariant: (productId: string, variantId: string) =>
     http.delete(`/products/${productId}/variants/${variantId}`).then((r) => r.data),
+
+  importProducts: (businessId: string, file: Blob) => {
+    const formData = new FormData();
+    formData.append('file', file, 'products.xlsx');
+    return http
+      .post<ImportResult>(`/products/import?businessId=${businessId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data);
+  },
+
+  downloadTemplate: () =>
+    http
+      .get('/products/import/template', { responseType: 'blob' })
+      .then((r) => r.data),
 };
 
 export const categoriesApi = {

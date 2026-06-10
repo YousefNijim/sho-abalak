@@ -18,7 +18,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState, useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Pencil, Camera, X, ScanBarcode, ChevronDown, Package, AlertTriangle } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { Plus, Trash2, Pencil, Camera, X, ScanBarcode, ChevronDown, Package, AlertTriangle, Upload } from 'lucide-react-native';
 import { businessesApi, productsApi, categoriesApi } from '@shu/api-client';
 import type { Product, ProductCategory, ProductVariant } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../../src/theme';
@@ -101,6 +102,7 @@ const emptyVariantForm = (): VariantForm => ({ name: '', price: '', stock: '', b
 export default function MenuTab() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -362,10 +364,27 @@ export default function MenuTab() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + spacing[4] }]}>
-        <Pressable style={styles.addBtn} onPress={openAddModal}>
-          <Plus size={18} color="#fff" />
-          <Text style={styles.addBtnText}>إضافة {isStore ? 'منتج' : 'صنف'}</Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          <Pressable style={styles.addBtn} onPress={openAddModal}>
+            <Plus size={18} color="#fff" />
+            <Text style={styles.addBtnText}>إضافة {isStore ? 'منتج' : 'صنف'}</Text>
+          </Pressable>
+          {isStore && (
+            <Pressable 
+              style={[styles.addBtn, { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }]} 
+              onPress={() => {
+                if (Platform.OS === 'web') {
+                  router.push('/import-products' as any);
+                } else {
+                  Alert.alert('ميزة الويب فقط', 'هذه الميزة متاحة على نسخة الويب فقط');
+                }
+              }}
+            >
+              <Upload size={18} color={colors.textPrimary} />
+              <Text style={[styles.addBtnText, { color: colors.textPrimary }]}>استيراد</Text>
+            </Pressable>
+          )}
+        </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={styles.headerTitle}>{activeCategoryLabel}</Text>
           <Text style={styles.headerSub}>{isStore ? 'إدارة منتجات المتجر' : 'عرض وتعديل قائمتك الخاصة بك'}</Text>

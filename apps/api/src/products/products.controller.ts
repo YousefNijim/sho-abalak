@@ -1,4 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards, Res, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import * as xlsx from 'xlsx';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@shu/shared-types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -7,6 +10,7 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthUser } from '../auth/jwt.strategy';
 import { ProductsService } from './products.service';
+import { ImportService, ImportRow } from './import.service';
 import { CategoriesService } from './categories.service';
 import { VariantsService } from './variants.service';
 import { InventoryService } from './inventory.service';
@@ -23,6 +27,7 @@ export class ProductsController {
     private readonly categories: CategoriesService,
     private readonly variants: VariantsService,
     private readonly inventory: InventoryService,
+    private readonly importService: ImportService,
   ) {}
 
   // ── Products ─────────────────────────────────────────────────────────────
@@ -52,6 +57,96 @@ export class ProductsController {
   @Get()
   findByBusiness(@Query('businessId') businessId: string) {
     return this.products.findByBusiness(businessId);
+  }
+
+  @Get('import/template')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  downloadTemplate(@Res() res: Response) {
+    const wb = xlsx.utils.book_new();
+    
+    const headersAr = ['اسم المنتج', 'التصنيف', 'السعر', 'الكمية', 'الباركود', 'الوحدة', 'الوصف', 'متاح (true/false)'];
+    const headersEn = ['name', 'categoryName', 'price', 'stock', 'barcode', 'unit', 'description', 'isAvailable'];
+    
+    const example1 = ['تفاحة فوجي', 'فواكه', 15, 100, '123456789', 'كغ', 'تفاح طازج', true];
+    const example2 = ['حليب المراعي', 'ألبان', 6.5, 50, '987654321', 'لتر', 'حليب كامل الدسم', true];
+    
+    const ws = xlsx.utils.aoa_to_sheet([headersAr, headersEn, example1, example2]);
+    xlsx.utils.book_append_sheet(wb, ws, 'Products');
+    
+    const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    
+    res.setHeader('Content-Disposition', 'attachment; filename=products-template.xlsx');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
+  }
+
+  @Post('import')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async importProducts(
+    @CurrentUser() user: AuthUser,
+    @Query('businessId') businessId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('لم يتم إرفاق ملف');
+    }
+
+    try {
+      const workbook = xlsx.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      
+      const rawData: any[][] = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+      
+      if (rawData.length < 3) {
+        throw new BadRequestException('الملف فارغ أو لا يحتوي على بيانات كافية');
+      }
+
+      const keys = rawData[1] as string[];
+      const rows: ImportRow[] = [];
+      
+      for (let i = 2; i < rawData.length; i++) {
+        const dataRow = rawData[i];
+        if (!dataRow || dataRow.length === 0 || !dataRow.some(val => val !== undefined && val !== null && val !== '')) continue;
+        
+        const rowObj: any = {};
+        for (let j = 0; j < keys.length; j++) {
+           const key = keys[j]?.trim();
+           if (key) {
+             rowObj[key] = dataRow[j];
+           }
+        }
+        
+        let isAvailable = true;
+        if (rowObj.isAvailable !== undefined) {
+          if (typeof rowObj.isAvailable === 'string') {
+            isAvailable = rowObj.isAvailable.toLowerCase() !== 'false' && rowObj.isAvailable !== '0';
+          } else {
+            isAvailable = Boolean(rowObj.isAvailable);
+          }
+        }
+        
+        rows.push({
+          name: rowObj.name,
+          categoryName: rowObj.categoryName || rowObj.category,
+          price: rowObj.price,
+          stock: rowObj.stock,
+          barcode: rowObj.barcode,
+          unit: rowObj.unit,
+          description: rowObj.description,
+          isAvailable,
+        });
+      }
+
+      return await this.importService.importProducts(businessId, user.id, rows);
+    } catch (e: any) {
+      throw new BadRequestException(`فشل قراءة الملف: ${e.message}`);
+    }
   }
 
   @Post()
