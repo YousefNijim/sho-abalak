@@ -11,9 +11,10 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AdminInterventionDto } from './dto/admin-intervention.dto';
+import { InventoryService } from '../products/inventory.service';
 
 const ORDER_INCLUDE = {
-  items: { include: { product: true } },
+  items: { include: { product: true, variant: true } },
   business: { include: { area: true, owner: { select: { phone: true, name: true } } } },
   customer: { include: { area: true } },
   driver: { include: { user: true, area: true } },
@@ -40,6 +41,7 @@ export class OrdersService {
     private readonly payments: PaymentsService,
     private readonly socketGateway: SocketGateway,
     private readonly notifications: NotificationsService,
+    private readonly inventory: InventoryService,
   ) {}
 
   async create(customerId: string, dto: CreateOrderDto) {
@@ -58,11 +60,36 @@ export class OrdersService {
     }
 
     const priceOf = new Map(products.map((p) => [p.id, p.price]));
+
+    // Fetch variants for items that have variantId
+    const variantIds = dto.items.filter((i) => i.variantId).map((i) => i.variantId!);
+    const variants = variantIds.length > 0
+      ? await this.prisma.productVariant.findMany({ where: { id: { in: variantIds }, isAvailable: true } })
+      : [];
+    const variantMap = new Map(variants.map((v) => [v.id, v]));
+
+    // Stock check (restaurants have stock=null — never checked)
+    for (const item of dto.items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) continue;
+      if (item.variantId) {
+        const variant = variantMap.get(item.variantId);
+        if (!variant) throw new BadRequestException(`المتغير المحدد غير متوفر لـ "${product.name}"`);
+        if (variant.stock !== null && variant.stock < item.quantity) {
+          throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name} — ${variant.name}"`);
+        }
+      } else if (product.stock !== null && product.stock < item.quantity) {
+        throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name}"`);
+      }
+    }
+
     let subtotal = new Prisma.Decimal(0);
     const itemData = dto.items.map((i) => {
-      const unitPrice = priceOf.get(i.productId)!;
-      subtotal = subtotal.add(unitPrice.mul(i.quantity));
-      return { productId: i.productId, quantity: i.quantity, unitPrice };
+      const variant = i.variantId ? variantMap.get(i.variantId) : null;
+      const unitPrice = variant ? variant.price : priceOf.get(i.productId)!;
+      const variantName = variant ? variant.name : null;
+      subtotal = subtotal.add(new Prisma.Decimal(unitPrice).mul(i.quantity));
+      return { productId: i.productId, quantity: i.quantity, unitPrice, variantId: i.variantId ?? null, variantName };
     });
 
     // Minimum order check
@@ -132,13 +159,14 @@ export class OrdersService {
       if (couponId) {
         await tx.coupon.update({
           where: { id: couponId },
-          data: { 
+          data: {
             currentUses: { increment: 1 },
             currentTotalDiscount: { increment: couponDiscount }
           },
         });
       }
-      return tx.order.create({
+
+      const createdOrder = await tx.order.create({
         data: {
           id: orderId,
           customerId,
@@ -162,7 +190,46 @@ export class OrdersService {
         },
         include: ORDER_INCLUDE,
       });
+
+      // Decrement stock for products/variants that track it (restaurants: stock=null → skip)
+      for (const item of dto.items) {
+        if (item.variantId) {
+          const variant = variantMap.get(item.variantId);
+          if (variant?.stock !== null && variant?.stock !== undefined) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
+        } else {
+          const product = products.find((p) => p.id === item.productId);
+          if (product?.stock !== null && product?.stock !== undefined) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
+        }
+      }
+
+      return createdOrder;
     });
+
+    // Fire-and-forget low-stock alerts after transaction (non-blocking)
+    if (business.ownerId) {
+      for (const item of dto.items) {
+        if (!item.variantId) {
+          const product = products.find((p) => p.id === item.productId);
+          if (product && product.stock !== null) {
+            const freshStock = product.stock - item.quantity;
+            this.inventory.checkAndAlertLowStock(
+              { ...product, stock: freshStock },
+              business.ownerId,
+            );
+          }
+        }
+      }
+    }
 
     // Emit new order socket event to the business owner
     if (order.business?.ownerId) {
@@ -262,6 +329,25 @@ export class OrdersService {
             where: { id },
             data: { pendingDriverId: null },
           });
+        }
+
+        // Restore stock for tracked products/variants (restaurants: stock=null → skip)
+        const cancelledItems = await tx.orderItem.findMany({
+          where: { orderId: id },
+          include: { product: true, variant: true },
+        });
+        for (const item of cancelledItems) {
+          if (item.variantId && item.variant?.stock !== null && item.variant?.stock !== undefined) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { stock: { increment: item.quantity } },
+            });
+          } else if (!item.variantId && item.product?.stock !== null && item.product?.stock !== undefined) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stock: { increment: item.quantity } },
+            });
+          }
         }
       }
 

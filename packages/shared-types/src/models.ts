@@ -46,6 +46,27 @@ export interface Business {
   isOpen: boolean;
 }
 
+export interface ProductCategory {
+  id: string;
+  businessId: string;
+  name: string;
+  parentId: string | null;
+  sortOrder: number;
+  imageUrl: string | null;
+  children?: ProductCategory[];
+}
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  stock: number | null;
+  barcode: string | null;
+  sortOrder: number;
+  isAvailable: boolean;
+}
+
 export interface Product {
   id: string;
   businessId: string;
@@ -55,6 +76,15 @@ export interface Product {
   imageUrl: string | null;
   isAvailable: boolean;
   category: string | null;
+  // Store-only additions (nullable — restaurants unaffected)
+  categoryId?: string | null;
+  barcode?: string | null;
+  stock?: number | null;
+  lowStockAlert?: number | null;
+  hasVariants?: boolean;
+  unit?: string | null;
+  variants?: ProductVariant[];
+  productCategory?: ProductCategory;
 }
 
 export interface Driver {
@@ -71,6 +101,8 @@ export interface OrderItem {
   productId: string;
   quantity: number;
   unitPrice: number;
+  variantId?: string | null;
+  variantName?: string | null;
 }
 
 export interface Order {

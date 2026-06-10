@@ -3,12 +3,22 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
+const PRODUCT_INCLUDE = {
+  variants: { where: { isAvailable: true }, orderBy: { sortOrder: 'asc' as const } },
+  productCategory: true,
+} as const;
+
 @Injectable()
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Business owner: returns ALL products (available + unavailable) with variants. */
   findByBusiness(businessId: string) {
-    return this.prisma.product.findMany({ where: { businessId }, orderBy: { name: 'asc' } });
+    return this.prisma.product.findMany({
+      where: { businessId },
+      include: PRODUCT_INCLUDE,
+      orderBy: { name: 'asc' },
+    });
   }
 
   search(query: string, areaId?: string) {
@@ -19,7 +29,6 @@ export class ProductsService {
           { name: { contains: query, mode: 'insensitive' } },
           { description: { contains: query, mode: 'insensitive' } },
         ],
-        // Only show products from businesses that deliver to the customer's area
         ...(areaId ? {
           business: {
             OR: [
@@ -30,6 +39,7 @@ export class ProductsService {
         } : {}),
       },
       include: {
+        ...PRODUCT_INCLUDE,
         business: {
           select: { id: true, name: true, imageUrl: true, isOpen: true, area: { select: { city: true, name: true, deliveryFee: true } } },
         },
@@ -39,14 +49,31 @@ export class ProductsService {
     });
   }
 
+  /** Lookup by barcode — for USB/camera scanner in business app. */
+  async findByBarcode(barcode: string, businessId: string) {
+    const product = await this.prisma.product.findFirst({
+      where: { barcode, businessId },
+      include: PRODUCT_INCLUDE,
+    });
+    if (!product) throw new NotFoundException('لا يوجد منتج بهذا الباركود');
+    return product;
+  }
+
   async create(ownerId: string, dto: CreateProductDto) {
     const business = await this.ownedBusiness(ownerId);
-    return this.prisma.product.create({ data: { ...dto, businessId: business.id } });
+    return this.prisma.product.create({
+      data: { ...dto, businessId: business.id },
+      include: PRODUCT_INCLUDE,
+    });
   }
 
   async update(id: string, ownerId: string, dto: UpdateProductDto) {
     await this.assertOwnsProduct(id, ownerId);
-    return this.prisma.product.update({ where: { id }, data: dto });
+    return this.prisma.product.update({
+      where: { id },
+      data: dto,
+      include: PRODUCT_INCLUDE,
+    });
   }
 
   async remove(id: string, ownerId: string) {

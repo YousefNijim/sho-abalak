@@ -3,6 +3,7 @@ import { http } from './http';
 export interface OrderItem {
   productId: string;
   quantity: number;
+  variantId?: string;
 }
 
 export interface CreateOrderDto {

@@ -12,6 +12,11 @@ export class OrderItemDto {
   @IsInt()
   @Min(1)
   quantity!: number;
+
+  @ApiPropertyOptional({ description: 'معرّف المتغير (للمتاجر ذات المتغيرات)' })
+  @IsOptional()
+  @IsString()
+  variantId?: string;
 }
 
 export class CreateOrderDto {
