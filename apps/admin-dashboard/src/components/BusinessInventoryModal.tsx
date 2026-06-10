@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { productsApi, categoriesApi } from '@shu/api-client';
 import type { Business } from '@shu/api-client';
 
@@ -11,7 +11,6 @@ interface Props {
 }
 
 export function BusinessInventoryModal({ business, onClose }: Props) {
-  const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'lowStock'>('products');
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('ALL');
