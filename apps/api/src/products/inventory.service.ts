@@ -47,4 +47,27 @@ export class InventoryService {
         return ratioA - ratioB;
       });
   }
+
+  /** Returns all low-stock products across ALL stores (Admin only) */
+  async getAllLowStockProducts() {
+    const products = await this.prisma.product.findMany({
+      where: {
+        stock: { not: null },
+        lowStockAlert: { not: null },
+        business: { type: 'STORE' }
+      },
+      include: { 
+        productCategory: true,
+        business: { select: { id: true, name: true } }
+      },
+    });
+
+    return products
+      .filter((p) => p.stock !== null && p.lowStockAlert !== null && p.stock <= p.lowStockAlert!)
+      .sort((a, b) => {
+        const ratioA = a.stock! / a.lowStockAlert!;
+        const ratioB = b.stock! / b.lowStockAlert!;
+        return ratioA - ratioB;
+      });
+  }
 }

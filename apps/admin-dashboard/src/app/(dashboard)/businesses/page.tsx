@@ -11,6 +11,7 @@ import {
   flexRender,
   createColumnHelper,
 } from '@tanstack/react-table';
+import { BusinessInventoryModal } from '@/components/BusinessInventoryModal';
 
 const TYPE_LABEL: Record<string, string> = {
   FOOD: 'مأكولات',
@@ -19,7 +20,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 const TYPE_STYLE: Record<string, string> = {
   FOOD: 'bg-primary/10 text-primary border-primary/20',
-  STORE: 'bg-secondary-container/40 text-secondary border-secondary-container',
+  STORE: 'bg-blue-50 text-blue-600 border-blue-200',
 };
 
 const columnHelper = createColumnHelper<Business>();
@@ -59,6 +60,9 @@ export default function BusinessesPage() {
 
   // Reject confirmation
   const [rejectTarget, setRejectTarget] = useState<Business | null>(null);
+
+  // Inventory Modal
+  const [inventoryTarget, setInventoryTarget] = useState<Business | null>(null);
 
   // Create-store modal
   const [showCreate, setShowCreate] = useState(false);
@@ -441,6 +445,15 @@ export default function BusinessesPage() {
                   >
                     <span className="material-symbols-outlined text-[18px]">key</span>
                   </button>
+                  {b.type === 'STORE' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setInventoryTarget(b); }}
+                      title="إدارة المخزون"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 transition-colors border border-blue-200"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                    </button>
+                  )}
                 </>
               )}
               <button
@@ -774,6 +787,13 @@ export default function BusinessesPage() {
         </div>
       )}
 
+      {inventoryTarget && (
+        <BusinessInventoryModal
+          business={inventoryTarget}
+          onClose={() => setInventoryTarget(null)}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -791,7 +811,29 @@ export default function BusinessesPage() {
 
       {/* Filters */}
       <div className="rounded-2xl border border-border-beige bg-surface-white p-5 shadow-sm mt-margin-standard">
-        <div className="grid grid-cols-1 items-end gap-gap-md sm:grid-cols-2 lg:grid-cols-4">
+        {/* Type Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-border-beige pb-4">
+          <button
+            onClick={() => setTypeFilter('ALL')}
+            className={`px-5 py-2 rounded-xl text-[14px] font-bold transition-colors ${typeFilter === 'ALL' ? 'bg-primary text-white' : 'bg-background/30 text-muted-gray hover:bg-background/50'}`}
+          >
+            الكل
+          </button>
+          <button
+            onClick={() => setTypeFilter('FOOD')}
+            className={`px-5 py-2 rounded-xl text-[14px] font-bold transition-colors ${typeFilter === 'FOOD' ? 'bg-primary text-white' : 'bg-background/30 text-muted-gray hover:bg-background/50'}`}
+          >
+            مطاعم (FOOD)
+          </button>
+          <button
+            onClick={() => setTypeFilter('STORE')}
+            className={`px-5 py-2 rounded-xl text-[14px] font-bold transition-colors ${typeFilter === 'STORE' ? 'bg-blue-600 text-white' : 'bg-background/30 text-muted-gray hover:bg-background/50'}`}
+          >
+            متاجر (STORE)
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 items-end gap-gap-md sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <label className="mr-1 block text-[12px] font-medium text-muted-gray">البحث عن متجر</label>
             <div className="relative">

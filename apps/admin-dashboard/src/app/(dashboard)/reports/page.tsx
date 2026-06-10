@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reportsApi, businessesApi, areasApi, tagsApi } from '@shu/api-client';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 const PERIODS = [
   { id: 'today', label: 'اليوم' },
@@ -212,6 +213,63 @@ export default function ReportsPage() {
               </div>
             ))}
           </div>
+
+          {/* Sales by Type */}
+          {summary.breakdownByType && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6 mb-6">
+              <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* FOOD */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-orange-500">restaurant</span>
+                    المطاعم (FOOD)
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">عدد الطلبات</span><span className="font-bold">{summary.breakdownByType.FOOD.orders}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">إجمالي المبيعات</span><span className="font-bold text-green-600">{fmt(summary.breakdownByType.FOOD.revenue)} ₪</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">عمولة المنصة</span><span className="font-bold text-blue-600">{fmt(summary.breakdownByType.FOOD.commission)} ₪</span></div>
+                  </div>
+                </div>
+
+                {/* STORE */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-blue-500">storefront</span>
+                    المتاجر (STORE)
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">عدد الطلبات</span><span className="font-bold">{summary.breakdownByType.STORE.orders}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">إجمالي المبيعات</span><span className="font-bold text-green-600">{fmt(summary.breakdownByType.STORE.revenue)} ₪</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">المنتجات المباعة</span><span className="font-bold text-purple-600">{summary.breakdownByType.STORE.itemsSold}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500 text-sm">عمولة المنصة</span><span className="font-bold text-blue-600">{fmt(summary.breakdownByType.STORE.commission)} ₪</span></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart */}
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col">
+                <h3 className="font-bold text-gray-800 mb-4">توزيع الطلبات: مطاعم vs متاجر</h3>
+                <div className="flex-1 min-h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'مطاعم', value: summary.breakdownByType.FOOD.orders },
+                          { name: 'متاجر', value: summary.breakdownByType.STORE.orders }
+                        ].filter(d => d.value > 0)}
+                        cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
+                      >
+                        <Cell key="cell-0" fill="#f97316" />
+                        <Cell key="cell-1" fill="#3b82f6" />
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 

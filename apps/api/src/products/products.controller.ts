@@ -46,6 +46,14 @@ export class ProductsController {
     return this.products.findByBarcode(code, businessId);
   }
 
+  @Get('low-stock/all')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  getAllLowStock() {
+    return this.inventory.getAllLowStockProducts();
+  }
+
   @Get('low-stock')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)

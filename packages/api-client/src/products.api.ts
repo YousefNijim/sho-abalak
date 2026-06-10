@@ -89,6 +89,11 @@ export const productsApi = {
       .get<Product[]>('/products/low-stock', { params: { businessId } })
       .then((r) => r.data),
 
+  getLowStockAll: () =>
+    http
+      .get<Product[]>('/products/low-stock/all')
+      .then((r) => r.data),
+
   create: (dto: CreateProductDto) =>
     http.post<Product>('/products', dto).then((r) => r.data),
 

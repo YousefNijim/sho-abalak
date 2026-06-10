@@ -77,6 +77,7 @@ export class ReportsService {
         business: { include: { area: true, tags: { select: { name: true } } } },
         customer: { select: { id: true, name: true, phone: true } },
         driver: { include: { user: { select: { id: true, name: true } } } },
+        items: { select: { quantity: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -91,6 +92,11 @@ export class ReportsService {
 
     let totalDriverDeliveryFees = 0;
     let totalPlatformDeliveryFees = 0;
+
+    const breakdownByType = {
+      FOOD: { orders: 0, revenue: 0, commission: 0, itemsSold: 0 },
+      STORE: { orders: 0, revenue: 0, commission: 0, itemsSold: 0 },
+    };
 
     const rows = orders.map((o) => {
       const subtotal = Number((o as any).subtotal ?? o.total);
@@ -122,6 +128,14 @@ export class ReportsService {
         totalPlatformDeliveryFees += platformDeliveryFee;
         totalFinal += finalTotal;
         totalCommission += commission;
+
+        const bType = o.business?.type as string;
+        if (bType === 'FOOD' || bType === 'STORE') {
+          breakdownByType[bType].orders += 1;
+          breakdownByType[bType].revenue += netSubtotal;
+          breakdownByType[bType].commission += commission;
+          breakdownByType[bType].itemsSold += (o as any).items?.reduce((acc: number, item: any) => acc + item.quantity, 0) ?? 0;
+        }
       }
 
       return {
@@ -172,6 +186,7 @@ export class ReportsService {
         ordersCount: orders.length,
         deliveredCount: delivered.length,
         cancelledCount: orders.filter((o) => o.status === OrderStatus.CANCELLED).length,
+        breakdownByType,
       },
       orders: rows,
     };
