@@ -19,7 +19,7 @@ import { colors, fontFamily, radius, spacing } from '../src/theme';
 import { useAuthStore } from '../src/stores/auth.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { NotificationBell } from './NotificationBell';
+import { NotificationBell } from '../src/components/NotificationBell';
 import { imageUrl } from '../src/lib/upload';
 
 const GROUPS = [
