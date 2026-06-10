@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>متجر البقالة - تفاصيل المتجر</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background-cream": "#FCF3DC",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "on-primary-fixed": "#311300",
+                        "error-red": "#EF4444",
+                        "on-surface": "#1b1b22",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#efecf6",
+                        "warning-amber": "#F59E0B",
+                        "surface-container-highest": "#e4e1eb",
+                        "on-tertiary-container": "#00314c",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "background": "#fbf8ff",
+                        "tertiary-fixed": "#cbe6ff",
+                        "surface-container-low": "#f5f2fc",
+                        "muted-gray": "#6B7280",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#974800",
+                        "surface-variant": "#e4e1eb",
+                        "on-primary-container": "#4e2200",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "border-beige": "#E5E0D5",
+                        "on-surface-variant": "#564337",
+                        "secondary": "#296a43",
+                        "on-secondary-fixed": "#00210e",
+                        "success-green": "#22C55E",
+                        "primary": "#974800",
+                        "inverse-surface": "#303037",
+                        "on-tertiary-fixed": "#001e30",
+                        "outline-variant": "#ddc1b1",
+                        "on-primary": "#ffffff",
+                        "surface-white": "#FFFFFF",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "on-primary-fixed-variant": "#733600",
+                        "tertiary-container": "#009ee8",
+                        "surface-container-high": "#eae7f1",
+                        "surface-dim": "#dbd9e2",
+                        "primary-container": "#e6781e",
+                        "secondary-container": "#abefbd",
+                        "inverse-primary": "#ffb688",
+                        "surface": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fbf8ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#aef2bf",
+                        "primary-fixed-dim": "#ffb688",
+                        "on-secondary-container": "#2e6f47",
+                        "primary-fixed": "#ffdbc7",
+                        "inverse-on-surface": "#f2eff9",
+                        "outline": "#8a7265",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#006495",
+                        "on-background": "#1b1b22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "margin-standard": "16px",
+                        "gap-lg": "20px",
+                        "gap-md": "12px",
+                        "nav-height": "64px",
+                        "gap-sm": "8px",
+                        "section-md": "24px",
+                        "section-lg": "32px",
+                        "gap-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Montserrat"],
+                        "headline-lg-mobile": ["Cairo"],
+                        "button-text": ["Montserrat"],
+                        "body-base": ["Montserrat"],
+                        "label-md": ["Montserrat"],
+                        "headline-sm": ["Cairo"],
+                        "label-sm": ["Montserrat"],
+                        "headline-md": ["Cairo"],
+                        "headline-lg": ["Cairo"],
+                        "hero-lg": ["Cairo"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-header {
+            backdrop-filter: blur(10px);
+            background-color: rgba(151, 72, 0, 0.95);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-cream text-on-surface font-body-base overflow-x-hidden min-h-screen pb-32">
+<!-- Top AppBar -->
+<header class="sticky top-0 z-50 glass-header shadow-md transition-all duration-300">
+<div class="flex flex-row-reverse items-center justify-between px-margin-standard h-nav-height w-full">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="search">search</span>
+<span class="text-headline-md-mobile font-headline-md-mobile font-extrabold text-on-primary">متجر البقالة</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="tune">tune</span>
+</div>
+</div>
+<!-- Quick Search Bar (Contextual) -->
+<div class="px-margin-standard pb-base">
+<div class="flex items-center bg-surface-white/20 rounded-xl px-4 py-2 mb-4 border border-white/20">
+<span class="material-symbols-outlined text-on-primary/70" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-primary placeholder:text-on-primary/60 focus:ring-0 text-body-base w-full pr-2" placeholder="ماذا تريد أن تشتري اليوم؟" type="text"/>
+</div>
+</div>
+</header>
+<main class="max-w-screen-md mx-auto">
+<!-- Store Header Info -->
+<section class="bg-surface-white p-margin-standard mt-2 shadow-sm rounded-b-3xl">
+<div class="flex items-start justify-between">
+<div class="flex gap-md">
+<div class="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-on-primary shadow-lg overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional close-up shot of a modern supermarket logo against a warm saffron background. The lighting is soft and inviting, emphasizing a heritage-inspired color palette of warm creams and deep oranges. The mood is clean, professional, and reflects a high-end Palestinian grocery brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmeQxlIag43JYohlIr1qtlrD3ShCm0808HB8YaBuJTZASAm5Lge3roperxi9R0OtWvISv1oADDox0WsZeN6ctoFR8Rpv_0gXG7ZDBUr7Kb8rUhKKqelJPGxMfi-lrgllLTVpBXW2-HSels0_ArgbmQviVJevgIZcDCI6tHTMfZPjJBaj8fQKJ5S6aQng4OCuSd6jTGFi70NokL6KVjR-DsIoDEbw93-c6LI0ome5linYqlDk_bOiSekG-fhp1388jqPL8W0FBlMU8s"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">سوبرماركت المدينة</h1>
+<div class="flex items-center gap-xs text-muted-gray">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+<span class="text-label-md font-label-md">توصيل في 25-35 دقيقة</span>
+</div>
+<div class="flex items-center gap-xs mt-1">
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded-full text-label-sm font-label-sm">أقل طلب ₪30</span>
+<span class="bg-success-green/10 text-success-green px-2 py-0.5 rounded-full text-label-sm font-label-sm">توصيل مجاني</span>
+</div>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full border border-border-beige flex items-center justify-center text-muted-gray hover:bg-error-container hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+</div>
+</section>
+<!-- Category Horizontal Scroll -->
+<section class="py-section-md">
+<div class="flex gap-md overflow-x-auto no-scrollbar px-margin-standard">
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-md">الكل</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-surface-white border border-border-beige text-on-surface font-label-md text-label-md hover:bg-primary-fixed-dim/10 transition-colors">الفواكه</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-surface-white border border-border-beige text-on-surface font-label-md text-label-md hover:bg-primary-fixed-dim/10 transition-colors">الألبان</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-surface-white border border-border-beige text-on-surface font-label-md text-label-md hover:bg-primary-fixed-dim/10 transition-colors">المخبوزات</button>
+<button class="flex-shrink-0 px-6 py-2 rounded-full bg-surface-white border border-border-beige text-on-surface font-label-md text-label-md hover:bg-primary-fixed-dim/10 transition-colors">المعلبات</button>
+</div>
+</section>
+<!-- Featured Promotions (Bento style hint) -->
+<section class="px-margin-standard mb-section-lg">
+<h2 class="font-headline-sm text-headline-sm mb-gap-md px-1">عروض خاصة لك</h2>
+<div class="grid grid-cols-2 gap-md">
+<div class="col-span-1 h-48 bg-secondary-container rounded-2xl relative overflow-hidden p-4 group">
+<div class="z-10 relative">
+<span class="bg-secondary text-on-secondary px-2 py-1 rounded-lg text-label-sm font-label-sm">خصم 30%</span>
+<h3 class="font-headline-sm text-on-secondary-container mt-2">خضروات طازجة</h3>
+<button class="mt-4 text-secondary font-button-text text-label-md flex items-center gap-1 group-hover:gap-2 transition-all">
+                            اكتشف الآن <span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<img class="absolute -left-4 -bottom-4 w-32 h-32 object-contain opacity-80 rotate-12 transition-transform duration-500 group-hover:scale-110" data-alt="A vibrant and crisp overhead shot of fresh Mediterranean vegetables including red peppers, tomatoes, and cucumbers. The lighting is bright and natural, highlighting the textures and rich colors. The overall aesthetic is clean and healthy, perfectly matching a premium Palestinian grocery application's visual identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuATEYXw-C0wvir4Cr9WUvDuYlWiuX-FeSOpTXQkCbHIhWaczzIV2W-z5s-vhugDrdpmVjwDFN6CLwzpyon41zjsKANBp4wEimtpLQ2OdOr2rksRRQZHt_cQkTLQ_IYSMd_PC4Q_JPvHzB13qmmnF64v0t7G2JiXvDTSzA7jETavrYIqjfak05I-AUvZIIJvvpVvFHHJxwFOFO4LZ6qAhI8AB164NFmxCNPN3PiyRZgyPCaG4ekYU1CoGBs4nCAl7ph_9D5YFkOC7370"/>
+</div>
+<div class="col-span-1 h-48 bg-primary-fixed rounded-2xl relative overflow-hidden p-4 group">
+<div class="z-10 relative">
+<span class="bg-primary text-on-primary px-2 py-1 rounded-lg text-label-sm font-label-sm">وفر ₪15</span>
+<h3 class="font-headline-sm text-on-primary-fixed mt-2">ركن المخبوزات</h3>
+<button class="mt-4 text-primary font-button-text text-label-md flex items-center gap-1 group-hover:gap-2 transition-all">
+                            تسوق <span class="material-symbols-outlined text-sm" data-icon="arrow_back">arrow_back</span>
+</button>
+</div>
+<img class="absolute -left-4 -bottom-4 w-32 h-32 object-contain opacity-80 -rotate-6 transition-transform duration-500 group-hover:scale-110" data-alt="A warm, golden-lit close-up of artisan bread and pastries fresh from the oven. The soft lighting creates deep shadows and glowing highlights on the crust. The scene evokes a cozy, traditional Palestinian bakery atmosphere, using a warm color palette of ambers and creams." src="https://lh3.googleusercontent.com/aida-public/AB6AXuACUtUE1Y0wJl8RTRMKNwU3iPHkMY-O8nQekwgKoyJRuheHTZbt8ngvla_tinvR4u10Cls9LNTNdj9tOhjj6PXtuxP1IZjnBGQBXhwZ4uxryj3us9LYsKYh1XCCsy_nOCPYvFTdWh9muyt730iDvxrCEHoSK6mU4mUDkVQLbqi6RKpKJ3GIVtM_SYT9hj_w4DdbdssHf2Z83zU3ioyX8n2bCPqSP3ArO_-yNyx_X-iXr8aLhEP9OHEILFrqCI68LZtpK-Jwu7nSdjz-"/>
+</div>
+</div>
+</section>
+<!-- Product Grid (2-columns) -->
+<section class="px-margin-standard">
+<div class="flex items-center justify-between mb-gap-md">
+<h2 class="font-headline-sm text-headline-sm">الأكثر مبيعاً</h2>
+<button class="text-primary font-button-text text-label-md">عرض الكل</button>
+</div>
+<div class="grid grid-cols-2 gap-gap-md">
+<!-- Product 1 -->
+<div class="bg-surface-white rounded-2xl p-3 shadow-md border border-white hover:border-primary/20 transition-all group">
+<div class="relative h-40 bg-surface-container-low rounded-xl mb-3 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="High-quality, studio-lit close-up of shiny red apples stacked neatly. The background is a clean, neutral warm cream, focusing all attention on the fruit's rich red texture and water droplets. The lighting is crisp and commercial-grade, consistent with a high-end modern grocery UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxVx_jqzTxzK_2mvJiAa5Ow1LAd7_cVdbx-qW1_Y-TTwz8IUlTo7M5AiX5iqxew_saAG7vr_lrXcrg4jpqpAmtXfiZ9BeZtgWdOnXwX72yNAOMu0cLXBO6ByRCHxG_eyM4Zvj5HXvzHqEQg3lvkMwywcUlXfsY86G_t-Uy7gYhYdUt6LXi0cCVGNzPyRsyWcU6Bg2FZfL4FiIH-v_nvPzI90AvxLGayJux1-Lp-m-NQ4xE65xTxmbPfpT3a1AWXUXOlGUkZGj0wA_-"/>
+<div class="absolute top-2 right-2 bg-error-red text-white text-[10px] font-bold px-2 py-0.5 rounded-full">خصم 25%</div>
+</div>
+<div class="space-y-1">
+<h3 class="text-on-surface font-label-md truncate">تفاح أحمر إيطالي</h3>
+<p class="text-muted-gray text-label-sm">كيلو تقريباً</p>
+<div class="flex items-end justify-between pt-2">
+<div class="flex flex-col">
+<span class="text-primary font-bold text-headline-sm">₪10.50</span>
+<span class="text-muted-gray line-through text-label-sm">₪13.90</span>
+</div>
+<button class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform" onclick="addToCart(this)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="bg-surface-white rounded-2xl p-3 shadow-md border border-white hover:border-primary/20 transition-all group">
+<div class="relative h-40 bg-surface-container-low rounded-xl mb-3 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A clean, minimalist product shot of a high-quality milk carton on a warm, lit background. The packaging is modern and elegant. The lighting is soft and high-key, creating a sense of freshness and purity. The visual style follows a tactile minimalism aesthetic with warm heritage undertones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo24S3RqhT5Xp69mb3eLqx0MEUhf7aKuTGfzX0xE3XI-ca9_P50DTbL7e40PeynWr7ASc3_uAZsCngLyJQPoH99Z9UhXoNZYt8fI58IspBW4Ao_zWct4RPuO9uRlgY0pe9oKcg--KgTaxgAYaK3KdxovrnVL1onUQYuq3XFn5rUbfQ8gB3mwVYv1xawilCkl7mW5MRGYNaK5lkquFf9Pq240gf08riefbEXOmbb1y8-Qm67hG2inWbthSBLQz7wZ8VHkaxOGG-ZuI7"/>
+</div>
+<div class="space-y-1">
+<h3 class="text-on-surface font-label-md truncate">حليب كامل الدسم</h3>
+<p class="text-muted-gray text-label-sm">1 لتر - طازج</p>
+<div class="flex items-end justify-between pt-2">
+<div class="flex flex-col">
+<span class="text-primary font-bold text-headline-sm">₪6.00</span>
+</div>
+<button class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform" onclick="addToCart(this)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="bg-surface-white rounded-2xl p-3 shadow-md border border-white hover:border-primary/20 transition-all group">
+<div class="relative h-40 bg-surface-container-low rounded-xl mb-3 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Close-up of a rustic woven basket filled with assorted fresh citrus fruits like lemons and oranges. The lighting is warm and sun-drenched, evoking a sense of local Palestinian agriculture. The color palette is vibrant with yellow and orange tones against a soft cream background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIrk7Fr3nNS2m95Su2o-jSKyF301XoOtk7lh1M6DuXbCvdfG3CUHzNnjLbMZ4OONHef26V60feHqUQ1EV-_iDGwUt1Af9A70UZjc7C4sq6M5PymWKY-y9AID3N3Q9YUwXsuWYfPB5Pt2qgKSA-y7OhwJqUl1jUZz0YGO2rmxNnHD7cIRbEY411MsG2y8zKLCmVG5aXLFHUhYaU-iDD9gHQ4JALjV4jbpEeKzUseO-YkYx6lVyk4alTpmwV7u_HoZT0WP_vqP6-aENu"/>
+</div>
+<div class="space-y-1">
+<h3 class="text-on-surface font-label-md truncate">ليمون بلدي</h3>
+<p class="text-muted-gray text-label-sm">نصف كيلو</p>
+<div class="flex items-end justify-between pt-2">
+<div class="flex flex-col">
+<span class="text-primary font-bold text-headline-sm">₪4.25</span>
+</div>
+<button class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform" onclick="addToCart(this)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="bg-surface-white rounded-2xl p-3 shadow-md border border-white hover:border-primary/20 transition-all group">
+<div class="relative h-40 bg-surface-container-low rounded-xl mb-3 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A stylized product shot of organic large eggs in a minimalist carton. The lighting is diffused and soft, accentuating the smooth textures of the shells. The background is a clean surface-white, creating a premium and hygienic look for a grocery app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwBdCBLeEeTwGW-gP-HbpfFLGWPeCiWz5YVuVM2yi0xHFQwdQXbms76Ccq1V2pTxX_l3esa877nS2hLu9r86oPGBV0UebxS7POMiofq0rNgc1BBruBVvjEEKInhZ4ixyomDAWb0FfcKpIB9cHy0V87eFvdkld2HtbVQTxYsB2fBORP9L_66YNlAjmbBRxJsHDyOQ4Y1CZKhUIS8yc4R_ZcGtt3HQyM9uN3nPYkRuNu8U-bbDCUqeevFQxWJNWB4IrGbVlaIIZ7OTJc"/>
+<div class="absolute top-2 right-2 bg-success-green text-white text-[10px] font-bold px-2 py-0.5 rounded-full">عرض توفير</div>
+</div>
+<div class="space-y-1">
+<h3 class="text-on-surface font-label-md truncate">بيض طازج 12 حبة</h3>
+<p class="text-muted-gray text-label-sm">حجم كبير</p>
+<div class="flex items-end justify-between pt-2">
+<div class="flex flex-col">
+<span class="text-primary font-bold text-headline-sm">₪14.00</span>
+</div>
+<button class="w-10 h-10 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform" onclick="addToCart(this)">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom "View Cart" Floating Bar (Appears when items added) -->
+<div class="fixed bottom-20 left-4 right-4 bg-primary text-on-primary p-4 rounded-2xl shadow-xl z-50 flex items-center justify-between translate-y-32 transition-transform duration-500" id="cart-bar">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 bg-on-primary text-primary rounded-full flex items-center justify-center font-bold text-label-md">1</div>
+<div>
+<p class="font-bold text-label-md">عرض السلة</p>
+<p class="text-label-sm opacity-90">10.50 ₪</p>
+</div>
+</div>
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 h-nav-height flex flex-row-reverse justify-around items-center bg-surface-white border-t border-border-beige shadow-lg pb-safe">
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors px-4" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-colors px-4" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors px-4" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label-sm text-label-sm">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors px-4" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">الحساب</span>
+</a>
+</nav>
+<script>
+        let cartCount = 0;
+        let totalPrice = 0;
+
+        function addToCart(btn) {
+            cartCount++;
+            const priceText = btn.parentElement.querySelector('.text-primary').innerText;
+            const priceValue = parseFloat(priceText.replace('₪', ''));
+            totalPrice += priceValue;
+
+            const cartBar = document.getElementById('cart-bar');
+            cartBar.classList.remove('translate-y-32');
+            
+            cartBar.querySelector('.w-8').innerText = cartCount;
+            cartBar.querySelector('.text-label-sm').innerText = totalPrice.toFixed(2) + ' ₪';
+
+            // Animation effect
+            btn.classList.add('scale-90');
+            setTimeout(() => btn.classList.remove('scale-90'), 150);
+        }
+
+        // Simple scroll behavior for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-1');
+            } else {
+                header.classList.remove('py-1');
+            }
+        });
+    </script>
+</body></html>

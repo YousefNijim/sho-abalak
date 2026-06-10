@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>متجر البقالة - جميع المتاجر</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background-cream": "#FCF3DC",
+                        "secondary-fixed-dim": "#92d5a5",
+                        "on-primary-fixed": "#311300",
+                        "error-red": "#EF4444",
+                        "on-surface": "#1b1b22",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#efecf6",
+                        "warning-amber": "#F59E0B",
+                        "surface-container-highest": "#e4e1eb",
+                        "on-tertiary-container": "#00314c",
+                        "on-tertiary-fixed-variant": "#004b71",
+                        "background": "#fbf8ff",
+                        "tertiary-fixed": "#cbe6ff",
+                        "surface-container-low": "#f5f2fc",
+                        "muted-gray": "#6B7280",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#974800",
+                        "surface-variant": "#e4e1eb",
+                        "on-primary-container": "#4e2200",
+                        "tertiary-fixed-dim": "#8fcdff",
+                        "border-beige": "#E5E0D5",
+                        "on-surface-variant": "#564337",
+                        "secondary": "#296a43",
+                        "on-secondary-fixed": "#00210e",
+                        "success-green": "#22C55E",
+                        "primary": "#974800",
+                        "inverse-surface": "#303037",
+                        "on-tertiary-fixed": "#001e30",
+                        "outline-variant": "#ddc1b1",
+                        "on-primary": "#ffffff",
+                        "surface-white": "#FFFFFF",
+                        "on-secondary-fixed-variant": "#09522d",
+                        "on-primary-fixed-variant": "#733600",
+                        "tertiary-container": "#009ee8",
+                        "surface-container-high": "#eae7f1",
+                        "surface-dim": "#dbd9e2",
+                        "primary-container": "#e6781e",
+                        "secondary-container": "#abefbd",
+                        "inverse-primary": "#ffb688",
+                        "surface": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#fbf8ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#aef2bf",
+                        "primary-fixed-dim": "#ffb688",
+                        "on-secondary-container": "#2e6f47",
+                        "primary-fixed": "#ffdbc7",
+                        "inverse-on-surface": "#f2eff9",
+                        "outline": "#8a7265",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#006495",
+                        "on-background": "#1b1b22"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "margin-standard": "16px",
+                        "gap-lg": "20px",
+                        "gap-md": "12px",
+                        "nav-height": "64px",
+                        "gap-sm": "8px",
+                        "section-md": "24px",
+                        "section-lg": "32px",
+                        "gap-xs": "4px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Montserrat"],
+                        "headline-lg-mobile": ["Cairo"],
+                        "button-text": ["Montserrat"],
+                        "body-base": ["Montserrat"],
+                        "label-md": ["Montserrat"],
+                        "headline-sm": ["Cairo"],
+                        "label-sm": ["Montserrat"],
+                        "headline-md": ["Cairo"],
+                        "headline-lg": ["Cairo"],
+                        "hero-lg": ["Cairo"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                        "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                        "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .custom-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-primary dark:bg-primary-container shadow-md flex flex-row-reverse items-center justify-between px-margin-standard h-nav-height w-full transition-all duration-300">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-primary dark:text-on-primary-container scale-95 duration-150 ease-in-out hover:bg-primary-fixed-dim/10 p-2 rounded-full" data-icon="tune">tune</button>
+<button class="material-symbols-outlined text-on-primary dark:text-on-primary-container scale-95 duration-150 ease-in-out hover:bg-primary-fixed-dim/10 p-2 rounded-full" data-icon="search">search</button>
+</div>
+<div class="flex items-center gap-md">
+<h1 class="text-headline-md-mobile font-headline-md-mobile font-extrabold text-on-primary">متجر البقالة</h1>
+<button class="material-symbols-outlined text-on-primary dark:text-on-primary-container scale-95 duration-150 ease-in-out hover:bg-primary-fixed-dim/10 p-2 rounded-full" data-icon="arrow_forward">arrow_forward</button>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Filters Area -->
+<div class="bg-surface-white px-margin-standard py-section-md overflow-x-auto whitespace-nowrap custom-scrollbar flex flex-row-reverse gap-sm">
+<button class="px-6 py-2 rounded-full bg-on-surface text-surface-white font-label-md text-label-md transition-all active:scale-95">الكل</button>
+<button class="px-6 py-2 rounded-full bg-surface-white border-1.5 border-border-beige text-muted-gray font-label-md text-label-md hover:bg-surface-container-low transition-all">ماركت</button>
+<button class="px-6 py-2 rounded-full bg-surface-white border-1.5 border-border-beige text-muted-gray font-label-md text-label-md hover:bg-surface-container-low transition-all">مياه</button>
+<button class="px-6 py-2 rounded-full bg-surface-white border-1.5 border-border-beige text-muted-gray font-label-md text-label-md hover:bg-surface-container-low transition-all">ملحمة</button>
+<button class="px-6 py-2 rounded-full bg-surface-white border-1.5 border-border-beige text-muted-gray font-label-md text-label-md hover:bg-surface-container-low transition-all">خضار</button>
+<button class="px-6 py-2 rounded-full bg-surface-white border-1.5 border-border-beige text-muted-gray font-label-md text-label-md hover:bg-surface-container-low transition-all">حيوانات</button>
+</div>
+<div class="px-margin-standard mt-section-md">
+<h2 class="font-headline-sm text-headline-sm mb-gap-md text-on-surface">جميع المحلات</h2>
+<div class="grid grid-cols-1 gap-gap-md">
+<!-- Shop Card 1 (Active) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex p-gap-md relative group cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Arda Supermarket" class="w-full h-full object-cover" data-alt="A vibrant and close-up photograph of a fresh grocery basket filled with colorful organic produce including bright red tomatoes, crisp green lettuce, and golden lemons. The image has a warm, high-contrast aesthetic with natural sunlight creating soft shadows against a warm cream background, evoking a sense of local heritage and freshness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxlwMtkmKMY4naiGxe1AywFR3Jt6LjN586Pm75OoSKSpD5dAXTsl9N1aM23LrKcs7cq1YOZ0Jb1cYpRaM01WcwAYh6zEoEqlkBVvgmAKHDhbh7yTfelXWEKbZH7pRQOfev64d6ZTgxpUjoKepSZzHmYcC8upu3ho_90JmbIYOWesu6cBIrwlb2YUHDZ11b0I0QwaTr3AoU3-TWTzayhSgedAMbpzWUPCsURfPz2PcRWIuDFIhsQiKo1cqAiWjpCHjakXZ1OpLtWs1y"/>
+</div>
+<div class="mr-gap-md flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">أردا سوبر ماركت</h3>
+<div class="flex items-center text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md mr-1">4.8</span>
+</div>
+</div>
+<p class="text-muted-gray text-label-md font-label-md mt-1">الحد الأدنى للطلب: 200.00 ILS</p>
+<div class="flex items-center gap-sm mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[16px] ml-1">schedule</span>
+<span>25-35 دقيقة</span>
+</div>
+<span class="text-border-beige">•</span>
+<div class="flex items-center text-success-green font-bold">
+<span class="material-symbols-outlined text-[16px] ml-1">delivery_dining</span>
+<span>توصيل مجاني</span>
+</div>
+</div>
+</div>
+<div class="mt-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] ml-1">confirmation_number</span>
+                                خصم 150 ILS
+                            </span>
+</div>
+</div>
+<button class="absolute left-3 top-3 w-8 h-8 rounded-full bg-surface-white/80 shadow-sm flex items-center justify-center text-muted-gray hover:text-error-red transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<!-- Shop Card 2 (Closed) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex p-gap-md relative opacity-75 grayscale cursor-not-allowed">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 relative">
+<img alt="As Market" class="w-full h-full object-cover" data-alt="A cinematic photo of a charming, traditional storefront with wooden accents and clear glass windows displaying neatly arranged jars and baked goods. The atmosphere is quiet and peaceful, with a slight golden hour glow reflecting off the surfaces, creating a warm and nostalgic heritage vibe with high-end tactile minimalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfGYnNwY7KrPJkbVIEcdan7xyp-Euqppepuq3jlWnGTtFJ4h7w39Nf7SOmWb4NLFMpHWz9x7_d8sgN0W6QltYiBdOyp1R52hOfLgJ2XuOmOwhPUdNkysIqbxeSEa0g-ttz-Ky9zBb7zhOIAeThhi2QtEgBaNudgZdWZrwR8KvAorDyf5t8c34jc6jTaqwAmJUSryPeWmX8fMzaQkZop9BxLMzk4hyTHq36A_iG8_0AhfLvHpgClnGb5RUfJovEKTXRzOxsczsqZhZq"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+<span class="bg-error-red text-white px-3 py-1 rounded-md font-bold text-label-sm">مغلق</span>
+</div>
+</div>
+<div class="mr-gap-md flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">آس ماركت 2</h3>
+<div class="flex items-center text-muted-gray">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md mr-1">4.5</span>
+</div>
+</div>
+<p class="text-muted-gray text-label-md font-label-md mt-1">الحد الأدنى للطلب: 2.500.00 ILS</p>
+<div class="flex items-center gap-sm mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[16px] ml-1">schedule</span>
+<span>20-35 دقيقة</span>
+</div>
+</div>
+</div>
+<div class="mt-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-highest text-muted-gray font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] ml-1">confirmation_number</span>
+                                خصم 60 ILS
+                            </span>
+</div>
+</div>
+</div>
+<!-- Shop Card 3 (Active) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex p-gap-md relative group cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-primary/10 flex items-center justify-center">
+<span class="text-primary font-bold text-headline-md">SEC</span>
+</div>
+<div class="mr-gap-md flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">سيتش ماركت</h3>
+<div class="flex items-center text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md mr-1">4.2</span>
+</div>
+</div>
+<p class="text-muted-gray text-label-md font-label-md mt-1">الحد الأدنى للطلب: 200.00 ILS</p>
+<div class="flex items-center gap-sm mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[16px] ml-1">schedule</span>
+<span>30-45 دقيقة</span>
+</div>
+<span class="text-border-beige">•</span>
+<div class="flex items-center text-primary font-bold">
+<span class="material-symbols-outlined text-[16px] ml-1">delivery_dining</span>
+<span>39.99 ILS</span>
+</div>
+</div>
+</div>
+<div class="mt-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] ml-1">confirmation_number</span>
+                                خصم 150 ILS
+                            </span>
+</div>
+</div>
+</div>
+<!-- Shop Card 4 (Active) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden flex p-gap-md relative group cursor-pointer transition-transform duration-200 active:scale-[0.98]">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Pet Shop" class="w-full h-full object-cover" data-alt="A clean and professional product photography shot of high-quality organic pet food accessories arranged on a textured wooden surface. The lighting is soft and even, highlighting the tactile materials and earthy tones of the products. The background is a soft, warm cream, maintaining a minimalist and upscale aesthetic that feels both modern and heritage-inspired." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAakUnYu8rm-fOivNSBXHslONtmiV2EcVWN6B2uCk2VbNYwEHacwEtYc1YmYm38XTqdzQqbmyJ0jXoivzW1vwOFct7IUdjzXIxlzuDqznERgJ2gz6zLgnSV1pjlZ-tydfaz2h3QV5RQL9MwLpLbZbnPPgSqPlOnTwvTCFjjJlzpR76bV1ZGeg7YlSXaYlePAZyewVLnE4k-_ut0C7RO5S0_YJqVWBfH5mzKv8siYcvIlk6G15kk6Wwzdq_Klgikl1XApqjY0CyuV3gh"/>
+</div>
+<div class="mr-gap-md flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">ميني باتيلر للحيوانات</h3>
+<div class="flex items-center text-warning-amber">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-label-md mr-1">4.9</span>
+</div>
+</div>
+<p class="text-muted-gray text-label-md font-label-md mt-1">الحد الأدنى للطلب: 200.00 ILS</p>
+<div class="flex items-center gap-sm mt-1 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-[16px] ml-1">schedule</span>
+<span>25 دقيقة</span>
+</div>
+<span class="text-border-beige">•</span>
+<div class="flex items-center text-success-green font-bold">
+<span class="material-symbols-outlined text-[16px] ml-1">delivery_dining</span>
+<span>توصيل مجاني</span>
+</div>
+</div>
+</div>
+<div class="mt-2">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] ml-1">confirmation_number</span>
+                                خصم 150 ILS
+                            </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 h-nav-height bg-surface-white dark:bg-surface-dim shadow-lg border-t border-border-beige dark:border-outline-variant flex flex-row-reverse justify-around items-center pb-safe">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-container font-bold px-4 py-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-label-sm text-label-sm mt-1">المتاجر</span>
+</a>
+<div class="relative">
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="font-label-sm text-label-sm mt-1">السلة</span>
+</a>
+<span class="absolute top-1 right-3 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">2</span>
+</div>
+<a class="flex flex-col items-center justify-center text-muted-gray dark:text-on-surface-variant hover:bg-surface-container-low transition-colors px-4 py-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">الحساب</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interactions
+        document.querySelectorAll('.active\\:scale-\\[0\\.98\\]').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Filter button toggle
+        const filterButtons = document.querySelectorAll('.whitespace-nowrap button');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => {
+                    b.classList.remove('bg-on-surface', 'text-surface-white');
+                    b.classList.add('bg-surface-white', 'text-muted-gray', 'border-border-beige');
+                });
+                btn.classList.add('bg-on-surface', 'text-surface-white');
+                btn.classList.remove('bg-surface-white', 'text-muted-gray', 'border-border-beige');
+            });
+        });
+    </script>
+</body></html>

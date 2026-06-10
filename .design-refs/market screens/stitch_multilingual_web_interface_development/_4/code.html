@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background-cream": "#FCF3DC",
+                      "secondary-fixed-dim": "#92d5a5",
+                      "on-primary-fixed": "#311300",
+                      "error-red": "#EF4444",
+                      "on-surface": "#1b1b22",
+                      "error-container": "#ffdad6",
+                      "surface-container": "#efecf6",
+                      "warning-amber": "#F59E0B",
+                      "surface-container-highest": "#e4e1eb",
+                      "on-tertiary-container": "#00314c",
+                      "on-tertiary-fixed-variant": "#004b71",
+                      "background": "#fbf8ff",
+                      "tertiary-fixed": "#cbe6ff",
+                      "surface-container-low": "#f5f2fc",
+                      "muted-gray": "#6B7280",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#974800",
+                      "surface-variant": "#e4e1eb",
+                      "on-primary-container": "#4e2200",
+                      "tertiary-fixed-dim": "#8fcdff",
+                      "border-beige": "#E5E0D5",
+                      "on-surface-variant": "#564337",
+                      "secondary": "#296a43",
+                      "on-secondary-fixed": "#00210e",
+                      "success-green": "#22C55E",
+                      "primary": "#974800",
+                      "inverse-surface": "#303037",
+                      "on-tertiary-fixed": "#001e30",
+                      "outline-variant": "#ddc1b1",
+                      "on-primary": "#ffffff",
+                      "surface-white": "#FFFFFF",
+                      "on-secondary-fixed-variant": "#09522d",
+                      "on-primary-fixed-variant": "#733600",
+                      "tertiary-container": "#009ee8",
+                      "surface-container-high": "#eae7f1",
+                      "surface-dim": "#dbd9e2",
+                      "primary-container": "#e6781e",
+                      "secondary-container": "#abefbd",
+                      "inverse-primary": "#ffb688",
+                      "surface": "#fbf8ff",
+                      "on-error": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#fbf8ff",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#aef2bf",
+                      "primary-fixed-dim": "#ffb688",
+                      "on-secondary-container": "#2e6f47",
+                      "primary-fixed": "#ffdbc7",
+                      "inverse-on-surface": "#f2eff9",
+                      "outline": "#8a7265",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#006495",
+                      "on-background": "#1b1b22"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "margin-standard": "16px",
+                      "gap-lg": "20px",
+                      "gap-md": "12px",
+                      "nav-height": "64px",
+                      "gap-sm": "8px",
+                      "section-md": "24px",
+                      "section-lg": "32px",
+                      "gap-xs": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Montserrat"],
+                      "headline-lg-mobile": ["Cairo"],
+                      "button-text": ["Montserrat"],
+                      "body-base": ["Montserrat"],
+                      "label-md": ["Montserrat"],
+                      "headline-sm": ["Cairo"],
+                      "label-sm": ["Montserrat"],
+                      "headline-md": ["Cairo"],
+                      "headline-lg": ["Cairo"],
+                      "hero-lg": ["Cairo"]
+              },
+              "fontSize": {
+                      "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                      "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                      "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                      "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            background-color: #FCF3DC;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- Top AppBar (from JSON guidance) -->
+<header class="bg-primary shadow-md sticky top-0 z-50 h-nav-height w-full flex flex-row-reverse items-center justify-between px-margin-standard">
+<div class="flex items-center gap-md">
+<button class="text-on-primary hover:bg-primary-fixed-dim/10 p-2 rounded-full duration-150 ease-in-out" onclick="toggleFilters()">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+</button>
+</div>
+<h1 class="text-headline-md-mobile font-headline-md-mobile font-extrabold text-on-primary">متجر البقالة</h1>
+<div class="flex items-center gap-md">
+<button class="text-on-primary hover:bg-primary-fixed-dim/10 p-2 rounded-full duration-150 ease-in-out">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</header>
+<main class="min-h-screen pb-32">
+<!-- Focused Search Bar -->
+<div class="px-margin-standard pt-section-md">
+<div class="relative group">
+<div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary" data-icon="search">search</span>
+</div>
+<input autofocus="" class="w-full h-[52px] bg-surface-white border-1.5 border-primary rounded-xl pr-12 pl-4 text-body-lg font-body-lg focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-md" type="text" value="خبز طازج"/>
+<div class="absolute inset-y-0 left-4 flex items-center cursor-pointer">
+<span class="material-symbols-outlined text-muted-gray" data-icon="close">close</span>
+</div>
+</div>
+</div>
+<!-- Recent Searches -->
+<section class="mt-section-md px-margin-standard">
+<div class="flex items-center justify-between mb-gap-md">
+<h2 class="text-headline-sm font-headline-sm">عمليات البحث الأخيرة</h2>
+<button class="text-label-md font-label-md text-primary">مسح الكل</button>
+</div>
+<div class="flex flex-wrap gap-sm">
+<div class="flex items-center gap-xs bg-surface-white border border-border-beige px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-muted-gray text-[18px]" data-icon="history">history</span>
+<span class="text-body-base font-body-base">زيت زيتون فلسطيني</span>
+</div>
+<div class="flex items-center gap-xs bg-surface-white border border-border-beige px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-muted-gray text-[18px]" data-icon="history">history</span>
+<span class="text-body-base font-body-base">حليب كامل الدسم</span>
+</div>
+<div class="flex items-center gap-xs bg-surface-white border border-border-beige px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-muted-gray text-[18px]" data-icon="history">history</span>
+<span class="text-body-base font-body-base">زعتر بلدي</span>
+</div>
+</div>
+</section>
+<!-- Recommended for You (Horizontal Bento Style) -->
+<section class="mt-section-lg px-margin-standard">
+<h2 class="text-headline-sm font-headline-sm mb-gap-md">مقترح لك</h2>
+<div class="flex overflow-x-auto gap-gap-md pb-4 scrollbar-hide -mx-margin-standard px-margin-standard">
+<!-- Product Card 1 -->
+<div class="min-w-[200px] bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige transform active:scale-95 transition-transform">
+<div class="h-32 bg-gray-100 relative">
+<img alt="Local Honey" class="w-full h-full object-cover" data-alt="A jar of golden, translucent Palestinian honey set against a warm, rustic kitchen background. The lighting is soft and natural, emphasizing the rich texture of the honey. The composition uses a warm color palette with earthy tones of amber and cream, reflecting a heritage-inspired aesthetic that feels authentic and appetizing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr7Khzlg4i7xkdlbNvG2bE7omOYVX6GW5kypwBr_nAJwQMnjoq0mVXEEs_NCSJeNd2YvCGGpgrHhyAoQDhW0_KU2vlhAwP4xteXmM-0WGCb1L7ttum5bbtMVi0QpP5lqAXJgjr1Brd5WF-dtEwbYVOB1WetyOqKdihyS7ffW_HOpwtGZ-1nnrlv7LmnY92ejs0a0eVDFre1O6vAQBljZ44FZf_Se1_ykSBFKA8d316uyMICeKFMEnYfeanBax85H8TwS1G0w-nvOcc"/>
+<span class="absolute top-2 right-2 bg-secondary text-on-secondary text-label-sm font-label-sm px-2 py-1 rounded-full">خصم 20%</span>
+</div>
+<div class="p-gap-sm">
+<h3 class="text-body-base font-bold text-on-surface">عسل جبلي أصلي</h3>
+<div class="flex items-center justify-between mt-2">
+<span class="text-primary font-bold">45.00 ₪</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="min-w-[200px] bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige transform active:scale-95 transition-transform">
+<div class="h-32 bg-gray-100 relative">
+<img alt="Olive Oil" class="w-full h-full object-cover" data-alt="Premium Palestinian extra virgin olive oil in a dark glass bottle, standing on a textured stone surface. The background is a soft-focus Mediterranean olive grove at sunset, bathing the scene in warm saffron and amber light. The mood is sophisticated and clean, emphasizing the high quality and cultural heritage of the product." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhrSd-NYRxNvZCPjb8AXjDMigIlvttbaNVEkRG0JZrKaFu3bw8wjZ1AYcBSCn9I6ZNHcn73XtaN2tY1SsMSQh7qkUu-i4PB_hE-HO3Ixb3ZAfi-SyE-AnWk4iL3jc2d7RmqpjefpnsQjPrl3AJReFvrfF889Sqd2EKxVthONPHlNn3WRUYESeOhRPZej7rlz9-yOfUbTcZz4zV7Ho7dCqXLJaO3gu0Hwv03aF3zCtlG2XNgerzw8XtoMHpHivXLefDsHTePBOTyE3Q"/>
+</div>
+<div class="p-gap-sm">
+<h3 class="text-body-base font-bold text-on-surface">زيت زيتون بكر ممتاز</h3>
+<div class="flex items-center justify-between mt-2">
+<span class="text-primary font-bold">120.00 ₪</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="min-w-[200px] bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige transform active:scale-95 transition-transform">
+<div class="h-32 bg-gray-100 relative">
+<img alt="Dates" class="w-full h-full object-cover" data-alt="A luxurious wooden bowl filled with plump, dark Medjool dates, arranged artfully on a warm cream-colored tablecloth. The lighting is low-key and dramatic, creating soft shadows that highlight the wrinkles and glisten of the dates. The overall aesthetic is rich and traditional, evoking Palestinian hospitality and festive warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw2MjeHXVYe6sYMGBZgGItIC7d3EoSM9j_r8ZHBE71cq9pEmVF5JjxzFOQAC2Vk5_oKe_kRy9cUMND-GDWCmS2wHE76stoGWAyNwMk32J6jUY_slDW5kPBOZKbm_MK9Hbwe2pOgSbX1ufbAGVlmvFjKfwyg4eg7Ml3o108oIvWFNJpgMO9dEMmnefe-FMsE6Ue7ppUsWlSV-c2da7S0kMA2ZmyqgF781m9fs1MhVV2FwmY_3OrhF-MJxNoIHP6aij9WEux1oK5Xy8m"/>
+</div>
+<div class="p-gap-sm">
+<h3 class="text-body-base font-bold text-on-surface">تمر مجدول فاخر</h3>
+<div class="flex items-center justify-between mt-2">
+<span class="text-primary font-bold">35.00 ₪</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Simulated Virtual Keyboard for context -->
+<div class="fixed bottom-nav-height left-0 w-full bg-[#D1D5DB] p-2 flex flex-col gap-1 md:hidden">
+<div class="flex gap-1 justify-center">
+<span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ض</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ص</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ث</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ق</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ف</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">غ</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ع</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ه</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">خ</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ح</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ج</span>
+</div>
+<div class="flex gap-1 justify-center">
+<span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ش</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">س</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ي</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ب</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ل</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ا</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ت</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ن</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">م</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ك</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ط</span>
+</div>
+<div class="flex gap-1 justify-center">
+<span class="bg-[#9CA3AF] px-2 py-3 rounded shadow text-center flex-1"><span class="material-symbols-outlined">shift</span></span>
+<span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ئ</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ء</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ؤ</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ر</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">لا</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ى</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ة</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">و</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ز</span><span class="bg-white px-2 py-3 rounded shadow text-center flex-1">ظ</span>
+<span class="bg-[#9CA3AF] px-2 py-3 rounded shadow text-center flex-1"><span class="material-symbols-outlined">backspace</span></span>
+</div>
+<div class="flex gap-1 justify-center">
+<span class="bg-[#9CA3AF] px-4 py-3 rounded shadow text-center flex-1">123</span>
+<span class="bg-white px-8 py-3 rounded shadow text-center flex-[3]">مسافة</span>
+<span class="bg-primary text-white px-4 py-3 rounded shadow text-center flex-1 font-bold">بحث</span>
+</div>
+</div>
+</main>
+<!-- Filter Modal (Bottom Sheet Style) -->
+<div class="fixed inset-0 z-[60] hidden" id="filterModal">
+<div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="toggleFilters()"></div>
+<div class="absolute bottom-0 w-full bg-surface-white rounded-t-[24px] shadow-2xl transition-transform duration-300 transform translate-y-0 p-margin-standard">
+<div class="w-12 h-1 bg-border-beige rounded-full mx-auto mb-section-md"></div>
+<div class="flex items-center justify-between mb-section-md">
+<h3 class="text-headline-md font-headline-md">تصفية النتائج</h3>
+<button class="text-muted-gray" onclick="toggleFilters()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-section-md overflow-y-auto max-h-[530px]">
+<!-- Price Range -->
+<div>
+<h4 class="text-body-lg font-bold mb-gap-md">نطاق السعر (₪)</h4>
+<div class="flex gap-md">
+<div class="flex-1 flex flex-col gap-xs">
+<label class="text-label-sm text-muted-gray">من</label>
+<input class="h-[52px] border-1.5 border-border-beige rounded-xl px-4 focus:border-primary outline-none" placeholder="0" type="number"/>
+</div>
+<div class="flex-1 flex flex-col gap-xs">
+<label class="text-label-sm text-muted-gray">إلى</label>
+<input class="h-[52px] border-1.5 border-border-beige rounded-xl px-4 focus:border-primary outline-none" placeholder="500" type="number"/>
+</div>
+</div>
+</div>
+<!-- Rating -->
+<div>
+<h4 class="text-body-lg font-bold mb-gap-md">التقييم</h4>
+<div class="flex gap-sm">
+<button class="flex-1 py-2 rounded-xl border border-border-beige flex items-center justify-center gap-1 active:bg-primary-fixed">
+<span class="material-symbols-outlined text-warning-amber text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-md">4.5+</span>
+</button>
+<button class="flex-1 py-2 rounded-xl border border-primary bg-primary/10 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-warning-amber text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-md text-primary font-bold">4.0+</span>
+</button>
+<button class="flex-1 py-2 rounded-xl border border-border-beige flex items-center justify-center gap-1 active:bg-primary-fixed">
+<span class="material-symbols-outlined text-warning-amber text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-md">3.0+</span>
+</button>
+</div>
+</div>
+<!-- Delivery Time -->
+<div>
+<h4 class="text-body-lg font-bold mb-gap-md">وقت التوصيل</h4>
+<div class="grid grid-cols-2 gap-sm">
+<label class="flex items-center gap-md p-3 border border-border-beige rounded-xl">
+<input class="text-primary focus:ring-primary" name="delivery" type="radio"/>
+<span class="text-body-base">أقل من 30 دقيقة</span>
+</label>
+<label class="flex items-center gap-md p-3 border border-primary bg-primary/5 rounded-xl">
+<input checked="" class="text-primary focus:ring-primary" name="delivery" type="radio"/>
+<span class="text-body-base font-bold">30-60 دقيقة</span>
+</label>
+</div>
+</div>
+<!-- Special Offers -->
+<div>
+<h4 class="text-body-lg font-bold mb-gap-md">عروض خاصة</h4>
+<div class="space-y-sm">
+<label class="flex items-center justify-between p-3">
+<span class="text-body-base">توصيل مجاني</span>
+<input class="w-6 h-6 rounded border-border-beige text-primary focus:ring-primary" type="checkbox"/>
+</label>
+<label class="flex items-center justify-between p-3">
+<span class="text-body-base">عروض حصرية</span>
+<input checked="" class="w-6 h-6 rounded border-border-beige text-primary focus:ring-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<div class="mt-section-md flex gap-md">
+<button class="flex-1 h-[52px] bg-primary text-on-primary font-bold rounded-xl shadow-md active:scale-95 transition-transform" onclick="toggleFilters()">تطبيق</button>
+<button class="flex-1 h-[52px] border-1.5 border-primary text-primary font-bold rounded-xl active:bg-primary/5">إعادة ضبط</button>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar (from JSON guidance) -->
+<nav class="fixed bottom-0 w-full z-50 h-nav-height flex flex-row-reverse justify-around items-center bg-surface-white border-t border-border-beige pb-safe shadow-lg">
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold hover:bg-surface-container-low transition-colors transform active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined active-icon" data-icon="search">search</span>
+<span class="font-label-sm text-label-sm">البحث</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors" href="#">
+<div class="relative">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute -top-1 -right-2 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">3</span>
+</div>
+<span class="font-label-sm text-label-sm">السلة</span>
+</a>
+<a class="flex flex-col items-center justify-center text-muted-gray hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">الحساب</span>
+</a>
+</nav>
+<script>
+        function toggleFilters() {
+            const modal = document.getElementById('filterModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body></html>

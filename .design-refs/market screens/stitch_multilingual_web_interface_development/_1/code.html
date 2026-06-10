@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>متجر البقالة | الرئيسية</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Montserrat:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background-cream": "#FCF3DC",
+                    "secondary-fixed-dim": "#92d5a5",
+                    "on-primary-fixed": "#311300",
+                    "error-red": "#EF4444",
+                    "on-surface": "#1b1b22",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#efecf6",
+                    "warning-amber": "#F59E0B",
+                    "surface-container-highest": "#e4e1eb",
+                    "on-tertiary-container": "#00314c",
+                    "on-tertiary-fixed-variant": "#004b71",
+                    "background": "#fbf8ff",
+                    "tertiary-fixed": "#cbe6ff",
+                    "surface-container-low": "#f5f2fc",
+                    "muted-gray": "#6B7280",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#974800",
+                    "surface-variant": "#e4e1eb",
+                    "on-primary-container": "#4e2200",
+                    "tertiary-fixed-dim": "#8fcdff",
+                    "border-beige": "#E5E0D5",
+                    "on-surface-variant": "#564337",
+                    "secondary": "#296a43",
+                    "on-secondary-fixed": "#00210e",
+                    "success-green": "#22C55E",
+                    "primary": "#974800",
+                    "inverse-surface": "#303037",
+                    "on-tertiary-fixed": "#001e30",
+                    "outline-variant": "#ddc1b1",
+                    "on-primary": "#ffffff",
+                    "surface-white": "#FFFFFF",
+                    "on-secondary-fixed-variant": "#09522d",
+                    "on-primary-fixed-variant": "#733600",
+                    "tertiary-container": "#009ee8",
+                    "surface-container-high": "#eae7f1",
+                    "surface-dim": "#dbd9e2",
+                    "primary-container": "#e6781e",
+                    "secondary-container": "#abefbd",
+                    "inverse-primary": "#ffb688",
+                    "surface": "#fbf8ff",
+                    "on-error": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-bright": "#fbf8ff",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#aef2bf",
+                    "primary-fixed-dim": "#ffb688",
+                    "on-secondary-container": "#2e6f47",
+                    "primary-fixed": "#ffdbc7",
+                    "inverse-on-surface": "#f2eff9",
+                    "outline": "#8a7265",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#006495",
+                    "on-background": "#1b1b22"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "margin-standard": "16px",
+                    "gap-lg": "20px",
+                    "gap-md": "12px",
+                    "nav-height": "64px",
+                    "gap-sm": "8px",
+                    "section-md": "24px",
+                    "section-lg": "32px",
+                    "gap-xs": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Montserrat"],
+                    "headline-lg-mobile": ["Cairo"],
+                    "button-text": ["Montserrat"],
+                    "body-base": ["Montserrat"],
+                    "label-md": ["Montserrat"],
+                    "headline-sm": ["Cairo"],
+                    "label-sm": ["Montserrat"],
+                    "headline-md": ["Cairo"],
+                    "headline-lg": ["Cairo"],
+                    "hero-lg": ["Cairo"]
+            },
+            "fontSize": {
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "34px", "fontWeight": "700"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "700"}],
+                    "body-base": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "label-md": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "headline-lg": ["30px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "hero-lg": ["38px", {"lineHeight": "1.2", "fontWeight": "800"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .promo-gradient {
+            background: linear-gradient(135deg, #974800 0%, #e6781e 100%);
+        }
+        
+        body {
+            background-color: #FCF3DC;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-base text-on-surface">
+<!-- Top AppBar (from JSON guidance) -->
+<header class="fixed top-0 z-50 w-full bg-primary shadow-md flex flex-row-reverse items-center justify-between px-margin-standard h-nav-height">
+<div class="flex items-center gap-md">
+<button class="text-on-primary hover:bg-primary-fixed-dim/10 p-2 rounded-full transition-transform active:scale-95 duration-150">
+<span class="material-symbols-outlined">tune</span>
+</button>
+<div class="relative flex-1 min-w-[200px]">
+<input class="w-full h-10 pr-10 pl-4 bg-white/10 border-none rounded-lg text-on-primary placeholder:text-on-primary/60 focus:ring-2 focus:ring-white/20 font-label-md" placeholder="ماذا تريد أن تطلب اليوم؟" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-on-primary">search</span>
+</div>
+</div>
+<h1 class="text-headline-md-mobile font-headline-md-mobile font-extrabold text-on-primary">متجر البقالة</h1>
+</header>
+<main class="pt-[80px] pb-[100px]">
+<!-- Hero Promo Banner (Asymmetric layout) -->
+<section class="px-margin-standard mb-section-lg">
+<div class="relative overflow-hidden rounded-xl promo-gradient h-48 flex items-center p-6 shadow-md">
+<div class="z-10 w-2/3">
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-on-primary mb-2 leading-tight">خصم 50% على طلبك الأول!</h2>
+<p class="text-label-md font-label-md text-on-primary/90 mb-4">استمتع بتجربة تسوق فريدة مع توصيل سريع ومجاني</p>
+<button class="bg-white text-primary px-6 py-2 rounded-full font-bold text-label-md active:scale-95 transition-transform">اطلب الآن</button>
+</div>
+<div class="absolute -left-4 -bottom-6 w-1/2 h-full opacity-90">
+<img alt="Grocery bag" class="w-full h-full object-contain rotate-6" data-alt="A vibrant and overflowing paper grocery bag filled with fresh green vegetables, ripe red tomatoes, artisanal bread loaves, and organic fruits. The setting is a bright and warm kitchen environment with soft morning light streaming in, creating a cozy and appetizing Palestinian heritage mood. The colors are rich and saturated, emphasizing freshness and quality within a modern light-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRgpPr_Vm1-e5Wc7zs5QJT5TiwUBmaf6PNzZhvubVLXMYp7Mmh7GcYnZ4ZCw6nAqXKAJVPYgVFGbHTpKTdGGM-Nw1CD4s_RmLPhszkc6tL5RL1G82hVb5t7e0aHqsyoYf4h4AAZTQK7bu9Xa7SJJLJH-eHcGu81buR2EDY34KrvdUFX_u2Xzzxq14T3wxzPC0xPs5NhYecPWNPzFy6Zn7MzQLwhZRMNTI92jBPfbv9uKrlS1LLoNsOeC5trVmw83PtEkZGHsadp8AC"/>
+</div>
+</div>
+</section>
+<!-- Categories Horizontal Scroll -->
+<section class="mb-section-lg">
+<div class="flex items-center justify-between px-margin-standard mb-4">
+<h3 class="text-headline-sm font-headline-sm">الأصناف</h3>
+<button class="text-primary font-bold text-label-md">عرض الكل</button>
+</div>
+<div class="flex gap-md overflow-x-auto px-margin-standard hide-scrollbar pb-2">
+<!-- Market -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">shopping_basket</span>
+</div>
+<span class="text-label-md font-label-md">ماركت</span>
+</div>
+<!-- Water -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+</div>
+<span class="text-label-md font-label-md">مياه</span>
+</div>
+<!-- Butchery -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">set_meal</span>
+</div>
+<span class="text-label-md font-label-md">لحوم</span>
+</div>
+<!-- Vegetables -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">nutrition</span>
+</div>
+<span class="text-label-md font-label-md">خضروات</span>
+</div>
+<!-- Pets -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">pets</span>
+</div>
+<span class="text-label-md font-label-md">حيوانات</span>
+</div>
+<!-- Bakery -->
+<div class="flex-shrink-0 flex flex-col items-center gap-sm group">
+<div class="w-16 h-16 bg-surface-white rounded-2xl shadow-sm flex items-center justify-center group-hover:scale-105 transition-transform border border-border-beige">
+<span class="material-symbols-outlined text-primary text-3xl">bakery_dining</span>
+</div>
+<span class="text-label-md font-label-md">مخبوزات</span>
+</div>
+</div>
+</section>
+<!-- Popular Shops - Bento Grid Style -->
+<section class="px-margin-standard mb-section-lg">
+<h3 class="text-headline-sm font-headline-sm mb-4">المتاجر الأكثر شعبية</h3>
+<div class="grid grid-cols-2 gap-md">
+<!-- Shop 1 (Large) -->
+<div class="col-span-2 relative h-40 bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige p-4 flex gap-4 items-center group cursor-pointer">
+<div class="w-24 h-24 rounded-lg bg-background-cream flex-shrink-0 overflow-hidden">
+<img alt="BIM Store" class="w-full h-full object-cover" data-alt="A clean, professionally shot commercial logo of a modern grocery store named BIM, set against a pristine white background. The design is minimalist and high-contrast, featuring bold typography and clean lines. The surrounding environment is bright and airy, reflecting a contemporary corporate retail aesthetic with a focus on efficiency and hygiene." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCc_AuxASceGSECiWHiVOIt-pjkMynJGHcOlFvbj6PUBBi7YfdZsBsRmVmmqUaneQ5DSups9wdJ_-AhyeRC6BcjUtpr0JkoSm1JaJnPk_Yd9tZo1_ZO6TMkqnES81_gMs2nlJKFXS_In4e1wdAM7LhpyFZlexikwNMFSu6boXuHX_6fhl1SzKxdI0kFOAw3OWxmARSf7mgmMJ6ILv3Lil478niS7HyeL91MegVZXaMWl1M7-GE__lcnO59BEmPlc5MsAGvlQYkRO8sS"/>
+</div>
+<div class="flex flex-col justify-center gap-xs">
+<div class="flex items-center gap-xs">
+<span class="bg-success-green/10 text-success-green text-[10px] px-2 py-0.5 rounded-full font-bold">مفتوح الآن</span>
+</div>
+<h4 class="text-headline-sm font-headline-sm">سوبر ماركت السلام</h4>
+<div class="flex items-center gap-xs text-muted-gray">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="text-label-sm font-label-sm">20-30 دقيقة</span>
+</div>
+</div>
+<div class="absolute left-4 top-4">
+<button class="bg-background-cream p-2 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary">favorite</span>
+</button>
+</div>
+</div>
+<!-- Shop 2 (Small) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige p-3 flex flex-col gap-sm group cursor-pointer">
+<div class="h-28 rounded-lg bg-background-cream overflow-hidden">
+<img alt="Butcher" class="w-full h-full object-cover" data-alt="Close up high-quality photography of premium cuts of meat displayed in a clean, modern butcher shop. The lighting is focused and warm, highlighting the texture and freshness of the product. The environment features a mix of traditional tile patterns and minimalist modern surfaces, creating a bridge between heritage and convenience. Warm cream tones and high-contrast accents define the visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADYqiK1yiZTb5Jmmm2d1Y_EDecJ3Zva4VwR4X7Pt-TOGSzTnbvgoUIrapypqQQ_ILRrVOa6H3zidGSaE6FdQRAgCPnaP4W-xWU5F-nnCVXTapEgpUVpeFSM_Ww0yn-cgsPTHu-apOnsFJbSGJB4c2XqqeeAez1MbqB34qlPIPbgxCoVkH8qz_18xmpKJuH4-tR22QF9vqJOmagLlWAV92TX7U2fkoF8bufnJBZISqCBe35Xl3yfduu8zz6KuuF3wW8PHlarIgB1eVJ"/>
+</div>
+<h4 class="text-label-md font-label-md font-bold truncate">ملحمة الأمانة</h4>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-muted-gray">35-45 دقيقة</span>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-sm font-label-sm">4.8</span>
+</div>
+</div>
+</div>
+<!-- Shop 3 (Small) -->
+<div class="bg-surface-white rounded-xl shadow-md overflow-hidden border border-border-beige p-3 flex flex-col gap-sm group cursor-pointer">
+<div class="h-28 rounded-lg bg-background-cream overflow-hidden">
+<img alt="Fruits" class="w-full h-full object-cover" data-alt="An artistic arrangement of colorful, fresh seasonal fruits including oranges, grapes, and pomegranates. The composition is vibrant and natural, captured with shallow depth of field in a sunlit outdoor market stall. The image evokes a sense of local Palestinian harvest and hospitality, using a rich, warm color palette that aligns with a traditional yet modern retail identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsu84R27EbHTIWZbleD3-IKwIqRXDCRgS8cevN1t0W_YKteFO0JLm8MW1AfLJBMz-I_d0nd6QYFUvaVMmXsHkbpQNVJaPCgrcVmjuZU9nUYyASHIMFDJ2ppoAYBe8s6n9y26c26yT5TTM7J4cJiNuP-0_GWaFj2oJY42O7reJcFjSa3luOinlKMnDUbXB8qNwVeZ-xLyiXCa4f0qJPuAzkypa4P6IhzJzvVZ-jLc_ZNs5AC6kCb_bGgDMUdOyFhxE2g_3orw4Y2HzX"/>
+</div>
+<h4 class="text-label-md font-label-md font-bold truncate">خضروات النور</h4>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-muted-gray">15-25 دقيقة</span>
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-warning-amber text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-sm font-label-sm">4.5</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Repeat Order Section (Linear but styled) -->
+<section class="px-margin-standard mb-section-lg">
+<h3 class="text-headline-sm font-headline-sm mb-4">اطلب مرة أخرى</h3>
+<div class="bg-surface-white rounded-xl border-2 border-dashed border-primary/20 p-4 flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">history</span>
+</div>
+<div>
+<p class="text-label-md font-label-md">آخر طلب من سوبر ماركت السلام</p>
+<p class="text-label-sm font-label-sm text-muted-gray">3 قطع • 45.00 ₪</p>
+</div>
+</div>
+<button class="bg-primary-fixed-dim/20 text-primary p-2 rounded-full active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell (from JSON guidance) -->
+<nav class="fixed bottom-0 w-full z-50 h-nav-height bg-surface-white flex flex-row-reverse justify-around items-center border-t border-border-beige shadow-lg pb-safe">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-muted-gray transition-colors hover:bg-surface-container-low px-4" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">الرئيسية</span>
+</a>
+<!-- Market (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-primary font-bold transition-transform duration-200 scale-100 px-4" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+<span class="font-label-sm text-label-sm">السلة</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-muted-gray transition-colors hover:bg-surface-container-low px-4" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-sm text-label-sm">الطلبات</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-muted-gray transition-colors hover:bg-surface-container-low px-4" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">الحساب</span>
+</a>
+</nav>
+<!-- Floating Action Button (FAB) contextually for "Search/Browse" -->
+<button class="fixed bottom-20 left-4 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-transform z-40">
+<span class="material-symbols-outlined text-3xl">shopping_cart_checkout</span>
+</button>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('click', (e) => {
+                // Prevent default if it's a dummy link
+                if(el.getAttribute('href') === '#') e.preventDefault();
+                
+                // Haptic-like feedback animation
+                el.classList.add('scale-95');
+                setTimeout(() => el.classList.remove('scale-95'), 150);
+            });
+        });
+
+        // Simple scroll appearance for top bar
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-lg');
+                header.classList.remove('shadow-md');
+            } else {
+                header.classList.add('shadow-md');
+                header.classList.remove('shadow-lg');
+            }
+        });
+    </script>
+</body></html>

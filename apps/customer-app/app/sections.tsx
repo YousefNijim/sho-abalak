@@ -57,7 +57,7 @@ export default function Sections() {
         </Pressable>
 
         {/* Section 2: Stores */}
-        <Pressable style={styles.cardWrap} onPress={() => router.push('/stores-coming-soon')}>
+        <Pressable style={styles.cardWrap} onPress={() => router.push('/(stores)')}>
           <LinearGradient
             colors={['#165A34', '#0E4427']}
             start={{ x: 0, y: 0 }}
