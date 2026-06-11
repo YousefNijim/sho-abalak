@@ -15,13 +15,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Search,
-  ShoppingCart,
-  MapPin,
-  UtensilsCrossed,
-  Store,
-import { Menu, Search, Filter, ShoppingBag, MapPin, ChevronDown, Check, Home as HomeIcon, Plus, ArrowRight, X, Clock, Bike, Star, Store, UtensilsCrossed, Settings, SlidersHorizontal, Package, ChevronRight, Share2 } from 'lucide-react-native';
+import { Menu, Search, Filter, ShoppingBag, ShoppingCart, MapPin, ChevronDown, Check, Home as HomeIcon, Plus, ArrowRight, X, Clock, Bike, Star, Store, UtensilsCrossed, Settings, SlidersHorizontal, Package, ChevronRight, Share2, Image as ImageIcon } from 'lucide-react-native';
 import { AddressSelector } from '../../components/AddressSelector';
 import { Image } from 'expo-image';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
@@ -479,6 +473,12 @@ export default function Home() {
 
         {/* Center: Address selector */}
         <AddressSelector />
+
+        {/* Left (renders on far left in forced RTL): Hamburger Menu Button */}
+        <Pressable style={styles.headerCircularBtn} onPress={() => router.replace('/sections')}>
+          <Menu size={24} color={colors.primary} />
+        </Pressable>
+      </View>
 
       {/* Full-page search overlay */}
       {isSearchActive && (

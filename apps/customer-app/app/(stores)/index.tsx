@@ -4,11 +4,15 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart } from 'lucide-react-native';
-import { businessesApi, tagsApi, promotedBusinessesApi, addressesApi, BASE_URL } from '@shu/api-client';
+import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart, Menu } from 'lucide-react-native';
+import { businessesApi, tagsApi, promotedBusinessesApi, addressesApi, ordersApi, productsApi, BASE_URL } from '@shu/api-client';
+import type { Order, Product } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
+import { useCartStore } from '../../src/stores/cart.store';
+import { useAuthStore } from '../../src/stores/auth.store';
 import { fontFamily, spacing } from '../../src/theme';
 import { AddressSelector } from '../../components/AddressSelector';
+import { NotificationBell } from '../../src/components/NotificationBell';
 
 const mediaUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;
@@ -59,10 +63,53 @@ export default function StoreHome() {
       }),
   });
 
+  const firstPopularBusinessId = businesses[0]?.id;
+
+  const { data: popularProducts = [] } = useQuery({
+    queryKey: ['popular-products', firstPopularBusinessId],
+    queryFn: () => productsApi.listByBusiness(firstPopularBusinessId!),
+    enabled: !!firstPopularBusinessId,
+  });
+
+  const trendingProduct = popularProducts[0] ?? null;
+
   const { data: promoted = [] } = useQuery({
     queryKey: ['promoted-businesses', 'STORE', selectedAddress?.areaId],
     queryFn: () => promotedBusinessesApi.list({ type: 'STORE', areaId: selectedAddress?.areaId }),
   });
+
+  const isAuthed = useAuthStore((s) => !!s.user && !!s.token);
+  const addItem = useCartStore((s) => s.addItem);
+  const clearCart = useCartStore((s) => s.clear);
+
+  const { data: recentStoreOrders = [] } = useQuery({
+    queryKey: ['orders', 'STORE'],
+    queryFn: () => ordersApi.list({ businessType: 'STORE' }),
+    enabled: isAuthed,
+  });
+
+  const lastOrder = recentStoreOrders[0] ?? null;
+
+  const handleReorder = (o: Order) => {
+    clearCart();
+    const areaId = o.business?.area?.id || '';
+    o.items?.forEach((it) => {
+      for (let i = 0; i < it.quantity; i++) {
+        addItem(
+          {
+            productId: it.productId,
+            name: it.product?.name || 'منتج',
+            price: it.unitPrice,
+            variantId: it.variantId,
+            variantName: it.variantName,
+          },
+          o.businessId,
+          areaId,
+        );
+      }
+    });
+    router.push('/cart');
+  };
 
   // Mock banners since there is no store-specific banner endpoint yet
   const mockBanners = [
@@ -74,10 +121,12 @@ export default function StoreHome() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + spacing[4] }]}>
         <View style={styles.headerTop}>
-          <View style={{ width: 40 }} /> {/* Spacer */}
+          <View style={styles.profileBtn}>
+            <NotificationBell size={24} />
+          </View>
           <AddressSelector />
-          <Pressable style={styles.profileBtn}>
-            <Store size={20} color={storeColors.primary} />
+          <Pressable style={styles.profileBtn} onPress={() => router.replace('/sections')}>
+            <Menu size={24} color={storeColors.primary} />
           </Pressable>
         </View>
 
@@ -141,21 +190,65 @@ export default function StoreHome() {
         </View>
 
         {/* Order Again Widget */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>اطلب مرة أخرى</Text>
-        </View>
-        <View style={styles.orderAgainCard}>
-          <View style={styles.orderAgainIconWrap}>
-            <Clock size={24} color={storeColors.primaryContainer} />
-          </View>
-          <View style={styles.orderAgainInfo}>
-            <Text style={styles.orderAgainTitle}>آخر طلب من سوبر ماركت السلام</Text>
-            <Text style={styles.orderAgainSub}>3 قطع • 45.00 ₪</Text>
-          </View>
-          <Pressable style={styles.orderAgainBtn}>
-            <ShoppingCart size={18} color="#fff" />
-          </Pressable>
-        </View>
+        {lastOrder && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>اطلب مرة أخرى</Text>
+            </View>
+            <View style={styles.orderAgainCard}>
+              <View style={styles.orderAgainIconWrap}>
+                <Clock size={24} color={storeColors.primaryContainer} />
+              </View>
+              <View style={styles.orderAgainInfo}>
+                <Text style={styles.orderAgainTitle}>آخر طلب من {lastOrder.business?.name || 'المتجر'}</Text>
+                <Text style={styles.orderAgainSub}>
+                  {lastOrder.items?.reduce((sum: number, it: any) => sum + it.quantity, 0) || 0} قطع • {Number(lastOrder.total).toFixed(2)} ₪
+                </Text>
+              </View>
+              <Pressable style={styles.orderAgainBtn} onPress={() => handleReorder(lastOrder)}>
+                <ShoppingCart size={18} color="#fff" />
+              </Pressable>
+            </View>
+          </>
+        )}
+
+        {/* Trending Product Widget */}
+        {trendingProduct && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>المنتجات الرائجة</Text>
+            </View>
+            <Pressable style={styles.trendingCard} onPress={() => router.push(`/business/${firstPopularBusinessId}`)}>
+              <View style={styles.trendingImgWrap}>
+                {trendingProduct.imageUrl ? (
+                  <Image source={{ uri: mediaUrl(trendingProduct.imageUrl)! }} style={styles.trendingImg} contentFit="cover" />
+                ) : (
+                  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Store size={24} color={storeColors.border} />
+                  </View>
+                )}
+              </View>
+              <View style={styles.trendingInfo}>
+                <Text style={styles.trendingTitle} numberOfLines={1}>{trendingProduct.name}</Text>
+                <Text style={styles.trendingBusiness} numberOfLines={1}>من {businesses[0]?.name}</Text>
+                <View style={styles.trendingPriceRow}>
+                  <Text style={styles.trendingPrice}>{Number(trendingProduct.price).toFixed(2)} ₪</Text>
+                  <Pressable style={styles.trendingAddBtn} onPress={(e) => {
+                    e.stopPropagation();
+                    addItem({
+                      productId: trendingProduct.id,
+                      name: trendingProduct.name,
+                      price: trendingProduct.price,
+                    }, 1, firstPopularBusinessId, businesses[0]?.name);
+                    // optionally feedback
+                  }}>
+                    <ShoppingCart size={14} color="#fff" />
+                  </Pressable>
+                </View>
+              </View>
+            </Pressable>
+          </>
+        )}
 
         {/* Popular Stores */}
         <View style={styles.sectionHeader}>
@@ -167,6 +260,11 @@ export default function StoreHome() {
 
         {isLoadingBusinesses ? (
           <ActivityIndicator size="large" color={storeColors.primary} style={{ marginTop: 20 }} />
+        ) : businesses.length === 0 ? (
+          <View style={{ marginTop: 40, marginBottom: 40, alignItems: 'center' }}>
+            <Text style={{ fontFamily: fontFamily.medium, fontSize: 16, color: storeColors.textMuted }}>لا توجد متاجر تصل إلى منطقتك حالياً</Text>
+            <Text style={{ fontFamily: fontFamily.regular, fontSize: 14, color: storeColors.textMuted, marginTop: 4 }}>جرّب اختيار عنوان آخر</Text>
+          </View>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.storesScroll}>
             {businesses.map((b: any) => (
@@ -482,5 +580,62 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.medium,
     fontSize: 12,
     color: storeColors.textMuted,
+  },
+  trendingCard: {
+    marginHorizontal: spacing[4],
+    backgroundColor: storeColors.surface,
+    borderRadius: 20,
+    padding: spacing[3],
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: storeColors.border,
+  },
+  trendingImgWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 16,
+    backgroundColor: storeColors.background,
+    overflow: 'hidden',
+  },
+  trendingImg: {
+    width: '100%',
+    height: '100%',
+  },
+  trendingInfo: {
+    flex: 1,
+    marginRight: spacing[3],
+    alignItems: 'flex-end',
+  },
+  trendingTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+    color: storeColors.textPrimary,
+  },
+  trendingBusiness: {
+    fontFamily: fontFamily.medium,
+    fontSize: 13,
+    color: storeColors.textMuted,
+    marginTop: 2,
+  },
+  trendingPriceRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    marginTop: spacing[2],
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  trendingPrice: {
+    fontFamily: fontFamily.bold,
+    fontSize: 14,
+    color: storeColors.primary,
+  },
+  trendingAddBtn: {
+    backgroundColor: storeColors.secondary,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

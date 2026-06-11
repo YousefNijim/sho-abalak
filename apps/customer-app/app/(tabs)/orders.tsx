@@ -51,16 +51,21 @@ export default function Orders() {
 
   const handleReorder = (o: Order) => {
     clearCart();
+    const areaId = o.business?.area?.id || '';
     o.items?.forEach((it) => {
-      addItem(
-        {
-          productId: it.productId,
-          name: it.product?.name || 'منتج',
-          price: it.unitPrice,
-        },
-        o.businessId,
-        o.customer?.area?.name || '',
-      );
+      for (let i = 0; i < it.quantity; i++) {
+        addItem(
+          {
+            productId: it.productId,
+            name: it.product?.name || 'منتج',
+            price: it.unitPrice,
+            variantId: it.variantId,
+            variantName: it.variantName,
+          },
+          o.businessId,
+          areaId,
+        );
+      }
     });
     router.push('/cart');
   };

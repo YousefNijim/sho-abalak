@@ -51,110 +51,110 @@ export class OrdersService {
     });
     if (!business) throw new NotFoundException('المنشأة غير موجودة');
 
-    const productIds = dto.items.map((i) => i.productId);
-    const products = await this.prisma.product.findMany({
-      where: { id: { in: productIds }, businessId: dto.businessId, isAvailable: true },
-    });
-    if (products.length !== productIds.length) {
-      throw new BadRequestException('بعض المنتجات غير متوفرة حالياً');
-    }
-
-    const priceOf = new Map(products.map((p) => [p.id, p.price]));
-
-    // Fetch variants for items that have variantId
-    const variantIds = dto.items.filter((i) => i.variantId).map((i) => i.variantId!);
-    const variants = variantIds.length > 0
-      ? await this.prisma.productVariant.findMany({ where: { id: { in: variantIds }, isAvailable: true } })
-      : [];
-    const variantMap = new Map(variants.map((v) => [v.id, v]));
-
-    // Stock check (restaurants have stock=null — never checked)
-    for (const item of dto.items) {
-      const product = products.find((p) => p.id === item.productId);
-      if (!product) continue;
-      if (item.variantId) {
-        const variant = variantMap.get(item.variantId);
-        if (!variant) throw new BadRequestException(`المتغير المحدد غير متوفر لـ "${product.name}"`);
-        if (variant.stock !== null && variant.stock < item.quantity) {
-          throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name} — ${variant.name}"`);
-        }
-      } else if (product.stock !== null && product.stock < item.quantity) {
-        throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name}"`);
-      }
-    }
-
-    let subtotal = new Prisma.Decimal(0);
-    const itemData = dto.items.map((i) => {
-      const variant = i.variantId ? variantMap.get(i.variantId) : null;
-      const unitPrice = variant ? variant.price : priceOf.get(i.productId)!;
-      const variantName = variant ? variant.name : null;
-      subtotal = subtotal.add(new Prisma.Decimal(unitPrice).mul(i.quantity));
-      return { productId: i.productId, quantity: i.quantity, unitPrice, variantId: i.variantId ?? null, variantName };
-    });
-
-    // Minimum order check
-    if (business.minimumOrder && subtotal.lt(business.minimumOrder)) {
-      throw new BadRequestException(`الحد الأدنى للطلب من هذه المنشأة هو ${business.minimumOrder} ₪`);
-    }
-
-    // Coupon validation & discount
-    let couponDiscount = new Prisma.Decimal(0);
-    let couponCode: string | null = null;
-    let couponIssuedBy: string | null = null;
-    let couponId: string | null = null;
-    if (dto.couponCode) {
-      const code = dto.couponCode.toUpperCase().trim();
-      const coupon = await this.prisma.coupon.findUnique({ where: { code } });
-      if (!coupon || !coupon.isActive) {
-        throw new BadRequestException('كود الكوبون غير صحيح أو غير فعّال');
-      }
-      if (coupon.maxUses !== null && coupon.currentUses >= coupon.maxUses) {
-        throw new BadRequestException('تم الوصول للحد الأقصى لمرات استخدام هذا الكوبون');
-      }
-      if (coupon.maxTotalDiscount !== null && Number(coupon.currentTotalDiscount) >= Number(coupon.maxTotalDiscount)) {
-        throw new BadRequestException('تم الوصول للحد الأقصى لقيمة الخصم الإجمالية لهذا الكوبون');
-      }
-      if (subtotal.lt(coupon.minimumOrder)) {
-        throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون هو ${coupon.minimumOrder} ₪`);
-      }
-      // Compute discount based on type (FIXED or PERCENTAGE with maxDiscount cap)
-      if (coupon.discountType === 'PERCENTAGE') {
-        const pct = (coupon.discountPct ?? new Prisma.Decimal(0)).div(100);
-        const raw = subtotal.mul(pct);
-        const max = coupon.maxDiscount ?? new Prisma.Decimal(999999);
-        couponDiscount = Prisma.Decimal.min(raw, max, subtotal);
-      } else {
-        couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
-      }
-      
-      // Cap the discount if maxTotalDiscount limit is close
-      if (coupon.maxTotalDiscount !== null) {
-        const remainingDiscount = new Prisma.Decimal(coupon.maxTotalDiscount).sub(coupon.currentTotalDiscount);
-        if (couponDiscount.gt(remainingDiscount)) {
-          couponDiscount = remainingDiscount;
-        }
-      }
-
-      couponCode = code;
-      couponIssuedBy = coupon.issuedBy;
-      couponId = coupon.id;
-    }
-
-    const deliveryFee = business.area.deliveryFee;
-    const driverDeliveryFee = (business.area as any).driverDeliveryFee ?? new Prisma.Decimal(0);
-    const platformDeliveryFee = deliveryFee.sub(driverDeliveryFee);
-    const subtotalAfterCoupon = subtotal.sub(couponDiscount);
-    const total = subtotalAfterCoupon.add(deliveryFee);
-
-    // Pre-generate the order id so the payment provider can reference it before we persist.
     const orderId = randomUUID();
-    const { create: paymentCreate, checkout } = await this.payments.buildPaymentForOrder({
-      orderId,
-      method: dto.paymentMethod,
-      amount: total,
-    });
 
-    const order = await this.prisma.$transaction(async (tx) => {
+    const { createdOrder: order, checkout, products } = await this.prisma.$transaction(async (tx) => {
+      const productIds = dto.items.map((i) => i.productId);
+      const products = await tx.product.findMany({
+        where: { id: { in: productIds }, businessId: dto.businessId, isAvailable: true },
+      });
+      if (products.length !== productIds.length) {
+        throw new BadRequestException('بعض المنتجات غير متوفرة حالياً');
+      }
+
+      const priceOf = new Map(products.map((p) => [p.id, p.price]));
+
+      // Fetch variants for items that have variantId
+      const variantIds = dto.items.filter((i) => i.variantId).map((i) => i.variantId!);
+      const variants = variantIds.length > 0
+        ? await tx.productVariant.findMany({ where: { id: { in: variantIds }, isAvailable: true } })
+        : [];
+      const variantMap = new Map(variants.map((v) => [v.id, v]));
+
+      // Stock check (restaurants have stock=null — never checked)
+      for (const item of dto.items) {
+        const product = products.find((p) => p.id === item.productId);
+        if (!product) continue;
+        if (item.variantId) {
+          const variant = variantMap.get(item.variantId);
+          if (!variant) throw new BadRequestException(`المتغير المحدد غير متوفر لـ "${product.name}"`);
+          if (variant.stock !== null && variant.stock < item.quantity) {
+            throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name} — ${variant.name}"`);
+          }
+        } else if (product.stock !== null && product.stock < item.quantity) {
+          throw new BadRequestException(`الكمية المطلوبة غير متوفرة لـ "${product.name}"`);
+        }
+      }
+
+      let subtotal = new Prisma.Decimal(0);
+      const itemData = dto.items.map((i) => {
+        const variant = i.variantId ? variantMap.get(i.variantId) : null;
+        const unitPrice = variant ? variant.price : priceOf.get(i.productId)!;
+        const variantName = variant ? variant.name : null;
+        subtotal = subtotal.add(new Prisma.Decimal(unitPrice).mul(i.quantity));
+        return { productId: i.productId, quantity: i.quantity, unitPrice, variantId: i.variantId ?? null, variantName };
+      });
+
+      // Minimum order check
+      if (business.minimumOrder && subtotal.lt(business.minimumOrder)) {
+        throw new BadRequestException(`الحد الأدنى للطلب من هذه المنشأة هو ${business.minimumOrder} ₪`);
+      }
+
+      // Coupon validation & discount
+      let couponDiscount = new Prisma.Decimal(0);
+      let couponCode: string | null = null;
+      let couponIssuedBy: string | null = null;
+      let couponId: string | null = null;
+      if (dto.couponCode) {
+        const code = dto.couponCode.toUpperCase().trim();
+        const coupon = await tx.coupon.findUnique({ where: { code } });
+        if (!coupon || !coupon.isActive) {
+          throw new BadRequestException('كود الكوبون غير صحيح أو غير فعّال');
+        }
+        if (coupon.maxUses !== null && coupon.currentUses >= coupon.maxUses) {
+          throw new BadRequestException('تم الوصول للحد الأقصى لمرات استخدام هذا الكوبون');
+        }
+        if (coupon.maxTotalDiscount !== null && Number(coupon.currentTotalDiscount) >= Number(coupon.maxTotalDiscount)) {
+          throw new BadRequestException('تم الوصول للحد الأقصى لقيمة الخصم الإجمالية لهذا الكوبون');
+        }
+        if (subtotal.lt(coupon.minimumOrder)) {
+          throw new BadRequestException(`الحد الأدنى لاستخدام هذا الكوبون هو ${coupon.minimumOrder} ₪`);
+        }
+        // Compute discount based on type (FIXED or PERCENTAGE with maxDiscount cap)
+        if (coupon.discountType === 'PERCENTAGE') {
+          const pct = (coupon.discountPct ?? new Prisma.Decimal(0)).div(100);
+          const raw = subtotal.mul(pct);
+          const max = coupon.maxDiscount ?? new Prisma.Decimal(999999);
+          couponDiscount = Prisma.Decimal.min(raw, max, subtotal);
+        } else {
+          couponDiscount = Prisma.Decimal.min(coupon.discountAmount, subtotal);
+        }
+        
+        // Cap the discount if maxTotalDiscount limit is close
+        if (coupon.maxTotalDiscount !== null) {
+          const remainingDiscount = new Prisma.Decimal(coupon.maxTotalDiscount).sub(coupon.currentTotalDiscount);
+          if (couponDiscount.gt(remainingDiscount)) {
+            couponDiscount = remainingDiscount;
+          }
+        }
+
+        couponCode = code;
+        couponIssuedBy = coupon.issuedBy;
+        couponId = coupon.id;
+      }
+
+      const deliveryFee = business.area.deliveryFee;
+      const driverDeliveryFee = (business.area as any).driverDeliveryFee ?? new Prisma.Decimal(0);
+      const platformDeliveryFee = deliveryFee.sub(driverDeliveryFee);
+      const subtotalAfterCoupon = subtotal.sub(couponDiscount);
+      const total = subtotalAfterCoupon.add(deliveryFee);
+
+      const { create: paymentCreate, checkout } = await this.payments.buildPaymentForOrder({
+        orderId,
+        method: dto.paymentMethod,
+        amount: total,
+      });
+
       // Increment coupon usage atomically with order creation
       if (couponId) {
         await tx.coupon.update({
@@ -212,7 +212,7 @@ export class OrdersService {
         }
       }
 
-      return createdOrder;
+      return { createdOrder, checkout, products };
     });
 
     // Fire-and-forget low-stock alerts after transaction (non-blocking)

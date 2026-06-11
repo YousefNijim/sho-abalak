@@ -54,7 +54,7 @@ export default function BusinessDetail() {
 
   // STORE-only state
   const [storeSearch, setStoreSearch] = useState('');
-  const [storeCatTab, setStoreCatTab] = useState<string | null>(null);
+  const [storeCatTabId, setStoreCatTabId] = useState<string | null>(null);
   const [pickerProduct, setPickerProduct] = useState<any | null>(null);
 
   const { data: business, isLoading } = useQuery({
@@ -225,11 +225,16 @@ export default function BusinessDetail() {
   const filteredProducts = tab === 0 ? products : products.filter((p: any) => p.category === categories[tab]);
 
   // ── STORE view data ──────────────────────────────────────────────────────────
-  const storeCategoryNames = Array.from(
-    new Set(products.map((p: any) => p.productCategory?.name).filter(Boolean) as string[])
-  );
+  const storeCategories = Array.from(
+    new Map(
+      products
+        .filter((p: any) => p.categoryId && p.productCategory?.name)
+        .map((p: any) => [p.categoryId, { id: p.categoryId, name: p.productCategory.name }])
+    ).values()
+  ) as { id: string; name: string }[];
+
   const storeFilteredProducts = products.filter((p: any) => {
-    const matchesCat = !storeCatTab || p.productCategory?.name === storeCatTab;
+    const matchesCat = !storeCatTabId || p.categoryId === storeCatTabId;
     const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
     return matchesCat && matchesSearch;
   });
@@ -371,7 +376,7 @@ export default function BusinessDetail() {
           </View>
 
           {/* Category tabs (horizontal) */}
-          {storeCategoryNames.length > 0 && (
+          {storeCategories.length > 0 && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -379,19 +384,19 @@ export default function BusinessDetail() {
             >
               {/* "الكل" tab */}
               <Pressable
-                style={[styles.storeCatBtn, !storeCatTab && styles.storeCatBtnActive]}
-                onPress={() => setStoreCatTab(null)}
+                style={[styles.storeCatBtn, !storeCatTabId && styles.storeCatBtnActive]}
+                onPress={() => setStoreCatTabId(null)}
               >
-                <Text style={[styles.storeCatText, !storeCatTab && styles.storeCatTextActive]}>الكل</Text>
+                <Text style={[styles.storeCatText, !storeCatTabId && styles.storeCatTextActive]}>الكل</Text>
               </Pressable>
-              {storeCategoryNames.map((catName) => (
+              {storeCategories.map((c) => (
                 <Pressable
-                  key={catName}
-                  style={[styles.storeCatBtn, storeCatTab === catName && styles.storeCatBtnActive]}
-                  onPress={() => setStoreCatTab(catName)}
+                  key={c.id}
+                  style={[styles.storeCatBtn, storeCatTabId === c.id && styles.storeCatBtnActive]}
+                  onPress={() => setStoreCatTabId(c.id)}
                 >
-                  <Text style={[styles.storeCatText, storeCatTab === catName && styles.storeCatTextActive]}>
-                    {catName}
+                  <Text style={[styles.storeCatText, storeCatTabId === c.id && styles.storeCatTextActive]}>
+                    {c.name}
                   </Text>
                 </Pressable>
               ))}

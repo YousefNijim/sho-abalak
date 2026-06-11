@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { businessesApi, areasApi, tagsApi } from '@shu/api-client';
 import type { Business, Area, Product, Tag, BusinessType } from '@shu/api-client';
@@ -27,10 +28,22 @@ const columnHelper = createColumnHelper<Business>();
 
 export default function BusinessesPage() {
   const qc = useQueryClient();
+  const searchParams = useSearchParams();
+  const urlType = searchParams.get('type');
 
   // Search & Filter state
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('ALL');
+  const [typeFilter, setTypeFilter] = useState(urlType === 'STORE' || urlType === 'FOOD' ? urlType : 'ALL');
+
+  useEffect(() => {
+    const t = searchParams.get('type');
+    if (t === 'FOOD' || t === 'STORE') {
+      setTypeFilter(t);
+    } else {
+      setTypeFilter('ALL');
+    }
+  }, [searchParams]);
+
   const [cityFilter, setCityFilter] = useState('ALL');
   const [villageFilter, setVillageFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -66,9 +79,9 @@ export default function BusinessesPage() {
 
   // Create-store modal
   const [showCreate, setShowCreate] = useState(false);
-  const emptyCreate = {
+  const getEmptyCreate = () => ({
     name: '',
-    type: 'FOOD' as BusinessType,
+    type: (typeFilter === 'STORE' ? 'STORE' : 'FOOD') as BusinessType,
     tagIds: [] as string[],
     deliveryAreaIds: [] as string[],
     ownerName: '',
@@ -76,8 +89,8 @@ export default function BusinessesPage() {
     areaId: '',
     password: '',
     addressDetail: '',
-  };
-  const [createForm, setCreateForm] = useState(emptyCreate);
+  });
+  const [createForm, setCreateForm] = useState(getEmptyCreate());
   const [createError, setCreateError] = useState('');
 
   // Edit type/tags modal (admin)
@@ -216,7 +229,7 @@ export default function BusinessesPage() {
       refetchBusinesses();
       showToast('success', 'تم إنشاء المتجر وتفعيله — يمكنه تسجيل الدخول مباشرة');
       setShowCreate(false);
-      setCreateForm(emptyCreate);
+      setCreateForm(getEmptyCreate());
       setCreateError('');
     },
     onError: (err: any) => {
@@ -801,7 +814,7 @@ export default function BusinessesPage() {
           <p className="text-[13px] text-muted-gray mt-1">راجع الطلبات المعلّقة، اعتمد المتاجر، عيّن العمولات وأنشئ متاجر جديدة</p>
         </div>
         <button
-          onClick={() => { setCreateForm(emptyCreate); setCreateError(''); setShowCreate(true); }}
+          onClick={() => { setCreateForm(getEmptyCreate()); setCreateError(''); setShowCreate(true); }}
           className="flex h-11 items-center gap-2 px-5 rounded-xl bg-primary text-white font-bold text-[14px] shadow-md hover:brightness-95 transition"
         >
           <span className="material-symbols-outlined text-[20px]">add_business</span>

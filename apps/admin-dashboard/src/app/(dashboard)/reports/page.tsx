@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { reportsApi, businessesApi, areasApi, tagsApi } from '@shu/api-client';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar } from 'recharts';
 
 const PERIODS = [
   { id: 'today', label: 'اليوم' },
@@ -56,6 +56,31 @@ export default function ReportsPage() {
 
   const handleSearch = () => setSearch(searchInput);
 
+  // Aggregations
+  const timeSeriesData = useMemo(() => {
+    if (!orders.length) return [];
+    const groups: Record<string, number> = {};
+    orders.forEach(o => {
+      if (o.status !== 'DELIVERED') return;
+      const date = new Date(o.createdAt).toLocaleDateString('en-CA');
+      groups[date] = (groups[date] || 0) + Number(o.subtotal) - Number(o.couponDiscount);
+    });
+    return Object.entries(groups).map(([date, revenue]) => ({ date, revenue })).sort((a,b) => a.date.localeCompare(b.date));
+  }, [orders]);
+
+  const topBusinessesData = useMemo(() => {
+    if (!orders.length) return [];
+    const groups: Record<string, number> = {};
+    orders.forEach(o => {
+      if (o.status !== 'DELIVERED') return;
+      groups[o.businessName] = (groups[o.businessName] || 0) + Number(o.subtotal) - Number(o.couponDiscount);
+    });
+    return Object.entries(groups)
+      .map(([name, revenue]) => ({ name, revenue }))
+      .sort((a,b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }, [orders]);
+
   const exportCsv = () => {
     const headers = ['رقم الطلب', 'المنشأة', 'المدينة', 'القرية', 'الزبون', 'السائق', 'مجموع المنتجات', 'الخصم', 'توصيل كلي', 'توصيل سائق', 'توصيل منصة', 'الإجمالي', 'ربح منشأة', 'ربح سائق', 'ربح منصة', 'طريقة الدفع', 'الحالة', 'التاريخ'];
     const rows = orders.map((o) => [o.id.slice(-6).toUpperCase(), o.businessName, o.businessCity, o.businessArea, o.customerName, o.driverName, o.subtotal, o.couponDiscount, o.deliveryFee, (o as any).driverDeliveryFee ?? 0, (o as any).platformDeliveryFee ?? 0, o.total, (o as any).businessEarnings ?? 0, (o as any).driverEarnings ?? 0, (o as any).platformEarnings ?? 0, o.paymentMethod, STATUS_LABELS[o.status] ?? o.status, new Date(o.createdAt).toLocaleDateString('ar-EG')]);
@@ -72,6 +97,29 @@ export default function ReportsPage() {
           <span className="material-symbols-outlined text-base">download</span> تصدير CSV
         </button>
         <h1 className="text-2xl font-bold text-gray-800">التقارير المالية</h1>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-3">
+        {[
+          { id: '', label: 'الكل', icon: '📊', color: 'border-gray-500 bg-gray-50 text-gray-800' },
+          { id: 'FOOD', label: 'المطاعم', icon: '🍽️', color: 'border-orange-500 bg-orange-50 text-orange-800' },
+          { id: 'STORE', label: 'المتاجر', icon: '🏪', color: 'border-blue-500 bg-blue-50 text-blue-800' }
+        ].map((tab) => {
+          const isActive = businessType === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setBusinessType(tab.id)}
+              className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-lg transition-all border-2 ${
+                isActive ? `${tab.color} shadow-md` : 'border-transparent bg-white shadow-sm hover:shadow-md'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters */}
@@ -121,14 +169,6 @@ export default function ReportsPage() {
             <select value={tagId} onChange={(e) => setTagId(e.target.value)} className="w-full border rounded-lg px-3 py-2 text-sm">
               <option value="">جميع الأقسام</option>
               {(tags as any[]).map((t: any) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1 text-right">نوع المنشأة</label>
-            <select value={businessType} onChange={(e) => setBusinessType(e.target.value)} className="w-full border rounded-lg px-3 py-2 text-sm">
-              <option value="">الكل</option>
-              <option value="FOOD">مطاعم</option>
-              <option value="STORE">متاجر</option>
             </select>
           </div>
           <div>
@@ -216,7 +256,8 @@ export default function ReportsPage() {
 
           {/* Sales by Type */}
           {summary.breakdownByType && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6 mb-6">
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6 mb-6">
               <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* FOOD */}
                 <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -246,29 +287,62 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              {/* Chart */}
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col">
-                <h3 className="font-bold text-gray-800 mb-4">توزيع الطلبات: مطاعم vs متاجر</h3>
-                <div className="flex-1 min-h-[200px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: 'مطاعم', value: summary.breakdownByType.FOOD.orders },
-                          { name: 'متاجر', value: summary.breakdownByType.STORE.orders }
-                        ].filter(d => d.value > 0)}
-                        cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
-                      >
-                        <Cell key="cell-0" fill="#f97316" />
-                        <Cell key="cell-1" fill="#3b82f6" />
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
+              </div>
+
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6 mb-6">
+                {/* Time Series Chart */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-800 mb-4 text-right">تطور الإيرادات بمرور الوقت</h3>
+                  <div className="h-[250px]" dir="ltr">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={timeSeriesData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                        <XAxis dataKey="date" tick={{fontSize: 12}} tickMargin={10} />
+                        <YAxis tick={{fontSize: 12}} tickFormatter={(val) => `${val} ₪`} width={60} />
+                        <Tooltip formatter={(val: number) => [`${val.toFixed(2)} ₪`, 'الإيرادات']} labelStyle={{color: '#333'}} />
+                        <Line type="monotone" dataKey="revenue" stroke={businessType === 'FOOD' ? '#f97316' : businessType === 'STORE' ? '#3b82f6' : '#10b981'} strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Distribution or Top 5 */}
+                <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                  <h3 className="font-bold text-gray-800 mb-4 text-right">
+                    {businessType === '' ? 'توزيع الطلبات: مطاعم vs متاجر' : `أفضل 5 ${businessType === 'FOOD' ? 'مطاعم' : 'متاجر'} (بالإيرادات)`}
+                  </h3>
+                  <div className="h-[250px]" dir="ltr">
+                    <ResponsiveContainer width="100%" height="100%">
+                      {businessType === '' ? (
+                        <PieChart>
+                          <Pie
+                            data={[
+                              { name: 'مطاعم', value: summary.breakdownByType.FOOD.orders },
+                              { name: 'متاجر', value: summary.breakdownByType.STORE.orders }
+                            ].filter(d => d.value > 0)}
+                            cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value"
+                          >
+                            <Cell key="cell-0" fill="#f97316" />
+                            <Cell key="cell-1" fill="#3b82f6" />
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      ) : (
+                        <BarChart data={topBusinessesData} layout="vertical" margin={{ left: 50 }}>
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
+                          <XAxis type="number" tick={{fontSize: 12}} tickFormatter={(val) => `${val}`} />
+                          <YAxis type="category" dataKey="name" tick={{fontSize: 11}} width={80} />
+                          <Tooltip formatter={(val: number) => [`${val.toFixed(2)} ₪`, 'الإيرادات']} />
+                          <Bar dataKey="revenue" fill={businessType === 'FOOD' ? '#f97316' : '#3b82f6'} radius={[0, 4, 4, 0]} barSize={20} />
+                        </BarChart>
+                      )}
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </>
       )}

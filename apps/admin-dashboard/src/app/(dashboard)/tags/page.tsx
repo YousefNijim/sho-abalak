@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tagsApi, uploadsApi, BASE_URL } from '@shu/api-client';
 import type { Tag, BusinessType } from '@shu/api-client';
@@ -13,7 +14,16 @@ export default function TagsPage() {
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Tag | null>(null);
 
-  const [formData, setFormData] = useState<{ name: string; type: BusinessType }>({ name: '', type: 'FOOD' });
+  const searchParams = useSearchParams();
+  const urlType = searchParams.get('type');
+  const [typeFilter, setTypeFilter] = useState<BusinessType>(urlType === 'STORE' ? 'STORE' : 'FOOD');
+
+  useEffect(() => {
+    const t = searchParams.get('type');
+    if (t === 'FOOD' || t === 'STORE') setTypeFilter(t);
+  }, [searchParams]);
+
+  const [formData, setFormData] = useState<{ name: string; type: BusinessType }>({ name: '', type: typeFilter });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -25,8 +35,8 @@ export default function TagsPage() {
   };
 
   const { data: tags = [], isLoading } = useQuery({
-    queryKey: ['tags'],
-    queryFn: () => tagsApi.list(),
+    queryKey: ['tags', typeFilter],
+    queryFn: () => tagsApi.list(typeFilter),
   });
 
   const createMutation = useMutation({
@@ -93,7 +103,7 @@ export default function TagsPage() {
   const closeModal = () => {
     setIsAddModalOpen(false);
     setEditingTag(null);
-    setFormData({ name: '', type: 'FOOD' });
+    setFormData({ name: '', type: typeFilter });
     setSelectedFile(null);
     setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -129,11 +139,39 @@ export default function TagsPage() {
           <p className="text-[12px] text-muted-gray mt-0.5">ضبط الأقسام وصورها التي تظهر للزبون في الصفحة الرئيسية</p>
         </div>
         <button
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => {
+            setFormData({ name: '', type: typeFilter });
+            setIsAddModalOpen(true);
+          }}
           className="flex h-12 items-center gap-gap-sm rounded-xl bg-primary px-5 font-bold text-white shadow-md transition-all hover:bg-primary/90"
         >
           <span className="material-symbols-outlined">add_circle</span>
           إضافة قسم جديد
+        </button>
+      </div>
+
+      <div className="flex gap-2 mb-6" dir="rtl">
+        <button
+          onClick={() => setTypeFilter('FOOD')}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-[14px] font-bold transition-all border-2 ${
+            typeFilter === 'FOOD'
+              ? 'border-orange-500 bg-orange-50 text-orange-800 shadow-sm'
+              : 'border-transparent bg-background/20 text-muted-gray hover:bg-background/40 hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">restaurant</span>
+          تصنيفات المطاعم
+        </button>
+        <button
+          onClick={() => setTypeFilter('STORE')}
+          className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-[14px] font-bold transition-all border-2 ${
+            typeFilter === 'STORE'
+              ? 'border-blue-500 bg-blue-50 text-blue-800 shadow-sm'
+              : 'border-transparent bg-background/20 text-muted-gray hover:bg-background/40 hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">storefront</span>
+          تصنيفات المتاجر
         </button>
       </div>
 

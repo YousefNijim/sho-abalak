@@ -63,6 +63,7 @@ export default function OrdersPage() {
 
   // Search & Filter state
   const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [cityFilter, setCityFilter] = useState('ALL');
   const [villageFilter, setVillageFilter] = useState('ALL');
@@ -122,8 +123,8 @@ export default function OrdersPage() {
 
   // Queries
   const { data: allOrders = [], isLoading: isOrdersLoading } = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => ordersApi.list(),
+    queryKey: ['orders', typeFilter],
+    queryFn: () => ordersApi.list({ businessType: typeFilter === 'ALL' ? undefined : (typeFilter as 'FOOD' | 'STORE') }),
   });
 
   const { data: areas = [] } = useQuery({
@@ -250,15 +251,26 @@ export default function OrdersPage() {
         ),
       }),
       columnHelper.accessor('business.name', {
-        header: 'المتجر',
-        cell: (info) => (
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
-              <span className="material-symbols-outlined text-[18px]">storefront</span>
+        header: 'المنشأة',
+        cell: (info) => {
+          const type = (info.row.original.business as any)?.type;
+          const isFood = type === 'FOOD';
+          return (
+            <div className="flex items-center gap-2">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${isFood ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                <span className="material-symbols-outlined text-[18px]">
+                  {isFood ? 'restaurant' : 'storefront'}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[14px] font-semibold text-on-surface">{info.getValue() ?? '—'}</span>
+                <span className={`text-[10px] w-fit px-1.5 py-0.5 mt-0.5 rounded-full ${isFood ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}`}>
+                  {isFood ? 'مطعم' : 'متجر'}
+                </span>
+              </div>
             </div>
-            <span className="text-[14px] font-semibold text-on-surface">{info.getValue() ?? '—'}</span>
-          </div>
-        ),
+          );
+        },
       }),
       columnHelper.accessor('total', {
         header: 'المجموع',
@@ -385,6 +397,42 @@ export default function OrdersPage() {
       {/* Filters Dashboard */}
       <div className="rounded-2xl border border-border-beige bg-surface-white p-5 shadow-sm mt-margin-standard">
         <div className="space-y-4">
+          {/* Type Tab Filters */}
+          <div className="flex gap-2 border-b border-border-beige pb-4">
+            <button
+              onClick={() => setTypeFilter('ALL')}
+              className={`flex-1 rounded-xl py-2.5 text-[14px] font-bold transition-all border-2 ${
+                typeFilter === 'ALL'
+                  ? 'border-gray-500 bg-gray-50 text-gray-800 shadow-sm'
+                  : 'border-transparent bg-background/20 text-muted-gray hover:bg-background/40 hover:text-on-surface'
+              }`}
+            >
+              الكل
+            </button>
+            <button
+              onClick={() => setTypeFilter('FOOD')}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-[14px] font-bold transition-all border-2 ${
+                typeFilter === 'FOOD'
+                  ? 'border-orange-500 bg-orange-50 text-orange-800 shadow-sm'
+                  : 'border-transparent bg-background/20 text-muted-gray hover:bg-background/40 hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">restaurant</span>
+              المطاعم
+            </button>
+            <button
+              onClick={() => setTypeFilter('STORE')}
+              className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-[14px] font-bold transition-all border-2 ${
+                typeFilter === 'STORE'
+                  ? 'border-blue-500 bg-blue-50 text-blue-800 shadow-sm'
+                  : 'border-transparent bg-background/20 text-muted-gray hover:bg-background/40 hover:text-on-surface'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px]">storefront</span>
+              المتاجر
+            </button>
+          </div>
+
           {/* Status Tab Filters */}
           <div className="flex flex-wrap gap-1.5 border-b border-border pb-4">
             <button
