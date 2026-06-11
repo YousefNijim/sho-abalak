@@ -3,14 +3,23 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi, Order } from '@shu/api-client';
+import { DriverSelectionModal } from '@/components/DriverSelectionModal';
+import { useBusiness } from '@/components/BusinessProvider';
 
 type TabStatus = 'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 type DateFilter = 'TODAY' | 'WEEK' | 'MONTH' | 'ALL';
 
 export default function OrdersPage() {
+  const { business } = useBusiness();
   const [tab, setTab] = useState<TabStatus>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [driverModal, setDriverModal] = useState<{ isOpen: boolean; orderId: string; total: number; areaId: string }>({
+    isOpen: false,
+    orderId: '',
+    total: 0,
+    areaId: '',
+  });
 
   const { data: allOrders = [], isLoading, refetch } = useQuery({
     queryKey: ['orders'],
@@ -148,6 +157,20 @@ export default function OrdersPage() {
                           {order.status === 'PREPARING' && (
                             <button onClick={() => handleUpdateStatus(order.id, 'READY')} className="px-2 py-1 bg-success text-white rounded font-bold text-xs hover:bg-green-600 transition-colors">جاهز للتوصيل</button>
                           )}
+                          {order.status === 'READY' && (
+                            <button 
+                              onClick={() => setDriverModal({
+                                isOpen: true,
+                                orderId: order.id,
+                                total: Number(order.total),
+                                areaId: order.deliveryAreaId || business?.areaId || ''
+                              })}
+                              className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors flex items-center gap-1"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">directions_car</span>
+                              تعيين سائق
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -199,6 +222,18 @@ export default function OrdersPage() {
           </table>
         </div>
       </div>
+
+      <DriverSelectionModal
+        isOpen={driverModal.isOpen}
+        orderIds={[driverModal.orderId]}
+        orderTotal={driverModal.total}
+        deliveryAreaId={driverModal.areaId}
+        onClose={() => setDriverModal({ ...driverModal, isOpen: false })}
+        onDriverAssigned={() => {
+          setDriverModal({ ...driverModal, isOpen: false });
+          refetch();
+        }}
+      />
     </div>
   );
 }

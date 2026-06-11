@@ -3,17 +3,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi, Order } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { DriverSelectionModal } from '@/components/DriverSelectionModal';
 
 export default function DashboardHome() {
   const { business, refetch: refetchBusiness } = useBusiness();
+  const [driverModal, setDriverModal] = useState<{ isOpen: boolean; orderId: string; total: number; areaId: string }>({
+    isOpen: false,
+    orderId: '',
+    total: 0,
+    areaId: '',
+  });
 
   // Polling active orders every 30 seconds
   const { data: allOrders = [], isLoading: isOrdersLoading, refetch: refetchOrders } = useQuery({
     queryKey: ['orders', 'all'],
     queryFn: () => ordersApi.list({ limit: 50 }),
-    refetchInterval: 30000, 
   });
 
   const today = new Date();
@@ -149,6 +155,20 @@ export default function DashboardHome() {
                     {order.status === 'PREPARING' && (
                       <button onClick={() => handleUpdateStatus(order.id, 'READY')} className="px-3 py-1.5 bg-success text-white rounded font-bold text-xs hover:bg-green-600 transition-colors w-full">جاهز للتوصيل</button>
                     )}
+                    {order.status === 'READY' && (
+                      <button 
+                        onClick={() => setDriverModal({
+                          isOpen: true,
+                          orderId: order.id,
+                          total: Number(order.total),
+                          areaId: order.deliveryAreaId || business?.areaId || ''
+                        })} 
+                        className="px-3 py-1.5 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors w-full flex items-center justify-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[14px]">directions_car</span>
+                        تعيين سائق
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -156,6 +176,18 @@ export default function DashboardHome() {
           </div>
         )}
       </div>
+
+      <DriverSelectionModal
+        isOpen={driverModal.isOpen}
+        orderIds={[driverModal.orderId]}
+        orderTotal={driverModal.total}
+        deliveryAreaId={driverModal.areaId}
+        onClose={() => setDriverModal({ ...driverModal, isOpen: false })}
+        onDriverAssigned={() => {
+          setDriverModal({ ...driverModal, isOpen: false });
+          refetchOrders();
+        }}
+      />
     </div>
   );
 }
