@@ -22,7 +22,8 @@ export default function ProductsPage() {
     name: '',
     description: '',
     price: '',
-    categoryId: '',
+    mainCategoryId: '',
+    subCategoryId: '',
     isAvailable: true,
     imageUrl: '',
     barcode: '',
@@ -53,7 +54,15 @@ export default function ProductsPage() {
 
   const filteredProducts = products.filter(p => {
     // @ts-ignore
-    if (categoryId !== 'ALL' && p.categoryId !== categoryId && p.category !== categoryId) return false;
+    if (categoryId !== 'ALL') {
+      const catId = p.categoryId || p.category;
+      if (catId !== categoryId) {
+        const selectedMainCat = categories.find(c => c.id === categoryId);
+        if (!selectedMainCat || !selectedMainCat.children?.some(sub => sub.id === catId)) {
+          return false;
+        }
+      }
+    }
     // @ts-ignore
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && p.barcode !== search) return false;
     
@@ -101,7 +110,7 @@ export default function ProductsPage() {
   const handleOpenAdd = () => {
     setEditingProduct(null);
     setFormData({ 
-      name: '', description: '', price: '', categoryId: '', isAvailable: true, 
+      name: '', description: '', price: '', mainCategoryId: '', subCategoryId: '', isAvailable: true, 
       imageUrl: '', barcode: '', unit: '', stock: '', lowStockAlert: '5', hasVariants: false 
     });
     setIsPanelOpen(true);
@@ -109,11 +118,26 @@ export default function ProductsPage() {
 
   const handleOpenEdit = (p: any) => {
     setEditingProduct(p);
+    
+    let mId = '';
+    let sId = '';
+    const catId = p.categoryId || p.category;
+    if (catId) {
+      const mainCat = categories.find(c => c.id === catId || c.children?.some(sub => sub.id === catId));
+      if (mainCat) {
+        mId = mainCat.id;
+        if (mainCat.id !== catId) {
+          sId = catId;
+        }
+      }
+    }
+
     setFormData({
       name: p.name,
       description: p.description || '',
       price: p.price.toString(),
-      categoryId: p.categoryId || p.category || '',
+      mainCategoryId: mId,
+      subCategoryId: sId,
       isAvailable: p.isAvailable,
       imageUrl: p.imageUrl || '',
       barcode: p.barcode || '',
@@ -147,7 +171,7 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        categoryId: formData.categoryId,
+        categoryId: formData.subCategoryId || formData.mainCategoryId || undefined,
         isAvailable: formData.isAvailable,
         imageUrl: formData.imageUrl,
         barcode: formData.barcode,
@@ -290,7 +314,19 @@ export default function ProductsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-2 font-bold text-on-surface">{p.name} {p.unit && <span className="text-xs text-muted-gray font-normal mr-1">/ {p.unit}</span>}</td>
-                      <td className="px-4 py-2 text-muted-gray text-xs">{categories.find(c => c.id === p.categoryId || c.id === p.category)?.name || 'بدون تصنيف'}</td>
+                      <td className="px-4 py-2 text-muted-gray text-xs">
+                        {(() => {
+                          const catId = p.categoryId || p.category;
+                          if (!catId) return 'بدون تصنيف';
+                          const mainCat = categories.find(c => c.id === catId || c.children?.some(sub => sub.id === catId));
+                          if (mainCat) {
+                            if (mainCat.id === catId) return mainCat.name;
+                            const sub = mainCat.children?.find(sub => sub.id === catId);
+                            return sub ? `${mainCat.name} > ${sub.name}` : mainCat.name;
+                          }
+                          return 'بدون تصنيف';
+                        })()}
+                      </td>
                       <td className="px-4 py-2 font-bold text-primary">{Number(p.price).toFixed(2)} ش</td>
                       <td className="px-4 py-2">
                         {stock === null ? <span className="text-muted-gray">—</span> : (
@@ -384,19 +420,33 @@ export default function ProductsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">السعر *</label>
-                  <input required type="number" step="0.01" dir="ltr" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">القسم</label>
-                  <select value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none">
+                  <label className="text-sm font-bold text-on-surface">القسم الرئيسي</label>
+                  <select value={formData.mainCategoryId} onChange={e => setFormData({...formData, mainCategoryId: e.target.value, subCategoryId: ''})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none">
                     <option value="">بدون قسم</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-on-surface">القسم الفرعي</label>
+                  <select 
+                    value={formData.subCategoryId} 
+                    onChange={e => setFormData({...formData, subCategoryId: e.target.value})} 
+                    disabled={!formData.mainCategoryId}
+                    className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
+                  >
+                    <option value="">بدون قسم فرعي</option>
+                    {formData.mainCategoryId && categories.find(c => c.id === formData.mainCategoryId)?.children?.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-on-surface">السعر *</label>
+                  <input required type="number" step="0.01" dir="ltr" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
+                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-on-surface">الباركود</label>
                   <div className="relative">

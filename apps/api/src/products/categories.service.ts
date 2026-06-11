@@ -9,7 +9,7 @@ export class CategoriesService {
   /** Returns flat list of all categories for a business, ordered by sortOrder. */
   findByBusiness(businessId: string) {
     return this.prisma.productCategory.findMany({
-      where: { businessId },
+      where: { businessId, parentId: null },
       include: { children: { orderBy: { sortOrder: 'asc' } } },
       orderBy: { sortOrder: 'asc' },
     });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput, FlatList } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput, FlatList, BackHandler } from 'react-native';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,7 +23,11 @@ import {
   Package,
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, offersApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, offersApi, productsApi, categoriesApi, BASE_URL } from '@shu/api-client';
+import { CategoryGrid } from '../../components/store/CategoryGrid';
+import { MainCategoryBar } from '../../components/store/MainCategoryBar';
+import { SubCategoryBar } from '../../components/store/SubCategoryBar';
+import { StoreProductCard } from '../../components/store/StoreProductCard';
 import type { Product } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
@@ -62,6 +67,42 @@ export default function BusinessDetail() {
     queryFn: () => businessesApi.getById(id!),
     enabled: !!id,
   });
+
+  const { data: storeCategories = [] } = useQuery({
+    queryKey: ['categories', id],
+    // @ts-ignore
+    queryFn: () => categoriesApi.listByBusiness(id!),
+    enabled: !!id && business?.type === 'STORE',
+  });
+
+  const [selectedMainCat, setSelectedMainCat] = useState<any | null>(null);
+  const [selectedSubCat, setSelectedSubCat] = useState<any | null>(null);
+
+  const { data: dynamicProducts = [] } = useQuery({
+    queryKey: ['products', id, selectedSubCat?.id || selectedMainCat?.id],
+    // @ts-ignore
+    queryFn: () => productsApi.listByBusiness(id!, selectedSubCat?.id || selectedMainCat?.id),
+    enabled: !!id && business?.type === 'STORE',
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (selectedSubCat) {
+          setSelectedSubCat(null);
+          return true; // handled
+        }
+        if (selectedMainCat) {
+          setSelectedMainCat(null);
+          return true; // handled
+        }
+        return false; // let default back happen
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [selectedSubCat, selectedMainCat])
+  );
 
   const { data: businessOffers = [] } = useQuery({
     queryKey: ['offers-for-business', id],
@@ -225,18 +266,10 @@ export default function BusinessDetail() {
   const filteredProducts = tab === 0 ? products : products.filter((p: any) => p.category === categories[tab]);
 
   // ── STORE view data ──────────────────────────────────────────────────────────
-  const storeCategories = Array.from(
-    new Map(
-      products
-        .filter((p: any) => p.categoryId && p.productCategory?.name)
-        .map((p: any) => [p.categoryId, { id: p.categoryId, name: p.productCategory.name }])
-    ).values()
-  ) as { id: string; name: string }[];
-
-  const storeFilteredProducts = products.filter((p: any) => {
-    const matchesCat = !storeCatTabId || p.categoryId === storeCatTabId;
+  // products are now dynamicProducts, and storeCategories are the hierarchy
+  const storeFilteredProducts = dynamicProducts.filter((p: any) => {
     const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
-    return matchesCat && matchesSearch;
+    return matchesSearch;
   });
 
   // ── Shared business header ───────────────────────────────────────────────────
@@ -261,7 +294,19 @@ export default function BusinessDetail() {
 
         {/* Back Button & Actions */}
         <View style={[styles.heroActions, { top: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
-          <Pressable style={styles.heroBtn} onPress={() => router.back()}>
+          <Pressable style={styles.heroBtn} onPress={() => {
+            if (isStore) {
+              if (selectedSubCat) {
+                setSelectedSubCat(null);
+                return;
+              }
+              if (selectedMainCat) {
+                setSelectedMainCat(null);
+                return;
+              }
+            }
+            router.back();
+          }}>
             <ArrowRight size={24} color={colors.textPrimary} />
           </Pressable>
           <View style={styles.heroActionsRight}>
@@ -347,6 +392,7 @@ export default function BusinessDetail() {
   // ══════════════════════════════════════════════════════════════════════════════
   if (isStore) {
     const numCols = 2;
+    const subCategories = selectedMainCat?.children || [];
 
     return (
       <View style={styles.container}>
@@ -375,58 +421,106 @@ export default function BusinessDetail() {
             </View>
           </View>
 
-          {/* Category tabs (horizontal) */}
-          {storeCategories.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.storeCatScroll}
-            >
-              {/* "الكل" tab */}
-              <Pressable
-                style={[styles.storeCatBtn, !storeCatTabId && styles.storeCatBtnActive]}
-                onPress={() => setStoreCatTabId(null)}
-              >
-                <Text style={[styles.storeCatText, !storeCatTabId && styles.storeCatTextActive]}>الكل</Text>
-              </Pressable>
-              {storeCategories.map((c) => (
-                <Pressable
-                  key={c.id}
-                  style={[styles.storeCatBtn, storeCatTabId === c.id && styles.storeCatBtnActive]}
-                  onPress={() => setStoreCatTabId(c.id)}
-                >
-                  <Text style={[styles.storeCatText, storeCatTabId === c.id && styles.storeCatTextActive]}>
-                    {c.name}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          )}
+          {/* Store Home vs Category View */}
+          {!selectedMainCat ? (
+            <>
+              {/* Category Grid */}
+              <CategoryGrid
+                categories={storeCategories}
+                onSelect={(cat) => {
+                  setSelectedMainCat(cat);
+                  setSelectedSubCat(null);
+                }}
+              />
 
-          {/* Products grid (2 columns) */}
-          <View style={styles.storeGrid}>
-            {storeFilteredProducts.length === 0 ? (
-              <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
-            ) : (
-              // Manual 2-column grid (FlatList can't nest in ScrollView)
-              storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
-                if (idx % numCols === 0) rows.push([p]);
-                else rows[rows.length - 1].push(p);
-                return rows;
-              }, []).map((row: any[], rowIdx: number) => (
-                <View key={rowIdx} style={styles.storeGridRow}>
-                  {row.map((p: any) => <StoreProductCard
-                    key={p.id}
-                    product={p}
-                    isOpen={business.isOpen}
-                    onPress={() => setPickerProduct(p)}
-                  />)}
-                  {/* Filler if row has only 1 item */}
-                  {row.length < numCols && <View style={styles.storeGridFiller} />}
-                </View>
-              ))
-            )}
-          </View>
+              {/* Products by section (only showing first 6 for each main cat) */}
+              {storeCategories.map((mainCat) => {
+                const sectionProducts = products.filter((p: any) => 
+                  p.categoryId === mainCat.id || mainCat.children?.some((c: any) => c.id === p.categoryId)
+                ).slice(0, 6);
+
+                if (sectionProducts.length === 0) return null;
+
+                return (
+                  <View key={mainCat.id} style={styles.sectionWrap}>
+                    <View style={styles.sectionHeader}>
+                      <Text style={styles.sectionTitle}>{mainCat.name}</Text>
+                      <Pressable onPress={() => { setSelectedMainCat(mainCat); setSelectedSubCat(null); }}>
+                        <Text style={styles.sectionLink}>عرض الكل ←</Text>
+                      </Pressable>
+                    </View>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sectionScroll}>
+                      {sectionProducts.map((p: any) => (
+                        <StoreProductCard
+                          key={p.id}
+                          product={p}
+                          discountPct={getDiscountPct(p)}
+                          width={140}
+                          onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
+                            productId: p.id,
+                            name: p.name,
+                            price: p.price,
+                            quantity: 1
+                          })}
+                        />
+                      ))}
+                    </ScrollView>
+                  </View>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              {/* Category Nav View */}
+              <MainCategoryBar
+                categories={storeCategories}
+                selected={selectedMainCat}
+                onSelect={(cat) => {
+                  setSelectedMainCat(cat);
+                  setSelectedSubCat(null);
+                }}
+              />
+              
+              <SubCategoryBar
+                subCategories={subCategories}
+                selected={selectedSubCat}
+                onSelect={setSelectedSubCat}
+              />
+
+              {/* Products grid (2 columns) */}
+              <View style={styles.storeGrid}>
+                {storeFilteredProducts.length === 0 ? (
+                  <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
+                ) : (
+                  // Manual 2-column grid
+                  storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
+                    if (idx % numCols === 0) rows.push([p]);
+                    else rows[rows.length - 1].push(p);
+                    return rows;
+                  }, []).map((row: any[], rowIdx: number) => (
+                    <View key={rowIdx} style={styles.storeGridRow}>
+                      {row.map((p: any) => (
+                        <StoreProductCard
+                          key={p.id}
+                          product={p}
+                          discountPct={getDiscountPct(p)}
+                          width="48%"
+                          onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
+                            productId: p.id,
+                            name: p.name,
+                            price: p.price,
+                            quantity: 1
+                          })}
+                        />
+                      ))}
+                      {/* Filler if row has only 1 item */}
+                      {row.length < numCols && <View style={{ width: '48%' }} />}
+                    </View>
+                  ))
+                )}
+              </View>
+            </>
+          )}
         </ScrollView>
 
         {/* Floating Cart Bar */}
@@ -1083,6 +1177,30 @@ const styles = StyleSheet.create({
   },
 
   // STORE-specific styles
+  sectionWrap: {
+    marginTop: spacing[4],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing[4],
+    marginBottom: spacing[3],
+  },
+  sectionTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.lg,
+    color: colors.textPrimary,
+  },
+  sectionLink: {
+    fontFamily: fontFamily.medium,
+    fontSize: fontSizes.sm,
+    color: colors.secondary,
+  },
+  sectionScroll: {
+    paddingHorizontal: spacing[4],
+    gap: spacing[3],
+  },
   storeSearchWrap: {
     paddingHorizontal: spacing[4],
     paddingTop: spacing[4],

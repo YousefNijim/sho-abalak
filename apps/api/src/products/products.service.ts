@@ -13,9 +13,29 @@ export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Business owner: returns ALL products (available + unavailable) with variants. */
-  findByBusiness(businessId: string) {
+  async findByBusiness(businessId: string, categoryId?: string) {
+    if (!categoryId) {
+      return this.prisma.product.findMany({
+        where: { businessId },
+        include: PRODUCT_INCLUDE,
+        orderBy: { name: 'asc' },
+      });
+    }
+
+    const category = await this.prisma.productCategory.findUnique({
+      where: { id: categoryId },
+      include: { children: true },
+    });
+
+    if (!category) return [];
+
+    const categoryIds = [category.id, ...category.children.map(c => c.id)];
+
     return this.prisma.product.findMany({
-      where: { businessId },
+      where: {
+        businessId,
+        categoryId: { in: categoryIds },
+      },
       include: PRODUCT_INCLUDE,
       orderBy: { name: 'asc' },
     });

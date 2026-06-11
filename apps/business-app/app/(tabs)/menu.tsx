@@ -43,7 +43,8 @@ interface ProductForm {
   description: string;
   price: string;
   category: string;
-  categoryId: string | null;
+  mainCategoryId: string | null;
+  subCategoryId: string | null;
   isAvailable: boolean;
   imageUri: string | null;
   imageUrl: string | null;
@@ -60,7 +61,8 @@ const emptyForm = (): ProductForm => ({
   description: '',
   price: '',
   category: 'وجبات رئيسية',
-  categoryId: null,
+  mainCategoryId: null,
+  subCategoryId: null,
   isAvailable: true,
   imageUri: null,
   imageUrl: null,
@@ -71,13 +73,28 @@ const emptyForm = (): ProductForm => ({
   hasVariants: false,
 });
 
-function formFromProduct(p: Product): ProductForm {
+function formFromProduct(p: Product, storeCategories: ProductCategory[] = []): ProductForm {
+  let mId: string | null = null;
+  let sId: string | null = null;
+  const catId = (p as any).categoryId || p.category;
+  
+  if (catId) {
+    const mainCat = storeCategories.find(c => c.id === catId || c.children?.some(sub => sub.id === catId));
+    if (mainCat) {
+      mId = mainCat.id;
+      if (mainCat.id !== catId) {
+        sId = catId;
+      }
+    }
+  }
+
   return {
     name: p.name,
     description: p.description ?? '',
     price: String(p.price),
     category: p.category ?? 'وجبات رئيسية',
-    categoryId: (p as any).categoryId ?? null,
+    mainCategoryId: mId,
+    subCategoryId: sId,
     isAvailable: p.isAvailable,
     imageUri: null,
     imageUrl: p.imageUrl ?? null,
@@ -243,7 +260,7 @@ export default function MenuTab() {
 
   const openEditModal = (product: Product) => {
     setEditingId(product.id);
-    setForm(formFromProduct(product));
+    setForm(formFromProduct(product, storeCategories as ProductCategory[]));
     setModalVisible(true);
   };
 
@@ -304,7 +321,7 @@ export default function MenuTab() {
       // FOOD keeps free-text category; STORE uses categoryId
       category: isStore ? undefined : (form.category.trim() || undefined),
       ...(isStore && {
-        categoryId: form.categoryId ?? undefined,
+        categoryId: (form.subCategoryId || form.mainCategoryId) ?? undefined,
         barcode: form.barcode.trim() || undefined,
         stock: stockNum,
         lowStockAlert: lowAlertNum,
@@ -518,66 +535,78 @@ export default function MenuTab() {
                   <View style={{ flex: 1 }}>
                     {/* FOOD: free-text category | STORE: dropdown */}
                     {isStore ? (
-                      <FormField label="التصنيف">
-                        <Pressable
-                          style={[styles.textInput, styles.catPickerBtn]}
-                          onPress={() => setCatPickerOpen((v) => !v)}
-                        >
-                          <ChevronDown size={16} color={colors.textMuted} />
-                          <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: form.categoryId ? colors.textPrimary : colors.textMuted, textAlign: 'right' }}>
-                            {form.categoryId
-                              ? (storeCategories as ProductCategory[]).find((c) => c.id === form.categoryId)?.name ?? 'اختر تصنيف'
-                              : 'اختر تصنيف'}
-                          </Text>
-                        </Pressable>
-                        {catPickerOpen && (
-                          <View style={styles.catDropdown}>
-                            {(storeCategories as ProductCategory[]).map((cat) => (
+                      <View style={{ gap: spacing[4] }}>
+                        <FormField label="التصنيف الرئيسي">
+                          <Pressable
+                            style={[styles.textInput, styles.catPickerBtn]}
+                            onPress={() => { setCatPickerOpen((v) => !v); setSubCatPickerOpen(false); }}
+                          >
+                            <ChevronDown size={16} color={colors.textMuted} />
+                            <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: form.mainCategoryId ? colors.textPrimary : colors.textMuted, textAlign: 'right' }}>
+                              {form.mainCategoryId
+                                ? (storeCategories as ProductCategory[]).find((c) => c.id === form.mainCategoryId)?.name ?? 'اختر تصنيف'
+                                : 'اختر تصنيف'}
+                            </Text>
+                          </Pressable>
+
+                          {catPickerOpen && (
+                            <View style={styles.catDropdown}>
+                              {(storeCategories as ProductCategory[]).map((cat) => (
+                                <Pressable
+                                  key={cat.id}
+                                  style={[styles.catOption, form.mainCategoryId === cat.id && styles.catOptionActive]}
+                                  onPress={() => { setForm((f) => ({ ...f, mainCategoryId: cat.id, subCategoryId: null })); setCatPickerOpen(false); }}
+                                >
+                                  <Text style={[styles.catOptionText, form.mainCategoryId === cat.id && { color: colors.primary }]}>
+                                    {cat.name}
+                                  </Text>
+                                </Pressable>
+                              ))}
+                            </View>
+                          )}
+                        </FormField>
+
+                        <FormField label="التصنيف الفرعي">
+                          <Pressable
+                            style={[styles.textInput, styles.catPickerBtn, !form.mainCategoryId && { opacity: 0.5 }]}
+                            onPress={() => {
+                              if (form.mainCategoryId) {
+                                setSubCatPickerOpen((v) => !v);
+                                setCatPickerOpen(false);
+                              }
+                            }}
+                          >
+                            <ChevronDown size={16} color={colors.textMuted} />
+                            <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: form.subCategoryId ? colors.textPrimary : colors.textMuted, textAlign: 'right' }}>
+                              {form.subCategoryId
+                                ? (storeCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.find(sub => sub.id === form.subCategoryId)?.name ?? 'بدون تصنيف فرعي'
+                                : 'بدون تصنيف فرعي'}
+                            </Text>
+                          </Pressable>
+
+                          {subCatPickerOpen && form.mainCategoryId && (
+                            <View style={styles.catDropdown}>
                               <Pressable
-                                key={cat.id}
-                                style={[styles.catOption, form.categoryId === cat.id && styles.catOptionActive]}
-                                onPress={() => { setForm((f) => ({ ...f, categoryId: cat.id })); setCatPickerOpen(false); }}
+                                style={[styles.catOption, !form.subCategoryId && styles.catOptionActive]}
+                                onPress={() => { setForm((f) => ({ ...f, subCategoryId: null })); setSubCatPickerOpen(false); }}
                               >
-                                <Text style={[styles.catOptionText, form.categoryId === cat.id && { color: colors.primary }]}>
-                                  {cat.name}
-                                </Text>
+                                <Text style={[styles.catOptionText, !form.subCategoryId && { color: colors.primary }]}>بدون تصنيف فرعي</Text>
                               </Pressable>
-                            ))}
-                            {showNewCatForm ? (
-                              <View style={styles.newCatForm}>
-                                <View style={styles.newCatRow}>
-                                  <Pressable
-                                    style={styles.newCatSaveBtn}
-                                    onPress={() => newCatName.trim() && createCategory.mutate(newCatName.trim())}
-                                  >
-                                    {createCategory.isPending
-                                      ? <ActivityIndicator size="small" color="#fff" />
-                                      : <Text style={styles.newCatSaveBtnText}>إضافة</Text>}
-                                  </Pressable>
-                                  <TextInput
-                                    style={[styles.textInput, { flex: 1, height: 40 }]}
-                                    value={newCatName}
-                                    onChangeText={setNewCatName}
-                                    placeholder="اسم التصنيف"
-                                    placeholderTextColor={colors.textMuted}
-                                    textAlign="right"
-                                    autoFocus
-                                  />
-                                </View>
-                              </View>
-                            ) : (
-                              <Pressable
-                                style={styles.catOption}
-                                onPress={() => setShowNewCatForm(true)}
-                              >
-                                <Text style={[styles.catOptionText, { color: colors.primary }]}>
-                                  ＋ إضافة تصنيف جديد
-                                </Text>
-                              </Pressable>
-                            )}
-                          </View>
-                        )}
-                      </FormField>
+                              {(storeCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.map((sub) => (
+                                <Pressable
+                                  key={sub.id}
+                                  style={[styles.catOption, form.subCategoryId === sub.id && styles.catOptionActive]}
+                                  onPress={() => { setForm((f) => ({ ...f, subCategoryId: sub.id })); setSubCatPickerOpen(false); }}
+                                >
+                                  <Text style={[styles.catOptionText, form.subCategoryId === sub.id && { color: colors.primary }]}>
+                                    {sub.name}
+                                  </Text>
+                                </Pressable>
+                              ))}
+                            </View>
+                          )}
+                        </FormField>
+                      </View>
                     ) : (
                       <FormField label="التصنيف">
                         <TextInput
