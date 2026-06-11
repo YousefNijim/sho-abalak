@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi, Order } from '@shu/api-client';
 import { DriverSelectionModal } from '@/components/DriverSelectionModal';
+import { OrderDetailsPanel } from '@/components/OrderDetailsPanel';
 import { useBusiness } from '@/components/BusinessProvider';
 
 type TabStatus = 'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
@@ -13,7 +14,7 @@ export default function OrdersPage() {
   const { business } = useBusiness();
   const [tab, setTab] = useState<TabStatus>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
-  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [driverModal, setDriverModal] = useState<{ isOpen: boolean; orderId: string; total: number; areaId: string }>({
     isOpen: false,
     orderId: '',
@@ -133,8 +134,8 @@ export default function OrdersPage() {
                 filteredOrders.map(order => (
                   <React.Fragment key={order.id}>
                     <tr 
-                      className={`hover:bg-surface-container-low transition-colors cursor-pointer ${expandedRowId === order.id ? 'bg-primary/5' : ''}`}
-                      onClick={() => setExpandedRowId(expandedRowId === order.id ? null : order.id)}
+                      className={`hover:bg-surface-container-low transition-colors cursor-pointer`}
+                      onClick={() => setSelectedOrderId(order.id)}
                     >
                       <td className="px-4 py-3 font-bold text-primary">#{order.id.slice(-6).toUpperCase()}</td>
                       <td className="px-4 py-3 font-medium">{order.customer?.name}</td>
@@ -159,12 +160,15 @@ export default function OrdersPage() {
                           )}
                           {order.status === 'READY' && (
                             <button 
-                              onClick={() => setDriverModal({
-                                isOpen: true,
-                                orderId: order.id,
-                                total: Number(order.total),
-                                areaId: order.deliveryAreaId || business?.areaId || ''
-                              })}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDriverModal({
+                                  isOpen: true,
+                                  orderId: order.id,
+                                  total: Number(order.total),
+                                  areaId: order.deliveryAreaId || business?.areaId || ''
+                                });
+                              }}
                               className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors flex items-center gap-1"
                             >
                               <span className="material-symbols-outlined text-[12px]">directions_car</span>
@@ -174,47 +178,7 @@ export default function OrdersPage() {
                         </div>
                       </td>
                     </tr>
-                    {expandedRowId === order.id && (
-                      <tr className="bg-surface-container-low border-b border-border">
-                        <td colSpan={8} className="px-4 py-4 whitespace-normal">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
-                            <div>
-                              <h4 className="font-bold text-sm mb-2 text-on-surface border-b border-border pb-1">تفاصيل المنتجات</h4>
-                              <ul className="space-y-2">
-                                {order.items?.map((item: any, i: number) => (
-                                  <li key={i} className="flex justify-between text-sm">
-                                    <span className="text-on-surface">
-                                      <span className="font-bold text-primary ml-1">{item.quantity}x</span> 
-                                      {item.product?.name || `Product ${item.productId}`}
-                                    </span>
-                                    <span className="font-medium text-muted-gray">{(Number(item.unitPrice) * Number(item.quantity)).toFixed(2)} ش</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              <div className="mt-3 pt-2 border-t border-border flex justify-between text-sm font-bold">
-                                <span>المجموع الكلي:</span>
-                                <span>{Number(order.total).toFixed(2)} ش</span>
-                              </div>
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-sm mb-2 text-on-surface border-b border-border pb-1">معلومات التوصيل والزبون</h4>
-                              <div className="space-y-1 text-sm text-muted-gray">
-                                <p><span className="font-bold text-on-surface">اسم الزبون:</span> {order.customer?.name}</p>
-                                <p><span className="font-bold text-on-surface">الهاتف:</span> {order.customer?.phone}</p>
-                                <p><span className="font-bold text-on-surface">منطقة التوصيل:</span> {order.deliveryAreaName || order.customer?.area?.name || 'غير محدد'}</p>
-                                <p><span className="font-bold text-on-surface">العنوان التفصيلي:</span> {order.deliveryAddressDetail || 'لا يوجد'}</p>
-                                {order.note && <p><span className="font-bold text-on-surface">ملاحظات:</span> {order.note}</p>}
-                                {order.driver && (
-                                  <p className="mt-2 text-primary font-bold">
-                                    السائق: {order.driver.user?.name} ({order.driver.user?.phone})
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
+
                   </React.Fragment>
                 ))
               )}
@@ -233,6 +197,12 @@ export default function OrdersPage() {
           setDriverModal({ ...driverModal, isOpen: false });
           refetch();
         }}
+      />
+
+      {/* Slide Panel for Order Details */}
+      <OrderDetailsPanel
+        orderId={selectedOrderId}
+        onClose={() => setSelectedOrderId(null)}
       />
     </div>
   );
