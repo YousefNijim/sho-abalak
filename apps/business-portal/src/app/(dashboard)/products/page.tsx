@@ -46,11 +46,17 @@ export default function ProductsPage() {
     enabled: !!business,
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], refetch: refetchCategories } = useQuery({
     queryKey: ['categories', business?.id],
     queryFn: () => categoriesApi.listByBusiness(business!.id),
     enabled: !!business,
   });
+
+  // Category Form State
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryParentId, setNewCategoryParentId] = useState<string>('');
+  const [isSubmittingCategory, setIsSubmittingCategory] = useState(false);
 
   const filteredProducts = products.filter(p => {
     if (categoryId !== 'ALL') {
@@ -231,8 +237,121 @@ export default function ProductsPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [products]);
 
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategoryName.trim() || !business) return;
+    setIsSubmittingCategory(true);
+    try {
+      await categoriesApi.create({
+        businessId: business.id,
+        name: newCategoryName.trim(),
+        parentId: newCategoryParentId || undefined
+      });
+      setNewCategoryName('');
+      setNewCategoryParentId('');
+      setIsAddingCategory(false);
+      refetchCategories();
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء إضافة التصنيف');
+    } finally {
+      setIsSubmittingCategory(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col md:flex-row gap-6 items-start">
+      {/* Left Panel - Categories */}
+      <div className="hidden md:flex flex-col w-64 shrink-0 bg-surface border border-border rounded-xl shadow-sm overflow-hidden sticky top-6 max-h-[calc(100vh-3rem)]">
+        <div className="p-4 border-b border-border">
+          <h2 className="text-lg font-bold text-on-surface">التصنيفات</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+          <button
+            onClick={() => setCategoryId('ALL')}
+            className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
+              categoryId === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
+            }`}
+          >
+            <span>الكل</span>
+          </button>
+          {categories.map(cat => (
+            <div key={cat.id} className="space-y-1">
+              <button
+                onClick={() => setCategoryId(cat.id)}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
+                  categoryId === cat.id ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-container-low'
+                }`}
+              >
+                <span>{cat.name}</span>
+              </button>
+              {cat.children?.map(sub => (
+                <button
+                  key={sub.id}
+                  onClick={() => setCategoryId(sub.id)}
+                  className={`w-full text-right pr-6 pl-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex justify-between items-center ${
+                    categoryId === sub.id ? 'bg-primary/5 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
+                  }`}
+                >
+                  <span>{sub.name}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div className="p-4 border-t border-border bg-surface-container-low">
+          {isAddingCategory ? (
+            <form onSubmit={handleAddCategory} className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <input
+                type="text"
+                autoFocus
+                placeholder="اسم التصنيف..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+              />
+              <select
+                value={newCategoryParentId}
+                onChange={(e) => setNewCategoryParentId(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">تصنيف رئيسي (بدون أب)</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>متفرع من: {cat.name}</option>
+                ))}
+              </select>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isSubmittingCategory || !newCategoryName.trim()}
+                  className="flex-1 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingCategory ? 'جاري...' : 'حفظ'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); setNewCategoryParentId(''); }}
+                  className="flex-1 py-1.5 bg-surface border border-border text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              onClick={() => setIsAddingCategory(true)}
+              className="w-full py-2 flex justify-center items-center gap-1 text-primary text-sm font-bold hover:bg-primary/10 rounded-lg transition-colors border border-dashed border-primary/30"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              إضافة تصنيف
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1 space-y-6 w-full min-w-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-2xl font-bold text-on-surface">إدارة المنتجات والمخزون</h1>
         <button 
@@ -380,94 +499,90 @@ export default function ProductsPage() {
 
       {/* Side Panel Overlay */}
       {isPanelOpen && (
-        <div className="fixed inset-0 bg-on-surface/50 z-50 flex justify-end">
-          <div className="w-full max-w-md bg-surface h-full shadow-2xl flex flex-col border-l border-border animate-in slide-in-from-right duration-300">
-            <div className="p-6 border-b border-border flex justify-between items-center bg-surface-container-low">
-              <h2 className="text-xl font-bold text-on-surface">
-                {editingProduct ? 'تعديل المنتج' : 'إضافة منتج جديد'}
-              </h2>
-              <button onClick={() => setIsPanelOpen(false)} className="text-muted-gray hover:text-error transition-colors">
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm transition-opacity">
+          <div className="bg-surface w-full max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-left-full duration-300">
+            <div className="flex justify-between items-center p-6 border-b border-border bg-surface-container-low">
+              <h2 className="text-xl font-bold text-on-surface">{editingProduct ? 'تعديل منتج' : 'إضافة منتج جديد'}</h2>
+              <button onClick={() => setIsPanelOpen(false)} className="w-10 h-10 rounded-full hover:bg-surface-container flex items-center justify-center text-muted-gray transition-colors">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-on-surface">صورة المنتج</label>
-                <div className="border-2 border-dashed border-border rounded-xl p-4 text-center hover:bg-surface-container-low transition-colors cursor-pointer relative overflow-hidden">
+              <div className="flex justify-center mb-6">
+                <label className="relative w-32 h-32 rounded-2xl border-2 border-dashed border-border bg-surface-container-low flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container hover:border-primary transition-all group overflow-hidden shadow-sm">
                   {formData.imageUrl ? (
-                    <img src={formData.imageUrl} alt="Preview" className="w-full h-32 object-contain" />
+                    <>
+                      <img src={formData.imageUrl} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                        <span className="material-symbols-outlined mb-1">edit</span>
+                        <span className="text-xs font-bold">تغيير الصورة</span>
+                      </div>
+                    </>
                   ) : (
-                    <div className="py-6 flex flex-col items-center gap-2 text-muted-gray">
-                      <span className="material-symbols-outlined text-3xl">image</span>
-                      <span className="text-sm">اضغط لرفع صورة</span>
-                    </div>
+                    <>
+                      <span className="material-symbols-outlined text-4xl text-muted-gray mb-2 group-hover:text-primary transition-colors">add_photo_alternate</span>
+                      <span className="text-sm font-bold text-muted-gray group-hover:text-primary transition-colors">إضافة صورة</span>
+                    </>
                   )}
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={handleImageUpload} />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2">اسم المنتج *</label>
+                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="مثال: تفاح أحمر" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">السعر (شيكل) *</label>
+                  <input required type="number" step="0.01" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="0.00" />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-on-surface">اسم المنتج *</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-on-surface">الوصف</label>
-                <textarea rows={2} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none custom-scrollbar" />
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">الباركود</label>
+                  <input type="text" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="اختياري" />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">القسم الرئيسي</label>
-                  <select value={formData.mainCategoryId} onChange={e => setFormData({...formData, mainCategoryId: e.target.value, subCategoryId: ''})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none">
-                    <option value="">بدون قسم</option>
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">التصنيف الرئيسي *</label>
+                  <select required value={formData.mainCategoryId} onChange={e => setFormData({...formData, mainCategoryId: e.target.value, subCategoryId: ''})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow">
+                    <option value="">اختر التصنيف</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">القسم الفرعي</label>
-                  <select 
-                    value={formData.subCategoryId} 
-                    onChange={e => setFormData({...formData, subCategoryId: e.target.value})} 
-                    disabled={!formData.mainCategoryId}
-                    className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
-                  >
-                    <option value="">بدون قسم فرعي</option>
-                    {formData.mainCategoryId && categories.find(c => c.id === formData.mainCategoryId)?.children?.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">التصنيف الفرعي</label>
+                  <select value={formData.subCategoryId} onChange={e => setFormData({...formData, subCategoryId: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow disabled:opacity-50" disabled={!formData.mainCategoryId}>
+                    <option value="">بدون تصنيف فرعي</option>
+                    {categories.find(c => c.id === formData.mainCategoryId)?.children?.map(sub => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">السعر *</label>
-                  <input required type="number" step="0.01" dir="ltr" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">الكمية في المخزن</label>
+                  <input type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="غير محدود" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">الباركود</label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-muted-gray text-[18px]">barcode_scanner</span>
-                    <input type="text" dir="ltr" value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} className="w-full pr-10 pl-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="مسح أو إدخال..." />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">وحدة القياس</label>
-                  <input type="text" placeholder="كغ / حبة / علبة" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">وحدة القياس</label>
+                  <input type="text" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="كغ، قطعة..." />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">المخزون الحالي</label>
-                  <input type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="اختياري" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-on-surface">حد التنبيه (منخفض)</label>
-                  <input type="number" value={formData.lowStockAlert} onChange={e => setFormData({...formData, lowStockAlert: e.target.value})} className="w-full px-4 py-2.5 bg-surface-container-low border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none" />
-                </div>
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2">تنبيه المخزون المنخفض</label>
+                <input type="number" value={formData.lowStockAlert} onChange={e => setFormData({...formData, lowStockAlert: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow" placeholder="5" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2">وصف المنتج</label>
+                <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow resize-none" placeholder="وصف قصير للمنتج..." />
               </div>
 
               <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-xl border border-border">
@@ -488,6 +603,7 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

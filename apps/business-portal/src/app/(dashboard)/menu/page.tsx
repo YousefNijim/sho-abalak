@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { productsApi, uploadsApi, Product } from '@shu/api-client';
+import { productsApi, uploadsApi, categoriesApi, Product } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
 
 export default function MenuPage() {
@@ -15,6 +15,11 @@ export default function MenuPage() {
   // Side Panel state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  
+  // Category Form State
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isSubmittingCategory, setIsSubmittingCategory] = useState(false);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -39,13 +44,20 @@ export default function MenuPage() {
     enabled: !!business,
   });
 
+  const { data: dbCategories = [], refetch: refetchCategories } = useQuery({
+    queryKey: ['categories', business?.id],
+    queryFn: () => categoriesApi.listByBusiness(business!.id),
+    enabled: !!business,
+  });
+
   const categories = useMemo(() => {
     const cats = new Set<string>();
     products.forEach(p => {
       if (p.category) cats.add(p.category);
     });
+    dbCategories.forEach((c: any) => cats.add(c.name));
     return ['الكل', ...Array.from(cats)];
-  }, [products]);
+  }, [products, dbCategories]);
 
   const filteredProducts = products.filter(p => {
     if (selectedCategory !== 'الكل' && p.category !== selectedCategory) return false;
@@ -134,12 +146,35 @@ export default function MenuPage() {
     }
   };
 
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategoryName.trim() || !business) return;
+    setIsSubmittingCategory(true);
+    try {
+      await categoriesApi.create({
+        businessId: business.id,
+        name: newCategoryName.trim()
+      });
+      setNewCategoryName('');
+      setIsAddingCategory(false);
+      refetchCategories();
+    } catch (err) {
+      console.error(err);
+      alert('حدث خطأ أثناء إضافة التصنيف');
+    } finally {
+      setIsSubmittingCategory(false);
+    }
+  };
+
   return (
     <div className="flex h-full gap-6">
       {/* Left Panel - Categories */}
-      <div className="hidden md:block w-64 shrink-0 bg-surface border border-border rounded-xl p-4 shadow-sm h-full overflow-y-auto custom-scrollbar">
-        <h2 className="text-lg font-bold text-on-surface mb-4">التصنيفات</h2>
-        <div className="space-y-1">
+      <div className="hidden md:flex flex-col w-64 shrink-0 bg-surface border border-border rounded-xl shadow-sm h-full overflow-hidden">
+        <div className="p-4 border-b border-border">
+          <h2 className="text-lg font-bold text-on-surface">التصنيفات</h2>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1">
           {categories.map(cat => (
             <button
               key={cat}
@@ -156,6 +191,45 @@ export default function MenuPage() {
               )}
             </button>
           ))}
+        </div>
+
+        <div className="p-4 border-t border-border bg-surface-container-low">
+          {isAddingCategory ? (
+            <form onSubmit={handleAddCategory} className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <input
+                type="text"
+                autoFocus
+                placeholder="اسم التصنيف..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isSubmittingCategory || !newCategoryName.trim()}
+                  className="flex-1 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingCategory ? 'جاري...' : 'حفظ'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); }}
+                  className="flex-1 py-1.5 bg-surface border border-border text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              onClick={() => setIsAddingCategory(true)}
+              className="w-full py-2 flex justify-center items-center gap-1 text-primary text-sm font-bold hover:bg-primary/10 rounded-lg transition-colors border border-dashed border-primary/30"
+            >
+              <span className="material-symbols-outlined text-lg">add</span>
+              إضافة تصنيف
+            </button>
+          )}
         </div>
       </div>
 
