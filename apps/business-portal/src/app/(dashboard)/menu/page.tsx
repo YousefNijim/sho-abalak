@@ -96,9 +96,7 @@ export default function MenuPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await uploadsApi.uploadImage(formData as any); 
+      const res = await uploadsApi.uploadImage(file);
       setFormData(prev => ({ ...prev, imageUrl: res.url }));
     } catch (err) {
       console.error(err);
@@ -220,7 +218,7 @@ export default function MenuPage() {
                 <div className="p-4">
                   <h3 className="font-bold text-on-surface mb-1 truncate">{p.name}</h3>
                   <div className="flex justify-between items-center mt-3">
-                    <span className="font-bold text-primary text-lg">{p.price.toFixed(2)} ش</span>
+                    <span className="font-bold text-primary text-lg">{Number(p.price).toFixed(2)} ش</span>
                     
                     <button 
                       onClick={() => handleToggleAvailable(p)}

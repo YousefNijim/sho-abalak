@@ -129,9 +129,7 @@ export default function ProductsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await uploadsApi.uploadImage(fd as any);
+      const res = await uploadsApi.uploadImage(file);
       setFormData(prev => ({ ...prev, imageUrl: res.url }));
     } catch (err) {
       console.error(err);
@@ -293,7 +291,7 @@ export default function ProductsPage() {
                       </td>
                       <td className="px-4 py-2 font-bold text-on-surface">{p.name} {p.unit && <span className="text-xs text-muted-gray font-normal mr-1">/ {p.unit}</span>}</td>
                       <td className="px-4 py-2 text-muted-gray text-xs">{categories.find(c => c.id === p.categoryId || c.id === p.category)?.name || 'بدون تصنيف'}</td>
-                      <td className="px-4 py-2 font-bold text-primary">{p.price.toFixed(2)} ش</td>
+                      <td className="px-4 py-2 font-bold text-primary">{Number(p.price).toFixed(2)} ش</td>
                       <td className="px-4 py-2">
                         {stock === null ? <span className="text-muted-gray">—</span> : (
                           <input 

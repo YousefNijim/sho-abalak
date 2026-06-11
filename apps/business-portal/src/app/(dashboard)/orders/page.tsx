@@ -130,7 +130,7 @@ export default function OrdersPage() {
                       <td className="px-4 py-3 font-bold text-primary">#{order.id.slice(-6).toUpperCase()}</td>
                       <td className="px-4 py-3 font-medium">{order.customer?.name}</td>
                       <td className="px-4 py-3 text-muted-gray">{order.items?.length || 0} عناصر</td>
-                      <td className="px-4 py-3 font-bold text-on-surface">{order.total.toFixed(2)} ش</td>
+                      <td className="px-4 py-3 font-bold text-on-surface">{Number(order.total).toFixed(2)} ش</td>
                       <td className="px-4 py-3 text-muted-gray">{order.paymentMethod === 'CASH' ? 'كاش' : 'إلكتروني'}</td>
                       <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
                       <td className="px-4 py-3 text-muted-gray" dir="ltr">{new Date(order.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
@@ -164,13 +164,13 @@ export default function OrdersPage() {
                                       <span className="font-bold text-primary ml-1">{item.quantity}x</span> 
                                       {item.product?.name || `Product ${item.productId}`}
                                     </span>
-                                    <span className="font-medium text-muted-gray">{(item.unitPrice * item.quantity).toFixed(2)} ش</span>
+                                    <span className="font-medium text-muted-gray">{(Number(item.unitPrice) * Number(item.quantity)).toFixed(2)} ش</span>
                                   </li>
                                 ))}
                               </ul>
                               <div className="mt-3 pt-2 border-t border-border flex justify-between text-sm font-bold">
                                 <span>المجموع الكلي:</span>
-                                <span>{order.total.toFixed(2)} ش</span>
+                                <span>{Number(order.total).toFixed(2)} ش</span>
                               </div>
                             </div>
                             <div>

@@ -68,7 +68,7 @@ export default function DashboardHome() {
           </div>
           <div>
             <p className="text-sm font-medium text-muted-gray">إيرادات اليوم</p>
-            <p className="text-2xl font-bold text-on-surface">{todayRevenue.toFixed(2)} ش</p>
+            <p className="text-2xl font-bold text-on-surface">{Number(todayRevenue).toFixed(2)} ش</p>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export default function DashboardHome() {
           <div>
             <p className="text-sm font-medium text-muted-gray">التقييم</p>
             <p className="text-2xl font-bold text-on-surface">
-              {business?.rating ? `${business.rating.toFixed(1)} ★` : 'لا يوجد تقييم'}
+              {business?.rating ? `${Number(business.rating).toFixed(1)} ★` : 'لا يوجد تقييم'}
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ export default function DashboardHome() {
                 </div>
                 
                 <div className="flex flex-col items-end gap-3 min-w-[150px]">
-                  <span className="font-bold text-lg text-primary">{order.total.toFixed(2)} ش</span>
+                  <span className="font-bold text-lg text-primary">{Number(order.total).toFixed(2)} ش</span>
                   <div className="flex gap-2 w-full justify-end">
                     {order.status === 'PENDING' && (
                       <>
