@@ -1,6 +1,6 @@
 {
   "buildCommand": "cd ../.. && pnpm --filter @shu/business-portal build",
-  "outputDirectory": "apps/business-portal/.next",
+  "outputDirectory": ".next",
   "installCommand": "pnpm install",
   "framework": "nextjs"
 }
