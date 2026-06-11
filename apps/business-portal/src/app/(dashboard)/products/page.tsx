@@ -53,9 +53,8 @@ export default function ProductsPage() {
   });
 
   const filteredProducts = products.filter(p => {
-    // @ts-ignore
     if (categoryId !== 'ALL') {
-      const catId = p.categoryId || p.category;
+      const catId = (p as any).categoryId || p.category;
       if (catId !== categoryId) {
         const selectedMainCat = categories.find(c => c.id === categoryId);
         if (!selectedMainCat || !selectedMainCat.children?.some(sub => sub.id === catId)) {
