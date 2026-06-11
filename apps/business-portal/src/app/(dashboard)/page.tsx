@@ -162,7 +162,7 @@ export default function DashboardHome() {
                           isOpen: true,
                           orderId: order.id,
                           total: Number(order.total),
-                          areaId: order.deliveryAreaId || business?.areaId || ''
+                          areaId: order.customer?.area?.id || business?.areaId || ''
                         })} 
                         className="px-3 py-1.5 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors w-full flex items-center justify-center gap-1"
                       >

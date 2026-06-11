@@ -16,7 +16,6 @@ export default function ProfilePage() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [addressDetail, setAddressDetail] = useState('');
-  const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +37,6 @@ export default function ProfilePage() {
       setName(business.name || '');
       setPhone(business.phone || '');
       setAddressDetail(business.addressDetail || '');
-      setDescription(business.description || '');
       setImageUrl(business.imageUrl || '');
       setLogoUrl(business.logoUrl || '');
       setIsOpen(business.isOpen || false);
@@ -113,7 +111,6 @@ export default function ProfilePage() {
       name,
       phone,
       addressDetail,
-      description,
       openTime,
       closeTime,
     });
@@ -247,15 +244,6 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-1">وصف المنشأة (اختياري)</label>
-              <textarea 
-                value={description} 
-                onChange={e => setDescription(e.target.value)} 
-                rows={3}
-                className="w-full border border-border rounded-lg p-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none" 
-              />
-            </div>
 
             <div className="flex gap-4 p-4 bg-surface-container-low rounded-lg border border-border mt-4">
               <div className="flex-1 text-center border-l border-border">

@@ -166,7 +166,7 @@ export default function OrdersPage() {
                                   isOpen: true,
                                   orderId: order.id,
                                   total: Number(order.total),
-                                  areaId: order.deliveryAreaId || business?.areaId || ''
+                                  areaId: order.customer?.area?.id || business?.areaId || ''
                                 });
                               }}
                               className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors flex items-center gap-1"

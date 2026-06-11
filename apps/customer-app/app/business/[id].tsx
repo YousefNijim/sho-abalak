@@ -36,8 +36,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VariantPicker, type CartAddPayload } from '../../components/VariantPicker';
 
 const TYPE_ICON: Record<string, { Icon: typeof UtensilsCrossed; color: string }> = {
-  FOOD:  { Icon: UtensilsCrossed, color: colors.primary },
-  STORE: { Icon: Store,           color: colors.secondary },
+  FOOD: { Icon: UtensilsCrossed, color: colors.primary },
+  STORE: { Icon: Store, color: colors.secondary },
 };
 
 export default function BusinessDetail() {
@@ -45,12 +45,12 @@ export default function BusinessDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const addItem    = useCartStore((s) => s.addItem);
-  const updateQty  = useCartStore((s) => s.updateQty);
-  const clearCart  = useCartStore((s) => s.clear);
-  const cartItems  = useCartStore((s) => s.items);
-  const cartTotal  = useCartStore((s) => s.total());
-  const cartQty    = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const addItem = useCartStore((s) => s.addItem);
+  const updateQty = useCartStore((s) => s.updateQty);
+  const clearCart = useCartStore((s) => s.clear);
+  const cartItems = useCartStore((s) => s.items);
+  const cartTotal = useCartStore((s) => s.total());
+  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const [tab, setTab] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -434,7 +434,7 @@ export default function BusinessDetail() {
 
               {/* Products by section (only showing first 6 for each main cat) */}
               {storeCategories.map((mainCat) => {
-                const sectionProducts = products.filter((p: any) => 
+                const sectionProducts = products.filter((p: any) =>
                   p.categoryId === mainCat.id || mainCat.children?.some((c: any) => c.id === p.categoryId)
                 ).slice(0, 6);
 
@@ -479,7 +479,7 @@ export default function BusinessDetail() {
                   setSelectedSubCat(null);
                 }}
               />
-              
+
               <SubCategoryBar
                 subCategories={subCategories}
                 selected={selectedSubCat}
@@ -601,67 +601,68 @@ export default function BusinessDetail() {
                 ? Math.round(originalPrice * (1 - discountPct / 100) * 100) / 100
                 : originalPrice;
               return (
-              <Pressable
-                key={p.id}
-                style={[styles.productCard, discountPct > 0 && styles.productCardOffer]}
-                onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id, businessId: business.id } })}
-              >
-                <View style={styles.productImageWrap}>
-                  {p.imageUrl ? (
-                    <Image source={{ uri: mediaUrl(p.imageUrl)! }} style={styles.productImage} contentFit="cover" />
-                  ) : (
-                    <View style={[styles.productImage, styles.productImagePlaceholder]}>
-                      <ChefHat size={24} color={colors.border} />
-                    </View>
-                  )}
-                  {discountPct > 0 && (
-                    <View style={styles.offerBadge}>
-                      <Text style={styles.offerBadgeText}>-{discountPct}%</Text>
-                    </View>
-                  )}
-                </View>
-
-                <View style={styles.productInfo}>
-                  <View>
-                    <Text style={[styles.productName, discountPct > 0 && styles.productNameOffer]}>{p.name}</Text>
-                    <Text style={styles.productDesc} numberOfLines={2}>
-                      {p.description || 'وصف شهي للمنتج'}
-                    </Text>
-                  </View>
-
-                  <View style={styles.productFooter}>
-                    <View style={{ alignItems: 'flex-start' }}>
-                      <Text style={[styles.productPrice, discountPct > 0 && styles.productPriceDiscounted]}>{discountedPrice} ₪</Text>
-                      {discountPct > 0 && (
-                        <Text style={styles.productPriceOld}>{originalPrice} ₪</Text>
-                      )}
-                    </View>
-                    {p.isAvailable && business.isOpen ? (() => {
-                      const cartItem = cartItems.find((i) => i.productId === p.id && !i.variantId);
-                      return cartItem ? (
-                        <View style={styles.stepperWrap}>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, -1)}>
-                            <Minus size={16} color={colors.primary} strokeWidth={2.5} />
-                          </Pressable>
-                          <Text style={styles.stepperQty}>{cartItem.quantity}</Text>
-                          <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, 1)}>
-                            <Plus size={16} color={colors.primary} strokeWidth={2.5} />
-                          </Pressable>
-                        </View>
-                      ) : (
-                        <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
-                          <Plus size={20} color="#fff" strokeWidth={2.5} />
-                        </Pressable>
-                      );
-                    })() : (
-                      <View style={styles.unavailableBadge}>
-                        <Text style={styles.unavailableText}>غير متوفر</Text>
+                <Pressable
+                  key={p.id}
+                  style={[styles.productCard, discountPct > 0 && styles.productCardOffer]}
+                  onPress={() => router.push({ pathname: '/product/[id]', params: { id: p.id, businessId: business.id } })}
+                >
+                  <View style={styles.productImageWrap}>
+                    {p.imageUrl ? (
+                      <Image source={{ uri: mediaUrl(p.imageUrl)! }} style={styles.productImage} contentFit="cover" />
+                    ) : (
+                      <View style={[styles.productImage, styles.productImagePlaceholder]}>
+                        <ChefHat size={24} color={colors.border} />
+                      </View>
+                    )}
+                    {discountPct > 0 && (
+                      <View style={styles.offerBadge}>
+                        <Text style={styles.offerBadgeText}>-{discountPct}%</Text>
                       </View>
                     )}
                   </View>
-                </View>
-              </Pressable>
-            );})
+
+                  <View style={styles.productInfo}>
+                    <View>
+                      <Text style={[styles.productName, discountPct > 0 && styles.productNameOffer]}>{p.name}</Text>
+                      <Text style={styles.productDesc} numberOfLines={2}>
+                        {p.description || 'وصف شهي للمنتج'}
+                      </Text>
+                    </View>
+
+                    <View style={styles.productFooter}>
+                      <View style={{ alignItems: 'flex-start' }}>
+                        <Text style={[styles.productPrice, discountPct > 0 && styles.productPriceDiscounted]}>{discountedPrice} ₪</Text>
+                        {discountPct > 0 && (
+                          <Text style={styles.productPriceOld}>{originalPrice} ₪</Text>
+                        )}
+                      </View>
+                      {p.isAvailable && business.isOpen ? (() => {
+                        const cartItem = cartItems.find((i) => i.productId === p.id && !i.variantId);
+                        return cartItem ? (
+                          <View style={styles.stepperWrap}>
+                            <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, -1)}>
+                              <Minus size={16} color={colors.primary} strokeWidth={2.5} />
+                            </Pressable>
+                            <Text style={styles.stepperQty}>{cartItem.quantity}</Text>
+                            <Pressable style={styles.stepperBtn} onPress={() => updateQty(p.id, 1)}>
+                              <Plus size={16} color={colors.primary} strokeWidth={2.5} />
+                            </Pressable>
+                          </View>
+                        ) : (
+                          <Pressable style={styles.addBtn} onPress={() => handleAdd(p)}>
+                            <Plus size={20} color="#fff" strokeWidth={2.5} />
+                          </Pressable>
+                        );
+                      })() : (
+                        <View style={styles.unavailableBadge}>
+                          <Text style={styles.unavailableText}>غير متوفر</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })
           )}
         </View>
       </ScrollView>

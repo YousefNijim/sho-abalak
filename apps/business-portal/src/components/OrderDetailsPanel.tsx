@@ -258,7 +258,7 @@ export function OrderDetailsPanel({ orderId, onClose }: OrderDetailsPanelProps) 
         isOpen={isDriverModalOpen}
         orderIds={order ? [order.id] : []}
         orderTotal={Number(order?.total)}
-        deliveryAreaId={order?.deliveryAreaId || ''}
+        deliveryAreaId={order?.customer?.area?.id || ''}
         onClose={() => setIsDriverModalOpen(false)}
         onDriverAssigned={() => {
           setIsDriverModalOpen(false);
