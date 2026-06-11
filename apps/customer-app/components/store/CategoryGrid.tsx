@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import type { ProductCategory } from '@shu/api-client';
-import { colors, radius, fontSizes, fontFamily, spacing } from '../../../src/theme';
+import { colors, radius, fontSizes, fontFamily, spacing } from '../../src/theme';
 import { BASE_URL } from '@shu/api-client';
 import { Layers } from 'lucide-react-native';
 

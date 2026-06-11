@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { Plus } from 'lucide-react-native';
 import type { Product } from '@shu/api-client';
-import { colors, radius, fontSizes, fontFamily, spacing } from '../../../src/theme';
+import { colors, radius, fontSizes, fontFamily, spacing } from '../../src/theme';
 import { BASE_URL } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>

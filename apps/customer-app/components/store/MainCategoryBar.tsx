@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ScrollView, Text, StyleSheet, Pressable, View } from 'react-native';
 import type { ProductCategory } from '@shu/api-client';
-import { colors, radius, fontSizes, fontFamily, spacing } from '../../../src/theme';
+import { colors, radius, fontSizes, fontFamily, spacing } from '../../src/theme';
 
 interface Props {
   categories: ProductCategory[];
