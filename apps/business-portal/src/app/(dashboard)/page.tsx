@@ -30,7 +30,7 @@ export default function DashboardHome() {
   const todayRevenue = deliveredTodayOrders.reduce((sum, o) => sum + o.subtotal, 0);
 
   const activeOrders = allOrders.filter(o => 
-    ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(o.status)
+    ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'PICKED_UP'].includes(o.status)
   ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
@@ -48,6 +48,7 @@ export default function DashboardHome() {
       case 'CONFIRMED': return <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">مؤكد</span>;
       case 'PREPARING': return <span className="bg-primary/20 text-primary-dark px-2 py-1 rounded text-xs font-bold">قيد التحضير</span>;
       case 'READY': return <span className="bg-success/20 text-success px-2 py-1 rounded text-xs font-bold">جاهز</span>;
+      case 'PICKED_UP': return <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">في الطريق</span>;
       default: return <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold">{status}</span>;
     }
   };

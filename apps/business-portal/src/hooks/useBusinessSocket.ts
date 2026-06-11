@@ -33,8 +33,26 @@ export function useBusinessSocket() {
 
       // Try playing a sound
       try {
-        const audio = new Audio('/notification.mp3'); // Optional: if you add a sound file later
-        audio.play().catch(() => {});
+        const audio = new Audio('/notification.mp3');
+        audio.play().catch(() => {
+          // Fallback to AudioContext beep if file not found or blocked
+          try {
+            // @ts-ignore
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+            gain.gain.setValueAtTime(0.1, ctx.currentTime); // Low volume
+            osc.start();
+            setTimeout(() => {
+              osc.stop();
+              ctx.close();
+            }, 500);
+          } catch(e) {}
+        });
       } catch (e) {}
     };
 

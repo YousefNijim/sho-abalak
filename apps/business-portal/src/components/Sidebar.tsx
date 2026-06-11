@@ -25,6 +25,7 @@ export function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (o:
     { title: 'الرئيسية', items: [
       { href: '/', label: 'لوحة التحكم', icon: 'dashboard' },
       { href: '/orders', label: 'الطلبات', icon: 'local_shipping' },
+      { href: '/analytics', label: 'الإحصائيات', icon: 'insights' },
       { href: '/profile', label: 'ملف المنشأة', icon: 'storefront' },
     ]},
     ...(isFood ? [{
