@@ -27,7 +27,6 @@ import { businessesApi, offersApi, productsApi, categoriesApi, BASE_URL } from '
 import { CategoryGrid } from '../../components/store/CategoryGrid';
 import { MainCategoryBar } from '../../components/store/MainCategoryBar';
 import { SubCategoryBar } from '../../components/store/SubCategoryBar';
-import { StoreProductCard } from '../../components/store/StoreProductCard';
 import type { Product } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
