@@ -97,7 +97,7 @@ export default function DashboardHome() {
 
       {/* Active Orders */}
       <div className="bg-surface rounded-xl border border-border shadow-sm p-4 md:p-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-bold text-on-surface flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">local_fire_department</span>
             الطلبات النشطة
@@ -107,6 +107,10 @@ export default function DashboardHome() {
             تحديث
           </button>
         </div>
+        <p className="text-xs text-muted-gray mb-6 flex items-center gap-1">
+          <span className="material-symbols-outlined text-[14px]">info</span>
+          للحصول على الإشعارات حتى عند إغلاق المتصفح، استخدم تطبيق الهاتف المحمول
+        </p>
 
         {isOrdersLoading ? (
           <div className="text-center py-12 text-muted-gray">جاري التحميل...</div>

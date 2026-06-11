@@ -239,7 +239,7 @@ export default function StoreHome() {
                       productId: trendingProduct.id,
                       name: trendingProduct.name,
                       price: trendingProduct.price,
-                    }, 1, firstPopularBusinessId, businesses[0]?.name);
+                    }, firstPopularBusinessId, businesses[0]?.areaId);
                     // optionally feedback
                   }}>
                     <ShoppingCart size={14} color="#fff" />
