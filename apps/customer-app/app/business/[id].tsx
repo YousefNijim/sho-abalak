@@ -439,7 +439,8 @@ export default function BusinessDetail() {
               {/* Products by section (only showing first 6 for each main cat) */}
               {storeCategories.map((mainCat) => {
                 const sectionProducts = products.filter((p: any) =>
-                  p.categoryId === mainCat.id || mainCat.children?.some((c: any) => c.id === p.categoryId)
+                  p.categoryId === mainCat.id || p.templateId === mainCat.id ||
+                  mainCat.children?.some((c: any) => c.id === p.categoryId || c.id === p.templateId)
                 ).slice(0, 6);
 
                 if (sectionProducts.length === 0) return null;
