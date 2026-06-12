@@ -77,9 +77,17 @@ export default function Home() {
     if (addresses.length === 0) return;
     const match = addresses.find((a) => a.id === selectedAddressId);
     if (!match) selectAddress((addresses[0] as any).id);
-  }, [addresses, selectedAddressId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addresses.map((a) => a.id).join(','), selectedAddressId]);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
+
+  // Invalidate business listings whenever the selected address changes so fresh data loads
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['businesses'] });
+    queryClient.invalidateQueries({ queryKey: ['promoted-businesses'] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAddress?.areaId]);
 
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
   const [search, setSearch] = useState('');

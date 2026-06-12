@@ -29,10 +29,9 @@ export function AddressSelector() {
   useEffect(() => {
     if (addresses.length === 0) return;
     const match = addresses.find((a: any) => a.id === selectedAddressId);
-    if (!match) {
-      selectAddress((addresses[0] as any).id);
-    }
-  }, [addresses, selectedAddressId]);
+    if (!match) selectAddress((addresses[0] as any).id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addresses.map((a: any) => a.id).join(','), selectedAddressId]);
 
   const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
