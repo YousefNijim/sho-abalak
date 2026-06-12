@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { businessesApi, uploadsApi, authApi } from '@shu/api-client';
+import { businessesApi, uploadsApi, authApi, areasApi } from '@shu/api-client';
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -32,6 +32,37 @@ export default function ProfilePage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
+  const [deliveryAreaIds, setDeliveryAreaIds] = useState<string[]>([]);
+  const [areaSearch, setAreaSearch] = useState('');
+
+  const { data: allAreas = [] } = useQuery({
+    queryKey: ['areas'],
+    queryFn: () => areasApi.list(),
+  });
+
+  const cityVillages = React.useMemo(() => {
+    if (!business?.area?.city) return [];
+    return allAreas.filter((a: any) => a.city === business.area?.city);
+  }, [allAreas, business]);
+
+  const filteredVillages = React.useMemo(() => {
+    if (!areaSearch.trim()) return cityVillages;
+    return cityVillages.filter((v: any) => v.name.includes(areaSearch.trim()));
+  }, [cityVillages, areaSearch]);
+
+  const isDeliveryDirty = React.useMemo(() => {
+    if (!business) return false;
+    const original = (business.deliveryAreas || []).map((a: any) => a.id).sort().join(',');
+    const current = [...deliveryAreaIds].sort().join(',');
+    return original !== current;
+  }, [business, deliveryAreaIds]);
+
+  const toggleDeliveryArea = (id: string) => {
+    setDeliveryAreaIds((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    );
+  };
+
   useEffect(() => {
     if (business) {
       setName(business.name || '');
@@ -42,6 +73,7 @@ export default function ProfilePage() {
       setIsOpen(business.isOpen || false);
       setOpenTime(business.openTime || '09:00 ص');
       setCloseTime(business.closeTime || '11:00 م');
+      setDeliveryAreaIds((business.deliveryAreas || []).map((a: any) => a.id));
     }
   }, [business]);
 
@@ -369,24 +401,67 @@ export default function ProfilePage() {
 
           {/* Section 3: Delivery Areas */}
           <div className="bg-surface rounded-xl shadow-sm border border-border p-6">
-            <h2 className="text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-on-surface mb-2 flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">map</span>
               مناطق التوصيل
             </h2>
-            <div className="flex flex-wrap gap-2">
-              {business?.deliveryAreas && business.deliveryAreas.length > 0 ? (
-                business.deliveryAreas.map((area: any) => (
-                  <span key={area.id} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold border border-primary/20">
-                    {area.city} - {area.name}
-                  </span>
-                ))
+            <p className="text-sm text-muted-gray mb-4">
+              اختر القرى والأحياء التي يمكنك التوصيل إليها داخل مدينتك ({business?.area?.city || ''})
+            </p>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="بحث عن قرية أو حي..."
+                value={areaSearch}
+                onChange={(e) => setAreaSearch(e.target.value)}
+                className="w-full border border-border rounded-lg p-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-right bg-surface-container-low"
+              />
+            </div>
+
+            <div className="border border-border rounded-lg overflow-hidden">
+              {cityVillages.length === 0 ? (
+                <p className="text-muted-gray text-sm text-center py-6">لا توجد مناطق متاحة.</p>
               ) : (
-                <p className="text-muted-gray text-sm">لم يتم تحديد مناطق التوصيل.</p>
+                <div className="max-h-60 overflow-y-auto divide-y divide-border bg-surface-container-low">
+                  {filteredVillages.map((area: any) => {
+                    const isSelected = deliveryAreaIds.includes(area.id);
+                    return (
+                      <div
+                        key={area.id}
+                        onClick={() => toggleDeliveryArea(area.id)}
+                        className={`flex items-center justify-between p-3 cursor-pointer select-none transition-colors hover:bg-primary/5 ${
+                          isSelected ? 'bg-primary/5' : ''
+                        }`}
+                      >
+                        <span className={`font-semibold ${isSelected ? 'text-primary' : 'text-on-surface'}`}>
+                          {area.name}
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {}} // toggled by outer click
+                          className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
-            <p className="text-xs text-muted-gray mt-4 italic">
-              لتعديل مناطق التوصيل المعتمدة، يرجى التواصل مع إدارة المنصة.
-            </p>
+
+            <button
+              onClick={() => updateBusiness.mutate({ deliveryAreaIds })}
+              disabled={updateBusiness.isPending || !isDeliveryDirty}
+              className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 rounded-lg transition-colors mt-4 flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {updateBusiness.isPending ? (
+                <span className="material-symbols-outlined animate-spin text-[20px]">progress_activity</span>
+              ) : (
+                <span className="material-symbols-outlined text-[20px]">save</span>
+              )}
+              حفظ مناطق التوصيل
+            </button>
           </div>
 
           {/* Section 4: Change Password */}
