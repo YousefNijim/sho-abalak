@@ -98,8 +98,8 @@ export default function BusinessDetail() {
         return false; // let default back happen
       };
 
-      BackHandler.addEventListener('hardwareBackPress', onBackPress);
-      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
     }, [selectedSubCat, selectedMainCat])
   );
 
@@ -453,6 +453,7 @@ export default function BusinessDetail() {
                         <StoreProductCard
                           key={p.id}
                           product={p}
+                          isOpen={business.isOpen}
                           discountPct={getDiscountPct(p)}
                           width={140}
                           onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
@@ -502,6 +503,7 @@ export default function BusinessDetail() {
                         <StoreProductCard
                           key={p.id}
                           product={p}
+                          isOpen={business.isOpen}
                           discountPct={getDiscountPct(p)}
                           width="48%"
                           onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
@@ -690,11 +692,15 @@ export default function BusinessDetail() {
 function StoreProductCard({
   product,
   isOpen,
-  onPress,
+  onAdd,
+  width,
+  discountPct,
 }: {
   product: any;
   isOpen: boolean;
-  onPress: () => void;
+  onAdd: () => void;
+  width?: any;
+  discountPct?: number;
 }) {
   const variants = (product.variants ?? []).filter((v: any) => v.isAvailable);
   const hasVariants = product.hasVariants && variants.length > 0;
@@ -713,8 +719,8 @@ function StoreProductCard({
 
   return (
     <Pressable
-      style={[styles.storeCard, unavailable && styles.storeCardUnavailable]}
-      onPress={unavailable ? undefined : onPress}
+      style={[styles.storeCard, unavailable && styles.storeCardUnavailable, width ? { width } : {}]}
+      onPress={unavailable ? undefined : onAdd}
     >
       {/* Image */}
       <View style={styles.storeCardImageWrap}>
@@ -741,6 +747,13 @@ function StoreProductCard({
         {lowStock && (
           <View style={styles.lowStockBadge}>
             <Text style={styles.lowStockText}>آخر {product.stock}</Text>
+          </View>
+        )}
+
+        {/* Discount badge */}
+        {discountPct !== undefined && discountPct > 0 && (
+          <View style={styles.offerBadge}>
+            <Text style={styles.offerBadgeText}>-{discountPct}%</Text>
           </View>
         )}
       </View>

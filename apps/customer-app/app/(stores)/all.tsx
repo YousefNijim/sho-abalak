@@ -7,6 +7,7 @@ import { ArrowRight, Search, SlidersHorizontal, Heart, Clock, Bike, Store, Star 
 import { Image } from 'expo-image';
 import { businessesApi, tagsApi, addressesApi, BASE_URL } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
+import { useAuthStore } from '../../src/stores/auth.store';
 import { fontFamily, spacing } from '../../src/theme';
 
 const mediaUrl = (path: string | null | undefined): string | null => {
@@ -33,10 +34,12 @@ export default function AllStores() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  const token = useAuthStore((s) => s.token);
   
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
+    enabled: !!token,
   });
 
   const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;

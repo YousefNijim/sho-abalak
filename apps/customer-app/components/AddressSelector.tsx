@@ -4,6 +4,7 @@ import { ChevronDown, MapPin, Check, Plus, HomeIcon } from 'lucide-react-native'
 import { useQuery } from '@tanstack/react-query';
 import { addressesApi } from '@shu/api-client';
 import { useSavedAddressesStore } from '../src/stores/saved-addresses.store';
+import { useAuthStore } from '../src/stores/auth.store';
 import { colors, fontFamily, radius, spacing } from '../src/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,9 +17,12 @@ export function AddressSelector() {
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
 
+  const token = useAuthStore((s) => s.token);
+
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
+    enabled: !!token,
   });
 
   const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;

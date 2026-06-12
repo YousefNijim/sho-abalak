@@ -39,10 +39,12 @@ export default function StoreHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
+  const token = useAuthStore((s) => s.token);
   
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
     queryFn: () => addressesApi.list(),
+    enabled: !!token,
   });
 
   const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;
