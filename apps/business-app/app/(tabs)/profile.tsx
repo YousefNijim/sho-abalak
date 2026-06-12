@@ -413,8 +413,7 @@ export default function ProfileTab() {
           </View>
 
           {/* Delivery Areas */}
-          {type === 'FOOD' && (
-            <>
+          <>
               <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>
                 مناطق التوصيل
               </Text>
@@ -476,8 +475,7 @@ export default function ProfileTab() {
                   </ScrollView>
                 )}
               </View>
-            </>
-          )}
+          </>
 
           {/* Additional settings */}
           <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>إعدادات إضافية</Text>

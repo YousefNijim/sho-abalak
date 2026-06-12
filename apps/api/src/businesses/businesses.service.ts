@@ -46,16 +46,11 @@ export class BusinessesService {
     if (query.tagId) where.tags = { some: { id: query.tagId } };
     
     if (query.areaId) {
-      if (query.type === 'FOOD') {
-        // For restaurants, check if the area is in their delivery areas OR is their own area
-        where.OR = [
-          { deliveryAreas: { some: { id: query.areaId } } },
-          { areaId: query.areaId }
-        ];
-      } else {
-        // For markets, just check their location
-        where.areaId = query.areaId;
-      }
+      // Check deliveryAreas relation for all types; fall back to own areaId
+      where.OR = [
+        { deliveryAreas: { some: { id: query.areaId } } },
+        { areaId: query.areaId },
+      ];
     }
     
     if (query.search) where.name = { contains: query.search, mode: 'insensitive' };
