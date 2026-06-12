@@ -5,7 +5,7 @@ export type { SavedAddress, CreateAddressDto as CreateAddressDtoClient, UpdateAd
 export { areasApi } from './areas.api';
 export { businessesApi } from './businesses.api';
 export { tagsApi } from './tags.api';
-export { productsApi, categoriesApi } from './products.api';
+export { productsApi, categoriesApi, categoryGroupsApi, businessCategoriesApi } from './products.api';
 export { ordersApi } from './orders.api';
 export { driversApi } from './drivers.api';
 export { reviewsApi } from './reviews.api';
@@ -32,7 +32,7 @@ export type { FinanceSummary } from './reports.api';
 export type { AuthResponse, LoginDto, RegisterDto, RegisterBusinessDto, ChangePasswordDto } from './auth.api';
 export type { Area } from './areas.api';
 export type { Business, BusinessListParams, AdminCreateBusinessDto, BusinessWriteDto, BusinessType, Tag } from './businesses.api';
-export type { Product, CreateProductDto, SearchProduct, ProductCategory, ProductVariant, CreateCategoryDto, CreateVariantDto, ImportResult } from './products.api';
+export type { Product, CreateProductDto, SearchProduct, ProductCategory, ProductVariant, CreateCategoryDto, CreateVariantDto, ImportResult, CategoryTemplate, CategoryGroup, BusinessCategoryAssignment } from './products.api';
 export type {
   Order,
   OrderItem,

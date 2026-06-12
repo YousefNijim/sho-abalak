@@ -63,8 +63,12 @@ export class ProductsController {
   }
 
   @Get()
-  findByBusiness(@Query('businessId') businessId: string, @Query('categoryId') categoryId?: string) {
-    return this.products.findByBusiness(businessId, categoryId);
+  findByBusiness(
+    @Query('businessId') businessId: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('templateId') templateId?: string,
+  ) {
+    return this.products.findByBusiness(businessId, categoryId, templateId);
   }
 
   @Get('import/template')

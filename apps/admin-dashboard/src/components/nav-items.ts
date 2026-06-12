@@ -30,6 +30,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: '/businesses?type=STORE', label: 'إدارة المتاجر', icon: 'storefront' },
       { href: '/tags?type=STORE', label: 'أقسام المتاجر', icon: 'category' },
+      { href: '/category-groups', label: 'مجموعات التصنيفات', icon: 'folder_open' },
       { href: '/inventory', label: 'مخزون المتاجر', icon: 'inventory_2' },
     ],
   },

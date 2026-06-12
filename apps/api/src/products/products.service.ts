@@ -6,6 +6,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 const PRODUCT_INCLUDE = {
   variants: { where: { isAvailable: true }, orderBy: { sortOrder: 'asc' as const } },
   productCategory: true,
+  categoryTemplate: true,
 } as const;
 
 @Injectable()
@@ -13,8 +14,8 @@ export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Business owner: returns ALL products (available + unavailable) with variants. */
-  async findByBusiness(businessId: string, categoryId?: string) {
-    if (!categoryId) {
+  async findByBusiness(businessId: string, categoryId?: string, templateId?: string) {
+    if (!categoryId && !templateId) {
       return this.prisma.product.findMany({
         where: { businessId },
         include: PRODUCT_INCLUDE,
@@ -22,20 +23,30 @@ export class ProductsService {
       });
     }
 
+    // New system: filter by templateId (admin-controlled categories)
+    if (templateId) {
+      const template = await this.prisma.categoryTemplate.findUnique({
+        where: { id: templateId },
+        include: { children: true },
+      });
+      if (!template) return [];
+      const templateIds = [template.id, ...template.children.map((c) => c.id)];
+      return this.prisma.product.findMany({
+        where: { businessId, templateId: { in: templateIds } },
+        include: PRODUCT_INCLUDE,
+        orderBy: { name: 'asc' },
+      });
+    }
+
+    // Legacy system: filter by categoryId (business-owned categories)
     const category = await this.prisma.productCategory.findUnique({
       where: { id: categoryId },
       include: { children: true },
     });
-
     if (!category) return [];
-
-    const categoryIds = [category.id, ...category.children.map(c => c.id)];
-
+    const categoryIds = [category.id, ...category.children.map((c) => c.id)];
     return this.prisma.product.findMany({
-      where: {
-        businessId,
-        categoryId: { in: categoryIds },
-      },
+      where: { businessId, categoryId: { in: categoryIds } },
       include: PRODUCT_INCLUDE,
       orderBy: { name: 'asc' },
     });

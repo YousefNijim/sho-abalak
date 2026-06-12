@@ -23,7 +23,7 @@ import {
   Package,
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
-import { businessesApi, offersApi, productsApi, categoriesApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, offersApi, productsApi, categoriesApi, businessCategoriesApi, BASE_URL } from '@shu/api-client';
 import { CategoryGrid } from '../../components/store/CategoryGrid';
 import { MainCategoryBar } from '../../components/store/MainCategoryBar';
 import { SubCategoryBar } from '../../components/store/SubCategoryBar';
@@ -68,9 +68,13 @@ export default function BusinessDetail() {
   });
 
   const { data: storeCategories = [] } = useQuery({
-    queryKey: ['categories', id],
-    // @ts-ignore
-    queryFn: () => categoriesApi.listByBusiness(id!),
+    queryKey: ['store-categories', id],
+    // public endpoint — returns only enabled templates if admin-controlled, else legacy categories
+    queryFn: async () => {
+      const templates = await businessCategoriesApi.getForBusiness(id!);
+      if (templates.length > 0) return templates;
+      return categoriesApi.listByBusiness(id!);
+    },
     enabled: !!id && business?.type === 'STORE',
   });
 
@@ -425,7 +429,7 @@ export default function BusinessDetail() {
             <>
               {/* Category Grid */}
               <CategoryGrid
-                categories={storeCategories}
+                categories={storeCategories as any}
                 onSelect={(cat) => {
                   setSelectedMainCat(cat);
                   setSelectedSubCat(null);
@@ -473,7 +477,7 @@ export default function BusinessDetail() {
             <>
               {/* Category Nav View */}
               <MainCategoryBar
-                categories={storeCategories}
+                categories={storeCategories as any}
                 selected={selectedMainCat}
                 onSelect={(cat) => {
                   setSelectedMainCat(cat);

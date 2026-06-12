@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { productsApi, categoriesApi, uploadsApi, Product, ProductCategory } from '@shu/api-client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { productsApi, categoriesApi, businessCategoriesApi, uploadsApi, Product } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
 
 export default function ProductsPage() {
@@ -52,14 +52,39 @@ export default function ProductsPage() {
     enabled: !!business,
   });
 
-  // Category Form State
+  // New admin-controlled templates
+  const { data: templates = [], refetch: refetchTemplates } = useQuery({
+    queryKey: ['my-templates', business?.id],
+    queryFn: () => businessCategoriesApi.getMyTemplates(),
+    enabled: !!business,
+  });
+
+  const hasTemplates = templates.length > 0;
+
+  const toggleTemplate = useMutation({
+    mutationFn: ({ id, isEnabled }: { id: string; isEnabled: boolean }) =>
+      businessCategoriesApi.toggle(id, isEnabled),
+    onSuccess: () => refetchTemplates(),
+  });
+
+  // selected templateId for filter (new system) — null = ALL
+  const [templateId, setTemplateId] = useState<string | null>(null);
+
+  // Category Form State (legacy — kept for businesses without templates)
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryParentId, setNewCategoryParentId] = useState<string>('');
   const [isSubmittingCategory, setIsSubmittingCategory] = useState(false);
 
   const filteredProducts = products.filter(p => {
-    if (categoryId !== 'ALL') {
+    if (templateId) {
+      if ((p as any).templateId !== templateId) {
+        // also match children
+        const tpl = templates.find(t => t.id === templateId);
+        const childIds = tpl?.children?.map(c => c.id) ?? [];
+        if (!childIds.includes((p as any).templateId)) return false;
+      }
+    } else if (categoryId !== 'ALL' && !hasTemplates) {
       const catId = (p as any).categoryId || p.category;
       if (catId !== categoryId) {
         const selectedMainCat = categories.find(c => c.id === categoryId);
@@ -176,7 +201,9 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        categoryId: formData.subCategoryId || formData.mainCategoryId || undefined,
+        ...(hasTemplates
+          ? { templateId: formData.subCategoryId || formData.mainCategoryId || undefined }
+          : { categoryId: formData.subCategoryId || formData.mainCategoryId || undefined }),
         isAvailable: formData.isAvailable,
         imageUrl: formData.imageUrl,
         barcode: formData.barcode,
@@ -265,90 +292,154 @@ export default function ProductsPage() {
       <div className="hidden md:flex flex-col w-64 shrink-0 bg-surface border border-border rounded-xl shadow-sm overflow-hidden sticky top-6 max-h-[calc(100vh-3rem)]">
         <div className="p-4 border-b border-border">
           <h2 className="text-lg font-bold text-on-surface">التصنيفات</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-          <button
-            onClick={() => setCategoryId('ALL')}
-            className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
-              categoryId === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
-            }`}
-          >
-            <span>الكل</span>
-          </button>
-          {categories.map(cat => (
-            <div key={cat.id} className="space-y-1">
-              <button
-                onClick={() => setCategoryId(cat.id)}
-                className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
-                  categoryId === cat.id ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-container-low'
-                }`}
-              >
-                <span>{cat.name}</span>
-              </button>
-              {cat.children?.map(sub => (
-                <button
-                  key={sub.id}
-                  onClick={() => setCategoryId(sub.id)}
-                  className={`w-full text-right pr-6 pl-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex justify-between items-center ${
-                    categoryId === sub.id ? 'bg-primary/5 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
-                  }`}
-                >
-                  <span>{sub.name}</span>
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        <div className="p-4 border-t border-border bg-surface-container-low">
-          {isAddingCategory ? (
-            <form onSubmit={handleAddCategory} className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
-              <input
-                type="text"
-                autoFocus
-                placeholder="اسم التصنيف..."
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
-              />
-              <select
-                value={newCategoryParentId}
-                onChange={(e) => setNewCategoryParentId(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">تصنيف رئيسي (بدون أب)</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>متفرع من: {cat.name}</option>
-                ))}
-              </select>
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={isSubmittingCategory || !newCategoryName.trim()}
-                  className="flex-1 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-                >
-                  {isSubmittingCategory ? 'جاري...' : 'حفظ'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); setNewCategoryParentId(''); }}
-                  className="flex-1 py-1.5 bg-surface border border-border text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors"
-                >
-                  إلغاء
-                </button>
-              </div>
-            </form>
-          ) : (
-            <button
-              onClick={() => setIsAddingCategory(true)}
-              className="w-full py-2 flex justify-center items-center gap-1 text-primary text-sm font-bold hover:bg-primary/10 rounded-lg transition-colors border border-dashed border-primary/30"
-            >
-              <span className="material-symbols-outlined text-lg">add</span>
-              إضافة تصنيف
-            </button>
+          {hasTemplates && (
+            <p className="text-xs text-muted-gray mt-1">تُدار من قبل الإدارة</p>
           )}
         </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+          {hasTemplates ? (
+            /* ── New system: admin-controlled templates with toggle ── */
+            <>
+              <button
+                onClick={() => setTemplateId(null)}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
+                  !templateId ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
+                }`}
+              >
+                الكل
+              </button>
+              {templates.map((tpl: any) => (
+                <div key={tpl.id} className="space-y-1">
+                  <div className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
+                    templateId === tpl.id ? 'bg-primary/10' : 'hover:bg-surface-container-low'
+                  }`}>
+                    <label className="flex items-center gap-1.5 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={tpl.isEnabled !== false}
+                        onChange={(e) => toggleTemplate.mutate({ id: tpl.id, isEnabled: e.target.checked })}
+                        className="rounded"
+                      />
+                    </label>
+                    <button
+                      onClick={() => setTemplateId(templateId === tpl.id ? null : tpl.id)}
+                      className={`flex-1 text-right text-sm font-bold mr-2 ${templateId === tpl.id ? 'text-primary' : 'text-on-surface'}`}
+                    >
+                      {tpl.name}
+                    </button>
+                  </div>
+                  {(tpl.children ?? []).map((child: any) => (
+                    <div key={child.id} className={`flex items-center justify-between pr-6 pl-3 py-1.5 rounded-lg cursor-pointer ${
+                      templateId === child.id ? 'bg-primary/5' : 'hover:bg-surface-container-low'
+                    }`}>
+                      <label className="flex items-center gap-1.5 cursor-pointer" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={child.isEnabled !== false}
+                          onChange={(e) => toggleTemplate.mutate({ id: child.id, isEnabled: e.target.checked })}
+                          className="rounded"
+                        />
+                      </label>
+                      <button
+                        onClick={() => setTemplateId(templateId === child.id ? null : child.id)}
+                        className={`flex-1 text-right text-xs font-medium mr-2 ${templateId === child.id ? 'text-primary' : 'text-muted-gray'}`}
+                      >
+                        ↳ {child.name}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </>
+          ) : (
+            /* ── Legacy system: business-owned categories ── */
+            <>
+              <button
+                onClick={() => setCategoryId('ALL')}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
+                  categoryId === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
+                }`}
+              >
+                <span>الكل</span>
+              </button>
+              {categories.map(cat => (
+                <div key={cat.id} className="space-y-1">
+                  <button
+                    onClick={() => setCategoryId(cat.id)}
+                    className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
+                      categoryId === cat.id ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-container-low'
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                  </button>
+                  {cat.children?.map(sub => (
+                    <button
+                      key={sub.id}
+                      onClick={() => setCategoryId(sub.id)}
+                      className={`w-full text-right pr-6 pl-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex justify-between items-center ${
+                        categoryId === sub.id ? 'bg-primary/5 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
+                      }`}
+                    >
+                      <span>{sub.name}</span>
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+
+        {!hasTemplates && (
+          <div className="p-4 border-t border-border bg-surface-container-low">
+            {isAddingCategory ? (
+              <form onSubmit={handleAddCategory} className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="اسم التصنيف..."
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                />
+                <select
+                  value={newCategoryParentId}
+                  onChange={(e) => setNewCategoryParentId(e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">تصنيف رئيسي (بدون أب)</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>متفرع من: {cat.name}</option>
+                  ))}
+                </select>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingCategory || !newCategoryName.trim()}
+                    className="flex-1 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
+                  >
+                    {isSubmittingCategory ? 'جاري...' : 'حفظ'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); setNewCategoryParentId(''); }}
+                    className="flex-1 py-1.5 bg-surface border border-border text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setIsAddingCategory(true)}
+                className="w-full py-2 flex justify-center items-center gap-1 text-primary text-sm font-bold hover:bg-primary/10 rounded-lg transition-colors border border-dashed border-primary/30"
+              >
+                <span className="material-symbols-outlined text-lg">add</span>
+                إضافة تصنيف
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 space-y-6 w-full min-w-0">
@@ -547,19 +638,32 @@ export default function ProductsPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-on-surface mb-2">التصنيف الرئيسي *</label>
-                  <select required value={formData.mainCategoryId} onChange={e => setFormData({...formData, mainCategoryId: e.target.value, subCategoryId: ''})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow">
+                  <label className="block text-sm font-bold text-on-surface mb-2">التصنيف الرئيسي</label>
+                  <select
+                    value={formData.mainCategoryId}
+                    onChange={e => setFormData({...formData, mainCategoryId: e.target.value, subCategoryId: ''})}
+                    className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow"
+                  >
                     <option value="">اختر التصنيف</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {(hasTemplates ? templates : categories).map((c: any) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2">التصنيف الفرعي</label>
-                  <select value={formData.subCategoryId} onChange={e => setFormData({...formData, subCategoryId: e.target.value})} className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow disabled:opacity-50" disabled={!formData.mainCategoryId}>
+                  <select
+                    value={formData.subCategoryId}
+                    onChange={e => setFormData({...formData, subCategoryId: e.target.value})}
+                    className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow disabled:opacity-50"
+                    disabled={!formData.mainCategoryId}
+                  >
                     <option value="">بدون تصنيف فرعي</option>
-                    {categories.find(c => c.id === formData.mainCategoryId)?.children?.map(sub => (
-                      <option key={sub.id} value={sub.id}>{sub.name}</option>
-                    ))}
+                    {(hasTemplates ? templates : categories)
+                      .find((c: any) => c.id === formData.mainCategoryId)
+                      ?.children?.map((sub: any) => (
+                        <option key={sub.id} value={sub.id}>{sub.name}</option>
+                      ))}
                   </select>
                 </div>
               </div>

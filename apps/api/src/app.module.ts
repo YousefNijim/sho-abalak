@@ -22,6 +22,7 @@ import { OffersModule } from './offers/offers.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { PopupAdsModule } from './popup-ads/popup-ads.module';
 import { PromotedBusinessesModule } from './promoted-businesses/promoted-businesses.module';
+import { CategoryGroupsModule } from './category-groups/category-groups.module';
 import { HealthController } from './health.controller';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
@@ -50,6 +51,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     CouponsModule,
     PopupAdsModule,
     PromotedBusinessesModule,
+    CategoryGroupsModule,
   ],
   controllers: [HealthController],
 })

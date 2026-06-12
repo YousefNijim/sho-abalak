@@ -90,6 +90,8 @@ model Business {
   promotedBusinesses  PromotedBusiness[]
   settlements         BusinessSettlement[]
   productCategories   ProductCategory[]
+  categoryGroups      BusinessCategoryGroup[]
+  categoryOverrides   BusinessCategoryOverride[]
   platformBalance     Decimal        @default(0) @db.Decimal(10, 2)
 
   @@map("businesses")
@@ -165,6 +167,69 @@ model ProductCategory {
   @@map("product_categories")
 }
 
+// ── Admin-controlled category system ──────────────────────────────────────────
+
+model CategoryGroup {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  templates   CategoryTemplate[]
+  assignments BusinessCategoryGroup[]
+
+  @@map("category_groups")
+}
+
+model CategoryTemplate {
+  id        String   @id @default(uuid())
+  groupId   String
+  name      String
+  imageUrl  String?
+  parentId  String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+
+  group     CategoryGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  parent    CategoryTemplate?  @relation("SubTemplates", fields: [parentId], references: [id], onDelete: SetNull)
+  children  CategoryTemplate[] @relation("SubTemplates")
+  products  Product[]
+  overrides BusinessCategoryOverride[]
+
+  @@index([groupId])
+  @@index([parentId])
+  @@map("category_templates")
+}
+
+model BusinessCategoryGroup {
+  id         String   @id @default(uuid())
+  businessId String
+  groupId    String
+  isActive   Boolean  @default(true)
+  assignedAt DateTime @default(now())
+
+  business Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  group    CategoryGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, groupId])
+  @@map("business_category_groups")
+}
+
+model BusinessCategoryOverride {
+  id                 String   @id @default(uuid())
+  businessId         String
+  categoryTemplateId String
+  isEnabled          Boolean  @default(true)
+
+  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  categoryTemplate CategoryTemplate @relation(fields: [categoryTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, categoryTemplateId])
+  @@map("business_category_overrides")
+}
+
 model ProductVariant {
   id          String      @id @default(uuid())
   productId   String
@@ -182,27 +247,30 @@ model ProductVariant {
 }
 
 model Product {
-  id              String           @id @default(uuid())
-  businessId      String
-  name            String
-  description     String?
-  price           Decimal          @db.Decimal(10, 2)
-  imageUrl        String?
-  isAvailable     Boolean          @default(true)
-  category        String?
-  categoryId      String?
-  barcode         String?
-  stock           Int?
-  lowStockAlert   Int?
-  hasVariants     Boolean          @default(false)
-  unit            String?
-  orderItems      OrderItem[]
-  business        Business         @relation(fields: [businessId], references: [id])
-  offerProducts   OfferProduct[]
-  productCategory ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  variants        ProductVariant[]
+  id               String            @id @default(uuid())
+  businessId       String
+  name             String
+  description      String?
+  price            Decimal           @db.Decimal(10, 2)
+  imageUrl         String?
+  isAvailable      Boolean           @default(true)
+  category         String?
+  categoryId       String?
+  templateId       String?
+  barcode          String?
+  stock            Int?
+  lowStockAlert    Int?
+  hasVariants      Boolean           @default(false)
+  unit             String?
+  orderItems       OrderItem[]
+  business         Business          @relation(fields: [businessId], references: [id])
+  offerProducts    OfferProduct[]
+  productCategory  ProductCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryTemplate CategoryTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  variants         ProductVariant[]
 
   @@index([categoryId])
+  @@index([templateId])
   @@index([barcode])
   @@map("products")
 }

@@ -150,3 +150,89 @@ export const categoriesApi = {
   remove: (id: string) =>
     http.delete(`/product-categories/${id}`).then((r) => r.data),
 };
+
+// ── New admin-controlled category system ────────────────────────────────────
+
+export interface CategoryTemplate {
+  id: string;
+  groupId: string;
+  name: string;
+  imageUrl: string | null;
+  parentId: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  isEnabled?: boolean;
+  children?: CategoryTemplate[];
+}
+
+export interface CategoryGroup {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+  templates?: CategoryTemplate[];
+  _count?: { templates: number; assignments: number };
+}
+
+export interface BusinessCategoryAssignment {
+  id: string;
+  businessId: string;
+  groupId: string;
+  isActive: boolean;
+  business?: { id: string; name: string; type: string; imageUrl: string | null; isOpen?: boolean };
+  group?: CategoryGroup;
+}
+
+export const categoryGroupsApi = {
+  // Admin
+  list: () =>
+    http.get<CategoryGroup[]>('/admin/category-groups').then((r) => r.data),
+
+  getById: (id: string) =>
+    http.get<CategoryGroup>(`/admin/category-groups/${id}`).then((r) => r.data),
+
+  create: (dto: { name: string; description?: string; imageUrl?: string }) =>
+    http.post<CategoryGroup>('/admin/category-groups', dto).then((r) => r.data),
+
+  update: (id: string, dto: { name?: string; description?: string; imageUrl?: string; isActive?: boolean }) =>
+    http.patch<CategoryGroup>(`/admin/category-groups/${id}`, dto).then((r) => r.data),
+
+  delete: (id: string) =>
+    http.delete(`/admin/category-groups/${id}`).then((r) => r.data),
+
+  getTemplates: (groupId: string) =>
+    http.get<CategoryTemplate[]>(`/admin/category-groups/${groupId}/templates`).then((r) => r.data),
+
+  createTemplate: (groupId: string, dto: { name: string; imageUrl?: string; parentId?: string; sortOrder?: number }) =>
+    http.post<CategoryTemplate>(`/admin/category-groups/${groupId}/templates`, dto).then((r) => r.data),
+
+  updateTemplate: (templateId: string, dto: { name?: string; imageUrl?: string; parentId?: string; sortOrder?: number; isActive?: boolean }) =>
+    http.patch<CategoryTemplate>(`/admin/category-templates/${templateId}`, dto).then((r) => r.data),
+
+  deleteTemplate: (templateId: string) =>
+    http.delete(`/admin/category-templates/${templateId}`).then((r) => r.data),
+
+  getBusinesses: (groupId: string) =>
+    http.get<BusinessCategoryAssignment[]>(`/admin/category-groups/${groupId}/businesses`).then((r) => r.data),
+
+  assignToBusinesses: (groupId: string, businessIds: string[]) =>
+    http.post(`/admin/category-groups/${groupId}/assign`, { businessIds }).then((r) => r.data),
+
+  removeFromBusiness: (groupId: string, businessId: string) =>
+    http.delete(`/admin/category-groups/${groupId}/assign/${businessId}`).then((r) => r.data),
+};
+
+export const businessCategoriesApi = {
+  // Business owner — read + toggle only
+  getMyTemplates: (enabledOnly = false) =>
+    http.get<CategoryTemplate[]>('/business/categories', { params: enabledOnly ? { enabled: 'true' } : {} }).then((r) => r.data),
+
+  toggle: (templateId: string, isEnabled: boolean) =>
+    http.patch(`/business/categories/${templateId}/toggle`, { isEnabled }).then((r) => r.data),
+
+  // Public — for customer app
+  getForBusiness: (businessId: string) =>
+    http.get<CategoryTemplate[]>(`/businesses/${businessId}/categories`).then((r) => r.data),
+};

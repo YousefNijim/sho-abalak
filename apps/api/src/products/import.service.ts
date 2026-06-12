@@ -63,25 +63,38 @@ export class ImportService {
         }
 
         let categoryId: string | undefined = undefined;
+        let templateId: string | undefined = undefined;
         let categoryString: string | undefined = undefined;
 
         const catName = row.categoryName || row.category;
         if (catName && catName.toString().trim() !== '') {
           if (business.type === 'STORE') {
-            let cat = await tx.productCategory.findFirst({
-              where: { businessId, name: catName.toString().trim() },
+            // Try new system: find a CategoryTemplate assigned to this business by name
+            const tpl = await (this.prisma as any).categoryTemplate.findFirst({
+              where: {
+                name: catName.toString().trim(),
+                group: { assignments: { some: { businessId, isActive: true } } },
+              },
             });
-            if (!cat) {
-              const maxCat = await tx.productCategory.findFirst({
-                where: { businessId },
-                orderBy: { sortOrder: 'desc' },
+            if (tpl) {
+              templateId = tpl.id;
+            } else {
+              // Fall back to legacy ProductCategory
+              let cat = await tx.productCategory.findFirst({
+                where: { businessId, name: catName.toString().trim() },
               });
-              const sortOrder = maxCat ? maxCat.sortOrder + 1 : 0;
-              cat = await tx.productCategory.create({
-                data: { businessId, name: catName.toString().trim(), sortOrder },
-              });
+              if (!cat) {
+                const maxCat = await tx.productCategory.findFirst({
+                  where: { businessId },
+                  orderBy: { sortOrder: 'desc' },
+                });
+                const sortOrder = maxCat ? maxCat.sortOrder + 1 : 0;
+                cat = await tx.productCategory.create({
+                  data: { businessId, name: catName.toString().trim(), sortOrder },
+                });
+              }
+              categoryId = cat.id;
             }
-            categoryId = cat.id;
           } else {
             categoryString = catName.toString().trim();
           }
@@ -107,6 +120,7 @@ export class ImportService {
                 description: row.description?.toString().trim(),
                 isAvailable: row.isAvailable !== undefined ? row.isAvailable : true,
                 categoryId,
+                ...(templateId ? { templateId } : {}),
                 category: categoryString,
               },
             });
@@ -126,6 +140,7 @@ export class ImportService {
             description: row.description?.toString().trim(),
             isAvailable: row.isAvailable !== undefined ? row.isAvailable : true,
             categoryId,
+            ...(templateId ? { templateId } : {}),
             category: categoryString,
           },
         });

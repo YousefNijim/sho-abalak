@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Plus, Trash2, Pencil, Camera, X, ScanBarcode, ChevronDown, Package, AlertTriangle, Upload } from 'lucide-react-native';
-import { businessesApi, productsApi, categoriesApi } from '@shu/api-client';
+import { businessesApi, productsApi, categoriesApi, businessCategoriesApi } from '@shu/api-client';
 import type { Product, ProductCategory, ProductVariant } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../../src/theme';
 import { uploadImage, imageUrl } from '../../src/lib/upload';
@@ -138,6 +138,7 @@ export default function MenuTab() {
   const [editingVariantId, setEditingVariantId] = useState<string | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [catPickerOpen, setCatPickerOpen] = useState(false);
+  const [subCatPickerOpen, setSubCatPickerOpen] = useState(false);
 
   // ── Data fetching ─────────────────────────────────────────────────────────────
   const { data: business } = useQuery({
@@ -158,6 +159,17 @@ export default function MenuTab() {
     queryFn: () => categoriesApi.listByBusiness(business!.id),
     enabled: !!business && isStore,
   });
+
+  // New admin-controlled templates (takes priority over storeCategories)
+  const { data: templates = [] } = useQuery({
+    queryKey: ['my-templates', business?.id],
+    queryFn: () => businessCategoriesApi.getMyTemplates(),
+    enabled: !!business && isStore,
+  });
+
+  const hasTemplates = templates.length > 0;
+  // Use templates if assigned, else fall back to legacy storeCategories
+  const effectiveCategories: ProductCategory[] = hasTemplates ? (templates as any) : storeCategories;
 
   const { data: editingVariants = [] } = useQuery({
     queryKey: ['product-variants', editingId],
@@ -260,7 +272,7 @@ export default function MenuTab() {
 
   const openEditModal = (product: Product) => {
     setEditingId(product.id);
-    setForm(formFromProduct(product, storeCategories as ProductCategory[]));
+    setForm(formFromProduct(product, effectiveCategories as ProductCategory[]));
     setModalVisible(true);
   };
 
@@ -321,7 +333,9 @@ export default function MenuTab() {
       // FOOD keeps free-text category; STORE uses categoryId
       category: isStore ? undefined : (form.category.trim() || undefined),
       ...(isStore && {
-        categoryId: (form.subCategoryId || form.mainCategoryId) ?? undefined,
+        ...(hasTemplates
+          ? { templateId: (form.subCategoryId || form.mainCategoryId) ?? undefined }
+          : { categoryId: (form.subCategoryId || form.mainCategoryId) ?? undefined }),
         barcode: form.barcode.trim() || undefined,
         stock: stockNum,
         lowStockAlert: lowAlertNum,
@@ -544,14 +558,14 @@ export default function MenuTab() {
                             <ChevronDown size={16} color={colors.textMuted} />
                             <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: form.mainCategoryId ? colors.textPrimary : colors.textMuted, textAlign: 'right' }}>
                               {form.mainCategoryId
-                                ? (storeCategories as ProductCategory[]).find((c) => c.id === form.mainCategoryId)?.name ?? 'اختر تصنيف'
+                                ? (effectiveCategories as ProductCategory[]).find((c) => c.id === form.mainCategoryId)?.name ?? 'اختر تصنيف'
                                 : 'اختر تصنيف'}
                             </Text>
                           </Pressable>
 
                           {catPickerOpen && (
                             <View style={styles.catDropdown}>
-                              {(storeCategories as ProductCategory[]).map((cat) => (
+                              {(effectiveCategories as ProductCategory[]).map((cat) => (
                                 <Pressable
                                   key={cat.id}
                                   style={[styles.catOption, form.mainCategoryId === cat.id && styles.catOptionActive]}
@@ -579,7 +593,7 @@ export default function MenuTab() {
                             <ChevronDown size={16} color={colors.textMuted} />
                             <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: form.subCategoryId ? colors.textPrimary : colors.textMuted, textAlign: 'right' }}>
                               {form.subCategoryId
-                                ? (storeCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.find(sub => sub.id === form.subCategoryId)?.name ?? 'بدون تصنيف فرعي'
+                                ? (effectiveCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.find(sub => sub.id === form.subCategoryId)?.name ?? 'بدون تصنيف فرعي'
                                 : 'بدون تصنيف فرعي'}
                             </Text>
                           </Pressable>
@@ -592,7 +606,7 @@ export default function MenuTab() {
                               >
                                 <Text style={[styles.catOptionText, !form.subCategoryId && { color: colors.primary }]}>بدون تصنيف فرعي</Text>
                               </Pressable>
-                              {(storeCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.map((sub) => (
+                              {(effectiveCategories as ProductCategory[]).find(c => c.id === form.mainCategoryId)?.children?.map((sub) => (
                                 <Pressable
                                   key={sub.id}
                                   style={[styles.catOption, form.subCategoryId === sub.id && styles.catOptionActive]}
