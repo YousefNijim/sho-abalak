@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet, Modal, ScrollView, Platform } from 'react-native';
 import { ChevronDown, MapPin, Check, Plus, HomeIcon } from 'lucide-react-native';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ export function AddressSelector() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [pickerVisible, setPickerVisible] = useState(false);
-  
+
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const selectAddress = useSavedAddressesStore((s) => s.select);
 
@@ -24,6 +24,15 @@ export function AddressSelector() {
     queryFn: () => addressesApi.list(),
     enabled: !!token,
   });
+
+  // If stored selectedId doesn't match any API address (stale/local ID), auto-select first
+  useEffect(() => {
+    if (addresses.length === 0) return;
+    const match = addresses.find((a: any) => a.id === selectedAddressId);
+    if (!match) {
+      selectAddress((addresses[0] as any).id);
+    }
+  }, [addresses, selectedAddressId]);
 
   const selectedAddress = addresses.find((a: any) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 

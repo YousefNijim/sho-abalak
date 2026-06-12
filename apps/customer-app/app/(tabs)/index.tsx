@@ -72,6 +72,13 @@ export default function Home() {
     enabled: isAuthed,
   });
 
+  // Sync: if stored selectedId is stale (old local ID), auto-select first API address
+  useEffect(() => {
+    if (addresses.length === 0) return;
+    const match = addresses.find((a) => a.id === selectedAddressId);
+    if (!match) selectAddress((addresses[0] as any).id);
+  }, [addresses, selectedAddressId]);
+
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId) ?? addresses[0] ?? null;
 
   const [selectedTagId, setSelectedTagId] = useState<string | null>(null);
