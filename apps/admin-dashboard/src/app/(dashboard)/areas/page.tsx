@@ -30,9 +30,11 @@ export default function AreasPage() {
   const [confirmDeleteArea, setConfirmDeleteArea] = useState<Area | null>(null);
 
   // Form states
-  const [newArea, setNewArea] = useState({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0 });
+  const [newArea, setNewArea] = useState({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0, motorcycleFee: 3.0, motorcycleDriverFee: 2.0 });
   const [editFee, setEditFee] = useState<string>('');
   const [editDriverFee, setEditDriverFee] = useState<string>('');
+  const [editMotorcycleFee, setEditMotorcycleFee] = useState<string>('');
+  const [editMotorcycleDriverFee, setEditMotorcycleDriverFee] = useState<string>('');
 
   // Success/Error Toasts
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -62,12 +64,12 @@ export default function AreasPage() {
 
   // Mutations
   const createAreaMutation = useMutation({
-    mutationFn: (dto: { city: string; name: string; deliveryFee: number; driverDeliveryFee: number }) =>
+    mutationFn: (dto: { city: string; name: string; deliveryFee: number; driverDeliveryFee: number; motorcycleFee: number; motorcycleDriverFee: number }) =>
       areasApi.create(dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['areas'] });
       showToast('success', 'تمت إضافة المنطقة الجديدة بنجاح');
-      setNewArea({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0 });
+      setNewArea({ city: CITIES[0], name: '', deliveryFee: 3.0, driverDeliveryFee: 2.0, motorcycleFee: 3.0, motorcycleDriverFee: 2.0 });
       setIsAddModalOpen(false);
     },
     onError: (err: any) => {
@@ -76,7 +78,7 @@ export default function AreasPage() {
   });
 
   const updateAreaMutation = useMutation({
-    mutationFn: ({ id, dto }: { id: string; dto: { deliveryFee?: number; driverDeliveryFee?: number } }) =>
+    mutationFn: ({ id, dto }: { id: string; dto: { deliveryFee?: number; driverDeliveryFee?: number; motorcycleFee?: number; motorcycleDriverFee?: number } }) =>
       areasApi.update(id, dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['areas'] });
@@ -84,6 +86,8 @@ export default function AreasPage() {
       setEditingArea(null);
       setEditFee('');
       setEditDriverFee('');
+      setEditMotorcycleFee('');
+      setEditMotorcycleDriverFee('');
     },
     onError: (err: any) => {
       showToast('error', err.response?.data?.message || 'فشل تعديل رسوم التوصيل');
@@ -160,6 +164,8 @@ export default function AreasPage() {
                   setEditingArea(rowArea);
                   setEditFee(String(rowArea.deliveryFee));
                   setEditDriverFee(String(rowArea.driverDeliveryFee ?? 0));
+                  setEditMotorcycleFee(String((rowArea as any).motorcycleFee ?? rowArea.deliveryFee));
+                  setEditMotorcycleDriverFee(String((rowArea as any).motorcycleDriverFee ?? rowArea.driverDeliveryFee ?? 0));
                 }}
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/20 bg-primary/5 text-primary transition-all hover:bg-primary hover:text-white"
                 title="تعديل رسوم التوصيل"
@@ -404,7 +410,7 @@ export default function AreasPage() {
 
               {/* Driver share input */}
               <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق من التوصيل (شيكل)</label>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق من التوصيل بالدراجة (شيكل)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -418,6 +424,33 @@ export default function AreasPage() {
                   حصة المنصة = {Math.max(0, newArea.deliveryFee - newArea.driverDeliveryFee).toFixed(2)} ₪
                 </p>
               </div>
+
+              {/* Motorcycle fees */}
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 space-y-3">
+                <p className="text-[11px] font-bold text-amber-800">🏍️ رسوم التوصيل بالدراجة النارية</p>
+                <div>
+                  <label className="block text-[12px] font-bold text-on-surface mb-1.5">الرسوم الكلية بالدراجة (شيكل)</label>
+                  <input
+                    type="number" step="0.5" min="0"
+                    value={newArea.motorcycleFee}
+                    onChange={(e) => setNewArea({ ...newArea, motorcycleFee: parseFloat(e.target.value) || 0 })}
+                    className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق بالدراجة (شيكل)</label>
+                  <input
+                    type="number" step="0.5" min="0" max={newArea.motorcycleFee}
+                    value={newArea.motorcycleDriverFee}
+                    onChange={(e) => setNewArea({ ...newArea, motorcycleDriverFee: parseFloat(e.target.value) || 0 })}
+                    className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none"
+                  />
+                  <p className="mt-1 text-[11px] text-muted-gray">
+                    حصة المنصة = {Math.max(0, newArea.motorcycleFee - newArea.motorcycleDriverFee).toFixed(2)} ₪
+                  </p>
+                </div>
+                <p className="text-[10px] text-amber-700">ملاحظة: رسوم السيارة تُحدد يدوياً لكل طلب مصعّد عند الحاجة</p>
+              </div>
             </div>
 
             <div className="mt-6 flex justify-end gap-3 border-t border-border-beige pt-4">
@@ -429,7 +462,7 @@ export default function AreasPage() {
               </button>
               <button
                 onClick={() => createAreaMutation.mutate(newArea)}
-                disabled={!newArea.name.trim() || newArea.deliveryFee < 0 || newArea.driverDeliveryFee > newArea.deliveryFee || createAreaMutation.isPending}
+                disabled={!newArea.name.trim() || newArea.deliveryFee < 0 || newArea.driverDeliveryFee > newArea.deliveryFee || newArea.motorcycleDriverFee > newArea.motorcycleFee || createAreaMutation.isPending}
                 className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-[13px] font-bold text-white shadow-md hover:bg-primary/95 transition-all disabled:opacity-50"
               >
                 {createAreaMutation.isPending && (
@@ -475,7 +508,7 @@ export default function AreasPage() {
               </div>
 
               <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق من التوصيل (شيكل)</label>
+                <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق بالدراجة (شيكل)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -487,6 +520,25 @@ export default function AreasPage() {
                 <p className="mt-1 text-[11px] text-muted-gray">
                   حصة المنصة = {Math.max(0, (parseFloat(editFee) || 0) - (parseFloat(editDriverFee) || 0)).toFixed(2)} ₪
                 </p>
+              </div>
+
+              {/* Motorcycle fees in edit modal */}
+              <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 space-y-3">
+                <p className="text-[11px] font-bold text-amber-800">🏍️ رسوم التوصيل بالدراجة النارية</p>
+                <div>
+                  <label className="block text-[12px] font-bold text-on-surface mb-1.5">الرسوم الكلية بالدراجة (شيكل)</label>
+                  <input type="number" step="0.5" min="0" value={editMotorcycleFee} onChange={(e) => setEditMotorcycleFee(e.target.value)}
+                    className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-bold text-on-surface mb-1.5">حصة السائق بالدراجة (شيكل)</label>
+                  <input type="number" step="0.5" min="0" value={editMotorcycleDriverFee} onChange={(e) => setEditMotorcycleDriverFee(e.target.value)}
+                    className="h-11 w-full rounded-lg border border-border-beige px-3 text-[13px] text-on-surface focus:border-primary focus:outline-none" />
+                  <p className="mt-1 text-[11px] text-muted-gray">
+                    حصة المنصة = {Math.max(0, (parseFloat(editMotorcycleFee) || 0) - (parseFloat(editMotorcycleDriverFee) || 0)).toFixed(2)} ₪
+                  </p>
+                </div>
+                <p className="text-[10px] text-amber-700">ملاحظة: رسوم السيارة تُحدد يدوياً لكل طلب مصعّد عند الحاجة</p>
               </div>
             </div>
 
@@ -501,7 +553,12 @@ export default function AreasPage() {
                 onClick={() =>
                   updateAreaMutation.mutate({
                     id: editingArea.id,
-                    dto: { deliveryFee: parseFloat(editFee) || 0, driverDeliveryFee: parseFloat(editDriverFee) || 0 },
+                    dto: {
+                      deliveryFee: parseFloat(editFee) || 0,
+                      driverDeliveryFee: parseFloat(editDriverFee) || 0,
+                      motorcycleFee: parseFloat(editMotorcycleFee) || 0,
+                      motorcycleDriverFee: parseFloat(editMotorcycleDriverFee) || 0,
+                    },
                   })
                 }
                 disabled={editFee === '' || parseFloat(editFee) < 0 || (parseFloat(editDriverFee) || 0) > (parseFloat(editFee) || 0) || updateAreaMutation.isPending}

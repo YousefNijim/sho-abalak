@@ -284,7 +284,16 @@ export default function StoreTracking() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
+
+        {/* Fee-adjusted banner — shown when admin approved escalation with new delivery fee */}
+        {(order as any).deliveryFeeAdjusted && (order as any).originalDeliveryFee != null && (
+          <View style={styles.feeAdjustedBanner}>
+            <Text style={styles.feeAdjustedText}>
+              ℹ️ تم تعديل رسوم التوصيل من {Number((order as any).originalDeliveryFee).toFixed(2)} ₪ إلى {Number(order.deliveryFee).toFixed(2)} ₪ بناءً على حجم طلبك، تم استخدام مركبة أكبر
+            </Text>
+          </View>
+        )}
+
         {/* Status Stepper Card */}
         <View style={styles.card}>
           <View style={styles.statusHeaderRow}>
@@ -569,4 +578,6 @@ const styles = StyleSheet.create({
   modalTitle: { fontFamily: fontFamily.bold, fontSize: 20, color: storeColors.textPrimary },
   ratingLabel: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.textPrimary, textAlign: 'center', marginBottom: spacing[4] },
   ratingInput: { backgroundColor: storeColors.background, borderRadius: 16, padding: spacing[4], fontFamily: fontFamily.medium, fontSize: 14, color: storeColors.textPrimary, minHeight: 100, textAlignVertical: 'top', marginTop: spacing[4] },
+  feeAdjustedBanner: { backgroundColor: '#FFF7ED', borderWidth: 1, borderColor: '#FDBA74', borderRadius: 12, padding: spacing[3] },
+  feeAdjustedText: { fontFamily: fontFamily.medium, fontSize: 13, color: '#9A3412', textAlign: 'right', lineHeight: 20 },
 });

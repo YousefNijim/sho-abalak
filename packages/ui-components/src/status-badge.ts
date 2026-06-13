@@ -15,4 +15,5 @@ export const STATUS_BADGE: Record<OrderStatus, StatusBadgeStyle> = {
   [OrderStatus.PICKED_UP]: { bg: '#CFFAFE', text: '#0E7490', label: 'في الطريق' },
   [OrderStatus.DELIVERED]: { bg: '#DCFCE7', text: '#166534', label: 'تم التسليم' },
   [OrderStatus.CANCELLED]: { bg: '#FEE2E2', text: '#991B1B', label: 'ملغى' },
+  [OrderStatus.ESCALATED]: { bg: '#FFF3CD', text: '#92400E', label: 'مصعّد للإدارة' },
 };

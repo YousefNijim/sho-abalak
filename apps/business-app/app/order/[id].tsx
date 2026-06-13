@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@shu/ui-components/native';
@@ -10,6 +10,7 @@ import { useSocket } from '../../src/hooks/useSocket';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'بانتظار التأكيد',
+  ESCALATED: 'مصعّد للإدارة ⏳',
   CONFIRMED: 'تم القبول',
   PREPARING: 'جاري التحضير',
   READY: 'جاهز للاستلام',
@@ -29,11 +30,20 @@ export default function OrderDetail() {
   const [driverRating, setDriverRating] = useState(0);
   const driverRatingShownRef = useRef(false);
 
+  // Escalation modal state
+  const [escalationModalVisible, setEscalationModalVisible] = useState(false);
+  const [escalationReason, setEscalationReason] = useState('');
+
+  // Delivery selection modal (at READY — store orders only)
+  const [deliveryChoiceVisible, setDeliveryChoiceVisible] = useState(false);
+
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
     queryFn: () => ordersApi.getById(id!),
     enabled: !!id,
   });
+
+  const isStoreOrder = (order?.business as any)?.type === 'STORE';
 
   const updateStatus = useMutation({
     mutationFn: (status: string) => ordersApi.updateStatus(id!, { status }),
@@ -45,6 +55,34 @@ export default function OrderDetail() {
     onError: (err: any) => {
       submitting.current = false;
       const msg = err.response?.data?.message || 'فشل تحديث حالة الطلب.';
+      Alert.alert('خطأ', msg);
+    },
+  });
+
+  const escalateMutation = useMutation({
+    mutationFn: (reason: string) => ordersApi.escalateOrder(id!, { reason: reason || undefined }),
+    onSuccess: () => {
+      setEscalationModalVisible(false);
+      setEscalationReason('');
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+      Alert.alert('تم التصعيد ✅', 'تم إرسال الطلب للإدارة لتعديل رسوم التوصيل');
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'فشل تصعيد الطلب.';
+      Alert.alert('خطأ', msg);
+    },
+  });
+
+  const selfDeliverMutation = useMutation({
+    mutationFn: () => ordersApi.selfDeliver(id!),
+    onSuccess: () => {
+      setDeliveryChoiceVisible(false);
+      queryClient.invalidateQueries({ queryKey: ['order', id] });
+      queryClient.invalidateQueries({ queryKey: ['business-orders'] });
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'فشل تغيير طريقة التوصيل.';
       Alert.alert('خطأ', msg);
     },
   });
@@ -148,7 +186,7 @@ export default function OrderDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Loading overlay while status update is in flight */}
-      <Modal visible={updateStatus.isPending} transparent animationType="fade">
+      <Modal visible={updateStatus.isPending || escalateMutation.isPending || selfDeliverMutation.isPending} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.overlayCard}>
             <ActivityIndicator size="large" color={colors.primary} />
@@ -190,6 +228,72 @@ export default function OrderDetail() {
         </View>
       </Modal>
 
+      {/* Escalation reason modal */}
+      <Modal visible={escalationModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>🚗 تصعيد الطلب للإدارة</Text>
+            <Text style={styles.modalSubtitle}>
+              سيتم إبلاغ الإدارة لتحديد رسوم التوصيل المناسبة لمركبة أكبر.
+            </Text>
+            <TextInput
+              style={styles.reasonInput}
+              placeholder="سبب التصعيد (اختياري)"
+              placeholderTextColor={colors.textMuted}
+              value={escalationReason}
+              onChangeText={setEscalationReason}
+              multiline
+              textAlign="right"
+            />
+            <View style={styles.modalBtns}>
+              <Pressable style={styles.skipBtn} onPress={() => { setEscalationModalVisible(false); setEscalationReason(''); }}>
+                <Text style={styles.skipText}>إلغاء</Text>
+              </Pressable>
+              <Pressable
+                style={styles.submitBtn}
+                disabled={escalateMutation.isPending}
+                onPress={() => escalateMutation.mutate(escalationReason)}
+              >
+                <Text style={styles.submitText}>تصعيد للإدارة</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delivery choice modal (READY + store order) */}
+      <Modal visible={deliveryChoiceVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>كيف تريد توصيل الطلب؟</Text>
+            <Text style={styles.modalSubtitle}>اختر طريقة التوصيل للمتابعة</Text>
+            <View style={{ gap: spacing[3], marginTop: spacing[4] }}>
+              <Pressable
+                style={[styles.deliveryOptionBtn, { backgroundColor: colors.primary }]}
+                disabled={selfDeliverMutation.isPending}
+                onPress={() => selfDeliverMutation.mutate()}
+              >
+                <Text style={styles.deliveryOptionText}>🏪 توصيل من المتجر</Text>
+                <Text style={[styles.deliveryOptionSub, { color: 'rgba(255,255,255,0.8)' }]}>ستوصّل الطلب بنفسك</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.deliveryOptionBtn, { backgroundColor: colors.secondary }]}
+                onPress={() => {
+                  setDeliveryChoiceVisible(false);
+                  router.push({ pathname: '/driver-selection', params: { orderId: order.id } });
+                }}
+              >
+                <Text style={styles.deliveryOptionText}>🚗 توصيل من المنصة</Text>
+                <Text style={[styles.deliveryOptionSub, { color: 'rgba(255,255,255,0.8)' }]}>اختيار سائق من المنصة</Text>
+              </Pressable>
+            </View>
+            <Pressable style={[styles.skipBtn, { marginTop: spacing[3], alignSelf: 'center' }]} onPress={() => setDeliveryChoiceVisible(false)}>
+              <Text style={styles.skipText}>تراجع</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: 100, gap: spacing[4] }}>
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={styles.title}>طلب #{order.id.slice(-6).toUpperCase()}</Text>
@@ -198,8 +302,13 @@ export default function OrderDetail() {
         </View>
 
         {/* Status indicator */}
-        <View style={styles.statusBanner}>
-          <Text style={styles.statusLabel}>الحالة الحالية: {STATUS_LABELS[status] || status}</Text>
+        <View style={[styles.statusBanner, status === 'ESCALATED' && styles.escalatedBanner]}>
+          <Text style={[styles.statusLabel, status === 'ESCALATED' && styles.escalatedLabel]}>
+            الحالة الحالية: {STATUS_LABELS[status] || status}
+          </Text>
+          {status === 'ESCALATED' && (order as any).escalationReason && (
+            <Text style={styles.escalationReasonText}>السبب: {(order as any).escalationReason}</Text>
+          )}
         </View>
 
         {/* Items */}
@@ -242,20 +351,52 @@ export default function OrderDetail() {
       {/* Footer — only ONE actionable transition per status, all guarded */}
       <View style={styles.footer}>
         {status === 'PENDING' ? (
-          <View style={styles.btnRow}>
-            <Button
-              title="رفض"
-              variant="danger"
-              style={{ flex: 1 }}
-              disabled={updateStatus.isPending}
-              onPress={handleReject}
-            />
-            <Button
-              title="قبول الطلب"
-              style={{ flex: 1 }}
-              disabled={updateStatus.isPending}
-              onPress={() => handleStatusChange('CONFIRMED')}
-            />
+          isStoreOrder ? (
+            // Store: 3 buttons — رفض | قبول | تصعيد
+            <View style={{ gap: spacing[2] }}>
+              <View style={styles.btnRow}>
+                <Button
+                  title="رفض"
+                  variant="danger"
+                  style={{ flex: 1 }}
+                  disabled={updateStatus.isPending}
+                  onPress={handleReject}
+                />
+                <Button
+                  title="قبول الطلب ✅"
+                  style={{ flex: 1 }}
+                  disabled={updateStatus.isPending}
+                  onPress={() => handleStatusChange('CONFIRMED')}
+                />
+              </View>
+              <Button
+                title="🚗 تصعيد (يحتاج سيارة)"
+                variant="secondary"
+                disabled={updateStatus.isPending}
+                onPress={() => setEscalationModalVisible(true)}
+              />
+            </View>
+          ) : (
+            // Restaurant: original 2 buttons
+            <View style={styles.btnRow}>
+              <Button
+                title="رفض"
+                variant="danger"
+                style={{ flex: 1 }}
+                disabled={updateStatus.isPending}
+                onPress={handleReject}
+              />
+              <Button
+                title="قبول الطلب"
+                style={{ flex: 1 }}
+                disabled={updateStatus.isPending}
+                onPress={() => handleStatusChange('CONFIRMED')}
+              />
+            </View>
+          )
+        ) : status === 'ESCALATED' ? (
+          <View style={styles.escalatedState}>
+            <Text style={styles.escalatedStateText}>⏳ بانتظار تدخّل الإدارة لتحديد رسوم التوصيل</Text>
           </View>
         ) : status === 'CONFIRMED' ? (
           <Button
@@ -270,15 +411,24 @@ export default function OrderDetail() {
             onPress={() => handleStatusChange('READY')}
           />
         ) : status === 'READY' ? (
-          <Button
-            title="اختيار سائق 🚗"
-            onPress={() =>
-              router.push({
-                pathname: '/driver-selection',
-                params: { orderId: order.id },
-              })
-            }
-          />
+          isStoreOrder ? (
+            // Store: delivery choice modal
+            <Button
+              title="اختيار طريقة التوصيل 🚗"
+              onPress={() => setDeliveryChoiceVisible(true)}
+            />
+          ) : (
+            // Restaurant: go directly to driver selection
+            <Button
+              title="اختيار سائق 🚗"
+              onPress={() =>
+                router.push({
+                  pathname: '/driver-selection',
+                  params: { orderId: order.id },
+                })
+              }
+            />
+          )
         ) : (
           <View style={styles.completedState}>
             <Text style={styles.completedText}>🏁 {STATUS_LABELS[status]}</Text>
@@ -305,7 +455,10 @@ const styles = StyleSheet.create({
   title: { fontSize: fontSizes.xl, fontFamily: fontFamily.bold, color: colors.textPrimary },
   muted: { color: colors.textMuted, fontSize: fontSizes.sm, textAlign: 'right' },
   statusBanner: { backgroundColor: colors.primary + '10', borderLeftWidth: 4, borderLeftColor: colors.primary, padding: spacing[3], borderRadius: radius.sm },
+  escalatedBanner: { backgroundColor: '#FFF3CD', borderLeftColor: '#F59E0B' },
   statusLabel: { color: colors.primary, fontFamily: fontFamily.bold, fontSize: fontSizes.sm, textAlign: 'right' },
+  escalatedLabel: { color: '#92400E' },
+  escalationReasonText: { color: '#92400E', fontSize: fontSizes.xs, textAlign: 'right', marginTop: 4 },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing[4], borderWidth: 1, borderColor: colors.border, gap: spacing[2] },
   itemRow: { flexDirection: 'row', justifyContent: 'space-between' },
   itemName: { color: colors.textPrimary, fontSize: fontSizes.base },
@@ -323,6 +476,8 @@ const styles = StyleSheet.create({
   btnRow: { flexDirection: 'row', gap: spacing[3] },
   completedState: { alignItems: 'center', paddingVertical: 12 },
   completedText: { fontSize: fontSizes.base, fontFamily: fontFamily.bold, color: colors.textMuted },
+  escalatedState: { alignItems: 'center', paddingVertical: spacing[4], backgroundColor: '#FFF3CD', borderRadius: radius.md, padding: spacing[3] },
+  escalatedStateText: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: '#92400E', textAlign: 'center' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   modalCard: { backgroundColor: '#fff', borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, padding: spacing[6], gap: spacing[4] },
   modalTitle: { fontFamily: fontFamily.extrabold, fontSize: fontSizes.xl, color: colors.textPrimary, textAlign: 'center' },
@@ -332,4 +487,8 @@ const styles = StyleSheet.create({
   skipText: { fontFamily: fontFamily.semibold, color: colors.textMuted },
   submitBtn: { flex: 2, paddingVertical: spacing[3], borderRadius: radius.lg, backgroundColor: colors.primary, alignItems: 'center' },
   submitText: { fontFamily: fontFamily.bold, color: '#fff' },
+  reasonInput: { borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.md, padding: spacing[3], fontFamily: fontFamily.regular, fontSize: fontSizes.base, color: colors.textPrimary, minHeight: 80, textAlignVertical: 'top' },
+  deliveryOptionBtn: { borderRadius: radius.lg, padding: spacing[4], alignItems: 'center', gap: spacing[1] },
+  deliveryOptionText: { fontFamily: fontFamily.bold, fontSize: fontSizes.base, color: '#fff' },
+  deliveryOptionSub: { fontFamily: fontFamily.regular, fontSize: fontSizes.xs },
 });

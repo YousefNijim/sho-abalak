@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
 import { DriverSelectionModal } from '@/components/DriverSelectionModal';
 import { OrderDetailsPanel } from '@/components/OrderDetailsPanel';
@@ -12,6 +12,7 @@ type DateFilter = 'TODAY' | 'WEEK' | 'MONTH' | 'ALL';
 
 export default function OrdersPage() {
   const { business } = useBusiness();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<TabStatus>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -21,10 +22,27 @@ export default function OrdersPage() {
     total: 0,
     areaId: '',
   });
+  const [escalateModal, setEscalateModal] = useState<{ isOpen: boolean; orderId: string } | null>(null);
+  const [escalateReason, setEscalateReason] = useState('');
 
-  const { data: allOrders = [], isLoading, refetch } = useQuery({
+  const { data: allOrders = [], isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: () => ordersApi.list({ limit: 500 }),
+  });
+
+  const escalateMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      ordersApi.escalateOrder(id, { reason: reason || undefined }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      setEscalateModal(null);
+      setEscalateReason('');
+    },
+  });
+
+  const selfDeliverMutation = useMutation({
+    mutationFn: (id: string) => ordersApi.selfDeliver(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['orders'] }),
   });
 
   const filteredOrders = allOrders.filter(order => {
@@ -57,7 +75,7 @@ export default function OrdersPage() {
   const handleUpdateStatus = async (orderId: string, status: string) => {
     try {
       await ordersApi.updateStatus(orderId, { status });
-      refetch();
+      qc.invalidateQueries({ queryKey: ['orders'] });
     } catch (err) {
       console.error(err);
     }
@@ -69,6 +87,7 @@ export default function OrdersPage() {
       case 'CONFIRMED': return <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">مؤكد</span>;
       case 'PREPARING': return <span className="bg-primary/20 text-primary-dark px-2 py-1 rounded text-xs font-bold">قيد التحضير</span>;
       case 'READY': return <span className="bg-success/20 text-success px-2 py-1 rounded text-xs font-bold">جاهز</span>;
+      case 'ESCALATED': return <span className="bg-[#FFF3CD] text-[#92400E] border border-[#F59E0B] px-2 py-1 rounded text-xs font-bold">مصعّد للإدارة</span>;
       case 'DELIVERED': return <span className="bg-success/10 text-success px-2 py-1 rounded text-xs font-bold">مكتمل</span>;
       case 'CANCELLED': 
       case 'REJECTED': return <span className="bg-error/10 text-error px-2 py-1 rounded text-xs font-bold">ملغى</span>;
@@ -145,12 +164,21 @@ export default function OrdersPage() {
                       <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
                       <td className="px-4 py-3 text-muted-gray" dir="ltr">{new Date(order.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                          {order.status === 'PENDING' && business?.type === 'STORE' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setEscalateModal({ isOpen: true, orderId: order.id }); setEscalateReason(''); }}
+                              className="px-2 py-1 bg-[#F59E0B] text-white rounded font-bold text-xs hover:bg-amber-600 transition-colors"
+                            >⚠️ تصعيد</button>
+                          )}
                           {order.status === 'PENDING' && (
                             <>
                               <button onClick={() => handleUpdateStatus(order.id, 'CONFIRMED')} className="px-2 py-1 bg-success text-white rounded font-bold text-xs hover:bg-green-600 transition-colors">قبول</button>
                               <button onClick={() => handleUpdateStatus(order.id, 'CANCELLED')} className="px-2 py-1 bg-error text-white rounded font-bold text-xs hover:bg-red-600 transition-colors">رفض</button>
                             </>
+                          )}
+                          {order.status === 'ESCALATED' && (
+                            <span className="text-[#92400E] text-xs font-bold">⏳ بانتظار الإدارة</span>
                           )}
                           {order.status === 'CONFIRMED' && (
                             <button onClick={() => handleUpdateStatus(order.id, 'PREPARING')} className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors">بدأ التحضير</button>
@@ -159,21 +187,30 @@ export default function OrdersPage() {
                             <button onClick={() => handleUpdateStatus(order.id, 'READY')} className="px-2 py-1 bg-success text-white rounded font-bold text-xs hover:bg-green-600 transition-colors">جاهز للتوصيل</button>
                           )}
                           {order.status === 'READY' && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDriverModal({
-                                  isOpen: true,
-                                  orderId: order.id,
-                                  total: Number(order.total),
-                                  areaId: order.customer?.area?.id || business?.areaId || ''
-                                });
-                              }}
-                              className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors flex items-center gap-1"
-                            >
-                              <span className="material-symbols-outlined text-[12px]">directions_car</span>
-                              تعيين سائق
-                            </button>
+                            <>
+                              {business?.type === 'STORE' && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); selfDeliverMutation.mutate(order.id); }}
+                                  disabled={selfDeliverMutation.isPending}
+                                  className="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-xs hover:bg-emerald-700 transition-colors"
+                                >🏪 توصيل من المتجر</button>
+                              )}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDriverModal({
+                                    isOpen: true,
+                                    orderId: order.id,
+                                    total: Number(order.total),
+                                    areaId: order.customer?.area?.id || business?.areaId || ''
+                                  });
+                                }}
+                                className="px-2 py-1 bg-primary text-white rounded font-bold text-xs hover:bg-primary-dark transition-colors flex items-center gap-1"
+                              >
+                                <span className="material-symbols-outlined text-[12px]">directions_car</span>
+                                تعيين سائق
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -195,9 +232,38 @@ export default function OrdersPage() {
         onClose={() => setDriverModal({ ...driverModal, isOpen: false })}
         onDriverAssigned={() => {
           setDriverModal({ ...driverModal, isOpen: false });
-          refetch();
+          qc.invalidateQueries({ queryKey: ['orders'] });
         }}
       />
+
+      {/* Escalation reason modal */}
+      {escalateModal?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setEscalateModal(null)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl" dir="rtl">
+            <h3 className="text-[16px] font-bold text-on-surface mb-4">⚠️ تصعيد الطلب للإدارة</h3>
+            <p className="text-[13px] text-muted-gray mb-3">سيتم إرسال الطلب للإدارة لتحديد رسوم التوصيل المناسبة (مركبة أكبر).</p>
+            <label className="block text-[12px] font-bold text-on-surface mb-1.5">سبب التصعيد (اختياري)</label>
+            <textarea
+              value={escalateReason}
+              onChange={(e) => setEscalateReason(e.target.value)}
+              placeholder="مثال: الطلب كبير الحجم، يحتاج شاحنة..."
+              rows={3}
+              className="w-full rounded-lg border border-border-beige px-3 py-2 text-[13px] text-on-surface placeholder:text-muted-gray focus:border-primary focus:outline-none resize-none"
+            />
+            <div className="flex gap-3 mt-4">
+              <button onClick={() => setEscalateModal(null)} className="flex-1 h-11 rounded-xl border border-border-beige font-bold text-[13px] text-on-surface hover:bg-surface-container-low transition-colors">إلغاء</button>
+              <button
+                onClick={() => escalateMutation.mutate({ id: escalateModal.orderId, reason: escalateReason })}
+                disabled={escalateMutation.isPending}
+                className="flex-1 h-11 rounded-xl bg-[#F59E0B] text-white font-bold text-[13px] hover:bg-amber-600 transition-colors disabled:opacity-50"
+              >
+                {escalateMutation.isPending ? 'جاري...' : 'تأكيد التصعيد'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Slide Panel for Order Details */}
       <OrderDetailsPanel
