@@ -1,17 +1,9 @@
 'use client';
 
 import { useBusiness } from './BusinessProvider';
-import { removeToken } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
 
 export function Header({ toggleSidebar }: { toggleSidebar: () => void }) {
   const { business } = useBusiness();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    removeToken();
-    router.push('/login');
-  };
 
   return (
     <header className="h-nav-height bg-surface border-b border-border flex items-center justify-between px-4 md:px-6 shrink-0 shadow-sm z-30">

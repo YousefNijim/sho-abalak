@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { productsApi, categoriesApi, businessCategoriesApi, uploadsApi, Product } from '@shu/api-client';
+import { productsApi, businessCategoriesApi, uploadsApi, Product } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
 
 export default function ProductsPage() {

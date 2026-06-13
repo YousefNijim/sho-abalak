@@ -328,7 +328,7 @@ export default function ProfilePage() {
                       const [h, m] = h_m.split(':');
                       h_m = `${(parseInt(h) + 12).toString().padStart(2, '0')}:${m}`;
                     } else if (parts[1] === 'ص' && h_m.startsWith('12')) {
-                      const [h, m] = h_m.split(':');
+                      const [, m] = h_m.split(':');
                       h_m = `00:${m}`;
                     }
                     return h_m;
@@ -363,7 +363,7 @@ export default function ProfilePage() {
                       const [h, m] = h_m.split(':');
                       h_m = `${(parseInt(h) + 12).toString().padStart(2, '0')}:${m}`;
                     } else if (parts[1] === 'ص' && h_m.startsWith('12')) {
-                      const [h, m] = h_m.split(':');
+                      const [, m] = h_m.split(':');
                       h_m = `00:${m}`;
                     }
                     return h_m;

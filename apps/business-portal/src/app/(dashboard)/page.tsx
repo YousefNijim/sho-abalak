@@ -3,12 +3,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { ordersApi } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { DriverSelectionModal } from '@/components/DriverSelectionModal';
 
 export default function DashboardHome() {
-  const { business, refetch: refetchBusiness } = useBusiness();
+  const { business } = useBusiness();
   const [driverModal, setDriverModal] = useState<{ isOpen: boolean; orderId: string; total: number; areaId: string }>({
     isOpen: false,
     orderId: '',
