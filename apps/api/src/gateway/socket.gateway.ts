@@ -121,4 +121,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Emit driver rejected to business owner business:owner:${businessOwnerId} for order:${payload.orderId}`);
     this.server.to(`business:owner:${businessOwnerId}`).emit(SocketEvents.ORDER_DRIVER_REJECTED, payload);
   }
+
+  /** Pushes notifications specifically to admin users */
+  emitAdminNotification(payload: { title: string; message: string; type: string }) {
+    this.logger.log(`Emit admin notification: ${payload.title}`);
+    // Just emit globally for now or to a specific admin room if you have one.
+    // For now we will broadcast it to all users who might be admins, or to a specific event if the client listens to it.
+    this.server.emit('admin:notification', payload);
+  }
 }

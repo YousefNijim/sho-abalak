@@ -394,7 +394,7 @@ export class OrdersService {
 
     const orders = await this.prisma.order.findMany({
       where: { id: { in: orderIds } },
-      include: { business: true, customer: { include: { area: true } }, items: { include: { product: true } } },
+      include: { business: { include: { area: true } }, customer: { include: { area: true } }, items: { include: { product: true } } },
     });
 
     if (orders.length !== orderIds.length) {
@@ -812,7 +812,7 @@ export class OrdersService {
     }
 
     if (dto.deliveryFee !== undefined) {
-      this.notifications.sendToUser(updatedOrder.customerId, {
+      this.notifications.send(updatedOrder.customerId, {
         title: 'تم تحديث أجرة التوصيل',
         body: `تم تحديث أجرة توصيل طلبك رقم #${updatedOrder.id.slice(-6).toUpperCase()} لتصبح ${dto.deliveryFee} ₪ بسبب حجم المركبة المطلوبة.`,
         data: { type: 'ORDER', orderId: updatedOrder.id },

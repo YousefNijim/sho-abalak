@@ -301,7 +301,7 @@ export function DriverSelectionModal({
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
