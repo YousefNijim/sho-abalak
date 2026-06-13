@@ -435,43 +435,7 @@ export default function BusinessDetail() {
                 }}
               />
 
-              {/* Products by section (only showing first 6 for each main cat) */}
-              {storeCategories.map((mainCat) => {
-                const sectionProducts = products.filter((p: Product) =>
-                  p.categoryId === mainCat.id || p.templateId === mainCat.id ||
-                  mainCat.children?.some((c: any) => c.id === p.categoryId || c.id === p.templateId)
-                ).slice(0, 6);
 
-                if (sectionProducts.length === 0) return null;
-
-                return (
-                  <View key={mainCat.id} style={styles.sectionWrap}>
-                    <View style={styles.sectionHeader}>
-                      <Text style={styles.sectionTitle}>{mainCat.name}</Text>
-                      <Pressable onPress={() => { setSelectedMainCat(mainCat); setSelectedSubCat(null); }}>
-                        <Text style={styles.sectionLink}>عرض الكل ←</Text>
-                      </Pressable>
-                    </View>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sectionScroll}>
-                      {sectionProducts.map((p: Product) => (
-                        <StoreProductCard
-                          key={p.id}
-                          product={p}
-                          isOpen={business.isOpen}
-                          discountPct={getDiscountPct(p)}
-                          width={140}
-                          onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
-                            productId: p.id,
-                            name: p.name,
-                            price: p.price,
-                            quantity: 1
-                          })}
-                        />
-                      ))}
-                    </ScrollView>
-                  </View>
-                );
-              })}
             </>
           ) : (
             <>
