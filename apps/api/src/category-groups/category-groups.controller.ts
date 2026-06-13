@@ -121,8 +121,8 @@ export class AdminCategoryTemplatesController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('لم يتم إرفاق ملف');
-    const result = await this.uploadsService.uploadImage(file);
-    return this.svc.updateTemplate(id, { imageUrl: result.secure_url });
+    const resultUrl = await this.uploadsService.saveFile(file as any);
+    return this.svc.updateTemplate(id, { imageUrl: resultUrl });
   }
 }
 

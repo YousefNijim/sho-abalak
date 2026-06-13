@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString, IsNumber, IsBoolean } from 'class-val
 export class CreateCategoryTemplateDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()

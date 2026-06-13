@@ -3,7 +3,7 @@ import { IsNotEmpty, IsOptional, IsString, IsBoolean } from 'class-validator';
 export class CreateCategoryGroupDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()

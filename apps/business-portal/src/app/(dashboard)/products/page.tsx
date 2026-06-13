@@ -238,8 +238,6 @@ export default function ProductsPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [products]);
 
-  }, [products]);
-
   return (
     <div className="flex flex-col md:flex-row gap-6 items-start">
       {/* Left Panel - Categories */}
