@@ -7,4 +7,9 @@ export class QueryDriversDto {
   @IsOptional()
   @IsString()
   areaId?: string;
+
+  @ApiPropertyOptional({ description: 'تصفية حسب نوع المركبة' })
+  @IsOptional()
+  @IsString()
+  vehicleType?: string;
 }

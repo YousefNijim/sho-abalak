@@ -66,7 +66,7 @@ export default function Cart() {
     enabled: !!businessId,
   });
 
-  const fee = Number(business?.area?.deliveryFee ?? 0);
+  const fee = business?.deliveryType === 'SELF' ? 0 : Number(business?.area?.deliveryFee ?? 0);
   const minimumOrder = Number(business?.minimumOrder ?? 0);
   const discount = appliedCoupon ? appliedCoupon.discountAmount : 0;
   const subtotalAfterCoupon = Math.max(0, Number(subtotal) - discount);

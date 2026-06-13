@@ -69,6 +69,7 @@ export default function OrdersPage() {
   const [villageFilter, setVillageFilter] = useState('ALL');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [needsContactFilter, setNeedsContactFilter] = useState(false);
 
   // Selected Order for Details Drawer
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -177,6 +178,9 @@ export default function OrdersPage() {
   // Client side filtering for TanStack Table
   const filteredOrders = useMemo(() => {
     return allOrders.filter((o) => {
+      // 0. Needs Contact Filter
+      if (needsContactFilter && !o.needsCustomerContact) return false;
+
       // 1. Status Filter
       if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
 
@@ -461,6 +465,19 @@ export default function OrdersPage() {
                 </button>
               );
             })}
+            
+            {/* Needs Contact Toggle */}
+            <button
+              onClick={() => setNeedsContactFilter(!needsContactFilter)}
+              className={`rounded-lg px-4 py-2 text-[13px] font-bold transition-all border flex items-center gap-1 ${
+                needsContactFilter
+                  ? 'bg-warning text-warning-dark border-warning shadow-sm'
+                  : 'bg-background/20 text-muted-gray border-transparent hover:text-warning-dark hover:bg-warning/10'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">call</span>
+              تتطلب تواصل ({allOrders.filter(o => o.needsCustomerContact).length})
+            </button>
           </div>
 
           {/* Search, Area, Date Inputs */}
@@ -646,6 +663,39 @@ export default function OrdersPage() {
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
+                {selectedOrder.needsCustomerContact && (
+                  <div className="rounded-xl border border-warning border-l-[6px] border-l-warning bg-warning/10 p-4 mb-4">
+                    <h4 className="flex items-center gap-2 text-[15px] font-bold text-warning-dark mb-2">
+                      <span className="material-symbols-outlined text-[22px]">phone_in_talk</span>
+                      يتطلب تواصل مع الزبون!
+                    </h4>
+                    <p className="text-[13px] text-muted-gray mb-3">
+                      المنشأة تطلب توصيل هذا الطلب باستخدام مركبة كبيرة ({selectedOrder.requiredVehicleType})، الرجاء التواصل مع الزبون لترتيب الأجرة الإضافية والموافقة عليها.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const newFee = prompt('أدخل الأجرة الجديدة المتفق عليها:');
+                          if (newFee) {
+                            interventionMutation.mutate({ id: selectedOrderId!, dto: { deliveryFee: Number(newFee), needsCustomerContact: false } });
+                          }
+                        }}
+                        className="h-9 px-4 rounded-lg bg-warning text-white text-[13px] font-bold hover:brightness-95 transition-all shadow-sm"
+                      >
+                        تحديث الأجرة وحل الطلب
+                      </button>
+                      <button
+                        onClick={() => {
+                          interventionMutation.mutate({ id: selectedOrderId!, dto: { needsCustomerContact: false } });
+                        }}
+                        className="h-9 px-4 rounded-lg bg-surface border border-warning text-warning-dark text-[13px] font-bold hover:bg-warning/5 transition-all"
+                      >
+                        تعليم كمحلول (بدون تعديل الأجرة)
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
                 {/* Visual Interventions Alert */}
                 <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
                   <h4 className="flex items-center gap-2 text-[14px] font-bold text-primary mb-1.5">

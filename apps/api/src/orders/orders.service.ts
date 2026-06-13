@@ -143,9 +143,10 @@ export class OrdersService {
         couponId = coupon.id;
       }
 
-      const deliveryFee = business.area.deliveryFee;
-      const driverDeliveryFee = (business.area as any).driverDeliveryFee ?? new Prisma.Decimal(0);
-      const platformDeliveryFee = deliveryFee.sub(driverDeliveryFee);
+      const isSelfDelivery = business.deliveryType === 'SELF';
+      const deliveryFee = isSelfDelivery ? new Prisma.Decimal(0) : business.area.deliveryFee;
+      const driverDeliveryFee = isSelfDelivery ? new Prisma.Decimal(0) : ((business.area as any).driverDeliveryFee ?? new Prisma.Decimal(0));
+      const platformDeliveryFee = isSelfDelivery ? new Prisma.Decimal(0) : deliveryFee.sub(driverDeliveryFee);
       const subtotalAfterCoupon = subtotal.sub(couponDiscount);
       const total = subtotalAfterCoupon.add(deliveryFee);
 
@@ -179,6 +180,7 @@ export class OrdersService {
           driverDeliveryFee,
           platformDeliveryFee,
           total,
+          deliveryMode: isSelfDelivery ? 'SELF' : 'PLATFORM',
           couponCode,
           couponIssuedBy,
           note: dto.note ?? null,
@@ -385,7 +387,7 @@ export class OrdersService {
    *
    * Backwards-compatible: passing a single orderId still works exactly as before.
    */
-  async sendDriverRequest(orderIds: string[], user: AuthUser, driverId: string) {
+  async sendDriverRequest(orderIds: string[], user: AuthUser, driverId: string, vehicleType?: string) {
     if (!orderIds || orderIds.length === 0) {
       throw new BadRequestException('يجب تحديد طلب واحد على الأقل');
     }
@@ -423,10 +425,45 @@ export class OrdersService {
 
     // Stamp all orders with the same batchId and pendingDriverId
     const batchId = randomUUID();
-    await this.prisma.order.updateMany({
-      where: { id: { in: orderIds } },
-      data: { pendingDriverId: driverId, batchId },
-    });
+    const needsContact = vehicleType === 'CAR' || vehicleType === 'VAN';
+    
+    // Process orders individually to handle deliveryFee updates if transitioning from SELF to PLATFORM
+    await this.prisma.$transaction(
+      orders.map(o => {
+        const isTransitioningFromSelf = o.deliveryMode === 'SELF';
+        const baseDeliveryFee = o.business?.area?.deliveryFee ?? new Prisma.Decimal(0);
+        const baseDriverFee = (o.business?.area as any)?.driverDeliveryFee ?? new Prisma.Decimal(0);
+        const basePlatformFee = baseDeliveryFee.sub(baseDriverFee);
+
+        // If it's a motorcycle (no contact needed), apply standard area fees
+        const shouldUpdateFees = isTransitioningFromSelf && !needsContact;
+
+        return this.prisma.order.update({
+          where: { id: o.id },
+          data: {
+            pendingDriverId: driverId,
+            batchId,
+            requiredVehicleType: vehicleType,
+            needsCustomerContact: needsContact,
+            deliveryMode: 'PLATFORM',
+            ...(shouldUpdateFees ? {
+              deliveryFee: baseDeliveryFee,
+              driverDeliveryFee: baseDriverFee,
+              platformDeliveryFee: basePlatformFee,
+              total: Number(o.subtotal) - Number(o.couponDiscount) + Number(baseDeliveryFee),
+            } : {})
+          }
+        });
+      })
+    );
+
+    if (needsContact) {
+      this.socketGateway.emitAdminNotification({
+        title: 'تواصل مع الزبون - أجور إضافية',
+        message: `تم اختيار ${vehicleType === 'CAR' ? 'سيارة' : 'فان'} لتوصيل الطلب. يرجى التواصل مع الزبون لترتيب الأجرة.`,
+        type: 'INFO',
+      });
+    }
 
     // Build per-order payload for the driver's alert screen
     const orderPayloads = orders.map((o) => ({
@@ -737,6 +774,11 @@ export class OrdersService {
           status: finalStatus,
           driverId: nextDriverId,
           pendingDriverId: nextPendingDriverId,
+          ...(dto.needsCustomerContact !== undefined ? { needsCustomerContact: dto.needsCustomerContact } : {}),
+          ...(dto.deliveryFee !== undefined ? { 
+            deliveryFee: dto.deliveryFee,
+            total: Number(order.subtotal) + dto.deliveryFee - Number(order.couponDiscount)
+          } : {}),
           ...(dto.status !== undefined
             ? {
                 statusHistory: {
@@ -767,6 +809,14 @@ export class OrdersService {
     // Push (additive): notify the customer if the admin changed the status.
     if (dto.status !== undefined) {
       this.pushOrderStatusToCustomer(updatedOrder.customerId, updatedOrder.id, updatedOrder.status as OrderStatus);
+    }
+
+    if (dto.deliveryFee !== undefined) {
+      this.notifications.sendToUser(updatedOrder.customerId, {
+        title: 'تم تحديث أجرة التوصيل',
+        body: `تم تحديث أجرة توصيل طلبك رقم #${updatedOrder.id.slice(-6).toUpperCase()} لتصبح ${dto.deliveryFee} ₪ بسبب حجم المركبة المطلوبة.`,
+        data: { type: 'ORDER', orderId: updatedOrder.id },
+      });
     }
 
     if (updatedOrder.business?.ownerId) {
@@ -879,5 +929,38 @@ export class OrdersService {
       if (business && business.id === businessId) return;
     }
     throw new ForbiddenException('لا تملك صلاحية تغيير حالة هذا الطلب');
+  }
+
+  async requestCustomerContact(orderIds: string[], user: AuthUser, vehicleType?: string) {
+    if (!orderIds || orderIds.length === 0) {
+      throw new BadRequestException('يجب تحديد طلب واحد على الأقل');
+    }
+
+    const orders = await this.prisma.order.findMany({
+      where: { id: { in: orderIds } },
+    });
+
+    if (orders.length !== orderIds.length) {
+      throw new NotFoundException('بعض الطلبات غير موجودة');
+    }
+
+    const firstBusinessId = orders[0].businessId;
+    await this.assertOwnsOrderBusiness(firstBusinessId, user);
+
+    await this.prisma.order.updateMany({
+      where: { id: { in: orderIds } },
+      data: { 
+        needsCustomerContact: true,
+        requiredVehicleType: vehicleType,
+      },
+    });
+
+    this.socketGateway.emitAdminNotification({
+      title: 'طلب تواصل مع الزبون',
+      message: `المنشأة تطلب التواصل مع زبون لعدم توفر مركبة مناسبة (النوع: ${vehicleType || 'غير محدد'})`,
+      type: 'INFO',
+    });
+
+    return { message: 'تم إرسال الطلب للإدارة بنجاح' };
   }
 }

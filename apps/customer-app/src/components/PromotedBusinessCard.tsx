@@ -97,7 +97,7 @@ export function PromotedBusinessCard({ promoted }: Props) {
             <View style={styles.metaItem}>
               <Bike size={15} color={colors.primary} />
               <Text style={[styles.metaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                {b.area?.deliveryFee ?? 3} ₪
+                {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} ₪
               </Text>
             </View>
             <View style={styles.metaItem}>

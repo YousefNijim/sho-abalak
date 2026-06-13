@@ -135,7 +135,7 @@ export default function StoresListing() {
                     </View>
                     <View style={styles.metaItem}>
                       <Text style={[styles.metaText, { color: colors.secondary, fontFamily: fontFamily.bold }]}>
-                        {b.area?.deliveryFee ?? 3} شيكل
+                        {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل
                       </Text>
                       <Bike size={13} color={colors.secondary} style={{ marginLeft: 4 }} />
                     </View>

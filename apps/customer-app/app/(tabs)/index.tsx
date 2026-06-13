@@ -461,7 +461,7 @@ export default function Home() {
                       <View style={styles.metaItem}>
                         <Bike size={16} color={colors.primary} />
                         <Text style={[styles.metaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                          {b.area?.deliveryFee ?? 3} شيكل
+                          {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل
                         </Text>
                       </View>
                     </View>
@@ -912,7 +912,7 @@ function BusinessCard({ b, onPress }: { b: any; onPress: () => void }) {
             </View>
             <View style={[styles.newMetaItem, { marginTop: 4 }]}>
               <Text style={[styles.newMetaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                {b.area?.deliveryFee ?? 3} شيكل
+                {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل
               </Text>
               <Bike size={13} color={colors.primary} style={{ marginLeft: 4 }} />
             </View>

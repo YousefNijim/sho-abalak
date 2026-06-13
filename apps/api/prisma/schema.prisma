@@ -335,6 +335,9 @@ model Order {
   batchId               String?
   deliveryAreaName      String?
   deliveryAddressDetail String?
+  requiredVehicleType   String?
+  deliveryMode          String?              @default("PLATFORM")
+  needsCustomerContact  Boolean              @default(false)
   items                 OrderItem[]
   statusHistory         OrderStatusHistory[]
   business              Business             @relation(fields: [businessId], references: [id])

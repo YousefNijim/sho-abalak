@@ -17,4 +17,12 @@ export class AdminInterventionDto {
   @IsOptional()
   @IsEnum(PaymentStatus)
   paymentStatus?: PaymentStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  needsCustomerContact?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  deliveryFee?: number;
 }

@@ -373,7 +373,7 @@ export default function BusinessDetail() {
           </View>
           <View style={styles.detailItem}>
             <Bike size={18} color={colors.primary} />
-            <Text style={styles.detailText}>توصيل {business.area?.deliveryFee ?? 0} ₪</Text>
+            <Text style={styles.detailText}>توصيل {business.deliveryType === 'SELF' ? 0 : (business.area?.deliveryFee ?? 0)} ₪</Text>
           </View>
           <View style={styles.detailItem}>
             <Banknote size={18} color={colors.primary} />

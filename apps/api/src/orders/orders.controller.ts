@@ -67,6 +67,17 @@ export class OrdersController {
     return this.orders.sendDriverRequest([id], user, driverId);
   }
 
+  @Post('request-contact')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  requestCustomerContact(
+    @CurrentUser() user: AuthUser,
+    @Body('orderIds') orderIds: string[],
+    @Body('vehicleType') vehicleType?: string,
+  ) {
+    return this.orders.requestCustomerContact(orderIds, user, vehicleType);
+  }
+
   @Post(':id/accept-driver')
   @UseGuards(RolesGuard)
   @Roles(UserRole.DRIVER)

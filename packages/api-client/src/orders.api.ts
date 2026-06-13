@@ -26,6 +26,8 @@ export interface AdminInterventionDto {
   status?: string;
   driverId?: string | null;
   paymentStatus?: string;
+  needsCustomerContact?: boolean;
+  deliveryFee?: number;
 }
 
 export interface Order {
@@ -46,6 +48,8 @@ export interface Order {
   note: string | null;
   deliveryAreaName: string | null;
   deliveryAddressDetail: string | null;
+  needsCustomerContact: boolean;
+  requiredVehicleType: string | null;
   createdAt: string;
   items?: {
     id: string;
@@ -82,8 +86,11 @@ export const ordersApi = {
     http.patch<Order>(`/orders/${id}/status`, dto).then((r) => r.data),
 
   /** Send a batch of READY orders to a driver. Pass one or more orderIds. */
-  sendDriverRequest: (orderIds: string[], driverId: string) =>
-    http.post<{ message: string; batchId: string }>('/orders/send-driver-request', { orderIds, driverId }).then((r) => r.data),
+  sendDriverRequest: (orderIds: string[], driverId: string, vehicleType?: string) =>
+    http.post<{ message: string; batchId: string }>('/orders/send-driver-request', { orderIds, driverId, vehicleType }).then((r) => r.data),
+
+  requestCustomerContact: (orderIds: string[], vehicleType?: string) =>
+    http.post<{ message: string }>('/orders/request-contact', { orderIds, vehicleType }).then((r) => r.data),
 
   acceptDriver: (id: string) =>
     http.post<Order[]>(`/orders/${id}/accept-driver`).then((r) => r.data),

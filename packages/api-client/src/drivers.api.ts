@@ -27,9 +27,9 @@ export const driversApi = {
   updateMyStatus: (dto: UpdateDriverStatusDto) =>
     http.patch<Driver>('/drivers/me/status', dto).then((r) => r.data),
 
-  available: (areaId?: string) =>
+  available: (areaId?: string, vehicleType?: string) =>
     http
-      .get<Driver[]>('/drivers/available', { params: { areaId } })
+      .get<Driver[]>('/drivers/available', { params: { areaId, vehicleType } })
       .then((r) => r.data),
 
   list: () =>

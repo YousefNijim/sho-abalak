@@ -106,6 +106,7 @@ export class DriversService {
   findAvailable(query: QueryDriversDto) {
     const where: Prisma.DriverWhereInput = { status: DriverStatus.AVAILABLE };
     if (query.areaId) where.areaId = query.areaId;
+    if (query.vehicleType) where.vehicleType = query.vehicleType;
     return this.prisma.driver.findMany({
       where,
       include: DRIVER_INCLUDE,
