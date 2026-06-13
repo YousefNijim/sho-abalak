@@ -56,7 +56,8 @@ export function DriverSelectionModal({
   }, [totalQty]);
 
   useEffect(() => {
-    if (business && business.deliveryType === 'PLATFORM' && step === 'MODE') {
+    // Auto-skip MODE step only for non-STORE (food) businesses with PLATFORM delivery
+    if (business && business.type !== 'STORE' && business.deliveryType === 'PLATFORM' && step === 'MODE') {
       setStep('VEHICLE');
     }
   }, [business, step]);
@@ -69,11 +70,7 @@ export function DriverSelectionModal({
 
   const setSelfDelivery = useMutation({
     mutationFn: async () => {
-      await Promise.all(
-        orderIds.map((id) =>
-          ordersApi.updateStatus(id, { status: 'PICKED_UP' })
-        )
-      );
+      await Promise.all(orderIds.map((id) => ordersApi.selfDeliver(id)));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -163,14 +160,11 @@ export function DriverSelectionModal({
                 <span className="material-symbols-outlined text-muted-gray">arrow_forward_ios</span>
               </button>
 
-              {business?.deliveryType === 'SELF' && (
+              {business?.type === 'STORE' && (
                 <button
-                  onClick={() => {
-                    if (confirm('هل أنت متأكد من توصيل الطلب بنفسك؟ سيتم تحويل حالة الطلب إلى (في الطريق).')) {
-                      setSelfDelivery.mutate();
-                    }
-                  }}
-                  className="w-full border border-border rounded-xl p-4 flex items-center gap-4 hover:border-success transition-colors bg-surface text-right"
+                  onClick={() => setSelfDelivery.mutate()}
+                  disabled={setSelfDelivery.isPending}
+                  className="w-full border border-border rounded-xl p-4 flex items-center gap-4 hover:border-success transition-colors bg-surface text-right disabled:opacity-50"
                 >
                   <div className="w-14 h-14 bg-success/10 rounded-full flex items-center justify-center text-success">
                     <span className="material-symbols-outlined text-3xl">storefront</span>
