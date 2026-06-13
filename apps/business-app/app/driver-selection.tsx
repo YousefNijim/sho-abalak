@@ -82,7 +82,7 @@ export default function DriverSelection() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-      router.replace(isBatch ? '/(tabs)/orders' : `/order/${orderIds[0]}`);
+      router.replace(isBatch ? '/(tabs)/orders' : `/order/${orderIds[0]}` as any);
     },
     onError: (err: any) => {
       Alert.alert('خطأ', err.response?.data?.message || 'حدث خطأ.');
@@ -120,7 +120,7 @@ export default function DriverSelection() {
         ordersApi.getById(primaryId).then((order) => {
           if (order.status !== 'READY') {
             queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-            router.replace(`/order/${primaryId}`);
+            router.replace(`/order/${primaryId}` as any);
           }
         }).catch(() => {});
       }
@@ -134,7 +134,7 @@ export default function DriverSelection() {
     const handleStatusUpdate = (payload: { orderId: string; status: string }) => {
       if (orderIds.includes(payload.orderId) && payload.status !== 'READY') {
         queryClient.invalidateQueries({ queryKey: ['business-orders'] });
-        router.replace(`/order/${payload.orderId}`);
+        router.replace(`/order/${payload.orderId}` as any);
       }
     };
     const handleDriverRejected = (payload: { orderId: string; driverName: string }) => {
@@ -165,7 +165,7 @@ export default function DriverSelection() {
     return (
       <View style={[styles.center, { padding: spacing[5] }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.pendingTitle}>تم إرسال {isBatch ? \`\${orderIds.length} طلبات\` : 'الطلب'} للسائق</Text>
+        <Text style={styles.pendingTitle}>تم إرسال {isBatch ? `${orderIds.length} طلبات` : 'الطلب'} للسائق</Text>
         <Text style={styles.pendingName}>{pendingDriver?.user?.name || 'السائق'}</Text>
         <Text style={styles.pendingSubtitle}>بانتظار القبول...</Text>
         <Button
@@ -344,7 +344,7 @@ export default function DriverSelection() {
               )}
 
               <Button
-                title={sendRequest.isPending && sendRequest.variables === d.id ? 'جاري الإرسال...' : `إرسال ${isBatch ? \`\${orderIds.length} طلبات\` : 'الطلب'} للسائق`}
+                title={sendRequest.isPending && sendRequest.variables === d.id ? 'جاري الإرسال...' : `إرسال ${isBatch ? `${orderIds.length} طلبات` : 'الطلب'} للسائق`}
                 onPress={() => sendRequest.mutate(d.id)}
                 disabled={sendRequest.isPending}
                 style={{ marginTop: spacing[3] }}

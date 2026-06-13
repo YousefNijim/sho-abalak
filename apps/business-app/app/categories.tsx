@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
   View,
+  Switch,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -68,7 +69,7 @@ export default function CategoriesScreen() {
         <View style={styles.addIconBtn} />
       </View>
 
-      <View style={{ padding: spacing[4], backgroundColor: colors.surfaceContainerLow }}>
+      <View style={{ padding: spacing[4], backgroundColor: colors.surface }}>
         <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-start' }}>
           <Lock size={16} color={colors.textMuted} style={{ marginTop: 2 }} />
           <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', lineHeight: 20 }}>
@@ -115,7 +116,7 @@ export default function CategoriesScreen() {
                 )}
               </View>
               {cat.children && cat.children.length > 0 && (
-                <View style={{ backgroundColor: colors.surfaceContainerLow }}>
+                <View style={{ backgroundColor: colors.surface }}>
                   {cat.children.map((sub) => (
                     <View key={sub.id} style={[styles.catRow, { borderWidth: 0, borderRadius: 0, backgroundColor: 'transparent', paddingRight: spacing[8] }]}>
                       <View style={styles.catInfo}>

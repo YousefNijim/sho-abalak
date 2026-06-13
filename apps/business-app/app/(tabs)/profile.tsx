@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
   RefreshControl,
+  Switch,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -81,6 +82,7 @@ export default function ProfileTab() {
   const [closeTime, setCloseTime] = useState(DEFAULT_CLOSE);
   const [deliveryAreaIds, setDeliveryAreaIds] = useState<string[]>([]);
   const [areaSearch, setAreaSearch] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   // image picks (local uris pending upload)
   const [coverUri, setCoverUri] = useState<string | null>(null);
@@ -123,6 +125,7 @@ export default function ProfileTab() {
       setOpenTime(business.openTime ?? DEFAULT_OPEN);
       setCloseTime(business.closeTime ?? DEFAULT_CLOSE);
       setDeliveryAreaIds((business.deliveryAreas ?? []).map((a) => a.id));
+      setIsOpen(business.isOpen ?? false);
       setCoverUri(null);
       setLogoLocalUri(null);
     }
@@ -136,6 +139,7 @@ export default function ProfileTab() {
     if (addressDetail !== (business.addressDetail ?? '')) return true;
     if (openTime !== (business.openTime ?? DEFAULT_OPEN)) return true;
     if (closeTime !== (business.closeTime ?? DEFAULT_CLOSE)) return true;
+    if (isOpen !== (business.isOpen ?? false)) return true;
     
     const originalTags = (business.tags ?? []).map((t) => t.id).sort().join(',');
     const currentTags = [...tagIds].sort().join(',');
@@ -149,7 +153,7 @@ export default function ProfileTab() {
     if (logoLocalUri !== null) return true;
 
     return false;
-  }, [business, name, phone, type, tagIds, addressDetail, openTime, closeTime, coverUri, logoLocalUri, deliveryAreaIds]);
+  }, [business, name, phone, type, tagIds, addressDetail, openTime, closeTime, isOpen, coverUri, logoLocalUri, deliveryAreaIds]);
 
   const toggleTag = (id: string) =>
     setTagIds((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -214,6 +218,7 @@ export default function ProfileTab() {
       addressDetail: addressDetail.trim(),
       openTime,
       closeTime,
+      isOpen,
       deliveryAreaIds,
     };
 
@@ -478,6 +483,23 @@ export default function ProfileTab() {
           {/* Additional settings */}
           <Text style={[styles.sectionTitle, { marginTop: spacing[6] }]}>إعدادات إضافية</Text>
           <View style={styles.listCard}>
+            <View style={[styles.listRow, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+              <Switch
+                value={isOpen}
+                onValueChange={setIsOpen}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor="#fff"
+              />
+              <View style={styles.listRowMain}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.listRowTitle}>حالة المتجر</Text>
+                  <Text style={[styles.listRowSub, { color: isOpen ? colors.success : colors.error, fontFamily: fontFamily.bold }]}>
+                    {isOpen ? 'مفتوح حالياً' : 'مغلق'}
+                  </Text>
+                </View>
+                <Store size={20} color={colors.textMuted} />
+              </View>
+            </View>
             <Pressable style={styles.listRow} onPress={() => setShowHoursModal(true)}>
               <ChevronLeft size={20} color={colors.textMuted} />
               <View style={styles.listRowMain}>
