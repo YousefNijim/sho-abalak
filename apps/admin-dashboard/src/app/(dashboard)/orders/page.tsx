@@ -16,6 +16,7 @@ import {
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: 'معلق',
+  ESCALATED: 'مصعّد للإدارة',
   CONFIRMED: 'مؤكد',
   PREPARING: 'جاري التحضير',
   READY: 'جاهز',
@@ -26,6 +27,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'bg-[#FEF9C3] text-[#854D0E] border-[#FEF08A]',
+  ESCALATED: 'bg-[#FFF3CD] text-[#92400E] border-[#F59E0B]',
   CONFIRMED: 'bg-[#DBEAFE] text-[#1E40AF] border-[#BFDBFE]',
   PREPARING: 'bg-[#FFEDD5] text-[#C2410C] border-[#FED7AA]',
   READY: 'bg-[#EDE9FE] text-[#6D28D9] border-[#DDD6FE]',
@@ -84,6 +86,14 @@ export default function OrdersPage() {
   // Success/Error Toasts
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Escalation resolve modal state
+  const [resolveEscalationOrderId, setResolveEscalationOrderId] = useState<string | null>(null);
+  const [escalationAction, setEscalationAction] = useState<'APPROVE' | 'REJECT'>('APPROVE');
+  const [escNewFee, setEscNewFee] = useState('');
+  const [escDeliveryOwner, setEscDeliveryOwner] = useState<'PLATFORM' | 'STORE'>('PLATFORM');
+  const [escDriverFee, setEscDriverFee] = useState('');
+  const [escPlatformFee, setEscPlatformFee] = useState('');
+
   // Socket connection for live updates
   useEffect(() => {
     const token = getToken();
@@ -110,6 +120,12 @@ export default function OrdersPage() {
       if (selectedOrderId === data.orderId) {
         qc.invalidateQueries({ queryKey: ['order', selectedOrderId] });
       }
+    });
+
+    socket.on('admin:escalation_new', (data: any) => {
+      console.log('[Admin Sockets] Escalated order received:', data);
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      showToast('error', `🚨 طلب مصعّد جديد من ${data.businessName || 'متجر'}`);
     });
 
     return () => {
@@ -172,6 +188,22 @@ export default function OrdersPage() {
     onError: (err: any) => {
       showToast('error', err.response?.data?.message || 'فشل تنفيذ الإجراء التعديلي');
       setConfirmAction(null);
+    },
+  });
+
+  const resolveEscalationMutation = useMutation({
+    mutationFn: ({ id, dto }: { id: string; dto: any }) => ordersApi.resolveEscalation(id, dto),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      if (selectedOrderId) qc.invalidateQueries({ queryKey: ['order', selectedOrderId] });
+      showToast('success', 'تم حل التصعيد بنجاح');
+      setResolveEscalationOrderId(null);
+      // Reset escalation form
+      setEscNewFee(''); setEscDriverFee(''); setEscPlatformFee('');
+      setEscDeliveryOwner('PLATFORM'); setEscalationAction('APPROVE');
+    },
+    onError: (err: any) => {
+      showToast('error', err.response?.data?.message || 'فشل حل التصعيد');
     },
   });
 
@@ -383,18 +415,133 @@ export default function OrdersPage() {
         </div>
       )}
 
+      {/* Resolve Escalation Modal */}
+      {resolveEscalationOrderId && (() => {
+        const esc = allOrders.find(o => o.id === resolveEscalationOrderId);
+        return (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-on-surface/50 backdrop-blur-sm p-4">
+            <div className="w-full max-w-lg rounded-2xl bg-surface-white shadow-2xl border border-border border-t-[6px] border-t-[#F59E0B] animate-fade-in overflow-y-auto max-h-[90vh]" dir="rtl">
+              <div className="p-6 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#F59E0B] text-[22px]">warning</span>
+                    حل التصعيد — طلب #{resolveEscalationOrderId.slice(-6).toUpperCase()}
+                  </h3>
+                  <button onClick={() => setResolveEscalationOrderId(null)} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-border/30 transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">close</span>
+                  </button>
+                </div>
+                {esc && (
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[13px] text-muted-gray">
+                    <div><span className="font-semibold text-on-surface">المتجر: </span>{esc.business?.name}</div>
+                    <div><span className="font-semibold text-on-surface">الزبون: </span>{esc.customer?.name}</div>
+                    <div><span className="font-semibold text-on-surface">الهاتف: </span>{esc.customer?.phone}</div>
+                    <div><span className="font-semibold text-on-surface">الأجرة الحالية: </span>₪{Number(esc.deliveryFee).toFixed(2)}</div>
+                    {(esc as any).escalationReason && <div className="col-span-2"><span className="font-semibold text-on-surface">سبب التصعيد: </span>{(esc as any).escalationReason}</div>}
+                  </div>
+                )}
+              </div>
+              <div className="p-6 space-y-5">
+                {/* Action selection */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setEscalationAction('APPROVE')}
+                    className={`flex-1 rounded-xl py-3 font-bold text-[14px] border-2 transition-all ${escalationAction === 'APPROVE' ? 'border-green-500 bg-green-50 text-green-800' : 'border-border text-muted-gray hover:border-green-300'}`}
+                  >
+                    ✅ موافقة
+                  </button>
+                  <button
+                    onClick={() => setEscalationAction('REJECT')}
+                    className={`flex-1 rounded-xl py-3 font-bold text-[14px] border-2 transition-all ${escalationAction === 'REJECT' ? 'border-red-500 bg-red-50 text-red-800' : 'border-border text-muted-gray hover:border-red-300'}`}
+                  >
+                    ❌ رفض الطلب
+                  </button>
+                </div>
+
+                {escalationAction === 'APPROVE' && (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="block text-[12px] font-bold text-on-surface">رسوم التوصيل الجديدة (₪)</label>
+                      <input type="number" value={escNewFee} onChange={e => setEscNewFee(e.target.value)} placeholder="0.00"
+                        className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[14px]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-[12px] font-bold text-on-surface">صاحب التوصيل</label>
+                      <div className="flex gap-3">
+                        <button onClick={() => setEscDeliveryOwner('PLATFORM')}
+                          className={`flex-1 rounded-xl py-2.5 text-[13px] font-bold border-2 transition-all ${escDeliveryOwner === 'PLATFORM' ? 'border-blue-500 bg-blue-50 text-blue-800' : 'border-border text-muted-gray hover:border-blue-300'}`}>
+                          🚗 المنصة (سائق سيارة)
+                        </button>
+                        <button onClick={() => setEscDeliveryOwner('STORE')}
+                          className={`flex-1 rounded-xl py-2.5 text-[13px] font-bold border-2 transition-all ${escDeliveryOwner === 'STORE' ? 'border-emerald-500 bg-emerald-50 text-emerald-800' : 'border-border text-muted-gray hover:border-emerald-300'}`}>
+                          🏪 المتجر (يوصّل بنفسه)
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="block text-[12px] font-bold text-on-surface">حصة السائق/المتجر (₪)</label>
+                        <input type="number" value={escDriverFee} onChange={e => setEscDriverFee(e.target.value)} placeholder="0.00"
+                          className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[14px]" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-[12px] font-bold text-on-surface">حصة المنصة (₪)</label>
+                        <input type="number" value={escPlatformFee} onChange={e => setEscPlatformFee(e.target.value)} placeholder="0.00"
+                          className="w-full h-11 px-4 bg-background/30 border border-border-beige rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-[14px]" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {escalationAction === 'REJECT' && (
+                  <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-[13px] text-red-700">
+                    ⚠️ سيتم إلغاء الطلب واستعادة المخزون تلقائياً. سيتم إبلاغ الزبون بالإلغاء.
+                  </div>
+                )}
+
+                <button
+                  onClick={() => {
+                    const dto: any = { action: escalationAction };
+                    if (escalationAction === 'APPROVE') {
+                      dto.newDeliveryFee = Number(escNewFee);
+                      dto.deliveryOwner = escDeliveryOwner;
+                      dto.newDriverFee = Number(escDriverFee) || 0;
+                      dto.newPlatformFee = Number(escPlatformFee) || 0;
+                    }
+                    resolveEscalationMutation.mutate({ id: resolveEscalationOrderId!, dto });
+                  }}
+                  disabled={resolveEscalationMutation.isPending || (escalationAction === 'APPROVE' && !escNewFee)}
+                  className="w-full h-12 rounded-xl bg-primary text-white font-bold text-[15px] shadow-md hover:brightness-95 disabled:opacity-50 transition-colors"
+                >
+                  {resolveEscalationMutation.isPending ? 'جاري التنفيذ...' : 'تأكيد القرار'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-on-surface">إدارة الطلبات والتدخل السريع</h2>
           <p className="text-[13px] text-muted-gray mt-1">تتبع، خصص، تحكم بالطلبات وعدّلها لحظياً عبر الـ Sockets</p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl bg-secondary/15 px-4 py-2 border border-secondary/20">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-          </span>
-          <span className="font-bold text-[13px] text-secondary">متصل بالبث المباشر</span>
+        <div className="flex items-center gap-3">
+          {/* Escalated badge */}
+          {allOrders.filter(o => o.status === 'ESCALATED').length > 0 && (
+            <div className="flex items-center gap-2 rounded-xl bg-[#FFF3CD] px-4 py-2 border border-[#F59E0B] cursor-pointer hover:brightness-95 transition-all" onClick={() => setStatusFilter('ESCALATED')}>
+              <span className="material-symbols-outlined text-[#92400E] text-[18px]">warning</span>
+              <span className="font-bold text-[13px] text-[#92400E]">طلبات مصعّدة ({allOrders.filter(o => o.status === 'ESCALATED').length})</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 rounded-xl bg-secondary/15 px-4 py-2 border border-secondary/20">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+            </span>
+            <span className="font-bold text-[13px] text-secondary">متصل بالبث المباشر</span>
+          </div>
         </div>
       </div>
 
@@ -663,7 +810,35 @@ export default function OrdersPage() {
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                {selectedOrder.needsCustomerContact && (
+                {/* Escalation Alert — shown when status is ESCALATED */}
+                {selectedOrder.status === 'ESCALATED' && (
+                  <div className="rounded-xl border border-[#F59E0B] border-l-[6px] border-l-[#F59E0B] bg-[#FFF3CD] p-4">
+                    <h4 className="flex items-center gap-2 text-[15px] font-bold text-[#92400E] mb-2">
+                      <span className="material-symbols-outlined text-[22px]">warning</span>
+                      طلب مصعّد — يحتاج تدخّلك!
+                    </h4>
+                    <p className="text-[13px] text-[#92400E] mb-1">
+                      <span className="font-semibold">المتجر:</span> {selectedOrder.business?.name}
+                    </p>
+                    {(selectedOrder as any).escalationReason && (
+                      <p className="text-[13px] text-[#92400E] mb-3">
+                        <span className="font-semibold">سبب التصعيد:</span> {(selectedOrder as any).escalationReason}
+                      </p>
+                    )}
+                    <p className="text-[12px] text-[#92400E]/80 mb-3">
+                      الأجرة الحالية (دراجة): ₪{Number(selectedOrder.deliveryFee).toFixed(2)} — تواصل مع الزبون لتحديد الأجرة الجديدة للسيارة.
+                    </p>
+                    <button
+                      onClick={() => setResolveEscalationOrderId(selectedOrderId)}
+                      className="h-10 px-5 rounded-xl bg-[#F59E0B] text-white text-[13px] font-bold hover:brightness-95 transition-all shadow-sm"
+                    >
+                      حل التصعيد
+                    </button>
+                  </div>
+                )}
+
+                {selectedOrder.needsCustomerContact && selectedOrder.status !== 'ESCALATED' && (
+
                   <div className="rounded-xl border border-warning border-l-[6px] border-l-warning bg-warning/10 p-4 mb-4">
                     <h4 className="flex items-center gap-2 text-[15px] font-bold text-warning-dark mb-2">
                       <span className="material-symbols-outlined text-[22px]">phone_in_talk</span>

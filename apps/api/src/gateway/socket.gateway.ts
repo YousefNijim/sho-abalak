@@ -129,4 +129,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // For now we will broadcast it to all users who might be admins, or to a specific event if the client listens to it.
     this.server.emit('admin:notification', payload);
   }
+
+  /** Alerts all admin sockets about a new escalated order needing intervention */
+  emitEscalationNew(payload: { orderId: string; businessName: string; reason: string }) {
+    this.logger.log(`Emit admin:escalation_new for order:${payload.orderId}`);
+    this.server.emit('admin:escalation_new', payload);
+  }
 }

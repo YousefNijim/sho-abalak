@@ -11,6 +11,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AdminInterventionDto } from './dto/admin-intervention.dto';
+import { EscalateOrderDto } from './dto/escalate-order.dto';
+import { ResolveEscalationDto } from './dto/resolve-escalation.dto';
 import { InventoryService } from '../products/inventory.service';
 
 const ORDER_INCLUDE = {
@@ -963,4 +965,244 @@ export class OrdersService {
 
     return { message: 'تم إرسال الطلب للإدارة بنجاح' };
   }
+
+  /**
+   * STORE business owner escalates a PENDING order that needs a larger vehicle.
+   * Sets status → ESCALATED and alerts admin via socket + push.
+   * Uses existing needsCustomerContact=true to flag for admin attention.
+   */
+  async escalateOrder(orderId: string, user: AuthUser, dto: EscalateOrderDto) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { business: true },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+
+    // Only STORE businesses may escalate
+    if ((order.business as any)?.type !== 'STORE') {
+      throw new BadRequestException('التصعيد متاح للمتاجر فقط');
+    }
+
+    // Verify ownership
+    await this.assertOwnsOrderBusiness(order.businessId, user);
+
+    // Must be PENDING
+    if (order.status !== OrderStatus.PENDING) {
+      throw new BadRequestException('يمكن تصعيد الطلبات المعلّقة فقط');
+    }
+
+    const reason = dto.reason ?? 'طلب كبير يحتاج مركبة أكبر';
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: OrderStatus.ESCALATED,
+        escalationReason: reason,
+        escalatedAt: new Date(),
+        needsCustomerContact: true, // flag for admin dashboard
+        deliveryVehicleType: 'CAR',
+        statusHistory: { create: { status: OrderStatus.ESCALATED, changedBy: user.id } },
+      },
+      include: ORDER_INCLUDE,
+    });
+
+    // Notify admin via socket
+    this.socketGateway.emitEscalationNew({
+      orderId,
+      businessName: order.business?.name ?? 'متجر',
+      reason,
+    });
+
+    // Emit status update so business app reflects the change
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(
+        updatedOrder.business.ownerId,
+        orderId,
+        OrderStatus.ESCALATED,
+      );
+    }
+
+    return updatedOrder;
+  }
+
+  /**
+   * Admin resolves an escalated order: either APPROVE (set new delivery fee + vehicle/owner) 
+   * or REJECT (cancel order and restore stock).
+   * 
+   * deliveryOwner mapping:
+   *   'PLATFORM' → deliveryMode = 'PLATFORM' (platform driver)
+   *   'STORE'    → deliveryMode = 'SELF' (store self-delivers)
+   */
+  async adminResolveEscalation(orderId: string, user: AuthUser, dto: ResolveEscalationDto) {
+    if (user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('فقط المشرف يمكنه حل التصعيد');
+    }
+
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { business: true, customer: true, items: { include: { product: true, variant: true } } },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+    if (order.status !== OrderStatus.ESCALATED) {
+      throw new BadRequestException('يمكن حل الطلبات المصعّدة فقط');
+    }
+
+    if (dto.action === 'APPROVE') {
+      if (!dto.newDeliveryFee || dto.newDeliveryFee < 0) {
+        throw new BadRequestException('يجب تحديد رسوم التوصيل الجديدة عند الموافقة');
+      }
+
+      const newFee = new Prisma.Decimal(dto.newDeliveryFee);
+      const newDriverFee = new Prisma.Decimal(dto.newDriverFee ?? 0);
+      const newPlatformFee = new Prisma.Decimal(dto.newPlatformFee ?? 0);
+      // deliveryOwner: 'STORE' → 'SELF', 'PLATFORM' → 'PLATFORM'
+      const newDeliveryMode = dto.deliveryOwner === 'STORE' ? 'SELF' : 'PLATFORM';
+      const subtotalAfterCoupon = new Prisma.Decimal(order.subtotal).sub(order.couponDiscount);
+      const newTotal = subtotalAfterCoupon.add(newFee);
+
+      const updatedOrder = await this.prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: { id: orderId },
+          data: {
+            status: OrderStatus.PREPARING,
+            originalDeliveryFee: order.deliveryFee,       // save original for display
+            deliveryFee: newFee,
+            driverDeliveryFee: newDriverFee,
+            platformDeliveryFee: newPlatformFee,
+            total: newTotal,
+            deliveryFeeAdjusted: true,
+            deliveryVehicleType: 'CAR',
+            deliveryMode: newDeliveryMode,
+            needsCustomerContact: false,                  // resolved
+            statusHistory: {
+              create: {
+                status: OrderStatus.PREPARING,
+                changedBy: `ADMIN:${user.name} (${user.id})`,
+              },
+            },
+          },
+        });
+
+        return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: ORDER_INCLUDE });
+      });
+
+      // Notify customer about fee change
+      void this.notifications.send(order.customerId, {
+        title: 'تحديث رسوم التوصيل 🚗',
+        body: `تم تحديث رسوم توصيل طلبك من ${Number(order.deliveryFee)} ₪ إلى ${dto.newDeliveryFee} ₪ بسبب حجم الطلب`,
+        data: { type: 'order_fee_adjusted', orderId, role: 'customer' },
+      });
+
+      // Notify customer of PREPARING status
+      this.pushOrderStatusToCustomer(order.customerId, orderId, OrderStatus.PREPARING);
+
+      // Emit socket updates
+      this.socketGateway.emitOrderStatusUpdate(order.customerId, orderId, OrderStatus.PREPARING);
+      if (updatedOrder.business?.ownerId) {
+        this.socketGateway.emitOrderStatusUpdateToBusiness(
+          updatedOrder.business.ownerId,
+          orderId,
+          OrderStatus.PREPARING,
+        );
+      }
+
+      return updatedOrder;
+    }
+
+    // REJECT: cancel and restore stock
+    const updatedOrder = await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.CANCELLED,
+          needsCustomerContact: false,
+          statusHistory: {
+            create: {
+              status: OrderStatus.CANCELLED,
+              changedBy: `ADMIN:${user.name} (${user.id})`,
+            },
+          },
+        },
+      });
+
+      // Restore stock for tracked products/variants
+      for (const item of order.items) {
+        if (item.variantId && (item.variant as any)?.stock !== null && (item.variant as any)?.stock !== undefined) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { increment: item.quantity } },
+          });
+        } else if (!item.variantId && (item.product as any)?.stock !== null && (item.product as any)?.stock !== undefined) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          });
+        }
+      }
+
+      // TODO: if order.paymentMethod === 'ELECTRONIC', trigger manual refund (no auto-refund yet)
+
+      return tx.order.findUniqueOrThrow({ where: { id: orderId }, include: ORDER_INCLUDE });
+    });
+
+    // Notify customer of cancellation
+    void this.notifications.send(order.customerId, {
+      title: 'إلغاء الطلب',
+      body: 'نعتذر، تعذّر توصيل طلبك بسبب حجمه. يُرجى التواصل مع الدعم لأي استفسار.',
+      data: { type: 'order_status', orderId, status: 'CANCELLED', role: 'customer' },
+    });
+
+    this.socketGateway.emitOrderStatusUpdate(order.customerId, orderId, OrderStatus.CANCELLED);
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(
+        updatedOrder.business.ownerId,
+        orderId,
+        OrderStatus.CANCELLED,
+      );
+    }
+
+    return updatedOrder;
+  }
+
+  /**
+   * Store self-delivery: business marks a READY order as PICKED_UP by themselves.
+   * deliveryMode is set to 'SELF'. No platform driver needed.
+   * The business will later mark it DELIVERED when they complete the delivery.
+   */
+  async selfDeliver(orderId: string, user: AuthUser) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { business: true },
+    });
+    if (!order) throw new NotFoundException('الطلب غير موجود');
+    await this.assertOwnsOrderBusiness(order.businessId, user);
+
+    if (order.status !== OrderStatus.READY) {
+      throw new BadRequestException('يمكن اختيار التوصيل الذاتي فقط عندما يكون الطلب جاهزاً');
+    }
+
+    const updatedOrder = await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        status: OrderStatus.PICKED_UP,
+        deliveryMode: 'SELF',
+        statusHistory: { create: { status: OrderStatus.PICKED_UP, changedBy: user.id } },
+      },
+      include: ORDER_INCLUDE,
+    });
+
+    // Notify customer
+    this.pushOrderStatusToCustomer(order.customerId, orderId, OrderStatus.PICKED_UP);
+    this.socketGateway.emitOrderStatusUpdate(order.customerId, orderId, OrderStatus.PICKED_UP);
+    if (updatedOrder.business?.ownerId) {
+      this.socketGateway.emitOrderStatusUpdateToBusiness(
+        updatedOrder.business.ownerId,
+        orderId,
+        OrderStatus.PICKED_UP,
+      );
+    }
+
+    return updatedOrder;
+  }
 }
+

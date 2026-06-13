@@ -17,10 +17,13 @@ export enum UserStatus {
 /**
  * حالات الطلب
  * PENDING → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED
- *                                            ↘ CANCELLED
+ *         ↘ ESCALATED → PREPARING (موافقة الأدمن)
+ *                     → CANCELLED (رفض الأدمن)
+ *                                  ↘ CANCELLED
  */
 export enum OrderStatus {
   PENDING = 'PENDING',
+  ESCALATED = 'ESCALATED',
   CONFIRMED = 'CONFIRMED',
   PREPARING = 'PREPARING',
   READY = 'READY',

@@ -100,4 +100,25 @@ export const ordersApi = {
 
   adminIntervention: (id: string, dto: AdminInterventionDto) =>
     http.patch<Order>(`/orders/${id}/admin-intervention`, dto).then((r) => r.data),
+
+  /** STORE business: escalate a PENDING order that needs a larger vehicle */
+  escalateOrder: (id: string, dto?: { reason?: string }) =>
+    http.patch<Order>(`/orders/${id}/escalate`, dto ?? {}).then((r) => r.data),
+
+  /** Admin: resolve an ESCALATED order (approve with new fee or reject) */
+  resolveEscalation: (
+    id: string,
+    dto: {
+      action: 'APPROVE' | 'REJECT';
+      newDeliveryFee?: number;
+      deliveryOwner?: 'PLATFORM' | 'STORE';
+      newDriverFee?: number;
+      newPlatformFee?: number;
+    },
+  ) => http.patch<Order>(`/orders/${id}/resolve-escalation`, dto).then((r) => r.data),
+
+  /** STORE business: self-deliver a READY order (READY → PICKED_UP, deliveryMode=SELF) */
+  selfDeliver: (id: string) =>
+    http.patch<Order>(`/orders/${id}/self-deliver`).then((r) => r.data),
 };
+

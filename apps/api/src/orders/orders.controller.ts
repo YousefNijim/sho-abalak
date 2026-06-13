@@ -10,6 +10,8 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { AdminInterventionDto } from './dto/admin-intervention.dto';
+import { EscalateOrderDto } from './dto/escalate-order.dto';
+import { ResolveEscalationDto } from './dto/resolve-escalation.dto';
 
 @ApiTags('orders')
 @ApiBearerAuth()
@@ -101,5 +103,37 @@ export class OrdersController {
     @Body() dto: AdminInterventionDto,
   ) {
     return this.orders.adminIntervention(id, user, dto);
+  }
+
+  /** STORE business owner escalates a PENDING order that requires a larger vehicle */
+  @Patch(':id/escalate')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  escalateOrder(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Body() dto: EscalateOrderDto,
+  ) {
+    return this.orders.escalateOrder(id, user, dto);
+  }
+
+  /** Admin resolves an ESCALATED order — approve with new fee, or reject/cancel */
+  @Patch(':id/resolve-escalation')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  resolveEscalation(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ResolveEscalationDto,
+  ) {
+    return this.orders.adminResolveEscalation(id, user, dto);
+  }
+
+  /** STORE business owner self-delivers a READY order (READY → PICKED_UP, deliveryMode=SELF) */
+  @Patch(':id/self-deliver')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.BUSINESS)
+  selfDeliver(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.orders.selfDeliver(id, user);
   }
 }

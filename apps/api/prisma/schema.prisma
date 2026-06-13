@@ -16,6 +16,10 @@ model Area {
   name               String
   deliveryFee        Decimal        @db.Decimal(10, 2)
   driverDeliveryFee  Decimal        @default(0) @db.Decimal(10, 2)
+  // Motorcycle-specific fee breakdown (copied from deliveryFee/driverDeliveryFee in migration)
+  motorcycleFee         Decimal?    @db.Decimal(10, 2)
+  motorcycleDriverFee   Decimal?    @default(0) @db.Decimal(10, 2)
+  motorcyclePlatformFee Decimal?    @default(0) @db.Decimal(10, 2)
   businesses         Business[]     @relation("BusinessLocation")
   drivers            Driver[]
   savedAddresses     SavedAddress[]
@@ -338,6 +342,12 @@ model Order {
   requiredVehicleType   String?
   deliveryMode          String?              @default("PLATFORM")
   needsCustomerContact  Boolean              @default(false)
+  // Escalation fields (STORE orders only)
+  deliveryVehicleType   String?              @default("MOTORCYCLE") // 'MOTORCYCLE' | 'CAR'
+  deliveryFeeAdjusted   Boolean              @default(false)
+  originalDeliveryFee   Decimal?             @db.Decimal(10, 2)
+  escalationReason      String?
+  escalatedAt           DateTime?
   items                 OrderItem[]
   statusHistory         OrderStatusHistory[]
   business              Business             @relation(fields: [businessId], references: [id])
@@ -536,6 +546,7 @@ enum UserStatus {
 
 enum OrderStatus {
   PENDING
+  ESCALATED
   CONFIRMED
   PREPARING
   READY

@@ -2,7 +2,8 @@ import { OrderStatus } from '@shu/shared-types';
 
 /** الانتقالات المسموح بها بين حالات الطلب */
 const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+  [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.ESCALATED, OrderStatus.CANCELLED],
+  [OrderStatus.ESCALATED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
   [OrderStatus.CONFIRMED]: [OrderStatus.PREPARING, OrderStatus.CANCELLED],
   [OrderStatus.PREPARING]: [OrderStatus.READY, OrderStatus.CANCELLED],
   [OrderStatus.READY]: [OrderStatus.PICKED_UP, OrderStatus.CANCELLED],
@@ -18,6 +19,7 @@ export function canTransition(from: OrderStatus, to: OrderStatus): boolean {
 /** التسمية العربية لحالة الطلب */
 export const ORDER_STATUS_LABEL_AR: Record<OrderStatus, string> = {
   [OrderStatus.PENDING]: 'معلق',
+  [OrderStatus.ESCALATED]: 'مصعّد للإدارة',
   [OrderStatus.CONFIRMED]: 'مؤكد',
   [OrderStatus.PREPARING]: 'جاري التحضير',
   [OrderStatus.READY]: 'جاهز',
@@ -25,3 +27,4 @@ export const ORDER_STATUS_LABEL_AR: Record<OrderStatus, string> = {
   [OrderStatus.DELIVERED]: 'تم التسليم',
   [OrderStatus.CANCELLED]: 'ملغى',
 };
+
