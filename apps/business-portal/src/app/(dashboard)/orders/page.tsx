@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ordersApi, Order } from '@shu/api-client';
+import { ordersApi } from '@shu/api-client';
 import { DriverSelectionModal } from '@/components/DriverSelectionModal';
 import { OrderDetailsPanel } from '@/components/OrderDetailsPanel';
 import { useBusiness } from '@/components/BusinessProvider';
