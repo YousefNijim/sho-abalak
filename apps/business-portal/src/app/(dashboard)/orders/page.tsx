@@ -11,7 +11,7 @@ type TabStatus = 'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 type DateFilter = 'TODAY' | 'WEEK' | 'MONTH' | 'ALL';
 
 export default function OrdersPage() {
-  const { business } = useBusiness();
+  const { business, isStore } = useBusiness();
   const qc = useQueryClient();
   const [tab, setTab] = useState<TabStatus>('ALL');
   const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
@@ -47,7 +47,7 @@ export default function OrdersPage() {
 
   const filteredOrders = allOrders.filter(order => {
     // Status filter
-    if (tab === 'ACTIVE' && !['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status)) return false;
+    if (tab === 'ACTIVE' && !['PENDING', 'ESCALATED', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status)) return false;
     if (tab === 'COMPLETED' && !['DELIVERED'].includes(order.status)) return false;
     if (tab === 'CANCELLED' && !['CANCELLED', 'REJECTED'].includes(order.status)) return false;
 
@@ -165,7 +165,7 @@ export default function OrdersPage() {
                       <td className="px-4 py-3 text-muted-gray" dir="ltr">{new Date(order.createdAt).toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-2 flex-wrap">
-                          {order.status === 'PENDING' && business?.type === 'STORE' && (
+                          {order.status === 'PENDING' && isStore && (
                             <button
                               onClick={(e) => { e.stopPropagation(); setEscalateModal({ isOpen: true, orderId: order.id }); setEscalateReason(''); }}
                               className="px-2 py-1 bg-[#F59E0B] text-white rounded font-bold text-xs hover:bg-amber-600 transition-colors"
@@ -188,7 +188,7 @@ export default function OrdersPage() {
                           )}
                           {order.status === 'READY' && (
                             <>
-                              {business?.type === 'STORE' && (
+                              {isStore && (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); selfDeliverMutation.mutate(order.id); }}
                                   disabled={selfDeliverMutation.isPending}
