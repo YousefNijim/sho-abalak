@@ -14,7 +14,7 @@ const STATUS_LABELS: Record<string, string> = {
   CONFIRMED: 'تم القبول',
   PREPARING: 'جاري التحضير',
   READY: 'جاهز للاستلام',
-  PICKED_UP: 'مع السائق (في الطريق)',
+  PICKED_UP: 'في الطريق للزبون',
   DELIVERED: 'تم التسليم بنجاح',
   CANCELLED: 'تم إلغاء الطلب',
 };
@@ -428,6 +428,25 @@ export default function OrderDetail() {
                 })
               }
             />
+          )
+        ) : status === 'PICKED_UP' ? (
+          (order as any).deliveryMode === 'SELF' ? (
+            // Self-delivery: store marks delivered
+            <Button
+              title="✅ تم تسليم الطلب للزبون"
+              disabled={updateStatus.isPending}
+              onPress={() =>
+                Alert.alert('تأكيد التسليم', 'هل سلّمت الطلب للزبون؟', [
+                  { text: 'لا', style: 'cancel' },
+                  { text: 'نعم، تم التسليم', onPress: () => handleStatusChange('DELIVERED') },
+                ])
+              }
+            />
+          ) : (
+            // Platform delivery: driver marks delivered
+            <View style={styles.escalatedState}>
+              <Text style={styles.escalatedStateText}>🚗 الطلب مع السائق — سيؤكد السائق التسليم</Text>
+            </View>
           )
         ) : (
           <View style={styles.completedState}>

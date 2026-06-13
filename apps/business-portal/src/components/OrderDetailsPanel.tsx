@@ -243,7 +243,25 @@ export function OrderDetailsPanel({ orderId, onClose }: OrderDetailsPanelProps) 
                     تعيين سائق
                   </button>
                 )}
-                {['PICKED_UP', 'DELIVERED', 'CANCELLED'].includes(order.status) && (
+                {order.status === 'PICKED_UP' && (order as any).deliveryMode === 'SELF' && (
+                  <button
+                    disabled={updateStatus.isPending}
+                    onClick={() => {
+                      if (confirm('هل سلّمت الطلب للزبون؟ سيتم إغلاق الطلب نهائياً.')) {
+                        updateStatus.mutate('DELIVERED');
+                      }
+                    }}
+                    className="py-3 col-span-2 bg-success text-white rounded-lg font-bold hover:bg-green-600 transition-colors disabled:opacity-50"
+                  >
+                    ✅ تم تسليم الطلب للزبون
+                  </button>
+                )}
+                {order.status === 'PICKED_UP' && (order as any).deliveryMode !== 'SELF' && (
+                  <div className="col-span-2 text-center text-muted-gray py-2 bg-surface-container rounded-lg border border-border">
+                    🚗 الطلب مع السائق — سيؤكد السائق التسليم
+                  </div>
+                )}
+                {['DELIVERED', 'CANCELLED'].includes(order.status) && (
                   <div className="col-span-2 text-center text-muted-gray py-2 bg-surface-container rounded-lg border border-border">
                     لا يوجد إجراءات متاحة في هذه الحالة
                   </div>

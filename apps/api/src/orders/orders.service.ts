@@ -293,8 +293,9 @@ export class OrdersService {
         });
       }
 
-      // If transitioning to DELIVERED, toggle the driver status back to AVAILABLE and update balance if CASH
-      if (dto.status === OrderStatus.DELIVERED && order.driverId) {
+      // If transitioning to DELIVERED via platform driver, free the driver and credit their fee.
+      // Skip for self-delivery (deliveryMode = 'SELF') — no driver involved.
+      if (dto.status === OrderStatus.DELIVERED && order.driverId && order.deliveryMode !== 'SELF') {
         await tx.driver.update({
           where: { id: order.driverId },
           data: {
@@ -893,18 +894,24 @@ export class OrdersService {
    * - CANCELLED → the customer (only while still PENDING) or the business owner.
    */
   private async assertCanTransition(
-    order: { customerId: string; businessId: string; driverId: string | null; status: string },
+    order: { customerId: string; businessId: string; driverId: string | null; status: string; deliveryMode?: string | null },
     user: AuthUser,
     to: OrderStatus,
     driverId?: string,
   ) {
     if (user.role === UserRole.ADMIN) return;
 
-    // Final delivery — assigned driver only.
+    // Final delivery — assigned driver OR store owner when self-delivering.
     if (to === OrderStatus.DELIVERED) {
+      // Self-delivery: only the business owner who owns this order may mark delivered.
+      if (order.deliveryMode === 'SELF' && user.role === UserRole.BUSINESS) {
+        await this.assertOwnsOrderBusiness(order.businessId, user);
+        return;
+      }
+      // Platform delivery: only the assigned driver.
       const driver = await this.prisma.driver.findUnique({ where: { userId: user.id } });
       if (user.role === UserRole.DRIVER && driver && driver.id === order.driverId) return;
-      throw new ForbiddenException('فقط السائق المعيّن يمكنه تأكيد التسليم');
+      throw new ForbiddenException('فقط السائق المعيّن أو صاحب المتجر (توصيل ذاتي) يمكنه تأكيد التسليم');
     }
 
     // Assigning a driver — business owner, must supply a driverId.
