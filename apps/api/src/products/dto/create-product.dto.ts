@@ -38,6 +38,11 @@ export class CreateProductDto {
   @IsUUID()
   categoryId?: string;
 
+  @ApiPropertyOptional({ description: 'معرّف القالب (التصنيفات الموحدة)' })
+  @IsOptional()
+  @IsUUID()
+  templateId?: string;
+
   @ApiPropertyOptional({ description: 'باركود المنتج' })
   @IsOptional()
   @IsString()

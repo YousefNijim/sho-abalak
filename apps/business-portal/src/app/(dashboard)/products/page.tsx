@@ -176,7 +176,7 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        templateId: formData.subCategoryId || formData.mainCategoryId || undefined,
+        templateId: formData.subCategoryId || formData.mainCategoryId || null,
         isAvailable: formData.isAvailable,
         imageUrl: formData.imageUrl,
         barcode: formData.barcode,
