@@ -10,7 +10,7 @@ import { businessesApi, offersApi, productsApi, categoriesApi, businessCategorie
 import { CategoryGrid } from '../../../components/store/CategoryGrid';
 import { MainCategoryBar } from '../../../components/store/MainCategoryBar';
 import { SubCategoryBar } from '../../../components/store/SubCategoryBar';
-import { useCartStore } from '../../../src/stores/cart.store';
+import { useStoreCartStore } from '../../../src/stores/storeCart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VariantPicker, type CartAddPayload } from '../../../components/VariantPicker';
 import { fontFamily, spacing } from '../../../src/theme';
@@ -35,10 +35,10 @@ export default function StoreBusinessDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const addItem    = useCartStore((s) => s.addItem);
-  const clearCart  = useCartStore((s) => s.clear);
-  const cartItems  = useCartStore((s) => s.items);
-  const cartTotal  = useCartStore((s) => s.total());
+  const addItem    = useStoreCartStore((s) => s.addItem);
+  const clearCart  = useStoreCartStore((s) => s.clear);
+  const cartItems  = useStoreCartStore((s) => s.items);
+  const cartTotal  = useStoreCartStore((s) => s.total());
   const cartQty    = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -141,7 +141,6 @@ export default function StoreBusinessDetail() {
       },
       business!.id,
       business!.areaId,
-      'STORE',
     );
 
     if (result === 'different_business') {
@@ -151,7 +150,7 @@ export default function StoreBusinessDetail() {
           for (let i = 0; i < payload.quantity; i++) {
             addItem(
               { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
-              business!.id, business!.areaId, 'STORE'
+              business!.id, business!.areaId
             );
           }
         }
@@ -170,7 +169,7 @@ export default function StoreBusinessDetail() {
               for (let i = 0; i < payload.quantity; i++) {
                 addItem(
                   { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
-                  business!.id, business!.areaId, 'STORE'
+                  business!.id, business!.areaId
                 );
               }
             },
@@ -181,7 +180,7 @@ export default function StoreBusinessDetail() {
       for (let i = 1; i < payload.quantity; i++) {
         addItem(
           { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
-          business!.id, business!.areaId, 'STORE'
+          business!.id, business!.areaId
         );
       }
     }
@@ -425,7 +424,7 @@ export default function StoreBusinessDetail() {
   );
 }
 
-function StoreProductCard({ product, isOpen, onPress, discountPct }: { product: any; isOpen: boolean; onPress: () => void; discountPct: number }) {
+function StoreProductCard({ product, isOpen, onPress, discountPct, width, onAdd }: { product: any; isOpen: boolean; onPress: () => void; discountPct: number; width?: any; onAdd: () => void; }) {
   const variants = (product.variants ?? []).filter((v: any) => v.isAvailable);
   const hasVariants = product.hasVariants && variants.length > 0;
 

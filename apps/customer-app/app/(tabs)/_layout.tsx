@@ -3,11 +3,11 @@ import { Home, Package, User, ShoppingCart, Tag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fontFamily, components, spacing } from '../../src/theme';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useFoodCartStore } from '../../src/stores/foodCart.store';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  const cartItems = useCartStore((s) => s.items);
+  const cartItems = useFoodCartStore((s) => s.items);
   const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (

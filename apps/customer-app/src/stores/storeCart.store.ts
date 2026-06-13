@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export interface CartItem {
+export interface StoreCartItem {
   productId: string;
   name: string;
   price: number;
@@ -12,7 +12,6 @@ export interface CartItem {
   imageUrl?: string | null;
 }
 
-// Unique key per cart line: same product + different variant = different line
 const lineKey = (productId: string, variantId?: string | null) =>
   variantId ? `${productId}__${variantId}` : productId;
 
@@ -26,18 +25,16 @@ export interface AppliedCoupon {
   issuedBy: 'PLATFORM' | 'BUSINESS';
 }
 
-interface CartState {
+interface StoreCartState {
   businessId: string | null;
-  businessType: 'FOOD' | 'STORE' | null;
   areaId: string | null;
-  items: CartItem[];
+  items: StoreCartItem[];
   appliedCoupon: AppliedCoupon | null;
   addItem: (
-    item: Omit<CartItem, 'quantity'>,
+    item: Omit<StoreCartItem, 'quantity'>,
     businessId: string,
     areaId: string,
-    businessType?: 'FOOD' | 'STORE',
-  ) => 'added' | 'different_business' | 'different_type';
+  ) => 'added' | 'different_business';
   removeItem: (productId: string, variantId?: string | null) => void;
   updateQty: (productId: string, delta: number, variantId?: string | null) => void;
   setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
@@ -45,27 +42,24 @@ interface CartState {
   total: () => number;
 }
 
-export const useCartStore = create<CartState>()(
+export const useStoreCartStore = create<StoreCartState>()(
   persist(
     (set, get) => ({
       businessId: null,
-      businessType: null,
       areaId: null,
       items: [],
       appliedCoupon: null,
 
-      addItem: (item, businessId, areaId, businessType = 'FOOD') => {
-        const { businessId: currentBiz, businessType: currentType, items } = get();
-        
-        if (currentType && currentType !== businessType) {
-          return 'different_type';
-        }
+      addItem: (item, businessId, areaId) => {
+        const { businessId: currentBiz, items } = get();
         
         if (currentBiz && currentBiz !== businessId) {
           return 'different_business';
         }
+        
         const key = lineKey(item.productId, item.variantId);
         const existing = items.find((i) => lineKey(i.productId, i.variantId) === key);
+        
         if (existing) {
           set({
             items: items.map((i) =>
@@ -77,7 +71,6 @@ export const useCartStore = create<CartState>()(
         } else {
           set({
             businessId,
-            businessType,
             areaId,
             items: [...items, { ...item, quantity: 1 }],
           });
@@ -105,7 +98,7 @@ export const useCartStore = create<CartState>()(
 
       setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
 
-      clear: () => set({ businessId: null, businessType: null, areaId: null, items: [], appliedCoupon: null }),
+      clear: () => set({ businessId: null, areaId: null, items: [], appliedCoupon: null }),
 
       total: () => {
         const sum = get().items.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0);
@@ -113,9 +106,13 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: 'shu-customer-cart',
+      name: 'store-cart-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state: CartState) => ({ items: state.items, businessId: state.businessId, businessType: state.businessType, appliedCoupon: state.appliedCoupon }),
+      partialize: (state: StoreCartState) => ({ 
+        items: state.items, 
+        businessId: state.businessId, 
+        appliedCoupon: state.appliedCoupon 
+      }),
     },
   ),
 );

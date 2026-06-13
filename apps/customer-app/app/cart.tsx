@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, CreditCard, ShoppingBag, MapPin, ChevronDown, Home as HomeIcon, Check, Tag, X } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../src/theme';
-import { useCartStore } from '../src/stores/cart.store';
+import { useFoodCartStore } from '../src/stores/foodCart.store';
 import { useActiveOrderStore } from '../src/stores/active-order.store';
 import { useAuthStore } from '../src/stores/auth.store';
 import { businessesApi, ordersApi, addressesApi, couponsApi, BASE_URL } from '@shu/api-client';
@@ -22,13 +22,13 @@ export default function Cart() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
-  const items = useCartStore((s) => s.items);
-  const updateQty = useCartStore((s) => s.updateQty);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const businessId = useCartStore((s) => s.businessId);
-  const areaId = useCartStore((s) => s.areaId);
-  const clearCart = useCartStore((s) => s.clear);
-  const subtotal = useCartStore((s) => s.total());
+  const items = useFoodCartStore((s) => s.items);
+  const updateQty = useFoodCartStore((s) => s.updateQty);
+  const removeItem = useFoodCartStore((s) => s.removeItem);
+  const businessId = useFoodCartStore((s) => s.businessId);
+  const areaId = useFoodCartStore((s) => s.areaId);
+  const clearCart = useFoodCartStore((s) => s.clear);
+  const subtotal = useFoodCartStore((s) => s.total());
   const setActiveOrder = useActiveOrderStore((s) => s.set);
 
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
@@ -307,28 +307,32 @@ export default function Cart() {
                   </View>
                 )}
               </View>
+              
               {/* Content */}
               <View style={styles.itemContent}>
                 <View style={styles.itemHeader}>
-                  <Pressable onPress={() => removeItem(it.productId, it.variantId)} style={styles.deleteBtn}>
-                    <Trash2 size={18} color={colors.error} />
+                  <Pressable onPress={() => removeItem(it.productId, it.variantId)} style={styles.deleteBtn} hitSlop={8}>
+                    <Trash2 size={16} color={colors.error} />
                   </Pressable>
-                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                  <View style={styles.itemNameWrap}>
                     <Text style={styles.itemName} numberOfLines={1}>{it.name}</Text>
                     {it.variantName ? (
-                      <Text style={styles.itemVariantName}>{it.variantName}</Text>
+                      <View style={styles.variantPill}>
+                        <Text style={styles.variantPillText}>{it.variantName}</Text>
+                      </View>
                     ) : null}
                   </View>
                 </View>
-                <Text style={styles.itemPrice}>{it.price} ₪</Text>
+                
                 <View style={styles.itemFooter}>
+                  <Text style={styles.itemPrice}>{it.price} ₪</Text>
                   <View style={styles.qtyWrap}>
-                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
-                      <Plus size={18} color={colors.white} />
+                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
+                      <Minus size={16} color={colors.textPrimary} />
                     </Pressable>
                     <Text style={styles.qtyText}>{it.quantity}</Text>
-                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
-                      <Minus size={18} color={colors.textPrimary} />
+                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
+                      <Plus size={16} color={colors.white} />
                     </Pressable>
                   </View>
                 </View>
@@ -468,21 +472,23 @@ const styles = StyleSheet.create({
   minimumBannerText: { fontFamily: fontFamily.semibold, fontSize: fontSizes.sm, color: '#92400E', textAlign: 'right' },
   scrollContent: { paddingHorizontal: spacing[4], paddingTop: spacing[6], gap: spacing[6] },
   itemsSection: { gap: spacing[3] },
-  itemCard: { backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: spacing[3], flexDirection: 'row', alignItems: 'center', gap: spacing[3], ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 }, android: { elevation: 2 }, web: { boxShadow: '0 2px 4px rgba(0,0,0,0.05)' } }) },
-  itemImageWrap: { width: 76, height: 76, borderRadius: radius.md, overflow: 'hidden', backgroundColor: 'rgba(229,224,213,1)', flexShrink: 0 },
+  itemCard: { flexDirection: 'row-reverse', backgroundColor: '#FFFFFF', padding: spacing[3], borderRadius: 20, marginBottom: spacing[4], borderWidth: 1, borderColor: 'transparent', ...Platform.select({ ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 10 }, android: { elevation: 3 }, web: { boxShadow: '0 4px 10px rgba(0,0,0,0.06)' } }) },
+  itemImageWrap: { width: 80, height: 80, borderRadius: 16, overflow: 'hidden', backgroundColor: '#F5F2FC', marginLeft: spacing[3] },
   itemImage: { width: '100%', height: '100%' },
   itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  itemContent: { flex: 1, minWidth: 0 },
-  itemHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-end' },
-  itemName: { fontFamily: fontFamily.semibold, fontSize: 15, color: colors.textPrimary, textAlign: 'right' },
-  itemVariantName: { fontFamily: fontFamily.regular, fontSize: 12, color: colors.textMuted, textAlign: 'right', marginTop: 2 },
-  deleteBtn: { padding: 2, marginLeft: spacing[1] },
-  itemPrice: { fontFamily: fontFamily.bold, color: colors.primary, marginTop: 4, textAlign: 'right' },
-  itemFooter: { marginTop: spacing[2], flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#efecf6', borderRadius: radius.full, paddingHorizontal: spacing[2], paddingVertical: spacing[1], gap: spacing[3] },
-  qtyBtnPlus: { width: 32, height: 32, backgroundColor: colors.primary, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  qtyText: { fontFamily: fontFamily.bold, fontSize: 15, color: colors.textPrimary },
-  qtyBtnMinus: { width: 32, height: 32, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: 'rgba(138,114,101,1)', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  itemContent: { flex: 1, justifyContent: 'space-between', paddingVertical: 2 },
+  itemHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start' },
+  deleteBtn: { padding: spacing[1], backgroundColor: 'rgba(186, 26, 26, 0.05)', borderRadius: 8 },
+  itemNameWrap: { flex: 1, alignItems: 'flex-end', marginRight: spacing[2] },
+  itemName: { fontFamily: fontFamily.bold, fontSize: 16, color: colors.textPrimary, textAlign: 'right' },
+  variantPill: { backgroundColor: 'rgba(151, 72, 0, 0.08)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-end', marginTop: 4 },
+  variantPillText: { fontFamily: fontFamily.medium, fontSize: 11, color: colors.primary },
+  itemFooter: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing[3] },
+  itemPrice: { fontFamily: fontFamily.bold, fontSize: 16, color: colors.primary, textAlign: 'right' },
+  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FCF3DC', borderRadius: 12, padding: 4 },
+  qtyBtnPlus: { width: 32, height: 32, borderRadius: 10, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  qtyBtnMinus: { width: 32, height: 32, borderRadius: 10, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(229,224,213,1)' },
+  qtyText: { fontFamily: fontFamily.bold, fontSize: 15, color: colors.textPrimary, width: 32, textAlign: 'center' },
   section: { gap: spacing[2] },
   sectionTitle: { fontFamily: fontFamily.semibold, fontSize: 16, color: colors.textPrimary, paddingHorizontal: 4, textAlign: 'right' },
   // Coupon slider

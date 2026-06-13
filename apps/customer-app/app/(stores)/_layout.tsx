@@ -3,7 +3,7 @@ import { Home, Search, ShoppingBag, ClipboardList, User } from 'lucide-react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, fontFamily, spacing } from '../../src/theme';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useStoreCartStore } from '../../src/stores/storeCart.store';
 
 // We use slightly different colors from FOOD section to distinguish STORES.
 // FOOD uses #FCF3DC for background, stores uses #fbf8ff (Surface) from heritage_pulse
@@ -17,9 +17,8 @@ export default function StoresTabsLayout() {
   const insets = useSafeAreaInsets();
   
   // We can still use the cart store, but the cart badge should match the Stores colors.
-  const cartItems = useCartStore((s) => s.items);
-  const cartBusinessType = useCartStore((s) => s.businessType);
-  const cartQty = cartBusinessType === 'STORE' ? cartItems.reduce((acc, item) => acc + item.quantity, 0) : 0;
+  const cartItems = useStoreCartStore((s) => s.items);
+  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <Tabs

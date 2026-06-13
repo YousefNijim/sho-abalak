@@ -8,7 +8,7 @@ import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart, Menu, Package, 
 import { businessesApi, tagsApi, promotedBusinessesApi, addressesApi, ordersApi, productsApi, BASE_URL } from '@shu/api-client';
 import type { Order, Product } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useStoreCartStore } from '../../src/stores/storeCart.store';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { fontFamily, spacing } from '../../src/theme';
 import { AddressSelector } from '../../components/AddressSelector';
@@ -133,8 +133,8 @@ export default function StoreHome() {
     queryFn: () => promotedBusinessesApi.list(selectedAddress?.areaId || undefined),
   });
 
-  const addItem = useCartStore((s) => s.addItem);
-  const clearCart = useCartStore((s) => s.clear);
+  const addItem = useStoreCartStore((s) => s.addItem);
+  const clearCart = useStoreCartStore((s) => s.clear);
 
   const { data: recentStoreOrders = [] } = useQuery({
     queryKey: ['orders', 'STORE'],
@@ -156,11 +156,10 @@ export default function StoreHome() {
             price: it.unitPrice,
             variantId: (it as any).variantId,
             variantName: (it as any).variantName,
-            imageUrl: it.product?.imageUrl,
+            imageUrl: (it.product as any)?.imageUrl,
           },
           o.businessId,
           areaId,
-          'STORE',
         );
       }
     });
@@ -324,7 +323,7 @@ export default function StoreHome() {
                       name: trendingProduct.name,
                       price: trendingProduct.price,
                       imageUrl: trendingProduct.imageUrl,
-                    }, firstPopularBusinessId, businesses[0]?.areaId, 'STORE');
+                    }, firstPopularBusinessId, businesses[0]?.areaId);
                     // optionally feedback
                   }}>
                     <ShoppingCart size={14} color="#fff" />
@@ -352,33 +351,44 @@ export default function StoreHome() {
           </View>
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.storesScroll}>
-            {businesses.map((b: any) => (
-              <Pressable key={b.id} style={styles.storeCard} onPress={() => router.push(`/business/${b.id}`)}>
-                <View style={styles.storeCardImgWrap}>
-                  {b.imageUrl ? (
-                    <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={styles.storeCardImg} contentFit="cover" />
-                  ) : (
-                    <View style={[styles.storeCardImg, styles.placeholderImg]}>
-                      <Store size={32} color={storeColors.border} />
+            {businesses.map((b: any) => {
+              const deliveryFee = b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 0);
+              return (
+                <Pressable key={b.id} style={styles.storeCard} onPress={() => router.push(`/business/${b.id}`)}>
+                  <View style={styles.storeCardImgWrap}>
+                    {b.imageUrl ? (
+                      <Image source={{ uri: mediaUrl(b.imageUrl)! }} style={styles.storeCardImg} contentFit="cover" />
+                    ) : (
+                      <View style={[styles.storeCardImg, styles.placeholderImg]}>
+                        <Store size={32} color={storeColors.border} />
+                      </View>
+                    )}
+                    <View style={[styles.statusBadge, { backgroundColor: b.isOpen ? storeColors.success : '#EF4444' }]}>
+                      <Text style={styles.statusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
                     </View>
-                  )}
-                  <View style={[styles.statusBadge, { backgroundColor: b.isOpen ? storeColors.success : '#EF4444' }]}>
-                    <Text style={styles.statusBadgeText}>{b.isOpen ? 'مفتوح' : 'مغلق'}</Text>
+                    <View style={styles.ratingBadge}>
+                      <Text style={styles.ratingText}>{b.rating ? b.rating.toFixed(1) : '4.8'}</Text>
+                      <Star size={12} color="#F59E0B" fill="#F59E0B" style={{ marginLeft: 2 }} />
+                    </View>
                   </View>
-                  <View style={styles.ratingBadge}>
-                    <Text style={styles.ratingText}>{b.rating ? b.rating.toFixed(1) : '4.8'}</Text>
-                    <Star size={12} color="#F59E0B" fill="#F59E0B" style={{ marginLeft: 2 }} />
+                  <View style={styles.storeCardBody}>
+                    <Text style={styles.storeCardTitle} numberOfLines={1}>{b.name}</Text>
+                    <View style={styles.storeCardMeta}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Text style={styles.storeCardMetaText}>
+                          {deliveryFee === 0 ? 'توصيل مجاني' : `${deliveryFee} ₪`}
+                        </Text>
+                        <Bike size={12} color={storeColors.textMuted} />
+                      </View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Text style={styles.storeCardMetaText}>20-30 دقيقة</Text>
+                        <Clock size={12} color={storeColors.textMuted} />
+                      </View>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.storeCardBody}>
-                  <Text style={styles.storeCardTitle} numberOfLines={1}>{b.name}</Text>
-                  <View style={styles.storeCardMeta}>
-                    <Text style={styles.storeCardMetaText}>20-30 دقيقة</Text>
-                    <Clock size={12} color={storeColors.textMuted} />
-                  </View>
-                </View>
-              </Pressable>
-            ))}
+                </Pressable>
+              );
+            })}
           </ScrollView>
         )}
       </ScrollView>
@@ -656,9 +666,9 @@ const styles = StyleSheet.create({
     color: storeColors.textPrimary,
   },
   storeCardMeta: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'space-between',
     marginTop: 4,
   },
   storeCardMetaText: {

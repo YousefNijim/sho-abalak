@@ -31,7 +31,8 @@ import type { Product } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
-import { useCartStore } from '../../src/stores/cart.store';
+import { useFoodCartStore } from '../../src/stores/foodCart.store';
+import { useStoreCartStore } from '../../src/stores/storeCart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VariantPicker, type CartAddPayload } from '../../components/VariantPicker';
 
@@ -45,12 +46,17 @@ export default function BusinessDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const addItem = useCartStore((s) => s.addItem);
-  const updateQty = useCartStore((s) => s.updateQty);
-  const clearCart = useCartStore((s) => s.clear);
-  const cartItems = useCartStore((s) => s.items);
-  const cartTotal = useCartStore((s) => s.total());
-  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const foodAddItem = useFoodCartStore((s) => s.addItem);
+  const foodUpdateQty = useFoodCartStore((s) => s.updateQty);
+  const foodClearCart = useFoodCartStore((s) => s.clear);
+  const foodCartItems = useFoodCartStore((s) => s.items);
+  const foodCartTotal = useFoodCartStore((s) => s.total());
+
+  const storeAddItem = useStoreCartStore((s) => s.addItem);
+  const storeUpdateQty = useStoreCartStore((s) => s.updateQty);
+  const storeClearCart = useStoreCartStore((s) => s.clear);
+  const storeCartItems = useStoreCartStore((s) => s.items);
+  const storeCartTotal = useStoreCartStore((s) => s.total());
 
   const [tab, setTab] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,6 +72,15 @@ export default function BusinessDetail() {
     queryFn: () => businessesApi.getById(id!),
     enabled: !!id,
   });
+
+  const isStore = business?.type === 'STORE';
+  
+  const addItem = isStore ? storeAddItem : foodAddItem;
+  const updateQty = isStore ? storeUpdateQty : foodUpdateQty;
+  const clearCart = isStore ? storeClearCart : foodClearCart;
+  const cartItems = isStore ? storeCartItems : foodCartItems;
+  const cartTotal = isStore ? storeCartTotal : foodCartTotal;
+  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const { data: storeCategories = [] } = useQuery({
     queryKey: ['store-categories', id],
@@ -261,7 +276,7 @@ export default function BusinessDetail() {
     );
   }
 
-  const isStore = business.type === 'STORE';
+
   const catMeta = TYPE_ICON[business.type] ?? TYPE_ICON.FOOD;
   const products = business.products || [];
 

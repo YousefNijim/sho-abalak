@@ -31,7 +31,7 @@ const mediaUrl = (path: string | null | undefined): string | null => {
   return `${base}${p}`;
 };
 import { useAuthStore } from '../../src/stores/auth.store';
-import { useCartStore } from '../../src/stores/cart.store';
+
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
 import { addressesApi, promotedBusinessesApi } from '@shu/api-client';
@@ -461,7 +461,9 @@ export default function Home() {
                       <View style={styles.metaItem}>
                         <Bike size={16} color={colors.primary} />
                         <Text style={[styles.metaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                          {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل
+                          {(b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)) === 0 
+                            ? 'مجاني' 
+                            : `${b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل`}
                         </Text>
                       </View>
                     </View>
@@ -912,7 +914,9 @@ function BusinessCard({ b, onPress }: { b: any; onPress: () => void }) {
             </View>
             <View style={[styles.newMetaItem, { marginTop: 4 }]}>
               <Text style={[styles.newMetaText, { color: colors.primary, fontFamily: fontFamily.bold }]}>
-                {b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل
+                {(b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)) === 0 
+                  ? 'مجاني' 
+                  : `${b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل`}
               </Text>
               <Bike size={13} color={colors.primary} style={{ marginLeft: 4 }} />
             </View>

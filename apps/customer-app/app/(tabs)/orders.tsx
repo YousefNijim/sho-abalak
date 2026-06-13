@@ -9,7 +9,7 @@ import type { Order } from '@shu/api-client';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
   !path ? null : path.startsWith('http') ? path : `${BASE_URL}${path}`;
-import { useCartStore } from '../../src/stores/cart.store';
+import { useFoodCartStore } from '../../src/stores/foodCart.store';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navigation, RefreshCcw } from 'lucide-react-native';
@@ -32,8 +32,8 @@ export default function Orders() {
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<'CURRENT' | 'PREVIOUS'>('CURRENT');
 
-  const addItem = useCartStore((s) => s.addItem);
-  const clearCart = useCartStore((s) => s.clear);
+  const addItem = useFoodCartStore((s) => s.addItem);
+  const clearCart = useFoodCartStore((s) => s.clear);
 
   // Fetch orders from API
   const { data: orders = [], isLoading } = useQuery({
@@ -59,9 +59,9 @@ export default function Orders() {
             productId: it.productId,
             name: it.product?.name || 'منتج',
             price: it.unitPrice,
-            variantId: it.variantId,
-            variantName: it.variantName,
-            imageUrl: it.product?.imageUrl,
+            variantId: (it as any).variantId,
+            variantName: (it as any).variantName,
+            imageUrl: (it.product as any)?.imageUrl,
           },
           o.businessId,
           areaId,

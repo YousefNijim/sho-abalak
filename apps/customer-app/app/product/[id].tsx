@@ -15,7 +15,8 @@ import {
 } from 'lucide-react-native';
 import { colors, fontSizes, fontFamily, radius, spacing } from '../../src/theme';
 import { businessesApi, BASE_URL } from '@shu/api-client';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useFoodCartStore } from '../../src/stores/foodCart.store';
+import { useStoreCartStore } from '../../src/stores/storeCart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const mediaUrl = (path: string | null | undefined): string | null =>
@@ -26,8 +27,10 @@ export default function ProductDetail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
-  const addItem = useCartStore((s) => s.addItem);
-  const clearCart = useCartStore((s) => s.clear);
+  const foodAddItem = useFoodCartStore((s) => s.addItem);
+  const foodClearCart = useFoodCartStore((s) => s.clear);
+  const storeAddItem = useStoreCartStore((s) => s.addItem);
+  const storeClearCart = useStoreCartStore((s) => s.clear);
 
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState('');
@@ -57,6 +60,10 @@ export default function ProductDetail() {
     );
   }
 
+  const isStore = business?.type === 'STORE';
+  const addItem = isStore ? storeAddItem : foodAddItem;
+  const clearCart = isStore ? storeClearCart : foodClearCart;
+
   const handleAdd = () => {
     // Note: The cart store currently only takes productId, name, price, businessId, areaId.
     // We are adding multiple items by calling it multiple times or modifying state?
@@ -66,7 +73,7 @@ export default function ProductDetail() {
     
     const finalizeAdd = () => {
       // Since addItem adds 1 piece, we need to increment the quantity by (quantity - 1)
-      const cartState = useCartStore.getState();
+      const cartState = isStore ? useStoreCartStore.getState() : useFoodCartStore.getState();
       if (quantity > 1) {
         cartState.updateQty(product.id, quantity - 1);
       }

@@ -210,8 +210,8 @@ export default function StoreTracking() {
   };
 
   const handleCallStore = () => {
-    if (order.business?.phone) {
-      Linking.openURL(`tel:${order.business.phone}`);
+    if ((order.business as any)?.phone) {
+      Linking.openURL(`tel:${(order.business as any).phone}`);
     } else {
       Alert.alert('تنبيه', 'رقم المتجر غير متوفر');
     }
@@ -236,7 +236,7 @@ export default function StoreTracking() {
               <Text style={styles.ratingLabel}>كيف كانت تجربتك مع متجر {order.business?.name}؟</Text>
               <StarRow value={businessRating} onChange={setBusinessRating} />
 
-              {order.deliveryMode === 'PLATFORM' && order.driver && (
+              {(order as any).deliveryMode === 'PLATFORM' && order.driver && (
                 <>
                   <Text style={[styles.ratingLabel, { marginTop: spacing[6] }]}>كيف تقيم خدمة التوصيل من السائق {order.driver.user?.name}؟</Text>
                   <StarRow value={deliveryRating} onChange={setDeliveryRating} />
@@ -297,7 +297,7 @@ export default function StoreTracking() {
                 <Text style={styles.timeElapsedText}>الطلب أُرسل الساعة {orderTime}</Text>
                 {order.status !== 'DELIVERED' && (
                   <Text style={[styles.timeElapsedText, { color: storeColors.primary, marginTop: 4, fontFamily: fontFamily.bold }]}>
-                    الوقت المتوقع للتوصيل: {order.business?.deliveryType === 'SELF' ? '60-90 دقيقة' : '30-45 دقيقة'}
+                    الوقت المتوقع للتوصيل: {(order.business as any)?.deliveryType === 'SELF' ? '60-90 دقيقة' : '30-45 دقيقة'}
                   </Text>
                 )}
               </View>
@@ -364,7 +364,7 @@ export default function StoreTracking() {
           <View style={[styles.card, styles.driverCard]}>
             <Text style={styles.summaryTitle}>معلومات التوصيل</Text>
             
-            {order.deliveryMode === 'PLATFORM' && order.driver ? (
+            {(order as any).deliveryMode === 'PLATFORM' && order.driver ? (
               <>
                 <View style={styles.driverHeader}>
                   <Pressable style={styles.callBtn} onPress={handleCallDriver}>
@@ -378,8 +378,8 @@ export default function StoreTracking() {
                     </View>
                   </View>
                   <View style={styles.driverAvatarContainer}>
-                    {order.driver.user?.imageUrl ? (
-                      <Image source={{ uri: mediaUrl(order.driver.user.imageUrl)! }} style={styles.driverAvatar} />
+                    {(order.driver.user as any)?.imageUrl ? (
+                      <Image source={{ uri: mediaUrl((order.driver.user as any).imageUrl)! }} style={styles.driverAvatar} />
                     ) : (
                       <View style={[styles.driverAvatar, { backgroundColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center' }]}>
                         <Bike size={32} color={storeColors.primary} />
@@ -394,7 +394,7 @@ export default function StoreTracking() {
                     <Text style={styles.msgBtnText}>رسالة للسائق</Text>
                   </Pressable>
                   <View style={styles.vehicleRow}>
-                    <Text style={styles.vehicleText}>{order.driver.vehicleType === 'CAR' ? 'سيارة' : 'دراجة نارية'}</Text>
+                    <Text style={styles.vehicleText}>{(order.driver as any).vehicleType === 'CAR' ? 'سيارة' : 'دراجة نارية'}</Text>
                     <Bike size={16} color={storeColors.textMuted} />
                   </View>
                 </View>

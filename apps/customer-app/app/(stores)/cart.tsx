@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShoppingCart, Minus, Plus, Trash2, ArrowRight, Banknote, MapPin, ChevronDown, Home as HomeIcon, Check, Tag, X, Store } from 'lucide-react-native';
 import { Button } from '@shu/ui-components/native';
 import { fontFamily, spacing } from '../../src/theme';
-import { useCartStore } from '../../src/stores/cart.store';
+import { useStoreCartStore } from '../../src/stores/storeCart.store';
 import { useActiveOrderStore } from '../../src/stores/active-order.store';
 import { useAuthStore } from '../../src/stores/auth.store';
 import { businessesApi, ordersApi, addressesApi, couponsApi, BASE_URL } from '@shu/api-client';
@@ -37,14 +37,13 @@ export default function StoreCart() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
-  const items = useCartStore((s) => s.items);
-  const updateQty = useCartStore((s) => s.updateQty);
-  const removeItem = useCartStore((s) => s.removeItem);
-  const businessId = useCartStore((s) => s.businessId);
-  const businessType = useCartStore((s) => s.businessType);
-  const areaId = useCartStore((s) => s.areaId);
-  const clearCart = useCartStore((s) => s.clear);
-  const subtotal = useCartStore((s) => s.total());
+  const items = useStoreCartStore((s) => s.items);
+  const updateQty = useStoreCartStore((s) => s.updateQty);
+  const removeItem = useStoreCartStore((s) => s.removeItem);
+  const businessId = useStoreCartStore((s) => s.businessId);
+  const areaId = useStoreCartStore((s) => s.areaId);
+  const clearCart = useStoreCartStore((s) => s.clear);
+  const subtotal = useStoreCartStore((s) => s.total());
   const setActiveOrder = useActiveOrderStore((s) => s.set);
 
   const [payment, setPayment] = useState<'CASH' | 'ELECTRONIC'>('CASH');
@@ -53,8 +52,8 @@ export default function StoreCart() {
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
-  const appliedCoupon = useCartStore((s) => s.appliedCoupon);
-  const setAppliedCoupon = useCartStore((s) => s.setAppliedCoupon);
+  const appliedCoupon = useStoreCartStore((s) => s.appliedCoupon);
+  const setAppliedCoupon = useStoreCartStore((s) => s.setAppliedCoupon);
   const [couponError, setCouponError] = useState('');
 
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
@@ -151,7 +150,7 @@ export default function StoreCart() {
     } as CreateOrderDto);
   };
 
-  if (items.length === 0 || businessType !== 'STORE') {
+  if (items.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <View style={[styles.header, { paddingTop: insets.top + spacing[2] }]}>
@@ -297,12 +296,12 @@ export default function StoreCart() {
                 <View style={styles.itemFooter}>
                   <Text style={styles.itemPrice}>{it.price} ₪</Text>
                   <View style={styles.qtyWrap}>
-                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
-                      <Minus size={16} color={storeColors.textPrimary} />
+                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
+                      <Plus size={16} color="#fff" />
                     </Pressable>
                     <Text style={styles.qtyText}>{it.quantity}</Text>
-                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
-                      <Plus size={16} color={storeColors.white} />
+                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
+                      <Minus size={16} color={storeColors.textPrimary} />
                     </Pressable>
                   </View>
                 </View>
@@ -403,7 +402,7 @@ export default function StoreCart() {
           onPress={handleConfirm}
           loading={createOrder.isPending}
           disabled={belowMinimum}
-          style={[styles.checkoutBtn, belowMinimum && { opacity: 0.5 }]}
+          style={[styles.checkoutBtn, belowMinimum && { opacity: 0.5 }] as any}
         />
       </View>
     </View>
@@ -461,13 +460,12 @@ const styles = StyleSheet.create({
   addressSelectorName: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.textPrimary, marginTop: 2 },
   addressErrorText: { fontFamily: fontFamily.medium, fontSize: 12, color: storeColors.error, textAlign: 'right', marginBottom: spacing[4], paddingRight: spacing[2] },
   
-  itemsSection: { marginTop: spacing[4] },
+  itemsSection: { marginTop: spacing[4], gap: spacing[3] },
   itemCard: {
     flexDirection: 'row-reverse',
-    backgroundColor: storeColors.surface,
+    backgroundColor: '#FFFFFF',
     padding: spacing[3],
     borderRadius: 20,
-    marginBottom: spacing[4],
     borderWidth: 1,
     borderColor: 'transparent',
     ...Platform.select({
@@ -483,6 +481,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#F5F2FC',
     marginLeft: spacing[3],
+    borderWidth: 1,
+    borderColor: 'rgba(229,224,213,0.5)'
   },
   itemImage: { width: '100%', height: '100%' },
   itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -501,10 +501,10 @@ const styles = StyleSheet.create({
   },
   variantPillText: { fontFamily: fontFamily.medium, fontSize: 11, color: storeColors.primary },
   itemFooter: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing[3] },
-  itemPrice: { fontFamily: fontFamily.bold, fontSize: 16, color: storeColors.primaryContainer, textAlign: 'right' },
-  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: storeColors.background, borderRadius: 12, padding: 4 },
+  itemPrice: { fontFamily: fontFamily.bold, fontSize: 16, color: storeColors.primary, textAlign: 'right' },
+  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fbf8ff', borderRadius: 12, padding: 4 },
   qtyBtnPlus: { width: 32, height: 32, borderRadius: 10, backgroundColor: storeColors.primary, alignItems: 'center', justifyContent: 'center' },
-  qtyBtnMinus: { width: 32, height: 32, borderRadius: 10, backgroundColor: storeColors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: storeColors.border },
+  qtyBtnMinus: { width: 32, height: 32, borderRadius: 10, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(229,224,213,1)' },
   qtyText: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.textPrimary, width: 32, textAlign: 'center' },
   
   section: { marginTop: spacing[6] },
