@@ -115,13 +115,41 @@ interface VariantForm {
 }
 const emptyVariantForm = (): VariantForm => ({ name: '', price: '', stock: '', barcode: '' });
 
+// ─── Category Chip ──────────────────────────────────────────────────────────────
+function CategoryChip({ label, active, onPress, variant }: { label: string, active: boolean, onPress: () => void, variant: 'main' | 'sub' }) {
+  const isMain = variant === 'main';
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.chip,
+        isMain ? styles.chipMain : styles.chipSub,
+        active && (isMain ? styles.chipMainActive : styles.chipSubActive),
+      ]}
+    >
+      <Text
+        style={[
+          styles.chipText,
+          active && styles.chipTextActive,
+          !isMain && styles.chipSubText,
+        ]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────────
 export default function MenuTab() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null); // For restaurants
+  const [selectedMain, setSelectedMain] = useState<string | null>(null); // For stores
+  const [selectedSub, setSelectedSub] = useState<string | null>(null); // For stores
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm());
@@ -196,10 +224,26 @@ export default function MenuTab() {
   }, [products]);
 
   const filtered = useMemo(() => {
-    if (!activeCategory) return products;
-    if (isStore) return products.filter((p: any) => p.template?.name === activeCategory || p.productCategory?.name === activeCategory);
-    return products.filter((p: Product) => p.category === activeCategory);
-  }, [products, activeCategory, isStore]);
+    let result = products;
+
+    if (!isStore) {
+      if (!activeCategory) return result;
+      return result.filter((p: Product) => p.category === activeCategory);
+    } else {
+      // Store logic
+      if (selectedSub) {
+        result = result.filter((p: any) => p.template?.id === selectedSub || p.templateId === selectedSub || p.categoryId === selectedSub);
+      } else if (selectedMain) {
+        const mainCat = effectiveCategories.find(c => c.id === selectedMain);
+        const validIds = [
+          selectedMain,
+          ...(mainCat?.children?.map(c => c.id) ?? [])
+        ];
+        result = result.filter((p: any) => validIds.includes(p.template?.id) || validIds.includes(p.templateId) || validIds.includes(p.categoryId));
+      }
+    }
+    return result;
+  }, [products, activeCategory, isStore, selectedMain, selectedSub, effectiveCategories]);
 
   // ── Mutations ─────────────────────────────────────────────────────────────────
   const createProduct = useMutation({
@@ -386,10 +430,14 @@ export default function MenuTab() {
   };
 
   const activeCategoryLabel = isStore
-    ? (activeCategory ? activeCategory : 'إدارة المنتجات')
+    ? (selectedSub 
+        ? effectiveCategories.find(c => c.id === selectedMain)?.children?.find(s => s.id === selectedSub)?.name
+        : selectedMain 
+          ? effectiveCategories.find(c => c.id === selectedMain)?.name 
+          : 'إدارة المنتجات')
     : (activeCategory ? `إدارة ${activeCategory}` : 'إدارة قائمة الطعام');
 
-  const tabCategories = isStore ? storeCategoryNames : categories;
+  const tabCategories = categories; // Used only for restaurants
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
@@ -424,31 +472,93 @@ export default function MenuTab() {
       </View>
 
       {/* Category Tabs */}
-      {tabCategories.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabsRow}
-          style={styles.tabsScroll}
-        >
-          <Pressable
-            style={[styles.tab, !activeCategory && styles.tabActive]}
-            onPress={() => setActiveCategory(null)}
-          >
-            <Text style={[styles.tabText, !activeCategory && styles.tabTextActive]}>الكل</Text>
-          </Pressable>
-          {tabCategories.map((cat) => (
-            <Pressable
-              key={cat}
-              style={[styles.tab, activeCategory === cat && styles.tabActive]}
-              onPress={() => setActiveCategory(activeCategory === cat ? null : cat)}
+      {isStore ? (
+        <View>
+          {/* BAR 1 — Main categories */}
+          <View style={styles.mainBarContainer}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.barContent}
             >
-              <Text style={[styles.tabText, activeCategory === cat && styles.tabTextActive]}>
-                {cat}
-              </Text>
+              <CategoryChip
+                label="الكل"
+                active={selectedMain === null}
+                onPress={() => {
+                  setSelectedMain(null);
+                  setSelectedSub(null);
+                }}
+                variant="main"
+              />
+              {effectiveCategories.map(cat => (
+                <CategoryChip
+                  key={cat.id}
+                  label={cat.name}
+                  active={selectedMain === cat.id}
+                  onPress={() => {
+                    setSelectedMain(cat.id);
+                    setSelectedSub(null);
+                  }}
+                  variant="main"
+                />
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* BAR 2 — Sub categories */}
+          {selectedMain && (effectiveCategories.find(c => c.id === selectedMain)?.children?.length ?? 0) > 0 && (
+            <View style={styles.subBarContainer}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.barContent}
+              >
+                <CategoryChip
+                  label="الكل"
+                  active={selectedSub === null}
+                  onPress={() => setSelectedSub(null)}
+                  variant="sub"
+                />
+                {effectiveCategories.find(c => c.id === selectedMain)?.children?.map(sub => (
+                  <CategoryChip
+                    key={sub.id}
+                    label={sub.name}
+                    active={selectedSub === sub.id}
+                    onPress={() => setSelectedSub(sub.id)}
+                    variant="sub"
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          )}
+        </View>
+      ) : (
+        tabCategories.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsRow}
+            style={styles.tabsScroll}
+          >
+            <Pressable
+              style={[styles.tab, !activeCategory && styles.tabActive]}
+              onPress={() => setActiveCategory(null)}
+            >
+              <Text style={[styles.tabText, !activeCategory && styles.tabTextActive]}>الكل</Text>
             </Pressable>
-          ))}
-        </ScrollView>
+            {tabCategories.map((cat) => (
+              <Pressable
+                key={cat}
+                style={[styles.tab, activeCategory === cat && styles.tabActive]}
+                onPress={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              >
+                <Text style={[styles.tabText, activeCategory === cat && styles.tabTextActive]}>
+                  {cat}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        )
       )}
 
       {/* Products List */}
@@ -1347,6 +1457,66 @@ const styles = StyleSheet.create({
   variantCancelBtnText: { fontFamily: fontFamily.medium, fontSize: fontSizes.sm, color: colors.textMuted },
   variantSaveBtn: { flex: 2, backgroundColor: colors.primary, borderRadius: radius.md, paddingVertical: spacing[2], alignItems: 'center', justifyContent: 'center', height: 40 },
   variantSaveBtnText: { fontFamily: fontFamily.bold, fontSize: fontSizes.sm, color: '#fff' },
+
+  // New CategoryChip styles
+  mainBarContainer: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  subBarContainer: {
+    backgroundColor: '#FAFAFA',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  barContent: {
+    paddingHorizontal: 12,
+    gap: 8,
+    flexDirection: 'row',
+  },
+  chip: {
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    marginHorizontal: 4,
+  },
+  chipMain: {
+    height: 38,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1.5,
+    borderColor: '#E8E8E8',
+  },
+  chipMainActive: {
+    backgroundColor: '#E6781E',
+    borderColor: '#E6781E',
+  },
+  chipSub: {
+    height: 32,
+    backgroundColor: '#EFEFEF',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  chipSubActive: {
+    backgroundColor: '#1A1A1A',
+    borderColor: '#1A1A1A',
+  },
+  chipText: {
+    fontSize: 14,
+    fontFamily: fontFamily.bold,
+    color: '#444444',
+    textAlign: 'center',
+  },
+  chipSubText: {
+    fontSize: 13,
+    fontFamily: fontFamily.medium,
+  },
+  chipTextActive: {
+    color: '#FFFFFF',
+    fontFamily: fontFamily.extrabold,
+  },
 });
 
 const pStyles = StyleSheet.create({
