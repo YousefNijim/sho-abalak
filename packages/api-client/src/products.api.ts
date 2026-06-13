@@ -69,9 +69,9 @@ export interface ImportResult {
 }
 
 export const productsApi = {
-  listByBusiness: (businessId: string, categoryId?: string) =>
+  listByBusiness: (businessId: string, categoryId?: string, templateId?: string) =>
     http
-      .get<Product[]>('/products', { params: { businessId, categoryId } })
+      .get<Product[]>('/products', { params: { businessId, categoryId, templateId } })
       .then((r) => r.data),
 
   search: (q: string, areaId?: string) =>

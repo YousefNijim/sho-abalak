@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Star, Clock, Bike, MapPin, Store, Plus, Minus, ArrowRight, Share2, Heart, Banknote, Search, Package } from 'lucide-react-native';
-import { businessesApi, offersApi, BASE_URL } from '@shu/api-client';
+import { businessesApi, offersApi, productsApi, categoriesApi, businessCategoriesApi, BASE_URL } from '@shu/api-client';
+import { CategoryGrid } from '../../../components/store/CategoryGrid';
+import { MainCategoryBar } from '../../../components/store/MainCategoryBar';
+import { SubCategoryBar } from '../../../components/store/SubCategoryBar';
 import { useCartStore } from '../../../src/stores/cart.store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { VariantPicker, type CartAddPayload } from '../../../components/VariantPicker';
@@ -41,7 +45,8 @@ export default function StoreBusinessDetail() {
   const queryClient = useQueryClient();
 
   const [storeSearch, setStoreSearch] = useState('');
-  const [storeCatTab, setStoreCatTab] = useState<string | null>(null);
+  const [selectedMainCat, setSelectedMainCat] = useState<any | null>(null);
+  const [selectedSubCat, setSelectedSubCat] = useState<any | null>(null);
   const [pickerProduct, setPickerProduct] = useState<any | null>(null);
 
   const { data: business, isLoading } = useQuery({
@@ -49,6 +54,53 @@ export default function StoreBusinessDetail() {
     queryFn: () => businessesApi.getById(id!),
     enabled: !!id,
   });
+
+  const { data: storeCategories = [] } = useQuery({
+    queryKey: ['store-categories', id],
+    queryFn: async () => {
+      const templates = await businessCategoriesApi.getForBusiness(id!);
+      if (templates.length > 0) {
+        return templates.map((t: any) => ({ ...t, isTemplate: true }));
+      }
+      return categoriesApi.listByBusiness(id!);
+    },
+    enabled: !!id && business?.type === 'STORE',
+  });
+
+  const { data: dynamicProducts = [] } = useQuery({
+    queryKey: ['products', id, selectedSubCat?.id || selectedMainCat?.id],
+    queryFn: () => {
+      const selected = selectedSubCat || selectedMainCat;
+      return productsApi.listByBusiness(
+        id as string,
+        selected?.isTemplate ? undefined : selected?.id,
+        selected?.isTemplate ? selected?.id : undefined
+      );
+    },
+    enabled: !!id && business?.type === 'STORE' && !!selectedMainCat,
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (selectedSubCat) {
+          setSelectedSubCat(null);
+          return true; // handled
+        }
+        if (selectedMainCat) {
+          setSelectedMainCat(null);
+          return true; // handled
+        }
+        return false;
+      };
+      
+      if (Platform.OS === 'android') {
+        const { BackHandler } = require('react-native');
+        BackHandler.addEventListener('hardwareBackPress', onBackPress);
+        return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      }
+    }, [selectedMainCat, selectedSubCat])
+  );
 
   const { data: businessOffers = [] } = useQuery({
     queryKey: ['offers-for-business', id],
@@ -154,25 +206,11 @@ export default function StoreBusinessDetail() {
     );
   }
 
-  const products = business.products || [];
-  
-  const storeCategoryNames = [
-    'عروض خاصة',
-    'الأكثر مبيعاً',
-    ...Array.from(new Set(products.map((p: any) => p.productCategory?.name).filter(Boolean) as string[]))
-  ];
+  const subCategories = selectedMainCat?.children || [];
 
-  const storeFilteredProducts = products.filter((p: any) => {
-    const isOffer = getDiscountPct(p) > 0;
-    const isBestSeller = p.isPopular || Math.random() > 0.8; // Use isPopular if available
-
-    let matchesCat = true;
-    if (storeCatTab === 'عروض خاصة') matchesCat = isOffer;
-    else if (storeCatTab === 'الأكثر مبيعاً') matchesCat = isBestSeller;
-    else if (storeCatTab) matchesCat = p.productCategory?.name === storeCatTab;
-
+  const storeFilteredProducts = dynamicProducts.filter((p: any) => {
     const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
-    return matchesCat && matchesSearch;
+    return matchesSearch;
   });
 
   const numCols = 2;
@@ -279,64 +317,63 @@ export default function StoreBusinessDetail() {
           </View>
         </View>
 
-        {/* Category tabs */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.storeCatScroll}
-        >
-          <Pressable
-            style={[styles.storeCatBtn, !storeCatTab && styles.storeCatBtnActive]}
-            onPress={() => setStoreCatTab(null)}
-          >
-            <Text style={[styles.storeCatText, !storeCatTab && styles.storeCatTextActive]}>الكل</Text>
-          </Pressable>
-          {storeCategoryNames.map((catName) => (
-            <Pressable
-              key={catName}
-              style={[
-                styles.storeCatBtn,
-                storeCatTab === catName && styles.storeCatBtnActive,
-                catName === 'عروض خاصة' && !storeCatTab && styles.specialCatBtn,
-                catName === 'عروض خاصة' && storeCatTab === catName && styles.specialCatBtnActive,
-              ]}
-              onPress={() => setStoreCatTab(catName)}
-            >
-              <Text style={[
-                styles.storeCatText,
-                storeCatTab === catName && styles.storeCatTextActive,
-                catName === 'عروض خاصة' && !storeCatTab && styles.specialCatText,
-                catName === 'عروض خاصة' && storeCatTab === catName && styles.specialCatTextActive,
-              ]}>
-                {catName}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+        {/* Store Home vs Category View */}
+        {!selectedMainCat ? (
+          <>
+            <CategoryGrid
+              categories={storeCategories as any}
+              onSelect={(cat) => {
+                setSelectedMainCat(cat);
+                setSelectedSubCat(null);
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <MainCategoryBar
+              categories={storeCategories as any}
+              selected={selectedMainCat}
+              onSelect={(cat) => {
+                setSelectedMainCat(cat);
+                setSelectedSubCat(null);
+              }}
+            />
 
-        {/* Products grid */}
-        <View style={styles.storeGrid}>
-          {storeFilteredProducts.length === 0 ? (
-            <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
-          ) : (
-            storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
-              if (idx % numCols === 0) rows.push([p]);
-              else rows[rows.length - 1].push(p);
-              return rows;
-            }, []).map((row: any[], rowIdx: number) => (
-              <View key={rowIdx} style={styles.storeGridRow}>
-                {row.map((p: any) => <StoreProductCard
-                  key={p.id}
-                  product={p}
-                  isOpen={business.isOpen}
-                  onPress={() => setPickerProduct(p)}
-                  discountPct={getDiscountPct(p)}
-                />)}
-                {row.length < numCols && <View style={styles.storeGridFiller} />}
-              </View>
-            ))
-          )}
-        </View>
+            <SubCategoryBar
+              subCategories={subCategories}
+              selected={selectedSubCat}
+              onSelect={setSelectedSubCat}
+            />
+
+            <View style={styles.storeGrid}>
+              {storeFilteredProducts.length === 0 ? (
+                <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
+              ) : (
+                storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
+                  if (idx % numCols === 0) rows.push([p]);
+                  else rows[rows.length - 1].push(p);
+                  return rows;
+                }, []).map((row: any[], rowIdx: number) => (
+                  <View key={rowIdx} style={styles.storeGridRow}>
+                    {row.map((p: any) => <StoreProductCard
+                      key={p.id}
+                      product={p}
+                      isOpen={business.isOpen}
+                      onPress={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
+                        productId: p.id,
+                        name: p.name,
+                        price: p.price,
+                        quantity: 1
+                      })}
+                      discountPct={getDiscountPct(p)}
+                    />)}
+                    {row.length < numCols && <View style={styles.storeGridFiller} />}
+                  </View>
+                ))
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Floating Cart Bar */}
@@ -709,6 +746,7 @@ const styles = StyleSheet.create({
   storeSearchWrap: {
     paddingHorizontal: spacing[4],
     marginTop: spacing[4],
+    marginBottom: spacing[2],
   },
   storeSearchBar: {
     flexDirection: 'row',

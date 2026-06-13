@@ -47,15 +47,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing[2],
   },
   scrollContent: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
+    paddingHorizontal: spacing[4],
+    gap: spacing[2],
   },
   chip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[1],
     borderRadius: radius.full,
     backgroundColor: colors.white,
     borderWidth: 1,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: fontFamily.regular,
     fontSize: fontSizes.sm,
-    color: colors.textSecondary,
+    color: colors.textMuted,
   },
   textSelected: {
     color: colors.white,

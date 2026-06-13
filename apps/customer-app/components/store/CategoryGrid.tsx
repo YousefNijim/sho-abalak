@@ -17,8 +17,8 @@ const mediaUrl = (path: string | null | undefined): string | null =>
 export function CategoryGrid({ categories, onSelect }: Props) {
   const { width } = useWindowDimensions();
   const numColumns = width > 768 ? 5 : 3;
-  const padding = spacing.md * 2;
-  const gap = spacing.md;
+  const padding = spacing[4] * 2;
+  const gap = spacing[4];
   const availableWidth = width - padding - gap * (numColumns - 1);
   const itemWidth = Math.floor(availableWidth / numColumns);
 
@@ -59,21 +59,21 @@ export function CategoryGrid({ categories, onSelect }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.lg,
-    backgroundColor: '#FAFAFA',
+    paddingHorizontal: spacing[4],
+    paddingTop: spacing[8],
+    paddingBottom: spacing[6],
+    backgroundColor: 'transparent',
   },
   title: {
     fontFamily: fontFamily.bold,
     fontSize: fontSizes.xl,
     color: colors.textPrimary,
-    marginBottom: spacing.lg,
+    marginBottom: spacing[6],
     textAlign: 'right',
   },
   row: {
-    gap: spacing.md,
-    marginBottom: spacing.md,
+    gap: spacing[4],
+    marginBottom: spacing[4],
     justifyContent: 'flex-start',
   },
   card: {
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
-    marginBottom: spacing.sm,
+    marginBottom: spacing[2],
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.03)',
@@ -111,6 +111,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'center',
     lineHeight: 18,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: spacing[1],
   },
 });
