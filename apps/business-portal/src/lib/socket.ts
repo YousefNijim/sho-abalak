@@ -5,7 +5,7 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+    socket = io(process.env.NEXT_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_URL || 'https://shu-abalak-production.up.railway.app', {
       auth: { token: getToken() },
       autoConnect: false,
     });

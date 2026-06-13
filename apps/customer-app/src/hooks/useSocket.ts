@@ -30,7 +30,7 @@ export function useSocket(): Socket | null {
       });
 
       socketInstance.on('connect', () => {
-        console.log('Customer App WS connected successfully');
+
         socketRef.current = socketInstance;
         forceUpdate((n) => n + 1);
       });
@@ -40,7 +40,7 @@ export function useSocket(): Socket | null {
       });
 
       socketInstance.on('disconnect', (reason) => {
-        console.log('Customer App WS disconnected:', reason);
+
       });
     }
 

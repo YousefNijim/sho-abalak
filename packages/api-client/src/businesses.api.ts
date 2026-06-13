@@ -60,6 +60,14 @@ export interface Product {
   imageUrl: string | null;
   isAvailable: boolean;
   category: string | null;
+  categoryId?: string | null;
+  templateId?: string | null;
+  stock?: number | null;
+  lowStockAlert?: number | null;
+  hasVariants?: boolean;
+  variants?: any[];
+  unit?: string | null;
+  barcode?: string | null;
 }
 
 export interface BusinessListParams {

@@ -257,8 +257,7 @@ export default function BusinessesPage() {
     setEditTarget(b);
     setEditType(b.type);
     setEditTagIds((b.tags ?? []).map((t) => t.id));
-    // @ts-ignore
-    setEditDeliveryAreaIds((b.deliveryAreas ?? []).map((a: any) => a.id));
+    setEditDeliveryAreaIds((b.deliveryAreas ?? []).map((a) => a.id));
   };
   const toggleCreateTag = (id: string) =>
     setCreateForm((f) => ({

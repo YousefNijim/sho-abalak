@@ -60,22 +60,21 @@ export default function ProductsPage() {
 
   const [templateId, setTemplateId] = useState<string | null>(null);
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = products.filter((p: any) => {
     if (templateId) {
-      if ((p as any).templateId !== templateId) {
+      if (p.templateId !== templateId) {
         // also match children
         const tpl = templates.find(t => t.id === templateId);
         const childIds = tpl?.children?.map((c: any) => c.id) ?? [];
-        if (!childIds.includes((p as any).templateId)) return false;
+        if (!childIds.includes(p.templateId)) return false;
       }
     }
-    // @ts-ignore
+    
     if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && p.barcode !== search) return false;
     
-    // @ts-ignore - we assume product has stock/lowStockAlert properties added for store
-    const stock = p.stock ?? null;
-    // @ts-ignore
-    const lowAlert = p.lowStockAlert ?? 5;
+    // we assume product has stock/lowStockAlert properties added for store
+    const stock = p?.stock ?? null;
+    const lowAlert = p?.lowStockAlert ?? 5;
     
     if (stockFilter === 'OUT_OF_STOCK' && stock !== 0) return false;
     if (stockFilter === 'LOW_STOCK' && (stock === null || stock > lowAlert || stock === 0)) return false;

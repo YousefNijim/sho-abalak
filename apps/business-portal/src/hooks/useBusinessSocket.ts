@@ -37,8 +37,8 @@ export function useBusinessSocket() {
         audio.play().catch(() => {
           // Fallback to AudioContext beep if file not found or blocked
           try {
-            // @ts-ignore
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+            const ctx = new AudioContextClass();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -71,7 +71,7 @@ export function useBusinessSocket() {
       // If delivered/cancelled, optionally show a toast/alert
       if (data.status === 'DELIVERED') {
         // You could use a toast library here if installed
-        console.log(`تم توصيل طلب #${data.orderId.slice(-6).toUpperCase()}`);
+
       }
     };
 

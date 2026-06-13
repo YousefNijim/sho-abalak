@@ -1,10 +1,7 @@
 import axios from 'axios';
 
 /** Base URL — override with NEXT_PUBLIC_API_URL or EXPO_PUBLIC_API_URL at build time */
-export const BASE_URL =
-  (typeof process !== 'undefined' &&
-    (process.env['NEXT_PUBLIC_API_URL'] ?? process.env['EXPO_PUBLIC_API_URL'])) ||
-  'https://shu-abalak-production.up.railway.app';
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_URL || 'https://shu-abalak-production.up.railway.app';
 
 export const http = axios.create({
   baseURL: BASE_URL,

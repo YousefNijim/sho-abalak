@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'node:path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -28,7 +28,8 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`API running on http://localhost:${port} — docs at /docs`);
+  const logger = new Logger('Bootstrap');
+  logger.log(`API running on http://localhost:${port} — docs at /docs`);
   // Trigger deployment
 }
 bootstrap();

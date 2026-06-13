@@ -59,7 +59,7 @@ export default function BusinessDetail() {
   // STORE-only state
   const [storeSearch, setStoreSearch] = useState('');
   const [storeCatTabId, setStoreCatTabId] = useState<string | null>(null);
-  const [pickerProduct, setPickerProduct] = useState<any | null>(null);
+  const [pickerProduct, setPickerProduct] = useState<Product | null>(null);
 
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', id],
@@ -83,8 +83,7 @@ export default function BusinessDetail() {
 
   const { data: dynamicProducts = [] } = useQuery({
     queryKey: ['products', id, selectedSubCat?.id || selectedMainCat?.id],
-    // @ts-ignore
-    queryFn: () => productsApi.listByBusiness(id!, selectedSubCat?.id || selectedMainCat?.id),
+    queryFn: () => productsApi.listByBusiness(id as string, selectedSubCat?.id || selectedMainCat?.id),
     enabled: !!id && business?.type === 'STORE',
   });
 
@@ -128,7 +127,7 @@ export default function BusinessDetail() {
     }
   }
 
-  const getDiscountPct = (p: any): number => {
+  const getDiscountPct = (p: Product): number => {
     if (discountMap.has(p.id)) return discountMap.get(p.id)!;
     if (p.category && categoryDiscountMap.has(p.category)) return categoryDiscountMap.get(p.category)!;
     return 0;
@@ -265,12 +264,12 @@ export default function BusinessDetail() {
   const products = business.products || [];
 
   // ── FOOD view data ───────────────────────────────────────────────────────────
-  const categories = ['الكل', ...Array.from(new Set(products.map((p: any) => p.category).filter(Boolean) as string[]))];
-  const filteredProducts = tab === 0 ? products : products.filter((p: any) => p.category === categories[tab]);
+  const categories = ['الكل', ...Array.from(new Set(products.map((p: Product) => p.category).filter(Boolean) as string[]))];
+  const filteredProducts = tab === 0 ? products : products.filter((p: Product) => p.category === categories[tab]);
 
   // ── STORE view data ──────────────────────────────────────────────────────────
   // products are now dynamicProducts, and storeCategories are the hierarchy
-  const storeFilteredProducts = dynamicProducts.filter((p: any) => {
+  const storeFilteredProducts = dynamicProducts.filter((p: Product) => {
     const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
     return matchesSearch;
   });
@@ -438,7 +437,7 @@ export default function BusinessDetail() {
 
               {/* Products by section (only showing first 6 for each main cat) */}
               {storeCategories.map((mainCat) => {
-                const sectionProducts = products.filter((p: any) =>
+                const sectionProducts = products.filter((p: Product) =>
                   p.categoryId === mainCat.id || p.templateId === mainCat.id ||
                   mainCat.children?.some((c: any) => c.id === p.categoryId || c.id === p.templateId)
                 ).slice(0, 6);
@@ -454,7 +453,7 @@ export default function BusinessDetail() {
                       </Pressable>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sectionScroll}>
-                      {sectionProducts.map((p: any) => (
+                      {sectionProducts.map((p: Product) => (
                         <StoreProductCard
                           key={p.id}
                           product={p}
@@ -498,13 +497,13 @@ export default function BusinessDetail() {
                   <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
                 ) : (
                   // Manual 2-column grid
-                  storeFilteredProducts.reduce((rows: any[][], p: any, idx: number) => {
+                  storeFilteredProducts.reduce((rows: Product[][], p: Product, idx: number) => {
                     if (idx % numCols === 0) rows.push([p]);
                     else rows[rows.length - 1].push(p);
                     return rows;
-                  }, []).map((row: any[], rowIdx: number) => (
+                  }, []).map((row: Product[], rowIdx: number) => (
                     <View key={rowIdx} style={styles.storeGridRow}>
-                      {row.map((p: any) => (
+                      {row.map((p: Product) => (
                         <StoreProductCard
                           key={p.id}
                           product={p}
@@ -601,7 +600,7 @@ export default function BusinessDetail() {
           {filteredProducts.length === 0 ? (
             <Text style={styles.emptyText}>لا توجد منتجات متوفرة حالياً</Text>
           ) : (
-            filteredProducts.map((p: any) => {
+            filteredProducts.map((p: Product) => {
               const discountPct = getDiscountPct(p);
               const originalPrice = Number(p.price);
               const discountedPrice = discountPct > 0
@@ -701,7 +700,7 @@ function StoreProductCard({
   width,
   discountPct,
 }: {
-  product: any;
+  product: Product;
   isOpen: boolean;
   onAdd: () => void;
   width?: any;

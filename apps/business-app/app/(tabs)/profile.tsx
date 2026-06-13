@@ -122,8 +122,7 @@ export default function ProfileTab() {
       setAddressDetail(business.addressDetail ?? '');
       setOpenTime(business.openTime ?? DEFAULT_OPEN);
       setCloseTime(business.closeTime ?? DEFAULT_CLOSE);
-      // @ts-ignore
-      setDeliveryAreaIds((business.deliveryAreas ?? []).map((a: any) => a.id));
+      setDeliveryAreaIds((business.deliveryAreas ?? []).map((a) => a.id));
       setCoverUri(null);
       setLogoLocalUri(null);
     }
@@ -142,8 +141,7 @@ export default function ProfileTab() {
     const currentTags = [...tagIds].sort().join(',');
     if (originalTags !== currentTags) return true;
 
-    // @ts-ignore
-    const originalDelivery = (business.deliveryAreas ?? []).map((a: any) => a.id).sort().join(',');
+    const originalDelivery = (business.deliveryAreas ?? []).map((a) => a.id).sort().join(',');
     const currentDelivery = [...deliveryAreaIds].sort().join(',');
     if (originalDelivery !== currentDelivery) return true;
 
