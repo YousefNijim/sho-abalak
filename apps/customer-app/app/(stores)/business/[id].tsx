@@ -140,6 +140,7 @@ export default function StoreBusinessDetail() {
       },
       business!.id,
       business!.areaId,
+      'STORE',
     );
 
     if (result === 'different_business') {
@@ -149,7 +150,7 @@ export default function StoreBusinessDetail() {
           for (let i = 0; i < payload.quantity; i++) {
             addItem(
               { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
-              business!.id, business!.areaId,
+              business!.id, business!.areaId, 'STORE'
             );
           }
         }
@@ -168,7 +169,7 @@ export default function StoreBusinessDetail() {
               for (let i = 0; i < payload.quantity; i++) {
                 addItem(
                   { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
-                  business!.id, business!.areaId,
+                  business!.id, business!.areaId, 'STORE'
                 );
               }
             },
@@ -179,7 +180,7 @@ export default function StoreBusinessDetail() {
       for (let i = 1; i < payload.quantity; i++) {
         addItem(
           { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
-          business!.id, business!.areaId,
+          business!.id, business!.areaId, 'STORE'
         );
       }
     }

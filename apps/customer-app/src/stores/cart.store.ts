@@ -15,17 +15,31 @@ export interface CartItem {
 const lineKey = (productId: string, variantId?: string | null) =>
   variantId ? `${productId}__${variantId}` : productId;
 
+export interface AppliedCoupon {
+  code: string;
+  discountAmount: number;
+  discountType: 'FIXED' | 'PERCENTAGE';
+  discountPct: number | null;
+  maxDiscount: number | null;
+  minimumOrder: number;
+  issuedBy: 'PLATFORM' | 'BUSINESS';
+}
+
 interface CartState {
   businessId: string | null;
+  businessType: 'FOOD' | 'STORE' | null;
   areaId: string | null;
   items: CartItem[];
+  appliedCoupon: AppliedCoupon | null;
   addItem: (
     item: Omit<CartItem, 'quantity'>,
     businessId: string,
     areaId: string,
-  ) => 'added' | 'different_business';
+    businessType?: 'FOOD' | 'STORE',
+  ) => 'added' | 'different_business' | 'different_type';
   removeItem: (productId: string, variantId?: string | null) => void;
   updateQty: (productId: string, delta: number, variantId?: string | null) => void;
+  setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
   clear: () => void;
   total: () => number;
 }
@@ -34,11 +48,18 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       businessId: null,
+      businessType: null,
       areaId: null,
       items: [],
+      appliedCoupon: null,
 
-      addItem: (item, businessId, areaId) => {
-        const { businessId: currentBiz, items } = get();
+      addItem: (item, businessId, areaId, businessType = 'FOOD') => {
+        const { businessId: currentBiz, businessType: currentType, items } = get();
+        
+        if (currentType && currentType !== businessType) {
+          return 'different_type';
+        }
+        
         if (currentBiz && currentBiz !== businessId) {
           return 'different_business';
         }
@@ -55,6 +76,7 @@ export const useCartStore = create<CartState>()(
         } else {
           set({
             businessId,
+            businessType,
             areaId,
             items: [...items, { ...item, quantity: 1 }],
           });
@@ -80,7 +102,9 @@ export const useCartStore = create<CartState>()(
         }));
       },
 
-      clear: () => set({ businessId: null, areaId: null, items: [] }),
+      setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
+
+      clear: () => set({ businessId: null, businessType: null, areaId: null, items: [], appliedCoupon: null }),
 
       total: () => {
         const sum = get().items.reduce((s, i) => s + (Number(i.price) * Number(i.quantity)), 0);
@@ -90,7 +114,7 @@ export const useCartStore = create<CartState>()(
     {
       name: 'shu-customer-cart',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state: CartState) => ({ items: state.items, businessId: state.businessId }),
+      partialize: (state: CartState) => ({ items: state.items, businessId: state.businessId, businessType: state.businessType, appliedCoupon: state.appliedCoupon }),
     },
   ),
 );

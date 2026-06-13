@@ -18,8 +18,8 @@ import { NotificationBell } from '../../src/components/NotificationBell';
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   PENDING: { label: 'بانتظار التأكيد', bg: '#ffedd5', fg: '#F59E0B' }, // warning-amber
   CONFIRMED: { label: 'تم التأكيد', bg: '#ffedd5', fg: '#F59E0B' },
-  PREPARING: { label: 'قيد التحضير', bg: '#ffedd5', fg: '#F59E0B' },
-  READY: { label: 'جاهز للاستلام', bg: '#ffedd5', fg: '#F59E0B' },
+  PREPARING: { label: 'تجهيز المشتريات', bg: '#ffedd5', fg: '#F59E0B' },
+  READY: { label: 'جاهز للتوصيل', bg: '#ffedd5', fg: '#F59E0B' },
   PICKED_UP: { label: 'في الطريق', bg: '#ffedd5', fg: '#F59E0B' },
   DELIVERED: { label: 'تم التوصيل', bg: '#dcfce7', fg: '#22C55E' }, // success-green
   CANCELLED: { label: 'ملغى', bg: '#fee2e2', fg: '#EF4444' }, // error-red
@@ -64,6 +64,7 @@ export default function Orders() {
           },
           o.businessId,
           areaId,
+          'STORE',
         );
       }
     });
@@ -174,7 +175,7 @@ export default function Orders() {
                     {isCurrent ? (
                       <Pressable
                         style={styles.actionBtn}
-                        onPress={() => router.push({ pathname: '/tracking', params: { id: o.id } })}
+                        onPress={() => router.push(`/(stores)/track/${o.id}` as any)}
                       >
                         <Navigation size={18} color={colors.primary} />
                         <Text style={styles.actionBtnText}>تتبع الطلب</Text>

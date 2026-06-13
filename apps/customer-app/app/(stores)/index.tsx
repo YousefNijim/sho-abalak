@@ -107,6 +107,7 @@ export default function StoreHome() {
           },
           o.businessId,
           areaId,
+          'STORE',
         );
       }
     });
@@ -241,7 +242,7 @@ export default function StoreHome() {
                       productId: trendingProduct.id,
                       name: trendingProduct.name,
                       price: trendingProduct.price,
-                    }, firstPopularBusinessId, businesses[0]?.areaId);
+                    }, firstPopularBusinessId, businesses[0]?.areaId, 'STORE');
                     // optionally feedback
                   }}>
                     <ShoppingCart size={14} color="#fff" />

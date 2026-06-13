@@ -18,7 +18,8 @@ export default function StoresTabsLayout() {
   
   // We can still use the cart store, but the cart badge should match the Stores colors.
   const cartItems = useCartStore((s) => s.items);
-  const cartQty = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const cartBusinessType = useCartStore((s) => s.businessType);
+  const cartQty = cartBusinessType === 'STORE' ? cartItems.reduce((acc, item) => acc + item.quantity, 0) : 0;
 
   return (
     <Tabs
@@ -68,7 +69,7 @@ export default function StoresTabsLayout() {
         name="cart"
         options={{
           title: 'السلة',
-          href: '/cart', // navigates to global cart
+          href: '/(stores)/cart', // navigates to store cart
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <View>

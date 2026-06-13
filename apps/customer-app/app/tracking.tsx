@@ -62,6 +62,13 @@ export default function Tracking() {
     };
   }, [socket, id, queryClient]);
 
+  // Redirect to store tracking if the order is from a store
+  useEffect(() => {
+    if (order?.business?.type === 'STORE') {
+      router.replace(`/(stores)/track/${order.id}` as any);
+    }
+  }, [order?.business?.type, order?.id, router]);
+
   // Keep global active-order store in sync so the Home banner stays current
   useEffect(() => {
     if (!order) return;
