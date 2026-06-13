@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ordersApi, Order } from '@shu/api-client';
+import { ordersApi } from '@shu/api-client';
 import { useBusiness } from '@/components/BusinessProvider';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
