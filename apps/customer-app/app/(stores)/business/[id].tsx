@@ -49,6 +49,12 @@ export default function StoreBusinessDetail() {
   const [selectedSubCat, setSelectedSubCat] = useState<any | null>(null);
   const [pickerProduct, setPickerProduct] = useState<any | null>(null);
 
+  React.useEffect(() => {
+    setSelectedMainCat(null);
+    setSelectedSubCat(null);
+    setStoreSearch('');
+  }, [id]);
+
   const { data: business, isLoading } = useQuery({
     queryKey: ['business', id],
     queryFn: () => businessesApi.getById(id!),
@@ -67,19 +73,6 @@ export default function StoreBusinessDetail() {
     enabled: !!id && business?.type === 'STORE',
   });
 
-  const { data: dynamicProducts = [] } = useQuery({
-    queryKey: ['products', id, selectedSubCat?.id || selectedMainCat?.id],
-    queryFn: () => {
-      const selected = selectedSubCat || selectedMainCat;
-      return productsApi.listByBusiness(
-        id as string,
-        selected?.isTemplate ? undefined : selected?.id,
-        selected?.isTemplate ? selected?.id : undefined
-      );
-    },
-    enabled: !!id && business?.type === 'STORE' && !!selectedMainCat,
-  });
-
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
@@ -91,6 +84,8 @@ export default function StoreBusinessDetail() {
           setSelectedMainCat(null);
           return true; // handled
         }
+        setSelectedMainCat(null);
+        setSelectedSubCat(null);
         return false;
       };
       
@@ -206,11 +201,23 @@ export default function StoreBusinessDetail() {
     );
   }
 
+  const products = business.products || [];
   const subCategories = selectedMainCat?.children || [];
 
-  const storeFilteredProducts = dynamicProducts.filter((p: any) => {
+  const storeFilteredProducts = products.filter((p: any) => {
     const matchesSearch = !storeSearch.trim() || p.name.includes(storeSearch.trim());
-    return matchesSearch;
+    if (!matchesSearch) return false;
+
+    if (selectedSubCat) {
+      const catName = p.productCategory?.name || p.categoryTemplate?.name;
+      return catName === selectedSubCat.name;
+    } else if (selectedMainCat) {
+      const mainName = selectedMainCat.name;
+      const childrenNames = subCategories.map((c: any) => c.name);
+      const catName = p.productCategory?.name || p.categoryTemplate?.name;
+      return catName === mainName || childrenNames.includes(catName);
+    }
+    return true;
   });
 
   const numCols = 2;
@@ -241,7 +248,11 @@ export default function StoreBusinessDetail() {
             pointerEvents="none"
           />
           <View style={[styles.heroActions, { top: Platform.OS === 'ios' ? insets.top || spacing[4] : spacing[4] }]}>
-            <Pressable style={styles.heroBtn} onPress={() => router.back()}>
+            <Pressable style={styles.heroBtn} onPress={() => {
+              setSelectedMainCat(null);
+              setSelectedSubCat(null);
+              router.back();
+            }}>
               <ArrowRight size={24} color={storeColors.textPrimary} />
             </Pressable>
             <View style={styles.heroActionsRight}>
