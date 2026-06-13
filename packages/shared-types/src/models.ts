@@ -67,6 +67,18 @@ export interface ProductVariant {
   isAvailable: boolean;
 }
 
+export interface CategoryTemplate {
+  id: string;
+  groupId: string;
+  name: string;
+  imageUrl: string | null;
+  parentId: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  isEnabled?: boolean;
+  children?: CategoryTemplate[];
+}
+
 export interface Product {
   id: string;
   businessId: string;
@@ -78,6 +90,7 @@ export interface Product {
   category: string | null;
   // Store-only additions (nullable — restaurants unaffected)
   categoryId?: string | null;
+  templateId?: string | null;
   barcode?: string | null;
   stock?: number | null;
   lowStockAlert?: number | null;
@@ -85,6 +98,7 @@ export interface Product {
   unit?: string | null;
   variants?: ProductVariant[];
   productCategory?: ProductCategory;
+  template?: CategoryTemplate;
 }
 
 export interface Driver {

@@ -16,9 +16,9 @@ const mediaUrl = (path: string | null | undefined): string | null =>
 
 export function CategoryGrid({ categories, onSelect }: Props) {
   const { width } = useWindowDimensions();
-  const numColumns = width > 500 ? 5 : 4;
+  const numColumns = width > 768 ? 5 : 3;
   const padding = spacing.md * 2;
-  const gap = spacing.sm;
+  const gap = spacing.md;
   const availableWidth = width - padding - gap * (numColumns - 1);
   const itemWidth = Math.floor(availableWidth / numColumns);
 
@@ -36,14 +36,14 @@ export function CategoryGrid({ categories, onSelect }: Props) {
           const img = mediaUrl(item.imageUrl);
           return (
             <Pressable
-              style={({ pressed }) => [styles.card, { width: itemWidth }, pressed && { opacity: 0.8 }]}
+              style={({ pressed }) => [styles.card, { width: itemWidth }, pressed && styles.cardPressed]}
               onPress={() => onSelect(item)}
             >
               <View style={styles.imageContainer}>
                 {img ? (
-                  <Image source={{ uri: img }} style={styles.image} contentFit="cover" />
+                  <Image source={{ uri: img }} style={styles.image} contentFit="cover" transition={300} />
                 ) : (
-                  <Layers size={24} color={colors.secondary} />
+                  <Layers size={28} color={colors.primary} />
                 )}
               </View>
               <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
@@ -61,47 +61,56 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
     backgroundColor: '#FAFAFA',
   },
   title: {
     fontFamily: fontFamily.bold,
-    fontSize: fontSizes.lg,
-    color: colors.text,
-    marginBottom: spacing.md,
-    textAlign: 'left',
+    fontSize: fontSizes.xl,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+    textAlign: 'right',
   },
   row: {
-    gap: spacing.sm,
+    gap: spacing.md,
     marginBottom: spacing.md,
+    justifyContent: 'flex-start',
   },
   card: {
     alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  cardPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.96 }],
   },
   imageContainer: {
     width: '100%',
     aspectRatio: 1,
     backgroundColor: colors.white,
-    borderRadius: radius.md,
+    borderRadius: radius.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-    marginBottom: spacing.xs,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: spacing.sm,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
   image: {
     width: '100%',
     height: '100%',
   },
   name: {
-    fontFamily: fontFamily.medium,
-    fontSize: fontSizes.xs,
-    color: colors.textSecondary,
+    fontFamily: fontFamily.bold,
+    fontSize: fontSizes.sm,
+    color: colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 18,
+    paddingHorizontal: spacing.xs,
   },
 });

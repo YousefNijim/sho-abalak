@@ -17,6 +17,8 @@ export default function CategoryGroupsPage() {
 
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [templateForm, setTemplateForm] = useState({ name: '', imageUrl: '', parentId: '' });
+  const [templateImageFile, setTemplateImageFile] = useState<File | null>(null);
+  const [templateImagePreview, setTemplateImagePreview] = useState<string | null>(null);
 
   const [showAssign, setShowAssign] = useState(false);
   const [selectedBusinessIds, setSelectedBusinessIds] = useState<string[]>([]);
@@ -59,16 +61,29 @@ export default function CategoryGroupsPage() {
       imageUrl: templateForm.imageUrl || undefined,
       parentId: templateForm.parentId || undefined,
     }),
-    onSuccess: () => {
+    onSuccess: async (data) => {
+      if (templateImageFile) {
+        await categoryGroupsApi.uploadTemplateImage(data.id, templateImageFile);
+      }
       qc.invalidateQueries({ queryKey: ['admin-category-group', selectedGroupId] });
       setShowCreateTemplate(false);
       setTemplateForm({ name: '', imageUrl: '', parentId: '' });
+      setTemplateImageFile(null);
+      setTemplateImagePreview(null);
     },
   });
 
   const updateTemplate = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => categoryGroupsApi.updateTemplate(id, { name }),
+    mutationFn: ({ id, name, file }: { id: string; name: string; file?: File }) => 
+      file 
+        ? categoryGroupsApi.uploadTemplateImage(id, file).then(() => categoryGroupsApi.updateTemplate(id, { name }))
+        : categoryGroupsApi.updateTemplate(id, { name }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-category-group', selectedGroupId] }); setEditingTemplate(null); },
+  });
+
+  const uploadExistingImage = useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => categoryGroupsApi.uploadTemplateImage(id, file),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-category-group', selectedGroupId] }),
   });
 
   const deleteTemplate = useMutation({
@@ -177,7 +192,12 @@ export default function CategoryGroupsPage() {
             {activeTab === 'templates' && (
               <div className="space-y-3">
                 <button
-                  onClick={() => { setShowCreateTemplate(true); setTemplateForm({ name: '', imageUrl: '', parentId: '' }); }}
+                  onClick={() => { 
+                    setShowCreateTemplate(true); 
+                    setTemplateForm({ name: '', imageUrl: '', parentId: '' }); 
+                    setTemplateImageFile(null);
+                    setTemplateImagePreview(null);
+                  }}
                   className="w-full border-2 border-dashed border-gray-200 rounded-xl py-3 text-sm text-gray-500 hover:border-primary hover:text-primary transition-colors"
                 >
                   + إضافة تصنيف رئيسي
@@ -190,6 +210,7 @@ export default function CategoryGroupsPage() {
                       tpl={tpl}
                       onEdit={() => { setEditingTemplate(tpl); setEditTemplateName(tpl.name); }}
                       onDelete={() => { if (confirm(`حذف "${tpl.name}"؟`)) deleteTemplate.mutate(tpl.id); }}
+                      onUploadImage={(file) => uploadExistingImage.mutate({ id: tpl.id, file })}
                     />
 
                     {/* Children */}
@@ -200,12 +221,18 @@ export default function CategoryGroupsPage() {
                         isChild
                         onEdit={() => { setEditingTemplate(child); setEditTemplateName(child.name); }}
                         onDelete={() => { if (confirm(`حذف "${child.name}"؟`)) deleteTemplate.mutate(child.id); }}
+                        onUploadImage={(file) => uploadExistingImage.mutate({ id: child.id, file })}
                       />
                     ))}
 
                     {/* Add sub-category */}
                     <button
-                      onClick={() => { setShowCreateTemplate(true); setTemplateForm({ name: '', imageUrl: '', parentId: tpl.id }); }}
+                      onClick={() => { 
+                        setShowCreateTemplate(true); 
+                        setTemplateForm({ name: '', imageUrl: '', parentId: tpl.id }); 
+                        setTemplateImageFile(null);
+                        setTemplateImagePreview(null);
+                      }}
                       className="w-full text-right px-4 py-2 text-xs text-gray-400 hover:text-primary hover:bg-gray-50 border-t"
                     >
                       + إضافة فرعي لـ "{tpl.name}"
@@ -282,13 +309,26 @@ export default function CategoryGroupsPage() {
               value={templateForm.name}
               onChange={(e) => setTemplateForm((f) => ({ ...f, name: e.target.value }))}
             />
-            <input
-              className="w-full border rounded-lg px-3 py-2 text-right text-sm"
-              placeholder="رابط الصورة (اختياري)"
-              value={templateForm.imageUrl}
-              onChange={(e) => setTemplateForm((f) => ({ ...f, imageUrl: e.target.value }))}
-              dir="ltr"
-            />
+            <div className="flex gap-4 items-center">
+              {templateImagePreview && (
+                <img src={templateImagePreview} alt="Preview" className="w-16 h-16 rounded-xl object-cover border" />
+              )}
+              <div className="flex-1">
+                <label className="text-xs text-gray-500 block mb-1 text-right">الصورة (اختياري - يفضل 1:1)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setTemplateImageFile(file);
+                      setTemplateImagePreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                />
+              </div>
+            </div>
             {!templateForm.parentId && flatTemplates.length > 0 && (
               <div>
                 <label className="text-xs text-gray-500 block mb-1 text-right">التصنيف الأب (اختياري)</label>
@@ -371,11 +411,12 @@ export default function CategoryGroupsPage() {
   );
 }
 
-function TemplateRow({ tpl, isChild = false, onEdit, onDelete }: {
+function TemplateRow({ tpl, isChild = false, onEdit, onDelete, onUploadImage }: {
   tpl: CategoryTemplate;
   isChild?: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  onUploadImage: (file: File) => void;
 }) {
   return (
     <div className={`flex items-center justify-between px-4 py-3 ${isChild ? 'bg-gray-50 border-t' : 'bg-white'}`}>
@@ -383,10 +424,23 @@ function TemplateRow({ tpl, isChild = false, onEdit, onDelete }: {
         <button onClick={onDelete} className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded">حذف</button>
         <button onClick={onEdit} className="text-gray-500 hover:text-primary text-xs px-2 py-1 rounded">تعديل</button>
       </div>
-      <div className="text-right flex items-center gap-2">
-        {tpl.imageUrl && (
-          <img src={tpl.imageUrl} alt={tpl.name} className="w-8 h-8 rounded-lg object-cover" />
-        )}
+      <div className="text-right flex items-center gap-2 group relative">
+        <div className="relative overflow-hidden w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center border">
+          {tpl.imageUrl ? (
+            <img src={tpl.imageUrl} alt={tpl.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-[10px] text-gray-400">صورة</span>
+          )}
+          <input 
+            type="file" 
+            accept="image/*"
+            className="absolute inset-0 opacity-0 cursor-pointer"
+            onChange={(e) => {
+              if (e.target.files?.[0]) onUploadImage(e.target.files[0]);
+            }}
+            title="تغيير الصورة"
+          />
+        </div>
         <span className={`text-sm font-medium ${isChild ? 'text-gray-600' : 'text-gray-800'}`}>
           {isChild ? '↳ ' : ''}{tpl.name}
         </span>

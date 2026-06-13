@@ -214,6 +214,16 @@ export const categoryGroupsApi = {
   deleteTemplate: (templateId: string) =>
     http.delete(`/admin/category-templates/${templateId}`).then((r) => r.data),
 
+  uploadTemplateImage: (templateId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return http
+      .post<CategoryTemplate>(`/admin/category-templates/${templateId}/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data);
+  },
+
   getBusinesses: (groupId: string) =>
     http.get<BusinessCategoryAssignment[]>(`/admin/category-groups/${groupId}/businesses`).then((r) => r.data),
 

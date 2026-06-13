@@ -8,9 +8,10 @@ import {
 } from './category-groups.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
+import { UploadsModule } from '../uploads/uploads.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, UploadsModule],
   providers: [CategoryGroupsService],
   controllers: [
     AdminCategoryGroupsController,

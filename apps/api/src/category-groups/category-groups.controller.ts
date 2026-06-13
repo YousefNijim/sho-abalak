@@ -8,7 +8,11 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@shu/shared-types';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,6 +21,7 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { AuthUser } from '../auth/jwt.strategy';
 import { CategoryGroupsService } from './category-groups.service';
+import { UploadsService } from '../uploads/uploads.service';
 
 // ── Admin routes ─────────────────────────────────────────────────────────────
 
@@ -91,7 +96,10 @@ export class AdminCategoryGroupsController {
 @Roles(UserRole.ADMIN)
 @Controller('admin/category-templates')
 export class AdminCategoryTemplatesController {
-  constructor(private readonly svc: CategoryGroupsService) {}
+  constructor(
+    private readonly svc: CategoryGroupsService,
+    private readonly uploadsService: UploadsService,
+  ) {}
 
   @Patch(':id')
   update(
@@ -104,6 +112,17 @@ export class AdminCategoryTemplatesController {
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.svc.deleteTemplate(id);
+  }
+
+  @Post(':id/image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('لم يتم إرفاق ملف');
+    const result = await this.uploadsService.uploadImage(file);
+    return this.svc.updateTemplate(id, { imageUrl: result.secure_url });
   }
 }
 

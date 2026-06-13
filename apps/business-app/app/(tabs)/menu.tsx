@@ -189,14 +189,15 @@ export default function MenuTab() {
   const storeCategoryNames = useMemo(() => {
     const names = new Set<string>();
     products.forEach((p: any) => {
-      if (p.productCategory?.name) names.add(p.productCategory.name);
+      if (p.template?.name) names.add(p.template.name);
+      else if (p.productCategory?.name) names.add(p.productCategory.name);
     });
     return Array.from(names);
   }, [products]);
 
   const filtered = useMemo(() => {
     if (!activeCategory) return products;
-    if (isStore) return products.filter((p: any) => p.productCategory?.name === activeCategory);
+    if (isStore) return products.filter((p: any) => p.template?.name === activeCategory || p.productCategory?.name === activeCategory);
     return products.filter((p: Product) => p.category === activeCategory);
   }, [products, activeCategory, isStore]);
 

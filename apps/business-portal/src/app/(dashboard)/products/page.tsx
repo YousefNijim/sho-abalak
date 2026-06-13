@@ -10,7 +10,6 @@ export default function ProductsPage() {
   const router = useRouter();
   const { business, isStore } = useBusiness();
   const [search, setSearch] = useState('');
-  const [categoryId, setCategoryId] = useState<string>('ALL');
   const [stockFilter, setStockFilter] = useState<'ALL'|'IN_STOCK'|'LOW_STOCK'|'OUT_OF_STOCK'>('ALL');
   
   // Side Panel state
@@ -46,20 +45,12 @@ export default function ProductsPage() {
     enabled: !!business,
   });
 
-  const { data: categories = [], refetch: refetchCategories } = useQuery({
-    queryKey: ['categories', business?.id],
-    queryFn: () => categoriesApi.listByBusiness(business!.id),
-    enabled: !!business,
-  });
-
-  // New admin-controlled templates
+  // Admin-controlled templates
   const { data: templates = [], refetch: refetchTemplates } = useQuery({
     queryKey: ['my-templates', business?.id],
     queryFn: () => businessCategoriesApi.getMyTemplates(),
     enabled: !!business,
   });
-
-  const hasTemplates = templates.length > 0;
 
   const toggleTemplate = useMutation({
     mutationFn: ({ id, isEnabled }: { id: string; isEnabled: boolean }) =>
@@ -67,30 +58,15 @@ export default function ProductsPage() {
     onSuccess: () => refetchTemplates(),
   });
 
-  // selected templateId for filter (new system) — null = ALL
   const [templateId, setTemplateId] = useState<string | null>(null);
-
-  // Category Form State (legacy — kept for businesses without templates)
-  const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryParentId, setNewCategoryParentId] = useState<string>('');
-  const [isSubmittingCategory, setIsSubmittingCategory] = useState(false);
 
   const filteredProducts = products.filter(p => {
     if (templateId) {
       if ((p as any).templateId !== templateId) {
         // also match children
         const tpl = templates.find(t => t.id === templateId);
-        const childIds = tpl?.children?.map(c => c.id) ?? [];
+        const childIds = tpl?.children?.map((c: any) => c.id) ?? [];
         if (!childIds.includes((p as any).templateId)) return false;
-      }
-    } else if (categoryId !== 'ALL' && !hasTemplates) {
-      const catId = (p as any).categoryId || p.category;
-      if (catId !== categoryId) {
-        const selectedMainCat = categories.find(c => c.id === categoryId);
-        if (!selectedMainCat || !selectedMainCat.children?.some(sub => sub.id === catId)) {
-          return false;
-        }
       }
     }
     // @ts-ignore
@@ -151,9 +127,9 @@ export default function ProductsPage() {
     
     let mId = '';
     let sId = '';
-    const catId = p.categoryId || p.category;
+    const catId = p.templateId;
     if (catId) {
-      const mainCat = categories.find(c => c.id === catId || c.children?.some(sub => sub.id === catId));
+      const mainCat = templates.find((c: any) => c.id === catId || c.children?.some((sub: any) => sub.id === catId));
       if (mainCat) {
         mId = mainCat.id;
         if (mainCat.id !== catId) {
@@ -201,9 +177,7 @@ export default function ProductsPage() {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
-        ...(hasTemplates
-          ? { templateId: formData.subCategoryId || formData.mainCategoryId || undefined }
-          : { categoryId: formData.subCategoryId || formData.mainCategoryId || undefined }),
+        templateId: formData.subCategoryId || formData.mainCategoryId || undefined,
         isAvailable: formData.isAvailable,
         imageUrl: formData.imageUrl,
         barcode: formData.barcode,
@@ -264,27 +238,7 @@ export default function ProductsPage() {
     return () => window.removeEventListener('keydown', handleKey);
   }, [products]);
 
-  const handleAddCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCategoryName.trim() || !business) return;
-    setIsSubmittingCategory(true);
-    try {
-      await categoriesApi.create({
-        businessId: business.id,
-        name: newCategoryName.trim(),
-        parentId: newCategoryParentId || undefined
-      });
-      setNewCategoryName('');
-      setNewCategoryParentId('');
-      setIsAddingCategory(false);
-      refetchCategories();
-    } catch (err) {
-      console.error(err);
-      alert('حدث خطأ أثناء إضافة التصنيف');
-    } finally {
-      setIsSubmittingCategory(false);
-    }
-  };
+  }, [products]);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -292,16 +246,11 @@ export default function ProductsPage() {
       <div className="hidden md:flex flex-col w-64 shrink-0 bg-surface border border-border rounded-xl shadow-sm overflow-hidden sticky top-6 max-h-[calc(100vh-3rem)]">
         <div className="p-4 border-b border-border">
           <h2 className="text-lg font-bold text-on-surface">التصنيفات</h2>
-          {hasTemplates && (
-            <p className="text-xs text-muted-gray mt-1">تُدار من قبل الإدارة</p>
-          )}
+          <p className="text-xs text-muted-gray mt-1">تُدار التصنيفات من قِبَل الإدارة</p>
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
-          {hasTemplates ? (
-            /* ── New system: admin-controlled templates with toggle ── */
-            <>
-              <button
+          <button
                 onClick={() => setTemplateId(null)}
                 className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                   !templateId ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
@@ -351,95 +300,7 @@ export default function ProductsPage() {
                   ))}
                 </div>
               ))}
-            </>
-          ) : (
-            /* ── Legacy system: business-owned categories ── */
-            <>
-              <button
-                onClick={() => setCategoryId('ALL')}
-                className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
-                  categoryId === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
-                }`}
-              >
-                <span>الكل</span>
-              </button>
-              {categories.map(cat => (
-                <div key={cat.id} className="space-y-1">
-                  <button
-                    onClick={() => setCategoryId(cat.id)}
-                    className={`w-full text-right px-3 py-2 rounded-lg text-sm font-bold transition-colors flex justify-between items-center ${
-                      categoryId === cat.id ? 'bg-primary/10 text-primary' : 'text-on-surface hover:bg-surface-container-low'
-                    }`}
-                  >
-                    <span>{cat.name}</span>
-                  </button>
-                  {cat.children?.map(sub => (
-                    <button
-                      key={sub.id}
-                      onClick={() => setCategoryId(sub.id)}
-                      className={`w-full text-right pr-6 pl-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex justify-between items-center ${
-                        categoryId === sub.id ? 'bg-primary/5 text-primary' : 'text-muted-gray hover:bg-surface-container-low hover:text-on-surface'
-                      }`}
-                    >
-                      <span>{sub.name}</span>
-                    </button>
-                  ))}
-                </div>
-              ))}
-            </>
-          )}
         </div>
-
-        {!hasTemplates && (
-          <div className="p-4 border-t border-border bg-surface-container-low">
-            {isAddingCategory ? (
-              <form onSubmit={handleAddCategory} className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="اسم التصنيف..."
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
-                />
-                <select
-                  value={newCategoryParentId}
-                  onChange={(e) => setNewCategoryParentId(e.target.value)}
-                  className="w-full px-3 py-2 text-sm bg-surface border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">تصنيف رئيسي (بدون أب)</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>متفرع من: {cat.name}</option>
-                  ))}
-                </select>
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmittingCategory || !newCategoryName.trim()}
-                    className="flex-1 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-                  >
-                    {isSubmittingCategory ? 'جاري...' : 'حفظ'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); setNewCategoryParentId(''); }}
-                    className="flex-1 py-1.5 bg-surface border border-border text-xs font-bold rounded-lg hover:bg-surface-container-low transition-colors"
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <button
-                onClick={() => setIsAddingCategory(true)}
-                className="w-full py-2 flex justify-center items-center gap-1 text-primary text-sm font-bold hover:bg-primary/10 rounded-lg transition-colors border border-dashed border-primary/30"
-              >
-                <span className="material-symbols-outlined text-lg">add</span>
-                إضافة تصنيف
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="flex-1 space-y-6 w-full min-w-0">
@@ -467,12 +328,12 @@ export default function ProductsPage() {
         </div>
         
         <select 
-          value={categoryId} 
-          onChange={(e) => setCategoryId(e.target.value)}
+          value={templateId || 'ALL'} 
+          onChange={(e) => setTemplateId(e.target.value === 'ALL' ? null : e.target.value)}
           className="bg-surface-container-low border border-border rounded-xl px-4 py-2 outline-none font-bold text-sm min-w-[150px] w-full md:w-auto"
         >
           <option value="ALL">كل الأقسام</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {templates.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
 
         <div className="flex bg-surface-container-low border border-border rounded-xl overflow-hidden w-full md:w-auto">
@@ -525,12 +386,12 @@ export default function ProductsPage() {
                       <td className="px-4 py-2 font-bold text-on-surface">{p.name} {p.unit && <span className="text-xs text-muted-gray font-normal mr-1">/ {p.unit}</span>}</td>
                       <td className="px-4 py-2 text-muted-gray text-xs">
                         {(() => {
-                          const catId = p.categoryId || p.category;
+                          const catId = p.templateId;
                           if (!catId) return 'بدون تصنيف';
-                          const mainCat = categories.find(c => c.id === catId || c.children?.some(sub => sub.id === catId));
+                          const mainCat = templates.find((c: any) => c.id === catId || c.children?.some((sub: any) => sub.id === catId));
                           if (mainCat) {
                             if (mainCat.id === catId) return mainCat.name;
-                            const sub = mainCat.children?.find(sub => sub.id === catId);
+                            const sub = mainCat.children?.find((sub: any) => sub.id === catId);
                             return sub ? `${mainCat.name} > ${sub.name}` : mainCat.name;
                           }
                           return 'بدون تصنيف';
@@ -645,7 +506,7 @@ export default function ProductsPage() {
                     className="w-full px-4 py-2.5 bg-surface border border-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-shadow"
                   >
                     <option value="">اختر التصنيف</option>
-                    {(hasTemplates ? templates : categories).map((c: any) => (
+                    {templates.map((c: any) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
@@ -659,7 +520,7 @@ export default function ProductsPage() {
                     disabled={!formData.mainCategoryId}
                   >
                     <option value="">بدون تصنيف فرعي</option>
-                    {(hasTemplates ? templates : categories)
+                    {templates
                       .find((c: any) => c.id === formData.mainCategoryId)
                       ?.children?.map((sub: any) => (
                         <option key={sub.id} value={sub.id}>{sub.name}</option>

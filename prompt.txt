@@ -1,0 +1,99 @@
+<USER_REQUEST>
+Redesign the store category system for شو عبالك؟
+
+Current system (TO BE REPLACED):
+  - Each business owns their own ProductCategory
+  - Business owner can create/edit/delete categories
+  - Product.categoryId → ProductCategory
+
+New system (TO BUILD):
+  - Admin creates CategoryGroups with CategoryTemplates
+  - Admin assigns groups to stores
+  - Business owner can only enable/disable templates
+  - Product.categoryId → CategoryTemplate (new model)
+  - Categories shown as IMAGE GRID on store home screen
+
+This is a breaking change to the category system.
+Plan carefully before implementing.
+Report in Arabic after each step.
+
+═══════════════════════════════════
+STEP 1 — AUDIT CURRENT USAGE
+═══════════════════════════════════
+
+Read these files and answer:
+
+1. apps/api/prisma/schema.prisma:
+   Show ProductCategory model exactly.
+   How many records exist? (check seed.ts)
+   What references it? (FK relations)
+
+2. apps/api/src/products/categories.service.ts:
+   List every method and who calls it.
+
+3. apps/api/src/products/products.service.ts:
+   How is categoryId used in queries?
+   Is it in the where clause anywhere?
+
+4. apps/customer-app/app/business/[id].tsx:
+   How are categories currently displayed?
+   How are products filtered by category?
+
+5. apps/business-portal/src/app/(dashboard)/
+   products/page.tsx:
+   How does category sidebar work currently?
+
+6. apps/business-app/app/(tabs)/menu.tsx:
+   How does category management work currently?
+
+7. packages/api-client/src/products.api.ts:
+   What category-related methods exist?
+
+Answer: what will BREAK if we change 
+ProductCategory → CategoryTemplate?
+List every file that needs updating.
+
+═══════════════════════════════════
+STEP 2 — NEW SCHEMA
+═══════════════════════════════
+<truncated 15285 bytes>
+ner toggles a template off
+   □ Customer app shows image grid
+   □ Disabled template hidden from customers
+   □ Products can be assigned to templates
+   □ Old category system doesn't break restaurants
+     (restaurants still use free-text category)
+
+3. Migration safety:
+   □ ADD-ONLY migration (no ProductCategory drop)
+   □ Existing products: templateId = null (okay)
+   □ Restaurant products unaffected (no templateId)
+
+4. Commit:
+   "feat: admin-controlled category groups system
+    - CategoryGroup + CategoryTemplate models
+    - Admin assigns groups to stores
+    - Business owner toggle only (no create/edit)
+    - Customer app image grid for categories
+    - Image upload per template"
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-06-13T13:05:40+03:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\yosef\Desktop\sho abalak\apps\customer-app\components\AddressSelector.tsx (LANGUAGE_TSX)
+Cursor is on line: 32
+Other open documents:
+- c:\Users\yosef\Desktop\sho abalak\apps\customer-app\app\(stores)\all.tsx (LANGUAGE_TSX)
+- c:\Users\yosef\Desktop\sho abalak\apps\business-portal\package.json (LANGUAGE_JSON)
+- c:\Users\yosef\Desktop\sho abalak\packages\api-client\src\businesses.api.ts (LANGUAGE_TYPESCRIPT)
+- c:\Users\yosef\Desktop\sho abalak\apps\customer-app\app\(tabs)\index.tsx (LANGUAGE_TSX)
+- c:\Users\yosef\Desktop\sho abalak\apps\customer-app\components\AddressSelector.tsx (LANGUAGE_TSX)
+Running terminal commands:
+- pnpm admin (in c:\Users\yosef\Desktop\sho abalak, running for 15h20m6s)
+- pnpm run customer (in c:\Users\yosef\Desktop\sho abalak, running for 13m8s)
+- pnpm api (in c:\Users\yosef\Desktop\sho abalak, running for 12m15s)
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from Gemini 3.5 Flash (Medium) to Gemini 3.1 Pro (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

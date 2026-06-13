@@ -14,9 +14,9 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ArrowRight, Plus, Trash2, ChevronUp, ChevronDown, Check, X } from 'lucide-react-native';
-import { businessesApi, categoriesApi } from '@shu/api-client';
-import type { ProductCategory } from '@shu/api-client';
+import { ArrowRight, Lock } from 'lucide-react-native';
+import { businessesApi, businessCategoriesApi } from '@shu/api-client';
+import type { CategoryTemplate } from '@shu/api-client';
 import { colors, fontFamily, fontSizes, radius, spacing } from '../src/theme';
 
 export default function CategoriesScreen() {
@@ -24,78 +24,35 @@ export default function CategoriesScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
-  const [newName, setNewName] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const { data: business } = useQuery({
     queryKey: ['business-mine'],
     queryFn: () => businessesApi.mine(),
   });
 
-  const { data: categories = [], isLoading } = useQuery({
-    queryKey: ['my-categories', business?.id],
-    queryFn: () => categoriesApi.listByBusiness(business!.id),
-    enabled: !!business,
+  const { data: templates = [], isLoading } = useQuery({
+    queryKey: ['my-templates', business?.id],
+    queryFn: () => businessCategoriesApi.getMyTemplates(),
+    enabled: !!business && business.type === 'STORE',
   });
 
-  const createCategory = useMutation({
-    mutationFn: (name: string) => categoriesApi.create({ businessId: business!.id, name }),
+  const toggleTemplate = useMutation({
+    mutationFn: ({ id, isEnabled }: { id: string; isEnabled: boolean }) =>
+      businessCategoriesApi.toggle(id, isEnabled),
+    onMutate: (vars) => setUpdatingId(vars.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-categories'] });
-      setNewName('');
-      setShowAddForm(false);
+      queryClient.invalidateQueries({ queryKey: ['my-templates'] });
     },
-    onError: (err: any) => Alert.alert('خطأ', err.response?.data?.message ?? 'فشل إضافة التصنيف'),
+    onError: (err: any) => Alert.alert('خطأ', err.response?.data?.message ?? 'فشل تحديث التصنيف'),
+    onSettled: () => setUpdatingId(null),
   });
 
-  const updateCategory = useMutation({
-    mutationFn: ({ id, name }: { id: string; name: string }) => categoriesApi.update(id, { name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['my-categories'] });
-      setEditingId(null);
-      setEditName('');
-    },
-    onError: (err: any) => Alert.alert('خطأ', err.response?.data?.message ?? 'فشل تعديل التصنيف'),
-  });
-
-  const deleteCategory = useMutation({
-    mutationFn: (id: string) => categoriesApi.remove(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-categories'] }),
-    onError: (err: any) => Alert.alert('خطأ', err.response?.data?.message ?? 'فشل حذف التصنيف'),
-  });
-
-  const reorderCategory = useMutation({
-    mutationFn: ({ idx, direction }: { idx: number; direction: 'up' | 'down' }) => {
-      const arr = [...(categories as ProductCategory[])];
-      const swapWith = direction === 'up' ? idx - 1 : idx + 1;
-      [arr[idx], arr[swapWith]] = [arr[swapWith], arr[idx]];
-      return categoriesApi.reorder(arr.map((c) => c.id));
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['my-categories'] }),
-    onError: (err: any) => Alert.alert('خطأ', err.response?.data?.message ?? 'فشل إعادة الترتيب'),
-  });
-
-  const handleCreate = () => {
-    if (!newName.trim()) { Alert.alert('تنبيه', 'اسم التصنيف مطلوب'); return; }
-    createCategory.mutate(newName.trim());
+  const handleToggle = (id: string, isEnabled: boolean) => {
+    toggleTemplate.mutate({ id, isEnabled });
   };
 
-  const handleUpdate = () => {
-    if (!editingId) return;
-    if (!editName.trim()) { Alert.alert('تنبيه', 'اسم التصنيف مطلوب'); return; }
-    updateCategory.mutate({ id: editingId, name: editName.trim() });
-  };
-
-  const handleDelete = (cat: ProductCategory) => {
-    Alert.alert('حذف التصنيف', `حذف "${cat.name}"؟ سيُزال التصنيف من جميع المنتجات المرتبطة.`, [
-      { text: 'إلغاء', style: 'cancel' },
-      { text: 'حذف', style: 'destructive', onPress: () => deleteCategory.mutate(cat.id) },
-    ]);
-  };
-
-  const cats = categories as ProductCategory[];
+  const cats = templates as CategoryTemplate[];
 
   return (
     <KeyboardAvoidingView
@@ -107,39 +64,18 @@ export default function CategoriesScreen() {
         <Pressable style={styles.iconBtn} onPress={() => router.back()} hitSlop={8}>
           <ArrowRight size={22} color={colors.secondary} />
         </Pressable>
-        <Text style={styles.headerTitle}>تصنيفات المنتجات</Text>
-        <Pressable style={styles.addIconBtn} onPress={() => setShowAddForm((v) => !v)} hitSlop={8}>
-          {showAddForm ? <X size={20} color={colors.textMuted} /> : <Plus size={20} color={colors.primary} />}
-        </Pressable>
+        <Text style={styles.headerTitle}>إدارة التصنيفات</Text>
+        <View style={styles.addIconBtn} />
       </View>
 
-      {/* Add form */}
-      {showAddForm && (
-        <View style={styles.addForm}>
-          <View style={styles.addRow}>
-            <Pressable
-              style={[styles.addBtn, createCategory.isPending && { opacity: 0.6 }]}
-              onPress={handleCreate}
-              disabled={createCategory.isPending}
-            >
-              {createCategory.isPending
-                ? <ActivityIndicator size="small" color="#fff" />
-                : <Text style={styles.addBtnText}>إضافة</Text>}
-            </Pressable>
-            <TextInput
-              style={[styles.addInput, { flex: 1 }]}
-              value={newName}
-              onChangeText={setNewName}
-              placeholder="اسم التصنيف الجديد"
-              placeholderTextColor={colors.textMuted}
-              textAlign="right"
-              autoFocus
-              returnKeyType="done"
-              onSubmitEditing={handleCreate}
-            />
-          </View>
+      <View style={{ padding: spacing[4], backgroundColor: colors.surfaceContainerLow }}>
+        <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-start' }}>
+          <Lock size={16} color={colors.textMuted} style={{ marginTop: 2 }} />
+          <Text style={{ flex: 1, fontFamily: fontFamily.regular, fontSize: fontSizes.sm, color: colors.textMuted, textAlign: 'right', lineHeight: 20 }}>
+            التصنيفات تُدار من قِبَل الإدارة. يمكنك تفعيل أو إيقاف التصنيفات لتظهر في متجرك.
+          </Text>
         </View>
-      )}
+      </View>
 
       {/* List */}
       {isLoading ? (
@@ -158,75 +94,50 @@ export default function CategoriesScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {cats.map((cat, idx) => (
-            <View key={cat.id} style={styles.catRow}>
-              {/* Reorder buttons */}
-              <View style={styles.reorderBtns}>
-                <Pressable
-                  hitSlop={6}
-                  style={[styles.reorderBtn, idx === 0 && styles.reorderBtnDisabled]}
-                  onPress={() => idx > 0 && reorderCategory.mutate({ idx, direction: 'up' })}
-                  disabled={idx === 0 || reorderCategory.isPending}
-                >
-                  <ChevronUp size={16} color={idx === 0 ? colors.border : colors.textMuted} />
-                </Pressable>
-                <Pressable
-                  hitSlop={6}
-                  style={[styles.reorderBtn, idx === cats.length - 1 && styles.reorderBtnDisabled]}
-                  onPress={() => idx < cats.length - 1 && reorderCategory.mutate({ idx, direction: 'down' })}
-                  disabled={idx === cats.length - 1 || reorderCategory.isPending}
-                >
-                  <ChevronDown size={16} color={idx === cats.length - 1 ? colors.border : colors.textMuted} />
-                </Pressable>
-              </View>
-
-              {/* Name (edit inline) */}
-              <View style={styles.catInfo}>
-                {editingId === cat.id ? (
-                  <View style={styles.editRow}>
-                    <Pressable
-                      hitSlop={8}
-                      onPress={() => { setEditingId(null); setEditName(''); }}
-                    >
-                      <X size={18} color={colors.textMuted} />
-                    </Pressable>
-                    <Pressable
-                      hitSlop={8}
-                      style={[styles.saveEditBtn, updateCategory.isPending && { opacity: 0.6 }]}
-                      onPress={handleUpdate}
-                      disabled={updateCategory.isPending}
-                    >
-                      {updateCategory.isPending
-                        ? <ActivityIndicator size="small" color="#fff" />
-                        : <Check size={16} color="#fff" />}
-                    </Pressable>
-                    <TextInput
-                      style={styles.editInput}
-                      value={editName}
-                      onChangeText={setEditName}
-                      textAlign="right"
-                      autoFocus
-                      returnKeyType="done"
-                      onSubmitEditing={handleUpdate}
+          {cats.map((cat) => (
+            <View key={cat.id} style={{ overflow: 'hidden', borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border }}>
+              <View style={[styles.catRow, { borderWidth: 0, borderRadius: 0, borderBottomWidth: cat.children && cat.children.length > 0 ? 1 : 0 }]}>
+                <View style={styles.catInfo}>
+                  <Text style={styles.catName}>{cat.name}</Text>
+                </View>
+                {updatingId === cat.id ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <View style={styles.toggleWrap}>
+                    <Text style={[styles.toggleText, cat.isEnabled !== false && { color: colors.primary }]}>{cat.isEnabled !== false ? 'مفعل' : 'معطل'}</Text>
+                    <Switch
+                      value={cat.isEnabled !== false}
+                      onValueChange={(val) => handleToggle(cat.id, val)}
+                      trackColor={{ false: colors.border, true: colors.primary }}
+                      thumbColor="#fff"
                     />
                   </View>
-                ) : (
-                  <Pressable
-                    onPress={() => { setEditingId(cat.id); setEditName(cat.name); }}
-                  >
-                    <Text style={styles.catName}>{cat.name}</Text>
-                  </Pressable>
                 )}
               </View>
-
-              {/* Delete */}
-              <Pressable
-                hitSlop={8}
-                onPress={() => handleDelete(cat)}
-                disabled={deleteCategory.isPending}
-              >
-                <Trash2 size={18} color={colors.textMuted} />
-              </Pressable>
+              {cat.children && cat.children.length > 0 && (
+                <View style={{ backgroundColor: colors.surfaceContainerLow }}>
+                  {cat.children.map((sub) => (
+                    <View key={sub.id} style={[styles.catRow, { borderWidth: 0, borderRadius: 0, backgroundColor: 'transparent', paddingRight: spacing[8] }]}>
+                      <View style={styles.catInfo}>
+                        <Text style={[styles.catName, { fontSize: fontSizes.sm, color: colors.textMuted }]}>↳ {sub.name}</Text>
+                      </View>
+                      {updatingId === sub.id ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                      ) : (
+                        <View style={styles.toggleWrap}>
+                          <Switch
+                            value={sub.isEnabled !== false}
+                            onValueChange={(val) => handleToggle(sub.id, val)}
+                            trackColor={{ false: colors.border, true: colors.primary }}
+                            thumbColor="#fff"
+                            style={{ transform: [{ scale: 0.8 }] }}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           ))}
         </ScrollView>
@@ -310,25 +221,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'right',
   },
-  editRow: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
-  editInput: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing[3],
-    paddingVertical: Platform.OS === 'ios' ? spacing[2] : spacing[1],
-    fontSize: fontSizes.base,
-    fontFamily: fontFamily.regular,
-    color: colors.textPrimary,
-    textAlign: 'right',
-  },
-  saveEditBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  toggleWrap: { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+  toggleText: { fontSize: fontSizes.xs, fontFamily: fontFamily.bold, color: colors.textMuted },
 });
