@@ -23,6 +23,7 @@ export interface CartAddPayload {
   variantId?: string | null;
   variantName?: string | null;
   quantity: number;
+  imageUrl?: string | null;
 }
 
 interface Variant {
@@ -88,6 +89,7 @@ export function VariantPicker({ visible, product, onClose, onAddToCart }: Props)
       variantId: selectedVariant?.id ?? null,
       variantName: selectedVariant?.name ?? null,
       quantity: qty,
+      imageUrl: product.imageUrl,
     });
     onClose();
     setQty(1);

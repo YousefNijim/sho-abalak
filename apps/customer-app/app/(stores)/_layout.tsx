@@ -106,6 +106,13 @@ export default function StoresTabsLayout() {
           headerShown: false,
         }}
       />
+      <Tabs.Screen
+        name="track/[id]"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 }

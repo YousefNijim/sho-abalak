@@ -141,12 +141,12 @@ export default function BusinessDetail() {
 
   // ── FOOD add-to-cart (unchanged) ────────────────────────────────────────────
   const handleAdd = (p: Product) => {
-    const result = addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+    const result = addItem({ productId: p.id, name: p.name, price: p.price, imageUrl: p.imageUrl }, business!.id, business!.areaId);
     if (result === 'different_business') {
       if (Platform.OS === 'web') {
         if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
           clearCart();
-          addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+          addItem({ productId: p.id, name: p.name, price: p.price, imageUrl: p.imageUrl }, business!.id, business!.areaId);
         }
         return;
       }
@@ -160,7 +160,7 @@ export default function BusinessDetail() {
             style: 'destructive',
             onPress: () => {
               clearCart();
-              addItem({ productId: p.id, name: p.name, price: p.price }, business!.id, business!.areaId);
+              addItem({ productId: p.id, name: p.name, price: p.price, imageUrl: p.imageUrl }, business!.id, business!.areaId);
             },
           },
         ],
@@ -179,6 +179,7 @@ export default function BusinessDetail() {
             price: payload.price,
             variantId: payload.variantId,
             variantName: payload.variantName,
+            imageUrl: payload.imageUrl,
           },
           business!.id,
           business!.areaId,
@@ -193,6 +194,7 @@ export default function BusinessDetail() {
         price: payload.price,
         variantId: payload.variantId,
         variantName: payload.variantName,
+        imageUrl: payload.imageUrl,
       },
       business!.id,
       business!.areaId,
@@ -205,7 +207,7 @@ export default function BusinessDetail() {
           // Re-add with full quantity
           for (let i = 0; i < payload.quantity; i++) {
             addItem(
-              { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+              { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
               business!.id, business!.areaId,
             );
           }
@@ -224,7 +226,7 @@ export default function BusinessDetail() {
               clearCart();
               for (let i = 0; i < payload.quantity; i++) {
                 addItem(
-                  { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+                  { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
                   business!.id, business!.areaId,
                 );
               }
@@ -236,7 +238,7 @@ export default function BusinessDetail() {
       // First addItem already added 1, add remaining
       for (let i = 1; i < payload.quantity; i++) {
         addItem(
-          { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+          { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
           business!.id, business!.areaId,
         );
       }

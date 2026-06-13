@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, Dimensions, Platform, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart, Menu } from 'lucide-react-native';
+import { Search, MapPin, Store, Star, Clock, Bike, ShoppingCart, Menu, Package, ChevronLeft } from 'lucide-react-native';
 import { businessesApi, tagsApi, promotedBusinessesApi, addressesApi, ordersApi, productsApi, BASE_URL } from '@shu/api-client';
 import type { Order, Product } from '@shu/api-client';
 import { useSavedAddressesStore } from '../../src/stores/saved-addresses.store';
@@ -13,6 +13,8 @@ import { useAuthStore } from '../../src/stores/auth.store';
 import { fontFamily, spacing } from '../../src/theme';
 import { AddressSelector } from '../../components/AddressSelector';
 import { NotificationBell } from '../../src/components/NotificationBell';
+import { useActiveOrderStore } from '../../src/stores/active-order.store';
+
 
 const mediaUrl = (path: string | null | undefined): string | null => {
   if (!path) return null;
@@ -35,11 +37,62 @@ const storeColors = {
   success: '#22C55E',
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: 'بانتظار التأكيد',
+  CONFIRMED: 'تم القبول',
+  PREPARING: 'جاري التحضير',
+  READY: 'جاهز للاستلام',
+  PICKED_UP: 'في الطريق',
+  DELIVERED: 'تم التسليم',
+  CANCELLED: 'ملغي',
+};
+
 export default function StoreHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const selectedAddressId = useSavedAddressesStore((s) => s.selectedId);
   const token = useAuthStore((s) => s.token);
+  const isAuthed = useAuthStore((s) => !!s.user && !!s.token);
+
+  const activeOrder = useActiveOrderStore((s) => s.order);
+  const setActiveOrder = useActiveOrderStore((s) => s.set);
+  const clearActiveOrder = useActiveOrderStore((s) => s.clear);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: updatedOrder } = useQuery({
+    queryKey: ['order', activeOrder?.id],
+    queryFn: () => ordersApi.getById(activeOrder!.id),
+    enabled: !!activeOrder?.id,
+    refetchInterval: 10000,
+  });
+
+  useEffect(() => {
+    if (updatedOrder) {
+      if (['DELIVERED', 'CANCELLED'].includes(updatedOrder.status)) {
+        clearActiveOrder();
+      } else {
+        setActiveOrder({
+          id: updatedOrder.id,
+          businessName: updatedOrder.business?.name || activeOrder?.businessName || 'المتجر',
+          status: updatedOrder.status,
+          total: updatedOrder.total,
+        });
+      }
+    }
+  }, [updatedOrder]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['businesses', 'STORE', selectedAddress?.areaId] });
+    await queryClient.invalidateQueries({ queryKey: ['orders', 'STORE'] });
+    if (activeOrder?.id) {
+      await queryClient.invalidateQueries({ queryKey: ['order', activeOrder.id] });
+    }
+    setRefreshing(false);
+  };
+
   
   const { data: addresses = [] } = useQuery({
     queryKey: ['addresses'],
@@ -77,10 +130,9 @@ export default function StoreHome() {
 
   const { data: promoted = [] } = useQuery({
     queryKey: ['promoted-businesses', 'STORE', selectedAddress?.areaId],
-    queryFn: () => promotedBusinessesApi.list({ type: 'STORE', areaId: selectedAddress?.areaId }),
+    queryFn: () => promotedBusinessesApi.list(selectedAddress?.areaId || undefined),
   });
 
-  const isAuthed = useAuthStore((s) => !!s.user && !!s.token);
   const addItem = useCartStore((s) => s.addItem);
   const clearCart = useCartStore((s) => s.clear);
 
@@ -102,8 +154,9 @@ export default function StoreHome() {
             productId: it.productId,
             name: it.product?.name || 'منتج',
             price: it.unitPrice,
-            variantId: it.variantId,
-            variantName: it.variantName,
+            variantId: (it as any).variantId,
+            variantName: (it as any).variantName,
+            imageUrl: it.product?.imageUrl,
           },
           o.businessId,
           areaId,
@@ -148,7 +201,35 @@ export default function StoreHome() {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={storeColors.primary}
+            colors={[storeColors.primary]}
+          />
+        }
+      >
+        {/* Active order tracking banner */}
+        {activeOrder && (
+          <Pressable
+            style={styles.activeOrderBanner}
+            onPress={() => router.push(`/(stores)/track/${activeOrder.id}`)}
+          >
+            <ChevronLeft size={20} color="#fff" />
+            <View style={{ flex: 1, marginRight: spacing[3] }}>
+              <Text style={styles.activeOrderTitle}>{activeOrder.businessName}</Text>
+              <Text style={styles.activeOrderStatus}>
+                {STATUS_LABELS[activeOrder.status] ?? activeOrder.status}
+              </Text>
+            </View>
+            <Package size={20} color="#fff" />
+          </Pressable>
+        )}
+
         {/* Promoted Banners */}
         <ScrollView
           horizontal
@@ -242,6 +323,7 @@ export default function StoreHome() {
                       productId: trendingProduct.id,
                       name: trendingProduct.name,
                       price: trendingProduct.price,
+                      imageUrl: trendingProduct.imageUrl,
                     }, firstPopularBusinessId, businesses[0]?.areaId, 'STORE');
                     // optionally feedback
                   }}>
@@ -640,5 +722,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeOrderBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: storeColors.secondary,
+    borderRadius: 16,
+    padding: spacing[4],
+    marginHorizontal: spacing[4],
+    marginTop: spacing[4],
+    gap: spacing[3],
+  },
+  activeOrderTitle: {
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+    color: '#fff',
+    textAlign: 'right',
+  },
+  activeOrderStatus: {
+    fontFamily: fontFamily.regular,
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'right',
   },
 });

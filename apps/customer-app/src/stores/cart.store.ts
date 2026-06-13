@@ -9,6 +9,7 @@ export interface CartItem {
   quantity: number;
   variantId?: string | null;
   variantName?: string | null;
+  imageUrl?: string | null;
 }
 
 // Unique key per cart line: same product + different variant = different line

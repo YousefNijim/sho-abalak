@@ -137,6 +137,7 @@ export default function StoreBusinessDetail() {
         price: payload.price,
         variantId: payload.variantId,
         variantName: payload.variantName,
+        imageUrl: payload.imageUrl,
       },
       business!.id,
       business!.areaId,
@@ -149,7 +150,7 @@ export default function StoreBusinessDetail() {
           clearCart();
           for (let i = 0; i < payload.quantity; i++) {
             addItem(
-              { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+              { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
               business!.id, business!.areaId, 'STORE'
             );
           }
@@ -168,7 +169,7 @@ export default function StoreBusinessDetail() {
               clearCart();
               for (let i = 0; i < payload.quantity; i++) {
                 addItem(
-                  { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+                  { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
                   business!.id, business!.areaId, 'STORE'
                 );
               }
@@ -179,7 +180,7 @@ export default function StoreBusinessDetail() {
     } else if (payload.quantity > 1) {
       for (let i = 1; i < payload.quantity; i++) {
         addItem(
-          { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName },
+          { productId: payload.productId, name: payload.name, price: payload.price, variantId: payload.variantId, variantName: payload.variantName, imageUrl: payload.imageUrl },
           business!.id, business!.areaId, 'STORE'
         );
       }

@@ -133,8 +133,24 @@ export default function AllStores() {
                       <Clock size={14} color={storeColors.textPrimary} />
                     </View>
                     <View style={[styles.metaItem, { marginLeft: spacing[2] }]}>
-                      <Text style={[styles.metaText, { color: storeColors.success }]}>توصيل مجاني</Text>
-                      <Bike size={14} color={storeColors.success} />
+                      <Text
+                        style={[
+                          styles.metaText,
+                          (b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)) === 0 && { color: storeColors.success },
+                        ]}
+                      >
+                        {(b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)) === 0
+                          ? 'توصيل مجاني'
+                          : `توصيل ${b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)} شيكل`}
+                      </Text>
+                      <Bike
+                        size={14}
+                        color={
+                          (b.deliveryType === 'SELF' ? 0 : (b.area?.deliveryFee ?? 3)) === 0
+                            ? storeColors.success
+                            : storeColors.textPrimary
+                        }
+                      />
                     </View>
                   </View>
                 </View>

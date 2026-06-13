@@ -61,6 +61,7 @@ export default function Orders() {
             price: it.unitPrice,
             variantId: it.variantId,
             variantName: it.variantName,
+            imageUrl: it.product?.imageUrl,
           },
           o.businessId,
           areaId,

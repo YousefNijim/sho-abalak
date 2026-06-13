@@ -62,7 +62,7 @@ export default function ProductDetail() {
     // We are adding multiple items by calling it multiple times or modifying state?
     // Wait, addItem adds 1 quantity and checks different business.
     // Let's implement a loop to add the correct quantity, or update the cart directly.
-    const result = addItem({ productId: product.id, name: product.name, price: product.price }, business.id, business.areaId);
+    const result = addItem({ productId: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl }, business.id, business.areaId);
     
     const finalizeAdd = () => {
       // Since addItem adds 1 piece, we need to increment the quantity by (quantity - 1)
@@ -78,7 +78,7 @@ export default function ProductDetail() {
       if (Platform.OS === 'web') {
         if (window.confirm('سلتك تحتوي على منتجات من منشأة أخرى. هل تريد إفراغها والبدء بطلب جديد؟')) {
           clearCart();
-          addItem({ productId: product.id, name: product.name, price: product.price }, business.id, business.areaId);
+          addItem({ productId: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl }, business.id, business.areaId);
           finalizeAdd();
         }
         return;
@@ -93,7 +93,7 @@ export default function ProductDetail() {
             style: 'destructive',
             onPress: () => {
               clearCart();
-              addItem({ productId: product.id, name: product.name, price: product.price }, business.id, business.areaId);
+              addItem({ productId: product.id, name: product.name, price: product.price, imageUrl: product.imageUrl }, business.id, business.areaId);
               finalizeAdd();
             },
           },

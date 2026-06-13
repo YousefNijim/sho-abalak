@@ -268,42 +268,44 @@ export default function StoreCart() {
         <View style={styles.itemsSection}>
           {items.map((it) => (
             <View key={`${it.productId}__${it.variantId ?? ''}`} style={styles.itemCard}>
+              {/* Image right side */}
+              <View style={styles.itemImageWrap}>
+                {it.imageUrl ? (
+                  <Image source={{ uri: mediaUrl(it.imageUrl)! }} style={styles.itemImage} contentFit="cover" />
+                ) : (
+                  <View style={styles.itemImagePlaceholder}>
+                    <Store size={28} color={storeColors.border} />
+                  </View>
+                )}
+              </View>
+              
               <View style={styles.itemContent}>
                 <View style={styles.itemHeader}>
-                  <Pressable onPress={() => removeItem(it.productId, it.variantId)} style={styles.deleteBtn}>
-                    <Trash2 size={18} color={storeColors.error} />
+                  <Pressable onPress={() => removeItem(it.productId, it.variantId)} style={styles.deleteBtn} hitSlop={8}>
+                    <Trash2 size={16} color={storeColors.error} />
                   </Pressable>
-                  <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                  <View style={styles.itemNameWrap}>
                     <Text style={styles.itemName} numberOfLines={2}>{it.name}</Text>
                     {it.variantName ? (
                       <View style={styles.variantPill}>
                         <Text style={styles.variantPillText}>{it.variantName}</Text>
                       </View>
                     ) : null}
-                    <Text style={styles.itemPrice}>{it.price} ₪</Text>
                   </View>
                 </View>
+                
                 <View style={styles.itemFooter}>
+                  <Text style={styles.itemPrice}>{it.price} ₪</Text>
                   <View style={styles.qtyWrap}>
-                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
-                      <Plus size={18} color={storeColors.white} />
+                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
+                      <Minus size={16} color={storeColors.textPrimary} />
                     </Pressable>
                     <Text style={styles.qtyText}>{it.quantity}</Text>
-                    <Pressable style={styles.qtyBtnMinus} onPress={() => updateQty(it.productId, -1, it.variantId)}>
-                      <Minus size={18} color={storeColors.textPrimary} />
+                    <Pressable style={styles.qtyBtnPlus} onPress={() => updateQty(it.productId, 1, it.variantId)}>
+                      <Plus size={16} color={storeColors.white} />
                     </Pressable>
                   </View>
                 </View>
-              </View>
-              {/* Image right side */}
-              <View style={styles.itemImageWrap}>
-                {(it as any).imageUrl ? (
-                  <Image source={{ uri: mediaUrl((it as any).imageUrl)! }} style={styles.itemImage} contentFit="cover" />
-                ) : (
-                  <View style={styles.itemImagePlaceholder}>
-                    <Store size={24} color={storeColors.border} />
-                  </View>
-                )}
               </View>
             </View>
           ))}
@@ -464,43 +466,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     backgroundColor: storeColors.surface,
     padding: spacing[3],
-    borderRadius: 16,
-    marginBottom: spacing[3],
+    borderRadius: 20,
+    marginBottom: spacing[4],
     borderWidth: 1,
-    borderColor: storeColors.border,
+    borderColor: 'transparent',
     ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 4 },
-      android: { elevation: 2 },
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 10 },
+      android: { elevation: 3 },
+      web: { boxShadow: '0 4px 10px rgba(0,0,0,0.06)' },
     }),
   },
   itemImageWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 80,
+    height: 80,
+    borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: storeColors.background,
+    backgroundColor: '#F5F2FC',
     marginLeft: spacing[3],
   },
   itemImage: { width: '100%', height: '100%' },
   itemImagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  itemContent: { flex: 1 },
+  itemContent: { flex: 1, justifyContent: 'space-between', paddingVertical: 2 },
   itemHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start' },
-  deleteBtn: { padding: spacing[1] },
-  itemName: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.textPrimary, textAlign: 'right' },
+  deleteBtn: { padding: spacing[1], backgroundColor: 'rgba(186, 26, 26, 0.05)', borderRadius: 8 },
+  itemNameWrap: { flex: 1, alignItems: 'flex-end', marginRight: spacing[2] },
+  itemName: { fontFamily: fontFamily.bold, fontSize: 16, color: storeColors.textPrimary, textAlign: 'right' },
   variantPill: {
-    backgroundColor: storeColors.background,
+    backgroundColor: 'rgba(151, 72, 0, 0.08)',
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
     alignSelf: 'flex-end',
     marginTop: 4,
   },
-  variantPillText: { fontFamily: fontFamily.medium, fontSize: 12, color: storeColors.textMuted },
-  itemPrice: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.primaryContainer, textAlign: 'right', marginTop: spacing[2] },
-  itemFooter: { flexDirection: 'row', justifyContent: 'flex-start', marginTop: spacing[2] },
-  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: storeColors.background, borderRadius: 20, padding: 4 },
-  qtyBtnPlus: { width: 28, height: 28, borderRadius: 14, backgroundColor: storeColors.secondary, alignItems: 'center', justifyContent: 'center' },
-  qtyBtnMinus: { width: 28, height: 28, borderRadius: 14, backgroundColor: storeColors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: storeColors.border },
+  variantPillText: { fontFamily: fontFamily.medium, fontSize: 11, color: storeColors.primary },
+  itemFooter: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing[3] },
+  itemPrice: { fontFamily: fontFamily.bold, fontSize: 16, color: storeColors.primaryContainer, textAlign: 'right' },
+  qtyWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: storeColors.background, borderRadius: 12, padding: 4 },
+  qtyBtnPlus: { width: 32, height: 32, borderRadius: 10, backgroundColor: storeColors.primary, alignItems: 'center', justifyContent: 'center' },
+  qtyBtnMinus: { width: 32, height: 32, borderRadius: 10, backgroundColor: storeColors.surface, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: storeColors.border },
   qtyText: { fontFamily: fontFamily.bold, fontSize: 15, color: storeColors.textPrimary, width: 32, textAlign: 'center' },
   
   section: { marginTop: spacing[6] },
