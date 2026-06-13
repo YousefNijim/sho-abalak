@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View, Platform, RefreshControl, TextInput, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -185,6 +185,8 @@ export default function StoreBusinessDetail() {
     }
   };
 
+  const { width: windowWidth } = useWindowDimensions();
+
   if (isLoading) {
     return (
       <View style={styles.loaderContainer}>
@@ -209,18 +211,22 @@ export default function StoreBusinessDetail() {
     if (!matchesSearch) return false;
 
     if (selectedSubCat) {
-      const catName = p.productCategory?.name || p.categoryTemplate?.name;
-      return catName === selectedSubCat.name;
+      const pCatId = p.templateId || p.categoryId;
+      return pCatId === selectedSubCat.id;
     } else if (selectedMainCat) {
-      const mainName = selectedMainCat.name;
-      const childrenNames = subCategories.map((c: any) => c.name);
-      const catName = p.productCategory?.name || p.categoryTemplate?.name;
-      return catName === mainName || childrenNames.includes(catName);
+      const mainId = selectedMainCat.id;
+      const childrenIds = subCategories.map((c: any) => c.id);
+      const pCatId = p.templateId || p.categoryId;
+      return pCatId === mainId || childrenIds.includes(pCatId);
     }
     return true;
   });
 
+
   const numCols = 2;
+  const horizontalPadding = spacing[6];
+  const gridGap = spacing[5];
+  const cardWidth = (windowWidth - horizontalPadding * 2 - gridGap * (numCols - 1)) / numCols;
 
   return (
     <View style={styles.container}>
@@ -356,7 +362,7 @@ export default function StoreBusinessDetail() {
               onSelect={setSelectedSubCat}
             />
 
-            <View style={styles.storeGrid}>
+            <View style={[styles.storeGrid, { paddingHorizontal: horizontalPadding, gap: gridGap }]}>
               {storeFilteredProducts.length === 0 ? (
                 <Text style={styles.emptyText}>لا توجد منتجات تطابق البحث</Text>
               ) : (
@@ -365,17 +371,19 @@ export default function StoreBusinessDetail() {
                   else rows[rows.length - 1].push(p);
                   return rows;
                 }, []).map((row: any[], rowIdx: number) => (
-                  <View key={rowIdx} style={styles.storeGridRow}>
+                  <View key={rowIdx} style={[styles.storeGridRow, { gap: gridGap }]}>
                     {row.map((p: any) => <StoreProductCard
                       key={p.id}
                       product={p}
+                      width={cardWidth}
                       isOpen={business.isOpen}
-                      onPress={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
+                      onAdd={() => p.hasVariants ? setPickerProduct(p) : handleStoreAddToCart({
                         productId: p.id,
                         name: p.name,
                         price: p.price,
                         quantity: 1
                       })}
+                      onPress={() => setPickerProduct(p)}
                       discountPct={getDiscountPct(p)}
                     />)}
                     {row.length < numCols && <View style={styles.storeGridFiller} />}
@@ -820,14 +828,15 @@ const styles = StyleSheet.create({
     color: storeColors.surface,
   },
   storeGrid: {
-    paddingHorizontal: spacing[4],
-    paddingBottom: spacing[4],
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[6],
+    paddingBottom: spacing[6],
   },
   storeGridRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing[4],
-    gap: spacing[4],
+    marginBottom: spacing[5],
+    gap: spacing[5],
   },
   storeGridFiller: {
     flex: 1,

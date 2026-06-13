@@ -12,11 +12,13 @@ const mediaUrl = (path: string | null | undefined): string | null =>
 interface Props {
   product: Product;
   discountPct: number;
-  onAdd: () => void;
+  onAdd?: () => void;
+  onPress?: () => void;
   width: number | string;
+  isOpen?: boolean;
 }
 
-export function StoreProductCard({ product, discountPct, onAdd, width }: Props) {
+export function StoreProductCard({ product, discountPct, onAdd, onPress, width, isOpen = true }: Props) {
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock !== null && product.stock <= (product.lowStockAlert || 5) && product.stock > 0;
   
@@ -34,7 +36,7 @@ export function StoreProductCard({ product, discountPct, onAdd, width }: Props) 
   const img = mediaUrl(product.imageUrl);
 
   return (
-    <View style={[styles.card, { width }]}>
+    <Pressable style={[styles.card, { width }]} onPress={onPress}>
       <View style={styles.imageContainer}>
         {img ? (
           <Image source={{ uri: img }} style={styles.image} contentFit="cover" />
@@ -74,17 +76,20 @@ export function StoreProductCard({ product, discountPct, onAdd, width }: Props) 
             )}
           </View>
 
-          {!isOutOfStock && product.isAvailable && (
+          {isOpen && !isOutOfStock && product.isAvailable && (
             <Pressable
               style={({ pressed }) => [styles.addButton, pressed && { opacity: 0.8 }]}
-              onPress={onAdd}
+              onPress={(e) => {
+                e.stopPropagation();
+                onAdd?.();
+              }}
             >
               <Plus size={20} color={colors.white} />
             </Pressable>
           )}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

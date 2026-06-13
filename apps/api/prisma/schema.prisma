@@ -16,11 +16,11 @@ model Area {
   name               String
   deliveryFee        Decimal        @db.Decimal(10, 2)
   driverDeliveryFee  Decimal        @default(0) @db.Decimal(10, 2)
-  businesses         Business[]        @relation("BusinessLocation")
+  businesses         Business[]     @relation("BusinessLocation")
   drivers            Driver[]
   savedAddresses     SavedAddress[]
   users              User[]
-  deliveryBusinesses Business[]        @relation("BusinessDeliveryAreas")
+  deliveryBusinesses Business[]     @relation("BusinessDeliveryAreas")
 
   @@map("areas")
 }
@@ -61,38 +61,38 @@ model DeviceToken {
 }
 
 model Business {
-  id             String       @id @default(uuid())
-  ownerId        String       @unique
-  name           String
-  areaId         String
-  deliveryType   DeliveryType @default(PLATFORM)
-  imageUrl       String?
-  rating         Float        @default(0)
-  isOpen         Boolean      @default(true)
-  commissionRate Decimal      @default(10.00) @db.Decimal(5, 2)
-  minimumOrder   Decimal?     @db.Decimal(10, 2)
-  phone          String?
-  addressDetail  String?
-  closeTime      String?
-  lat            Float?
-  lng            Float?
-  logoUrl        String?
-  openTime       String?
-  type           BusinessType @default(FOOD)
-  area           Area         @relation("BusinessLocation", fields: [areaId], references: [id])
-  owner          User         @relation(fields: [ownerId], references: [id])
-  orders         Order[]
-  products       Product[]
-  deliveryAreas       Area[]             @relation("BusinessDeliveryAreas")
-  tags                Tag[]              @relation("BusinessTags")
-  driverReviews       DriverReview[]
-  offerBusinesses     OfferBusiness[]
-  promotedBusinesses  PromotedBusiness[]
-  settlements         BusinessSettlement[]
-  productCategories   ProductCategory[]
-  categoryGroups      BusinessCategoryGroup[]
-  categoryOverrides   BusinessCategoryOverride[]
-  platformBalance     Decimal        @default(0) @db.Decimal(10, 2)
+  id                 String                     @id @default(uuid())
+  ownerId            String                     @unique
+  name               String
+  areaId             String
+  deliveryType       DeliveryType               @default(PLATFORM)
+  imageUrl           String?
+  rating             Float                      @default(0)
+  isOpen             Boolean                    @default(true)
+  commissionRate     Decimal                    @default(10.00) @db.Decimal(5, 2)
+  minimumOrder       Decimal?                   @db.Decimal(10, 2)
+  phone              String?
+  addressDetail      String?
+  closeTime          String?
+  lat                Float?
+  lng                Float?
+  logoUrl            String?
+  openTime           String?
+  type               BusinessType               @default(FOOD)
+  area               Area                       @relation("BusinessLocation", fields: [areaId], references: [id])
+  owner              User                       @relation(fields: [ownerId], references: [id])
+  orders             Order[]
+  products           Product[]
+  deliveryAreas      Area[]                     @relation("BusinessDeliveryAreas")
+  tags               Tag[]                      @relation("BusinessTags")
+  driverReviews      DriverReview[]
+  offerBusinesses    OfferBusiness[]
+  promotedBusinesses PromotedBusiness[]
+  settlements        BusinessSettlement[]
+  productCategories  ProductCategory[]
+  categoryGroups     BusinessCategoryGroup[]
+  categoryOverrides  BusinessCategoryOverride[]
+  platformBalance    Decimal                    @default(0) @db.Decimal(10, 2)
 
   @@map("businesses")
 }
@@ -124,9 +124,9 @@ model PopupAd {
   title         String?
   buttonText    String?
   buttonUrl     String?
-  targetPage    String    @default("home")  // home | cart | orders | business_detail | all
+  targetPage    String    @default("home") // home | cart | orders | business_detail | all
   isActive      Boolean   @default(true)
-  intervalHours Int       @default(0)      // 0 = always, 24 = once/day
+  intervalHours Int       @default(0) // 0 = always, 24 = once/day
   startsAt      DateTime?
   endsAt        DateTime?
   createdAt     DateTime  @default(now())
@@ -138,9 +138,9 @@ model PopupAd {
 model PromotedBusiness {
   id         String    @id @default(uuid())
   businessId String
-  isPopup    Boolean   @default(false)    // also show as popup overlay
+  isPopup    Boolean   @default(false) // also show as popup overlay
   isActive   Boolean   @default(true)
-  priority   Int       @default(0)        // higher = shown first
+  priority   Int       @default(0) // higher = shown first
   startsAt   DateTime?
   endsAt     DateTime?
   createdAt  DateTime  @default(now())
@@ -170,12 +170,12 @@ model ProductCategory {
 // ── Admin-controlled category system ──────────────────────────────────────────
 
 model CategoryGroup {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
   imageUrl    String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   templates   CategoryTemplate[]
   assignments BusinessCategoryGroup[]
@@ -184,17 +184,17 @@ model CategoryGroup {
 }
 
 model CategoryTemplate {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   groupId   String
   name      String
   imageUrl  String?
   parentId  String?
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
 
-  group     CategoryGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  parent    CategoryTemplate?  @relation("SubTemplates", fields: [parentId], references: [id], onDelete: SetNull)
-  children  CategoryTemplate[] @relation("SubTemplates")
+  group     CategoryGroup              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  parent    CategoryTemplate?          @relation("SubTemplates", fields: [parentId], references: [id], onDelete: SetNull)
+  children  CategoryTemplate[]         @relation("SubTemplates")
   products  Product[]
   overrides BusinessCategoryOverride[]
 
@@ -210,18 +210,18 @@ model BusinessCategoryGroup {
   isActive   Boolean  @default(true)
   assignedAt DateTime @default(now())
 
-  business Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  group    CategoryGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  business Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  group    CategoryGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([businessId, groupId])
   @@map("business_category_groups")
 }
 
 model BusinessCategoryOverride {
-  id                 String   @id @default(uuid())
+  id                 String  @id @default(uuid())
   businessId         String
   categoryTemplateId String
-  isEnabled          Boolean  @default(true)
+  isEnabled          Boolean @default(true)
 
   business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   categoryTemplate CategoryTemplate @relation(fields: [categoryTemplateId], references: [id], onDelete: Cascade)
@@ -296,7 +296,7 @@ model DriverSettlement {
   id        String   @id @default(uuid())
   driverId  String
   amount    Decimal  @db.Decimal(10, 2)
-  adminId   String   // The admin who performed the settlement
+  adminId   String // The admin who performed the settlement
   createdAt DateTime @default(now())
   driver    Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
 
@@ -307,7 +307,7 @@ model BusinessSettlement {
   id         String   @id @default(uuid())
   businessId String
   amount     Decimal  @db.Decimal(10, 2)
-  adminId    String   // The admin who performed the settlement
+  adminId    String // The admin who performed the settlement
   createdAt  DateTime @default(now())
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
@@ -374,13 +374,13 @@ model OrderStatusHistory {
 }
 
 model Review {
-  id              String   @id @default(uuid())
-  orderId         String   @unique
-  businessRating  Int
-  deliveryRating  Int?
-  comment         String?
-  createdAt       DateTime @default(now())
-  order           Order    @relation(fields: [orderId], references: [id])
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  businessRating Int
+  deliveryRating Int?
+  comment        String?
+  createdAt      DateTime @default(now())
+  order          Order    @relation(fields: [orderId], references: [id])
 
   @@map("reviews")
 }
@@ -470,13 +470,13 @@ model OfferBusiness {
 
 // Specific products/categories discounted by this offer
 model OfferProduct {
-  id            String   @id @default(uuid())
-  offerId       String
-  productId     String?
-  categoryName  String?
-  discountPct   Decimal  @db.Decimal(5, 2)
-  offer         Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  product       Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  offerId      String
+  productId    String?
+  categoryName String?
+  discountPct  Decimal  @db.Decimal(5, 2)
+  offer        Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  product      Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("offer_products")
 }
@@ -484,15 +484,15 @@ model OfferProduct {
 // ── Coupons ─────────────────────────────────────────────────────────────────
 
 model Coupon {
-  id              String       @id @default(uuid())
-  code            String       @unique
-  discountType    DiscountType @default(FIXED)
-  discountAmount  Decimal      @db.Decimal(10, 2)
-  discountPct     Decimal?     @db.Decimal(5, 2)
-  maxDiscount     Decimal?     @db.Decimal(10, 2)
-  minimumOrder    Decimal      @db.Decimal(10, 2)
-  issuedBy        CouponIssuer @default(PLATFORM)
-  isActive        Boolean      @default(true)
+  id                   String       @id @default(uuid())
+  code                 String       @unique
+  discountType         DiscountType @default(FIXED)
+  discountAmount       Decimal      @db.Decimal(10, 2)
+  discountPct          Decimal?     @db.Decimal(5, 2)
+  maxDiscount          Decimal?     @db.Decimal(10, 2)
+  minimumOrder         Decimal      @db.Decimal(10, 2)
+  issuedBy             CouponIssuer @default(PLATFORM)
+  isActive             Boolean      @default(true)
   maxUses              Int?
   currentUses          Int          @default(0)
   maxTotalDiscount     Decimal?     @db.Decimal(10, 2)
